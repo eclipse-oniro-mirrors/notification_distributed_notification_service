@@ -35,6 +35,9 @@
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
+#include "notification_live_view_content.h"
+#include "notification_content.h"
+#include "want_params.h"
 #include "mock_push_callback_stub.h"
 #include "advanced_notdisturb_enabled_observer.h"
 #include "advanced_notdisturb_white_list_observer.h"
@@ -338,6 +341,72 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_1200, F
     auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
 
     ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
+}
+
+/**
+ * @tc.name: PrepareNotificationRequest_SharedLiveView_GetActiveUserFailed_1300
+ * @tc.desc: Test PrepareNotificationRequest when isShared live view and GetCurrentActiveUserId fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    PrepareNotificationRequest_SharedLiveView_GetActiveUserFailed_1300, Function | SmallTest | Level1)
+{
+    MockIsNonBundleName(false);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetIsAgentNotification(true);
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    req->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    req->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(req->IsSharedThirdpartyLiveView());
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    MockQueryForgroundOsAccountId(false, 0);
+
+    auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
+
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    ASSERT_EQ(req->GetOwnerUid(), DEFAULT_UID);
+    MockQueryForgroundOsAccountId(true, 0);
+}
+
+/**
+ * @tc.name: PrepareNotificationRequest_SharedLiveView_Success_1400
+ * @tc.desc: Test PrepareNotificationRequest when isShared live view and GetCurrentActiveUserId succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    PrepareNotificationRequest_SharedLiveView_Success_1400, Function | SmallTest | Level1)
+{
+    MockIsNonBundleName(false);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetIsAgentNotification(true);
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    req->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    req->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(req->IsSharedThirdpartyLiveView());
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    MockQueryForgroundOsAccountId(true, 0);
+
+    auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
+
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
+    ASSERT_EQ(req->GetOwnerUid(), DEFAULT_UID);
+    MockQueryForgroundOsAccountId(true, 0);
 }
 
 /**
@@ -1097,6 +1166,43 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationKeys_100, Function 
     auto res = advancedNotificationService_->GetNotificationKeys(bundle);
 
     ASSERT_EQ(res, expect);
+}
+
+/**
+ * @tc.name: GetNotificationKeys_SkipSharedThirdpartyLiveView_200
+ * @tc.desc: test GetNotificationKeys skips records whose request is a shared thirdparty live view.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationKeys_SkipSharedThirdpartyLiveView_200,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+
+    sptr<NotificationRequest> request1 = new (std::nothrow) NotificationRequest();
+    request1->SetNotificationId(1);
+    request1->SetOwnerUid(SYSTEM_APP_UID);
+    auto record1 = advancedNotificationService_->MakeNotificationRecord(request1, bundle);
+
+    sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest();
+    request2->SetNotificationId(2);
+    request2->SetOwnerUid(SYSTEM_APP_UID);
+    request2->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request2->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    request2->SetExtendInfo(extendInfo);
+    auto record2 = advancedNotificationService_->MakeNotificationRecord(request2, bundle);
+    ASSERT_TRUE(record2->request->IsSharedThirdpartyLiveView());
+
+    advancedNotificationService_->AddToNotificationList(record1);
+    advancedNotificationService_->AddToNotificationList(record2);
+
+    auto res = advancedNotificationService_->GetNotificationKeys(bundle);
+
+    ASSERT_EQ(res.size(), 1);
+    ASSERT_EQ(res[0], record1->notification->GetKey());
 }
 
 /**
