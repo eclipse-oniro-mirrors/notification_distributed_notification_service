@@ -85,9 +85,34 @@ napi_value NapiRemove(napi_env env, napi_callback_info info)
     napi_create_string_latin1(env, "remove", NAPI_AUTO_LENGTH, &resourceName);
 
     // Asynchronous function call
-    napi_create_async_work(env, nullptr, resourceName, NapiRemoveExecuteCallback, NapiRemoveCompleteCallback,
-        (void *)removeInfo, &removeInfo->asyncWork);
-    napi_queue_async_work_with_qos(env, removeInfo->asyncWork, napi_qos_user_initiated);
+    napi_status status = napi_create_async_work(env, nullptr, resourceName, NapiRemoveExecuteCallback,
+        NapiRemoveCompleteCallback, (void *)removeInfo, &removeInfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create remove async work failed.");
+        removeInfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, removeInfo->info, Common::NapiGetNull(env));
+        bool isCallback = removeInfo->info.isCallback;
+        if (removeInfo->info.callback != nullptr) {
+            napi_delete_reference(env, removeInfo->info.callback);
+        }
+        delete removeInfo;
+        removeInfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
+    status = napi_queue_async_work_with_qos(env, removeInfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue remove async work failed.");
+        removeInfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, removeInfo->info, Common::NapiGetNull(env));
+        bool isCallback = removeInfo->info.isCallback;
+        if (removeInfo->info.callback != nullptr) {
+            napi_delete_reference(env, removeInfo->info.callback);
+        }
+        napi_delete_async_work(env, removeInfo->asyncWork);
+        delete removeInfo;
+        removeInfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
     if (removeInfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {
@@ -155,31 +180,34 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create removeAll async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
-    bool isCallback = asynccallbackinfo->info.isCallback;
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue removeAll async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
         if (asynccallbackinfo->info.callback != nullptr) {
             napi_delete_reference(env, asynccallbackinfo->info.callback);
         }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
-        return promise;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
-    if (isCallback) {
+    if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {

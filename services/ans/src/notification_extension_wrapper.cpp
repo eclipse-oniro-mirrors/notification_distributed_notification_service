@@ -40,7 +40,13 @@ ExtensionWrapper::ExtensionWrapper()
 {
     InitExtentionWrapper();
 }
-ExtensionWrapper::~ExtensionWrapper() = default;
+ExtensionWrapper::~ExtensionWrapper()
+{
+    if (extensionWrapperHandle_ != nullptr) {
+        dlclose(extensionWrapperHandle_);
+        extensionWrapperHandle_ = nullptr;
+    }
+}
 
 
 #ifdef __cplusplus

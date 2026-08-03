@@ -102,6 +102,7 @@ void UvQueueWorkOnResponse(uv_work_t *work, int status)
     delete dataWorkerData;
     dataWorkerData = nullptr;
     delete work;
+    work = nullptr;
 }
 
 void LocalLiveViewSubscriberInstance::OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption)
