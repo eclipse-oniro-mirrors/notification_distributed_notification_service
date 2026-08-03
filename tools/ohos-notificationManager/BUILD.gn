@@ -60,6 +60,7 @@ ohos_cli_executable("ohos-notificationManager") {
         "c_utils:utils",
         "ffrt:libffrt",
         "hilog:libhilog",
+        "image_framework:image_native"
     ]
     external_deps += component_external_deps
 
