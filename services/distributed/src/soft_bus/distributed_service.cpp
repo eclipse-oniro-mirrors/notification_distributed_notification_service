@@ -531,7 +531,6 @@ void DistributedService::HandleMatchByType(const int32_t matchType, const Distri
         DistributedPublishService::GetInstance().SyncLiveViewNotification(device, true);
     } else if (matchType == MatchType::MATCH_ACK) {
         DistributedSubscribeService::GetInstance().SubscribeNotification(device);
-        DistributedBundleService::GetInstance().SendDistributedBundleInfo(device);
         DistributedPublishService::GetInstance().SyncLiveViewNotification(device, false);
     }
 }
