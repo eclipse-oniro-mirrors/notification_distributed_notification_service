@@ -659,9 +659,6 @@ private:
         const std::unordered_map<std::string, std::string> &datas,
         std::vector<NotificationBundleOption> &bundleOption, const int32_t userId);
 
-    bool ParseBundleNameAndUidFromKey(const std::string &key, const std::string &suffix,
-        std::string &bundleName, int32_t &uid);
-
     void GetValueFromDisturbeDB(const std::string &key, const int &userId,
         std::function<void(std::string &)> function);
     void GetValueFromDisturbeDB(const std::string &key, const int &userId,
