@@ -190,11 +190,19 @@ void ReminderTimerTable::InitDbColumns()
 std::string ReminderStateTable::GetCreateColumns()
 {
     std::string addColumns;
-    addColumns.append(REMINDER_ID).append(" ").append("INTEGER NOT NULL").append(", ");
-    addColumns.append(ACTION_BUTTON_TYPE).append(" ").append("INT NOT NULL").append(", ");
-    addColumns.append(UID).append(" ").append("INT NOT NULL").append(", ");
-    addColumns.append(IS_RESEND).append(" ").append("TEXT NOT NULL").append(", ");
-    addColumns.append(TIMESTAMP).append(" ").append("BIGINT NOT NULL");  // end column
+    addColumns.append(REMINDER_ID).append(" INTEGER NOT NULL, ");
+    addColumns.append(ACTION_BUTTON_TYPE).append(" INT NOT NULL, ");
+    addColumns.append(UID).append(" INT NOT NULL, ");
+    addColumns.append(IS_RESEND).append(" TEXT NOT NULL, ");
+    addColumns.append(TIMESTAMP).append(" BIGINT NOT NULL");  // end column
+    return addColumns;
+}
+
+std::string ReminderConfigTable::GetCreateColumns()
+{
+    std::string addColumns;
+    addColumns.append(KEY).append(" TEXT PRIMARY KEY, ");
+    addColumns.append(VALUE).append(" TEXT");  // end column
     return addColumns;
 }
 }

@@ -66,6 +66,7 @@ ohos_shared_library("reminder_innerkits") {
   output_values = get_target_outputs(":reminder_service_interface")
   reminder_state_output_values = get_target_outputs(":reminder_state_callback_interface")
   sources = [
+    "${core_path}/common/src/notification_want_params_helper.cpp",
     "${frameworks_module_reminder_path}/src/reminder_helper.cpp",
     "${frameworks_module_reminder_path}/src/reminder_request.cpp",
     "${frameworks_module_reminder_path}/src/reminder_request_adaptation.cpp",
