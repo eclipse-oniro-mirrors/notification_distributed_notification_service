@@ -4186,5 +4186,257 @@ HWTEST_F(AnsPublishServiceTest, CheckCommonLiveViewRights_NonCommonLiveView_Skip
 
     wrapper.checkLiveViewRights_ = nullptr;
 }
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_NullRequest_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo with null request, should return without crash.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_NullRequest_00001,
+    Function | SmallTest | Level1)
+{
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(nullptr);
+    EXPECT_EQ(ERR_OK, ERR_OK);
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_NotCommonLiveView_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo with non-live-view request, extendInfo should not be created.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_NotCommonLiveView_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(request);
+    EXPECT_EQ(request->GetExtendInfo(), nullptr);
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_GetKvFailed_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo when GetKvFromDb fails, extendInfo should not be set.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_GetKvFailed_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetExtendInfo(nullptr);
+
+    MockQueryData(-1);
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(request);
+    MockQueryData(0);
+
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_EQ(extendInfo, nullptr);
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_CreateNewExtendInfo_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo creates new extendInfo and stores switch value.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_CreateNewExtendInfo_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetExtendInfo(nullptr);
+
+    MockSetDataValue("on");
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(request);
+
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_NE(extendInfo, nullptr);
+    EXPECT_TRUE(extendInfo->HasParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY));
+    auto value = extendInfo->GetParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY);
+    auto strValue = AAFwk::IString::Query(value);
+    ASSERT_NE(strValue, nullptr);
+    EXPECT_EQ(AAFwk::String::Unbox(strValue), "on");
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_PreserveExistingExtendInfo_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo preserves existing extendInfo params.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_PreserveExistingExtendInfo_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("existingParam", AAFwk::String::Box("value"));
+    request->SetExtendInfo(extendInfo);
+
+    MockSetDataValue("off");
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(request);
+
+    auto newExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(newExtendInfo, nullptr);
+    EXPECT_TRUE(newExtendInfo->HasParam("existingParam"));
+    EXPECT_TRUE(newExtendInfo->HasParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY));
+    auto value = newExtendInfo->GetParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY);
+    auto strValue = AAFwk::IString::Query(value);
+    ASSERT_NE(strValue, nullptr);
+    EXPECT_EQ(AAFwk::String::Unbox(strValue), "off");
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_EmptyValue_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo stores empty switch value when kv is empty.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_EmptyValue_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetExtendInfo(nullptr);
+
+    MockSetDataValue("");
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(request);
+
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_NE(extendInfo, nullptr);
+    EXPECT_TRUE(extendInfo->HasParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY));
+    auto value = extendInfo->GetParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY);
+    auto strValue = AAFwk::IString::Query(value);
+    ASSERT_NE(strValue, nullptr);
+    EXPECT_EQ(AAFwk::String::Unbox(strValue), "");
+}
+
+/**
+ * @tc.name: CheckNotificationRequest_PreserveIsShared_AgentLiveView_00001
+ * @tc.desc: Test CheckNotificationRequest preserves isShared when agent controller + common live view + agent notif.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_PreserveIsShared_AgentLiveView_00001,
+    Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetIsAgentNotification(true);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(request->IsCommonLiveView());
+    ASSERT_TRUE(request->IsAgentNotification());
+
+    auto ret = advancedNotificationService_->CheckNotificationRequest(request);
+
+    EXPECT_EQ(ret, ERR_OK);
+    auto outExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(outExtendInfo, nullptr);
+    EXPECT_TRUE(outExtendInfo->HasParam("isShared"));
+}
+
+/**
+ * @tc.name: CheckNotificationRequest_RemoveIsShared_NotAgentNotification_00001
+ * @tc.desc: Test CheckNotificationRequest removes isShared when request is not agent notification.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_RemoveIsShared_NotAgentNotification_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetIsAgentNotification(false);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    extendInfo->SetParam("keepParam", AAFwk::String::Box("keep"));
+    request->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(request->IsCommonLiveView());
+
+    auto ret = advancedNotificationService_->CheckNotificationRequest(request);
+
+    EXPECT_EQ(ret, ERR_OK);
+    auto outExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(outExtendInfo, nullptr);
+    EXPECT_FALSE(outExtendInfo->HasParam("isShared"));
+    EXPECT_TRUE(outExtendInfo->HasParam("keepParam"));
+}
+
+/**
+ * @tc.name: CheckNotificationRequest_RemoveIsShared_NotCommonLiveView_00001
+ * @tc.desc: Test CheckNotificationRequest removes isShared when request is not a common live view.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_RemoveIsShared_NotCommonLiveView_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetIsAgentNotification(true);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+    ASSERT_FALSE(request->IsCommonLiveView());
+
+    auto ret = advancedNotificationService_->CheckNotificationRequest(request);
+
+    EXPECT_EQ(ret, ERR_OK);
+    auto outExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(outExtendInfo, nullptr);
+    EXPECT_FALSE(outExtendInfo->HasParam("isShared"));
+}
+
+/**
+ * @tc.name: CheckNotificationRequest_NoIsSharedParam_00001
+ * @tc.desc: Test CheckNotificationRequest does nothing when extendInfo has no isShared param.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_NoIsSharedParam_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetIsAgentNotification(false);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("otherParam", AAFwk::String::Box("value"));
+    request->SetExtendInfo(extendInfo);
+
+    auto ret = advancedNotificationService_->CheckNotificationRequest(request);
+
+    EXPECT_EQ(ret, ERR_OK);
+    auto outExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(outExtendInfo, nullptr);
+    EXPECT_TRUE(outExtendInfo->HasParam("otherParam"));
+    EXPECT_FALSE(outExtendInfo->HasParam("isShared"));
+}
 }  // namespace Notification
 }  // namespace OHOS

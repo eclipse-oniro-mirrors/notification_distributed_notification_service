@@ -31,6 +31,7 @@
 #undef private
 #undef protected
 #include "want_agent_helper.h"
+#include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
 
@@ -637,6 +638,112 @@ HWTEST_F(NotificationRequestTest, CheckLiveViewRequest_0002, Level1)
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
     EXPECT_EQ(notificationRequest.IsCommonLiveView(), true);
+}
+
+/**
+ * @tc.name: IsSharedThirdpartyLiveView_0001
+ * @tc.desc: Non-live-view request returns false for IsSharedThirdpartyLiveView.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, IsSharedThirdpartyLiveView_0001, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    EXPECT_EQ(notificationRequest.IsSharedThirdpartyLiveView(), false);
+}
+
+/**
+ * @tc.name: IsSharedThirdpartyLiveView_0002
+ * @tc.desc: Common live view with null extendInfo returns false.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, IsSharedThirdpartyLiveView_0002, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    EXPECT_EQ(notificationRequest.GetExtendInfo(), nullptr);
+    EXPECT_EQ(notificationRequest.IsSharedThirdpartyLiveView(), false);
+}
+
+/**
+ * @tc.name: IsSharedThirdpartyLiveView_0003
+ * @tc.desc: Common live view with extendInfo but no isShared param returns false.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, IsSharedThirdpartyLiveView_0003, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    notificationRequest.SetExtendInfo(extendInfo);
+    EXPECT_FALSE(notificationRequest.GetExtendInfo()->HasParam("isShared"));
+    EXPECT_EQ(notificationRequest.IsSharedThirdpartyLiveView(), false);
+}
+
+/**
+ * @tc.name: IsSharedThirdpartyLiveView_0004
+ * @tc.desc: Common live view with isShared param of wrong type returns false.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, IsSharedThirdpartyLiveView_0004, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::String::Box("true"));
+    notificationRequest.SetExtendInfo(extendInfo);
+    EXPECT_TRUE(notificationRequest.GetExtendInfo()->HasParam("isShared"));
+    EXPECT_EQ(notificationRequest.IsSharedThirdpartyLiveView(), false);
+}
+
+/**
+ * @tc.name: IsSharedThirdpartyLiveView_0005
+ * @tc.desc: Common live view with isShared boolean true returns true.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, IsSharedThirdpartyLiveView_0005, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    notificationRequest.SetExtendInfo(extendInfo);
+    EXPECT_EQ(notificationRequest.IsSharedThirdpartyLiveView(), true);
+}
+
+/**
+ * @tc.name: IsSharedThirdpartyLiveView_0006
+ * @tc.desc: Common live view with isShared boolean false returns false.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, IsSharedThirdpartyLiveView_0006, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(false));
+    notificationRequest.SetExtendInfo(extendInfo);
+    EXPECT_EQ(notificationRequest.IsSharedThirdpartyLiveView(), false);
 }
 
 /**
