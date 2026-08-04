@@ -41,9 +41,15 @@
 #include "mock_push_callback_stub.h"
 #include "advanced_notdisturb_enabled_observer.h"
 #include "advanced_notdisturb_white_list_observer.h"
+#include "system_event_observer.h"
+#include "notification_preferences.h"
+#include "common_event_support.h"
+#include "common_event_data.h"
+#include "want.h"
 
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 extern void MockEncrypt(bool mockRet);
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -2973,6 +2979,101 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationStatisticsToDB_100,
     advancedNotificationService_->GetStatisticsByBundle(bundles, statistic);
     int ret = statistic.size();
     ASSERT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: SetNotificationStatisticsToDB_200
+ * @tc.desc: Test SetNotificationStatisticsToDB returns early when ResolveStatisticsTableUserId < 0 (line 802),
+ *           so no statistics row is written.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationStatisticsToDB_200, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetNotificationId(200);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    sptr<NotificationBundleOption> bundle01 = sptr<NotificationBundleOption>::MakeSptr();
+    bundle01->SetBundleName(TEST_DEFUALT_BUNDLE);
+    bundle01->SetUid(200200);
+
+    // userId resolution fails -> ResolveStatisticsTableUserId returns INVALID_USER_ID (< 0) -> line 802 early return.
+    MockGetOsAccountLocalIdFromUid(false, 1);
+    advancedNotificationService_->SetNotificationStatisticsToDB(record, bundle01, false);
+
+    // Keep the failing mock so the query also targets notification_statistics_-1; a buggy write (tableUserId < 0
+    // not guarded) would land in that table and surface as recentCount > 0.
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.push_back(bundle01);
+    std::vector<NotificationStatistics> statistic;
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->GetStatisticsByBundle(bundles, statistic);
+    ASSERT_FALSE(statistic.empty());
+    EXPECT_EQ(statistic[0].GetRecentCount(), 0);
+
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default
+}
+
+/**
+ * @tc.name: SystemEventObserver_OnReceiveEvent_TimeChanged_001
+ * @tc.desc: Verify OnReceiveEvent enters the TIME_CHANGED judgment (line 140): the handler calls
+ *           UpdateCustomTimeData, which shifts the seeded row's notificationTime in the _0 table.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_OnReceiveEvent_TimeChanged_001,
+    Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    ASSERT_NE(advancedNotificationService_->systemEventObserver_, nullptr);
+
+    // Seed a row in the ZERO_USERID statistics table (_0); UpdateCustomTimeData always shifts this table.
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundleStats140", 20014044);
+    ASSERT_EQ(NotificationPreferences::GetInstance()->PutNotificationStatistics(ZERO_USERID, bundle), ERR_OK);
+
+    int32_t recentCount = 0;
+    int64_t lastTimeBefore = 0;
+    ASSERT_TRUE(NotificationPreferences::GetInstance()->preferncesDB_->QueryStatisticsByBundle(
+        bundle->GetUid(), ZERO_USERID, recentCount, lastTimeBefore));
+    ASSERT_GT(recentCount, 0);
+
+    EventFwk::CommonEventData data;
+    AAFwk::Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
+    data.SetWant(want);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data); // line 140 -> shifts _0 rows
+
+    int64_t lastTimeAfter = 0;
+    ASSERT_TRUE(NotificationPreferences::GetInstance()->preferncesDB_->QueryStatisticsByBundle(
+        bundle->GetUid(), ZERO_USERID, recentCount, lastTimeAfter));
+    // line 140 entered -> UpdateCustomTimeData shifted notificationTime -> lastTime must change.
+    EXPECT_NE(lastTimeAfter, lastTimeBefore);
+}
+
+/**
+ * @tc.name: SystemEventObserver_OnReceiveEvent_PackageRemoved_001
+ * @tc.desc: Verify OnReceiveEvent enters the PACKAGE_REMOVED statistics block (line 175) with
+ *           bundleOption != nullptr (the onBundleRemovedByUserId spy fires).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_OnReceiveEvent_PackageRemoved_001,
+    Function | SmallTest | Level1)
+{
+    ISystemEvent callbacks = {};
+    bool spyFired = false;
+    callbacks.onBundleRemovedByUserId = [&spyFired](const sptr<NotificationBundleOption> &, int32_t) {
+        spyFired = true;
+    };
+    SystemEventObserver observer(callbacks);
+
+    EventFwk::CommonEventData data;
+    AAFwk::Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    data.SetWant(want);
+
+    observer.OnReceiveEvent(data);
+    // bundleOption != nullptr -> PACKAGE_REMOVED handler runs -> line 175 entered
+    EXPECT_TRUE(spyFired);
 }
 #endif
 }

@@ -798,16 +798,13 @@ void AdvancedNotificationService::SetNotificationStatisticsToDB(const std::share
         return;
     }
     if (!isExists) {
-        int32_t userId = INVALID_USER_ID;
-        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-        if (userId < 0) {
+        int32_t tableUserId = NotificationPreferences::ResolveStatisticsTableUserId(*bundleOption);
+        if (tableUserId < 0) {
             return;
         }
-        auto result = NotificationPreferences::GetInstance()->PutNotificationStatistics(
-            userId, bundleOption);
+        auto result = NotificationPreferences::GetInstance()->PutNotificationStatistics(tableUserId, bundleOption);
         ANS_LOGD("AdvancedNotificationService PutNotificationStatistics: %{public}d", result);
-
-        result = NotificationPreferences::GetInstance()->CleanExperData(userId);
+        result = NotificationPreferences::GetInstance()->CleanExperData(tableUserId);
         ANS_LOGD("AdvancedNotificationService CleanExperData: %{public}d", result);
     }
 }
