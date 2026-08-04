@@ -64,8 +64,6 @@ int32_t NotificationPreferences::ResolveStatisticsTableUserId(const Notification
     bool isAncoApp = BundleManagerHelper::GetInstance()->IsAncoApp(bundle.GetBundleName(), bundle.GetUid());
     return isAncoApp ? ZERO_USERID : userId;
 }
-ffrt::mutex NotificationPreferences::instanceMutex_;
-std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
 
 NotificationPreferences::NotificationPreferences()
 {
@@ -86,13 +84,8 @@ NotificationPreferences::~NotificationPreferences()
 
 std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
 {
-    if (instance_ == nullptr) {
-        std::lock_guard<ffrt::mutex> lock(instanceMutex_);
-        if (instance_ == nullptr) {
-            instance_ = std::make_shared<NotificationPreferences>();
-        }
-    }
-    return instance_;
+    static std::shared_ptr<NotificationPreferences> instance = std::make_shared<NotificationPreferences>();
+    return instance;
 }
 
 void NotificationPreferences::StartCacheCleanupTimer()

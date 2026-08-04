@@ -39,8 +39,6 @@ public:
     void ResetQueue();
 
 private:
-    static ffrt::mutex instanceMutex_;
-    static std::shared_ptr<SystemSoundHelper> instance_;
     std::shared_ptr<ffrt::queue> soundHelperQueue_ = nullptr;
 };
 }  // namespace Notification
