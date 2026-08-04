@@ -1884,7 +1884,8 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00002, Function | SmallTest
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     std::string jsonVal;
-    jsonVal = R"({"abilityName":"MainAbility","parameters":"{}","pkgName":"com.example.myapplication","uri":""})";
+    jsonVal = "{\"abilityName\":\"MainAbility\",\"parameters\":\"{\\\"ohos.want.paramsStringEnvelope\\\":{"
+        "}}\",\"pkgName\":\"com.example.myapplication\",\"uri\":\"\"}";
     rrc->RecoverWantAgentByJson(jsonVal, 0);
     std::string wantStr;
     std::string maxWantStr;
