@@ -57,6 +57,7 @@ ohos_shared_library("ohnotification") {
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
+    "ability_runtime:wantagent_innerkits",
     "ability_base:base",
     "ability_base:configuration",
     "ability_base:zuri",
@@ -64,6 +65,7 @@ ohos_shared_library("ohnotification") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "image_framework:image_native"
   ]
   output_extension = "so"
   innerapi_tags = [ "ndk" ]
