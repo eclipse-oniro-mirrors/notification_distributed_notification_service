@@ -38,6 +38,7 @@ Infra::NotificationRdbConfig& TestRdbConfig()
         c.dbName = "notificationdb_test.db";
         if (mkdir(c.dbPath.c_str(), 0770) != 0 && errno != EEXIST) {
             // best-effort: leave dbPath as-is, NotificationRdbMgr::Init surfaces the failure
+            (void)errno;
         }
         return c;
     }();

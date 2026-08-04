@@ -887,8 +887,6 @@ public:
 
 private:
     std::map<int32_t, int64_t> cloneTimestamp;
-    static ffrt::mutex instanceMutex_;
-    static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};
     ffrt::mutex preferenceMutex_;
 

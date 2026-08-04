@@ -144,7 +144,9 @@ namespace Notification {
             zeroUserRecord->slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
             service->notificationList_.push_back(zeroUserRecord);
         }
-        service->DeleteAllByUserStopped(userId);
+        service->notificationSvrQueue_.SyncSubmit([service, userId]() {
+            service->DeleteAllByUserStopped(userId);
+        });
 
         std::string oldKey = fuzzData->ConsumeRandomLengthString();
         std::string oldKey1 = fuzzData->ConsumeRandomLengthString();
