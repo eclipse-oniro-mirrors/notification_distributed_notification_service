@@ -1063,5 +1063,112 @@ HWTEST_F(AnsSnoozeDelayTest, SnoozeNotificationConsumed_DeviceFlags_00001, Funct
 
     advancedNotificationService_->notificationList_.clear();
 }
+
+/**
+ * @tc.name: PrepareSnoozeDeviceFlags_00001
+ * @tc.desc: Test PrepareSnoozeDeviceFlags deep-copies all peer entries when src is non-null and flags valid.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, PrepareSnoozeDeviceFlags_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    const uint32_t wearableFlags = static_cast<uint32_t>(NotificationConstant::ReminderFlag::SOUND_FLAG);
+    const uint32_t currentFlags = static_cast<uint32_t>(NotificationConstant::ReminderFlag::BANNER_FLAG);
+    auto srcDeviceFlags = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    (*srcDeviceFlags)[NotificationConstant::CURRENT_DEVICE_TYPE] =
+        std::make_shared<NotificationFlags>(currentFlags);
+    (*srcDeviceFlags)["wearable"] = std::make_shared<NotificationFlags>(wearableFlags);
+    (*srcDeviceFlags)["tablet"] = std::make_shared<NotificationFlags>(wearableFlags);
+    request->SetDeviceFlags(srcDeviceFlags);
+
+    auto newFlags = std::make_shared<NotificationFlags>(currentFlags);
+    advancedNotificationService_->PrepareSnoozeDeviceFlags(request, newFlags);
+
+    auto result = request->GetDeviceFlags();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->size(), 3);
+    auto wearableIter = result->find("wearable");
+    ASSERT_NE(wearableIter, result->end());
+    ASSERT_NE(wearableIter->second, nullptr);
+    EXPECT_EQ(wearableIter->second->GetReminderFlags(), wearableFlags);
+    EXPECT_NE(wearableIter->second.get(), (*srcDeviceFlags)["wearable"].get());
+    auto currentIter = result->find(NotificationConstant::CURRENT_DEVICE_TYPE);
+    ASSERT_NE(currentIter, result->end());
+    EXPECT_EQ(currentIter->second.get(), newFlags.get());
+}
+
+/**
+ * @tc.name: PrepareSnoozeDeviceFlags_00002
+ * @tc.desc: Test PrepareSnoozeDeviceFlags when src is null, only CURRENT entry is set.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, PrepareSnoozeDeviceFlags_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    auto newFlags = std::make_shared<NotificationFlags>(
+        static_cast<uint32_t>(NotificationConstant::ReminderFlag::SOUND_FLAG));
+    advancedNotificationService_->PrepareSnoozeDeviceFlags(request, newFlags);
+
+    auto result = request->GetDeviceFlags();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->size(), 1);
+    auto currentIter = result->find(NotificationConstant::CURRENT_DEVICE_TYPE);
+    ASSERT_NE(currentIter, result->end());
+    EXPECT_EQ(currentIter->second.get(), newFlags.get());
+}
+
+/**
+ * @tc.name: PrepareSnoozeDeviceFlags_00003
+ * @tc.desc: Test PrepareSnoozeDeviceFlags skips entries whose flag is null.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, PrepareSnoozeDeviceFlags_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    const uint32_t validFlags = static_cast<uint32_t>(NotificationConstant::ReminderFlag::SOUND_FLAG);
+    auto srcDeviceFlags = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    (*srcDeviceFlags)["wearable"] = std::make_shared<NotificationFlags>(validFlags);
+    (*srcDeviceFlags)["tablet"] = nullptr;
+    request->SetDeviceFlags(srcDeviceFlags);
+
+    auto newFlags = std::make_shared<NotificationFlags>(validFlags);
+    advancedNotificationService_->PrepareSnoozeDeviceFlags(request, newFlags);
+
+    auto result = request->GetDeviceFlags();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->size(), 2);
+    EXPECT_EQ(result->find("tablet"), result->end());
+    auto wearableIter = result->find("wearable");
+    ASSERT_NE(wearableIter, result->end());
+    ASSERT_NE(wearableIter->second, nullptr);
+    EXPECT_EQ(wearableIter->second->GetReminderFlags(), validFlags);
+}
+
+/**
+ * @tc.name: PrepareSnoozeDeviceFlags_00004
+ * @tc.desc: Test PrepareSnoozeDeviceFlags with empty src map, loop body never executes.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, PrepareSnoozeDeviceFlags_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    auto srcDeviceFlags = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    request->SetDeviceFlags(srcDeviceFlags);
+
+    auto newFlags = std::make_shared<NotificationFlags>(
+        static_cast<uint32_t>(NotificationConstant::ReminderFlag::BANNER_FLAG));
+    advancedNotificationService_->PrepareSnoozeDeviceFlags(request, newFlags);
+
+    auto result = request->GetDeviceFlags();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->size(), 1);
+    auto currentIter = result->find(NotificationConstant::CURRENT_DEVICE_TYPE);
+    ASSERT_NE(currentIter, result->end());
+    EXPECT_EQ(currentIter->second.get(), newFlags.get());
+}
 }  // namespace Notification
 }  // namespace OHOS
