@@ -150,10 +150,11 @@ void AdvancedNotificationService::PrepareSnoozeDeviceFlags(const sptr<Notificati
     const std::shared_ptr<NotificationFlags> &currentFlags)
 {
     auto deviceFlags = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
-    if (auto src = request->GetDeviceFlags()) {
-        for (const auto &[type, flag] : *src) {
-            if (flag != nullptr) {
-                deviceFlags->emplace(type, std::make_shared<NotificationFlags>(flag->GetReminderFlags()));
+    auto src = request->GetDeviceFlags();
+    if (src != nullptr) {
+        for (auto it = src->begin(); it != src->end(); ++it) {
+            if (it->second != nullptr) {
+                deviceFlags->emplace(it->first, std::make_shared<NotificationFlags>(it->second->GetReminderFlags()));
             }
         }
     }
