@@ -36,14 +36,6 @@ void MockRandomToken(FuzzedDataProvider *fdp, const std::vector<std::string> &pe
 
 #define ENSURE_ANS_SERVICE_CLEANED_AT_EXIT() \
     do { \
-        static bool _ans_cleanup_registered = [] { \
-            atexit([] { \
-                auto _exit_svc = OHOS::Notification::AdvancedNotificationService::GetInstance(); \
-                if (_exit_svc != nullptr) { _exit_svc->SelfClean(true); } \
-            }); \
-            return true; \
-        }(); \
-        (void)_ans_cleanup_registered; \
         auto _drain_svc = OHOS::Notification::AdvancedNotificationService::GetInstance(); \
         if (_drain_svc != nullptr) { _drain_svc->SelfClean(); } \
     } while(0)
