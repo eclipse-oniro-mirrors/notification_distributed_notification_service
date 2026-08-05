@@ -372,8 +372,24 @@ HWTEST_F(ReminderRequestCalendarTest, PreGetNextTriggerTimeIgnoreSnooze_01000, F
     struct tm nowTime;
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
     EXPECT_NE(nullptr, calendar);
-    EXPECT_EQ(calendar->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext),
-    calendar->GetNextTriggerTime());
+    int64_t target = calendar->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext);
+
+    time_t now;
+    (void)time(&now);
+    struct tm futureTime;
+    (void)localtime_r(&now, &futureTime);
+    futureTime.tm_mon = 0;
+    futureTime.tm_mday = 1;
+    futureTime.tm_hour = 1;
+    futureTime.tm_min = 1;
+    futureTime.tm_sec = 0;
+    time_t futureTimeInSecond = mktime(&futureTime);
+    if (futureTimeInSecond <= now) {
+        futureTime.tm_year += 1;
+        futureTimeInSecond = mktime(&futureTime);
+    }
+    int64_t futureTimeInMilli = static_cast<int64_t>(futureTimeInSecond) * ReminderRequest::MILLI_SECONDS;
+    EXPECT_EQ(target, futureTimeInMilli);
 }
 
 /**
@@ -390,8 +406,24 @@ HWTEST_F(ReminderRequestCalendarTest, PreGetNextTriggerTimeIgnoreSnooze_03000, F
     auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
     EXPECT_NE(nullptr, calendar);
 
-    EXPECT_EQ(calendar->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext),
-    calendar->GetNextTriggerTime());
+    int64_t target = calendar->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext);
+
+    time_t now;
+    (void)time(&now);
+    struct tm futureTime;
+    (void)localtime_r(&now, &futureTime);
+    futureTime.tm_mon = 0;
+    futureTime.tm_mday = 1;
+    futureTime.tm_hour = 1;
+    futureTime.tm_min = 1;
+    futureTime.tm_sec = 0;
+    time_t futureTimeInSecond = mktime(&futureTime);
+    if (futureTimeInSecond <= now) {
+        futureTime.tm_year += 1;
+        futureTimeInSecond = mktime(&futureTime);
+    }
+    int64_t futureTimeInMilli = static_cast<int64_t>(futureTimeInSecond) * ReminderRequest::MILLI_SECONDS;
+    EXPECT_EQ(target, futureTimeInMilli);
 }
 
 /**
@@ -418,6 +450,173 @@ HWTEST_F(ReminderRequestCalendarTest, PreGetNextTriggerTimeIgnoreSnooze_02000, F
     repeatDays.push_back(-1);
     auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
     EXPECT_EQ(calendar->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext), 0);
+}
+
+/**
+ * @tc.name: GetNextTriggerTime_CrossYear_00001
+ * @tc.desc: When repeatMonths contains Feb+Mar and repeatDays={31}, Feb has no 31st and should be
+ *           skipped. The next trigger time must equal the result of repeatMonths={Mar} only,
+ *           and must not be pushed one year further due to incorrect year accumulation after
+ *           crossing from December into January.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, GetNextTriggerTime_CrossYear_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    nowTime.tm_hour = 9;
+    nowTime.tm_min = 0;
+    nowTime.tm_sec = 0;
+
+    std::vector<uint8_t> daysOfWeek;
+    std::vector<uint8_t> monthsFebMar = {2, 3};
+    std::vector<uint8_t> monthsMar = {3};
+    std::vector<uint8_t> repeatDays = {31};
+
+    auto calFebMar = std::make_shared<ReminderRequestCalendar>(nowTime, monthsFebMar, repeatDays, daysOfWeek);
+    auto calMar = std::make_shared<ReminderRequestCalendar>(nowTime, monthsMar, repeatDays, daysOfWeek);
+    ASSERT_NE(nullptr, calFebMar);
+    ASSERT_NE(nullptr, calMar);
+
+    uint64_t nextFebMar = calFebMar->PreGetNextTriggerTimeIgnoreSnooze(false, true);
+    uint64_t nextMar = calMar->PreGetNextTriggerTimeIgnoreSnooze(false, true);
+    EXPECT_EQ(nextFebMar, nextMar);
+}
+
+/**
+ * @tc.name: GetNextTriggerTime_NotBeforeStartDate_00001
+ * @tc.desc: When the designated dateTime is in the future (later than now), the next trigger time
+ *           computed from the repeat rule must not be earlier than the start date time, even if
+ *           the current time has repeat days between now and the start date.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, GetNextTriggerTime_NotBeforeStartDate_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);
+    struct tm futureTime;
+    (void)localtime_r(&now, &futureTime);
+    futureTime.tm_year += 20;
+    futureTime.tm_mday = 2;
+    futureTime.tm_hour = 9;
+    futureTime.tm_min = 0;
+    futureTime.tm_sec = 0;
+    int64_t futureTimeInMilli = static_cast<int64_t>(mktime(&futureTime)) * ReminderRequest::MILLI_SECONDS;
+
+    std::vector<uint8_t> daysOfWeek;
+    std::vector<uint8_t> allMonths = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> repeatDays = {1};
+
+    auto calendar = std::make_shared<ReminderRequestCalendar>(futureTime, allMonths, repeatDays, daysOfWeek);
+    calendar->InitTriggerTime();
+    ASSERT_NE(nullptr, calendar);
+    uint64_t nextTrigger = calendar->PreGetNextTriggerTimeIgnoreSnooze(false, true);
+    EXPECT_EQ(nextTrigger, futureTimeInMilli);
+}
+
+/**
+ * @tc.name: GetNextTriggerTime_Feb29LeapYear_00001
+ * @tc.desc: For repeatMonths={Feb} and repeatDays={29}, Feb 29 exists only in leap years.
+ *           When the designated Feb 29 has passed, the next trigger must jump to the next
+ *           leap year's Feb 29 instead of returning INVALID and marking the reminder expired.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, GetNextTriggerTime_Feb29LeapYear_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    int32_t newYear = nowTime.tm_year + 1900;
+    struct tm targetTime;
+    targetTime.tm_year = 2024 - 1900;  // 2024 leap year
+    targetTime.tm_mon = 1;             // February (0-indexed)
+    targetTime.tm_mday = 29;
+    targetTime.tm_hour = 9;
+    targetTime.tm_min = 0;
+    targetTime.tm_sec = 0;
+
+    std::vector<uint8_t> daysOfWeek;
+    std::vector<uint8_t> feb = { 2 };
+    std::vector<uint8_t> day29 = { 29 };
+
+    auto calendar = std::make_shared<ReminderRequestCalendar>(targetTime, feb, day29, daysOfWeek);
+    ASSERT_NE(nullptr, calendar);
+    int32_t nextLeapYear = ((newYear - 2024) / 4 + 1) * 4 + 2024;
+    targetTime.tm_year = nextLeapYear - 1900;
+    int64_t futureTimeInMilli = static_cast<int64_t>(mktime(&targetTime)) * ReminderRequest::MILLI_SECONDS;
+
+    uint64_t nextTrigger = calendar->PreGetNextTriggerTimeIgnoreSnooze(false, true);
+    EXPECT_EQ(nextTrigger, futureTimeInMilli);
+}
+
+/**
+ * @tc.name: GetNextTriggerTime_Branch_00001
+ * @tc.desc: test repeatDays is empty
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, GetNextTriggerTime_Branch_00001, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    int32_t newYear = nowTime.tm_year + 1900;
+    struct tm targetTime;
+    targetTime.tm_year = 2024 - 1900;  // 2024 leap year
+    targetTime.tm_mon = 1;             // February (0-indexed)
+    targetTime.tm_mday = 29;
+    targetTime.tm_hour = 9;
+    targetTime.tm_min = 0;
+    targetTime.tm_sec = 0;
+
+    std::vector<uint8_t> daysOfWeek;
+    std::vector<uint8_t> feb = { 2 };
+    std::vector<uint8_t> days;
+
+    auto calendar = std::make_shared<ReminderRequestCalendar>(targetTime, feb, days, daysOfWeek);
+    uint64_t nextTrigger = calendar->GetNextTriggerTimeAsRepeatReminder(static_cast<int64_t>(now), nowTime, targetTime);
+    EXPECT_EQ(nextTrigger, ReminderRequest::INVALID_LONG_LONG_VALUE);
+}
+
+/**
+ * @tc.name: GetNextTriggerTime_Branch_00002
+ * @tc.desc: Whether the next cycle time can be correctly calculated when the current time equals the trigger time
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, GetNextTriggerTime_Branch_00002, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    struct tm targetTime;
+    targetTime.tm_year = nowTime.tm_year + 20;
+    targetTime.tm_mon = 10;
+    targetTime.tm_mday = 1;
+    targetTime.tm_hour = 9;
+    targetTime.tm_min = 0;
+    targetTime.tm_sec = 0;
+
+    std::vector<uint8_t> daysOfWeek;
+    std::vector<uint8_t> allMonths = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    std::vector<uint8_t> repeatDays = {1};
+
+    auto calendar = std::make_shared<ReminderRequestCalendar>(targetTime, allMonths, repeatDays, daysOfWeek);
+    time_t target = mktime(&targetTime);
+    uint64_t nextTrigger = calendar->GetNextTriggerTimeAsRepeatReminder(static_cast<int64_t>(target),
+        targetTime, targetTime);
+    
+    targetTime.tm_mon = 11;
+    int64_t futureTimeInMilli = static_cast<int64_t>(mktime(&targetTime)) * ReminderRequest::MILLI_SECONDS;
+    EXPECT_EQ(nextTrigger, futureTimeInMilli);
 }
 
 /**
