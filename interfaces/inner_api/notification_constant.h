@@ -800,6 +800,7 @@ public:
     static const uint32_t TYPE_PRIORITY_INTELLIGENT_SWITCH = 0;
     static const uint32_t TYPE_PRIORITY_SWITCH_BY_BUNDLE = 1;
     static const uint32_t TYPE_PRIORITY_STRATEGY_BY_BUNDLE = 2;
+    static const uint32_t CAPACITY_520 = 520 << 10;
 };
 }  // namespace Notification
 }  // namespace OHOS

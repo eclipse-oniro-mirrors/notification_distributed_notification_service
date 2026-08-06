@@ -281,6 +281,7 @@ void AdvancedNotificationService::GetRequestsFromNotification(
         }
 #endif
         MessageParcel parcel;
+        parcel.SetMaxCapacity(NotificationConstant::CAPACITY_520);
         if (!parcel.WriteParcelable(notification)) {
             ANS_LOGE("GetRequestsFromNotification writeParcelable failed.");
             continue;

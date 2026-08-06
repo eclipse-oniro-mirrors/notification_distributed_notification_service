@@ -403,6 +403,7 @@ ErrCode AdvancedNotificationService::OnSubscriberAddWithSilentReplay(
                 continue;
             }
             MessageParcel parcel;
+            parcel.SetMaxCapacity(NotificationConstant::CAPACITY_520);
             if (!parcel.WriteParcelable(notificationRecord->notification)) {
                 ANS_LOGE("SilentReplay writeParcelable failed.");
                 continue;
