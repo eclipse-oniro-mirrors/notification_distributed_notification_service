@@ -3647,7 +3647,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetEnabledForBundleSlots_00100, Fu
     std::vector<sptr<NotificationBundleOption>> bundleOptions;
     int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
-    EXPECT_FALSE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled));
+    EXPECT_FALSE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled, 0));
     EXPECT_EQ(0u, slotEnabled.size());
 }
 
@@ -3662,7 +3662,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetEnabledForBundleSlots_00200, Fu
     bundleOptions.push_back(nullptr);
     int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
-    EXPECT_TRUE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled));
+    EXPECT_TRUE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled, 0));
     EXPECT_EQ(0u, slotEnabled.size());
 }
 
@@ -3678,7 +3678,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetEnabledForBundleSlots_00300, Fu
     bundleOptions.push_back(new NotificationBundleOption("bundleNullRdb", 1001));
     int32_t slotType = static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
-    EXPECT_FALSE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled));
+    EXPECT_FALSE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled, 0));
     EXPECT_EQ(0u, slotEnabled.size());
 }
 
@@ -3718,7 +3718,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetEnabledForBundleSlots_00400, Fu
     bundleOptions.push_back(new NotificationBundleOption(bundleNameMissing, bundleUidMissing));
 
     std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
-    EXPECT_TRUE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled));
+    EXPECT_TRUE(preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled, userId));
     EXPECT_EQ(2u, slotEnabled.size());
 
     bool foundEnabled = false;

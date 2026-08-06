@@ -1308,14 +1308,15 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(
 bool __attribute__((weak)) NotificationPreferences::GetEnabledForBundleSlots(
     const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
     int32_t slotType,
-    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled)
+    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled,
+    int32_t userId)
 {
     ANS_LOGD("called");
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         return false;
     }
-    return preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled);
+    return preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled, userId);
 }
 
 ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
