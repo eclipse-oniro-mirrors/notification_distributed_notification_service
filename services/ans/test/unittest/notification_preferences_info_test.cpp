@@ -1113,5 +1113,38 @@ HWTEST_F(NotificationPreferencesInfoTest, GetAllDoNotDisturbProfiles_0300, TestS
     preferencesInfo->GetAllDoNotDisturbProfiles(100, profiles);
     ASSERT_EQ(profiles.size(), 0);
 }
+
+/**
+ * @tc.name: RemoveRingtoneInfo_NullRingtone_00001
+ * @tc.desc: Test RemoveRingtoneInfo with null ringtoneInfo_
+ * @tc.type: FUNC
+ * @tc.require: issue4281
+ */
+HWTEST_F(NotificationPreferencesInfoTest, RemoveRingtoneInfo_NullRingtone_00001, Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.ringtoneInfo_ = nullptr;
+    bundleInfo.RemoveRingtoneInfo();
+    EXPECT_EQ(bundleInfo.ringtoneInfo_, nullptr);
+}
+
+/**
+ * @tc.name: GetExtensionSubscriptionInfosJson_NullItem_00001
+ * @tc.desc: Test GetExtensionSubscriptionInfosJson with null item in vector
+ * @tc.type: FUNC
+ * @tc.require: issue4281
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetExtensionSubscriptionInfosJson_NullItem_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.extensionSubscriptionInfos_.push_back(nullptr);
+    sptr<NotificationExtensionSubscriptionInfo> validInfo =
+        new NotificationExtensionSubscriptionInfo();
+    ASSERT_NE(validInfo, nullptr);
+    bundleInfo.extensionSubscriptionInfos_.push_back(validInfo);
+    std::string result = bundleInfo.GetExtensionSubscriptionInfosJson();
+    EXPECT_FALSE(result.empty());
+}
 }
 }

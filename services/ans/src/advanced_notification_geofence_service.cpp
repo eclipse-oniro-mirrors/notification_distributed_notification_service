@@ -706,9 +706,16 @@ ErrCode AdvancedNotificationService::UpdateTriggerNotification(PublishNotificati
 void AdvancedNotificationService::UpdateTriggerRecord(std::shared_ptr<NotificationRecord> oldRecord,
     std::shared_ptr<NotificationRecord> newRecord)
 {
+    if (oldRecord == nullptr || oldRecord->request == nullptr || newRecord == nullptr) {
+        ANS_LOGE("Invalid record parameter.");
+        return;
+    }
     {
         std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
         for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end(); ++it) {
+            if (*it == nullptr || (*it)->request == nullptr) {
+                continue;
+            }
             if ((*it)->request->GetTriggerSecureKey() == oldRecord->request->GetTriggerSecureKey()) {
                 *it = newRecord;
                 break;
@@ -783,6 +790,11 @@ void AdvancedNotificationService::ExecuteCancelGroupCancelFromTriggerNotificatio
 {
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->bundleOption == nullptr ||
+            (*it)->notification == nullptr || (*it)->request == nullptr) {
+            ++it;
+            continue;
+        }
         if (((*it)->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundleOption->GetUid()) &&
             ((*it)->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
@@ -800,6 +812,10 @@ void AdvancedNotificationService::RemoveFromTriggerNotificationList(const sptr<N
 {
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->bundleOption == nullptr || (*it)->notification == nullptr) {
+            ++it;
+            continue;
+        }
         if (((*it)->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundleOption->GetUid()) &&
             ((*it)->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
@@ -939,6 +955,10 @@ void AdvancedNotificationService::DeleteAllByUserStoppedFromTriggerNotificationL
 {
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->notification == nullptr) {
+            ++it;
+            continue;
+        }
         if (((*it)->notification->GetKey() == key) &&
             (((*it)->notification->GetRecvUserId() == userId) ||
             ((*it)->notification->GetRecvUserId() == ZERO_USER_ID))) {
@@ -955,6 +975,10 @@ void AdvancedNotificationService::ExecuteRemoveNotificationFromTriggerNotificati
 {
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->bundleOption == nullptr || (*it)->notification == nullptr) {
+            ++it;
+            continue;
+        }
         if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
             ((*it)->notification->GetId() == notificationId) && ((*it)->notification->GetLabel() == label)) {
@@ -971,6 +995,10 @@ void AdvancedNotificationService::RemoveGroupByBundleFromTriggerNotificationList
 {
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->bundleOption == nullptr || (*it)->request == nullptr) {
+            ++it;
+            continue;
+        }
         if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
             ((*it)->request->GetGroupName() == groupName)) {

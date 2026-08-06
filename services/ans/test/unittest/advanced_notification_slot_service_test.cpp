@@ -33,6 +33,7 @@
 #include "notification_config_parse.h"
 #include "ipc_skeleton.h"
 #include "os_account_manager.h"
+#include "notification_record.h"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -1700,5 +1701,50 @@ HWTEST_F(AnsSlotServiceTest, GetEnabledForBundleSlotSelf_InvalidSlotType_002, Fu
         static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE), enabled);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: AssignValidNotificationSlot_NullBundleOption_00001
+ * @tc.desc: Test AssignValidNotificationSlot with nullptr bundleOption
+ * @tc.type: FUNC
+ * @tc.require: issue4281
+ */
+HWTEST_F(AnsSlotServiceTest, AssignValidNotificationSlot_NullBundleOption_00001, Function | SmallTest | Level1)
+{
+    auto record = std::make_shared<NotificationRecord>();
+    ASSERT_NE(record, nullptr);
+    record->request = new NotificationRequest();
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    auto ansStatus = advancedNotificationService_->AssignValidNotificationSlot(record, bundleOption);
+    ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: GenerateSlotReminderMode_NullSlot_00001
+ * @tc.desc: Test GenerateSlotReminderMode with nullptr slot
+ * @tc.type: FUNC
+ * @tc.require: issue4281
+ */
+HWTEST_F(AnsSlotServiceTest, GenerateSlotReminderMode_NullSlot_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationSlot> slot = nullptr;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    advancedNotificationService_->GenerateSlotReminderMode(slot, bundle, false, 0);
+    EXPECT_EQ(slot, nullptr);
+}
+
+/**
+ * @tc.name: GenerateSlotReminderMode_NullSlot_Specified_00001
+ * @tc.desc: Test GenerateSlotReminderMode with nullptr slot and isSpecifiedSlot true
+ * @tc.type: FUNC
+ * @tc.require: issue4281
+ */
+HWTEST_F(AnsSlotServiceTest, GenerateSlotReminderMode_NullSlot_Specified_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationSlot> slot = nullptr;
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    advancedNotificationService_->GenerateSlotReminderMode(slot, bundle, true, 1);
+    EXPECT_EQ(slot, nullptr);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

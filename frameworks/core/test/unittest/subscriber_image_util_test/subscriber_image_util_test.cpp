@@ -157,6 +157,24 @@ HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00005, Function | SmallTe
 }
 
 /**
+ * @tc.name: ProcessPictureOption_NullContent_00001
+ * @tc.desc: Test ProcessPictureOption with LIVE_VIEW type but null content
+ * @tc.type: FUNC
+ * @tc.require: issue4281
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_NullContent_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    request->notificationContent_ = nullptr;
+    sptr<Notification> notification = new Notification(request);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
+    EXPECT_EQ(request->GetContent(), nullptr);
+}
+
+/**
  * @tc.name: ProcessPictureOption_00006
  * @tc.desc: Test ProcessPictureOption with empty picList.
  * @tc.type: FUNC

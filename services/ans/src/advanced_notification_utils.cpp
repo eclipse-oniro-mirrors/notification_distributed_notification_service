@@ -832,6 +832,10 @@ void AdvancedNotificationService::OnDistributedPublish(
         request->SetCreatorUid(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundle, activeUserId));
         sptr<NotificationBundleOption> bundleOption =
             GenerateValidBundleOption(new NotificationBundleOption(bundle, 0));
+        if (bundleOption == nullptr) {
+            ANS_LOGE("GenerateValidBundleOption failed for OnDistributedPublish.");
+            return;
+        }
 
         std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
         if (record == nullptr) {
@@ -911,6 +915,10 @@ void AdvancedNotificationService::OnDistributedUpdate(
         request->SetCreatorUid(BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundle, activeUserId));
         sptr<NotificationBundleOption> bundleOption =
             GenerateValidBundleOption(new NotificationBundleOption(bundle, 0));
+        if (bundleOption == nullptr) {
+            ANS_LOGE("GenerateValidBundleOption failed for OnDistributedUpdate.");
+            return;
+        }
 
         std::shared_ptr<NotificationRecord> record = std::make_shared<NotificationRecord>();
         if (record == nullptr) {
@@ -1697,8 +1705,13 @@ void AdvancedNotificationService::CancelTimer(uint64_t timerId)
     if (timerId == NotificationConstant::INVALID_TIMER_ID) {
         return;
     }
-    MiscServices::TimeServiceClient::GetInstance()->StopTimer(timerId);
-    MiscServices::TimeServiceClient::GetInstance()->DestroyTimer(timerId);
+    auto timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("Failed to cancel timer due to get TimeServiceClient is null.");
+        return;
+    }
+    timer->StopTimer(timerId);
+    timer->DestroyTimer(timerId);
 }
 
 void AdvancedNotificationService::BatchCancelTimer(std::vector<uint64_t> timerIds)
@@ -2084,6 +2097,10 @@ std::vector<AppExecFwk::BundleInfo> AdvancedNotificationService::GetBundlesOfAct
 
 void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationRecord> &record)
 {
+    if (record == nullptr || record->notification == nullptr || record->request == nullptr) {
+        ANS_LOGE("Invalid record.");
+        return;
+    }
     record->notification->SetEnableLight(false);
     record->notification->SetEnableSound(false);
     record->notification->SetEnableVibration(false);

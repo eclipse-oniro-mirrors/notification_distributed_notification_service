@@ -55,7 +55,12 @@ extern "C" {
 
 void UpdateUnifiedGroupInfo(const std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo)
 {
-    AdvancedNotificationService::GetInstance()->UpdateUnifiedGroupInfo(key, groupInfo);
+    auto service = AdvancedNotificationService::GetInstance();
+    if (service == nullptr) {
+        ANS_LOGE("AdvancedNotificationService instance is null.");
+        return;
+    }
+    service->UpdateUnifiedGroupInfo(key, groupInfo);
 }
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
@@ -194,7 +199,12 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
         isRegisterDataSettingObserver = true;
     }
     std::string enable = "";
-    AdvancedNotificationService::GetInstance()->GetUnifiedGroupInfoFromDb(enable);
+    auto service = AdvancedNotificationService::GetInstance();
+    if (service == nullptr) {
+        ANS_LOGE("AdvancedNotificationService instance is null.");
+        return;
+    }
+    service->GetUnifiedGroupInfoFromDb(enable);
     SetlocalSwitch(enable);
 }
 

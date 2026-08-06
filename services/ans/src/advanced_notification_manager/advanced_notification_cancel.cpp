@@ -760,6 +760,10 @@ void AdvancedNotificationService::GetRemoveListForRemoveAll(const sptr<Notificat
     const sptr<NotificationBundleOption> &bundle, std::vector<std::shared_ptr<NotificationRecord>> &removeList)
 {
     for (auto record : notificationList_) {
+        if (record == nullptr || record->notification == nullptr ||
+            record->bundleOption == nullptr || record->request == nullptr) {
+            continue;
+        }
         bool isAllowedNotification = true;
         if (IsAllowedNotifyForBundle(bundleOption, isAllowedNotification) != ERR_OK) {
             ANSR_LOGW("The application does not request enable notification.");
@@ -781,11 +785,16 @@ void AdvancedNotificationService::GetRemoveListForRemoveAll(const sptr<Notificat
             continue;
         }
         auto notificationRequest = record->request;
-        if (!BundleManagerHelper::GetInstance()->IsSystemApp(bundle->GetUid()) &&
+        auto bundleMgr = BundleManagerHelper::GetInstance();
+        if (bundleMgr != nullptr && !bundleMgr->IsSystemApp(bundle->GetUid()) &&
             notificationRequest->IsSystemLiveView()) {
+            auto content = notificationRequest->GetContent();
+            if (content == nullptr || content->GetNotificationContent() == nullptr) {
+                continue;
+            }
             auto localLiveviewContent = std::static_pointer_cast<NotificationLocalLiveViewContent>(
-                notificationRequest->GetContent()->GetNotificationContent());
-            if (localLiveviewContent->GetType() == 0) {
+                content->GetNotificationContent());
+            if (localLiveviewContent == nullptr || localLiveviewContent->GetType() == 0) {
                 continue;
             }
         }

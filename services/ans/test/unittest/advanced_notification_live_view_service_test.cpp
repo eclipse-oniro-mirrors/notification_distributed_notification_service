@@ -765,6 +765,31 @@ HWTEST_F(AnsLiveViewServiceTest, UpdateRecordByOwner_300, Function | SmallTest |
 }
 
 /**
+ * @tc.name: UpdateRecordByOwner_400
+ * @tc.desc: Test UpdateRecordByOwner when isSystem is false and downloadTemplate is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, UpdateRecordByOwner_400, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto localLiveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(localLiveViewContent);
+    request->SetContent(content);
+    request->SetUpdateByOwnerAllowed(true);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    record->notification->SetFinishTimer(1);
+    advancedNotificationService_->AddToNotificationList(record);
+    bool isSystem = false;
+
+    advancedNotificationService_->UpdateRecordByOwner(record, isSystem);
+    EXPECT_NE(record->notification, nullptr);
+}
+
+/**
  * @tc.name: StartFinishTimerForUpdate_100
  * @tc.desc: Test StartFinishTimerForUpdate when process is FINISH_PER
  * @tc.type: FUNC

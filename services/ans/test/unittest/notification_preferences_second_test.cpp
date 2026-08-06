@@ -496,6 +496,26 @@ HWTEST_F(NotificationPreferencesTest, GetRingtoneInfoByBundle_0300, TestSize.Lev
     ASSERT_EQ(getRet, ERR_OK);
 }
 
+/**
+ * @tc.name: GetRingtoneInfoByBundle_NullDB_0001
+ * @tc.desc: Test GetRingtoneInfoByBundle returns DB error when preferncesDB_ is nullptr and ringtone not cached.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, GetRingtoneInfoByBundle_NullDB_0001, TestSize.Level1)
+{
+    NotificationPreferences notificationPreferences;
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("bundle", 100);
+    ASSERT_NE(bundleOption, nullptr);
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("bundle");
+    bundleInfo.SetBundleUid(100);
+    notificationPreferences.preferencesInfo_.SetBundleInfo(bundleInfo);
+    notificationPreferences.preferncesDB_ = nullptr;
+    sptr<NotificationRingtoneInfo> result = nullptr;
+    auto ret = notificationPreferences.GetRingtoneInfoByBundle(bundleOption, result);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
 HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0100, TestSize.Level1)
 {
     NotificationPreferences notificationPreferences;

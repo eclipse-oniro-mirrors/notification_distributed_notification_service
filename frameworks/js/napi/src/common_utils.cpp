@@ -419,7 +419,7 @@ napi_value Common::NapiReturnFalseCbInner(napi_env env, napi_callback_info info,
     napi_value result = nullptr;
     napi_get_boolean(env, false, &result);
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    if (argc >= ONLY_CALLBACK_MIN_PARA) {
+    if (argc > ONLY_CALLBACK_MIN_PARA) {
         napi_valuetype valuetype = napi_undefined;
         NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
         if (valuetype == napi_function) {

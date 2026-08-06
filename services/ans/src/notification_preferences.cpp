@@ -440,6 +440,10 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
         return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("preferncesDB_ is null.");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
 
     ErrCode result = ERR_OK;
@@ -448,8 +452,11 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
         sptr<NotificationRingtoneInfo> savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
         if (savedRingtoneInfo != nullptr) {
             if (preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, savedRingtoneInfo)) {
-                AdvancedNotificationService::GetInstance()->ReportRingtoneChanged(bundleOption,
-                    bundleInfo.GetRingtoneInfo(), NotificationConstant::RingtoneReportType::RINGTONE_REMOVE);
+                auto ansInstance = AdvancedNotificationService::GetInstance();
+                if (ansInstance != nullptr) {
+                    ansInstance->ReportRingtoneChanged(bundleOption,
+                        bundleInfo.GetRingtoneInfo(), NotificationConstant::RingtoneReportType::RINGTONE_REMOVE);
+                }
                 SystemSoundHelper::GetInstance()->RemoveCustomizedTone(savedRingtoneInfo);
             }
         }
@@ -1957,6 +1964,10 @@ ErrCode NotificationPreferences::SetSmartReminderEnabled(const std::string &devi
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("preferncesDB_ is null.");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetSmartReminderEnabled(deviceType, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1970,6 +1981,10 @@ ErrCode NotificationPreferences::IsSmartReminderEnabled(const std::string &devic
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("preferncesDB_ is null.");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->IsSmartReminderEnabled(deviceType, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -2152,8 +2167,20 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
     sptr<NotificationRingtoneInfo> savedRingtoneInfo = bundleInfo.GetRingtoneInfo();
     if (savedRingtoneInfo == nullptr) {
         savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+        if (savedRingtoneInfo == nullptr) {
+            ANS_LOGE("Failed to create NotificationRingtoneInfo.");
+            return ERR_ANS_INNER_NO_MEMORY;
+        }
+        if (preferncesDB_ == nullptr) {
+            ANS_LOGE("preferncesDB_ is null.");
+            return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        }
         if (!preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, savedRingtoneInfo)) {
             savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+            if (savedRingtoneInfo == nullptr) {
+                ANS_LOGE("Failed to create NotificationRingtoneInfo.");
+                return ERR_ANS_INNER_NO_MEMORY;
+            }
         }
         bundleInfo.SetRingtoneInfo(savedRingtoneInfo);
         preferencesInfo_.SetBundleInfo(bundleInfo);
@@ -2470,6 +2497,10 @@ std::string NotificationPreferences::GetAdditionalConfig(const std::string &key)
 bool NotificationPreferences::DelCloneProfileInfo(const int32_t &userId,
     const sptr<NotificationDoNotDisturbProfile>& info)
 {
+    if (info == nullptr) {
+        ANS_LOGE("Invalid info parameter.");
+        return false;
+    }
     if (preferncesDB_ == nullptr) {
         return false;
     }

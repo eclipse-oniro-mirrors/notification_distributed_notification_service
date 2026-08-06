@@ -55,6 +55,10 @@ void AdvancedNotificationServiceAbility::OnStart()
     }
     SystemEventObserver::InitSaStartTime();
     service_ = AdvancedNotificationService::GetInstance();
+    if (service_ == nullptr) {
+        ANS_LOGE("Failed to create AdvancedNotificationService instance.");
+        return;
+    }
     service_->CreateDialogManager();
     
     if (!Publish(service_)) {

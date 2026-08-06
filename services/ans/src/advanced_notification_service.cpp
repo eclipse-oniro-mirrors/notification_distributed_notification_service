@@ -718,7 +718,7 @@ AnsStatus AdvancedNotificationService::FillNotificationRecord(
     SetNotificationRemindType(record->notification, true);
 
     record->bundleOption = requestdbObj.bundleOption;
-    if (!record->bundleOption->GetBundleName().empty()) {
+    if (record->bundleOption != nullptr && !record->bundleOption->GetBundleName().empty()) {
         AnsStatus ansStatus = AssignValidNotificationSlot(record, record->bundleOption);
         if (!ansStatus.Ok()) {
             ANS_LOGE("Assign valid notification slot failed!");
@@ -2148,8 +2148,10 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
     int32_t uid = IPCSkeleton::GetCallingUid();
 
     std::lock_guard<ffrt::mutex> lock(pushMutex_);
+    auto checkIter = checkRequests_.find(slotType);
     if (pushCallBacks_.find(slotType) != pushCallBacks_.end()) {
-        if (checkRequests_[slotType]->GetUid() != uid) {
+        if (checkIter == checkRequests_.end() || checkIter->second == nullptr ||
+            checkIter->second->GetUid() != uid) {
             NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_TASK_ERR).BranchId(BRANCH_18));
             return ERR_ANS_INNER_TASK_ERR;
         }
@@ -2209,7 +2211,15 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
 
     if (request->IsCommonLiveView()) {
         std::shared_ptr<NotificationContent> content = request->GetContent();
+        if (content == nullptr || content->GetNotificationContent() == nullptr) {
+            ANS_LOGE("Invalid content for common live view.");
+            return false;
+        }
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
+        if (liveViewContent == nullptr) {
+            ANS_LOGE("Invalid live view content.");
+            return false;
+        }
         auto status = liveViewContent->GetLiveViewStatus();
         if (status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE &&
             status != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_CREATE) {
@@ -2227,7 +2237,12 @@ bool AdvancedNotificationService::IsNeedPushCheck(const sptr<NotificationRequest
         return false;
     }
 
-    if (contentType == checkRequests_[slotType]->GetContentType()) {
+    auto checkIter = checkRequests_.find(slotType);
+    if (checkIter == checkRequests_.end() || checkIter->second == nullptr) {
+        ANS_LOGD("CheckRequest unregistered");
+        return false;
+    }
+    if (contentType == checkIter->second->GetContentType()) {
         ANS_LOGD("Need push check.");
         return true;
     }
@@ -2238,7 +2253,15 @@ void AdvancedNotificationService::FillExtraInfoToJson(
     const sptr<NotificationRequest> &request, sptr<NotificationCheckRequest> &checkRequest, nlohmann::json &jsonObject)
 {
     std::shared_ptr<NotificationContent> content = request->GetContent();
+    if (content == nullptr || content->GetNotificationContent() == nullptr) {
+        ANS_LOGE("Invalid content.");
+        return;
+    }
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content->GetNotificationContent());
+    if (liveViewContent == nullptr) {
+        ANS_LOGE("Invalid live view content.");
+        return;
+    }
     auto extraInfo = liveViewContent->GetExtraInfo();
     if (extraInfo == nullptr) {
         return;
@@ -2317,6 +2340,10 @@ AnsStatus AdvancedNotificationService::PushCheck(const sptr<NotificationRequest>
     }
     sptr<IPushCallBack> pushCallBack = pushCallBacks_[request->GetSlotType()];
     sptr<NotificationCheckRequest> checkRequest = checkRequests_[request->GetSlotType()];
+    if (checkRequest == nullptr) {
+        ANS_LOGE("checkRequest is null.");
+        return AnsStatus(ERR_ANS_INNER_PUSH_CHECK_UNREGISTERED, "ERR_ANS_INNER_PUSH_CHECK_UNREGISTERED");
+    }
     if (request->GetCreatorUid() == checkRequest->GetUid()) {
         return AnsStatus();
     }

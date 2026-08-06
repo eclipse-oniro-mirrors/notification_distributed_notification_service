@@ -53,8 +53,13 @@ napi_value AttachNotificationSubscriberExtensionContext(napi_env env, void* valu
     }
 
     napi_value object = CreateJsNotificationSubscriberExtensionContext(env, ptr);
-    auto napiContextObj = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(env,
-        "application.NotificationSubscriberExtensionContext", &object, 1)->GetNapiValue();
+    auto module = AbilityRuntime::JsRuntime::LoadSystemModuleByEngine(env,
+        "application.NotificationSubscriberExtensionContext", &object, 1);
+    if (module == nullptr) {
+        ANS_LOGE("load system module failed.");
+        return nullptr;
+    }
+    auto napiContextObj = module->GetNapiValue();
     if (napiContextObj == nullptr) {
         ANS_LOGE("load context failed.");
         return nullptr;

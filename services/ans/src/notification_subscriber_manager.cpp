@@ -1080,9 +1080,11 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     }
 
     if (IsSystemUser(notification->GetUserId())) {
-        if ((notification->GetNotificationRequestPoint()->GetWantAgent() != nullptr) ||
-            (notification->GetNotificationRequestPoint()->GetRemovalWantAgent() != nullptr) ||
-            (notification->GetNotificationRequestPoint()->GetMaxScreenWantAgent() != nullptr)) {
+        auto canceledRequest = notification->GetNotificationRequestPoint();
+        if (canceledRequest != nullptr &&
+            ((canceledRequest->GetWantAgent() != nullptr) ||
+            (canceledRequest->GetRemovalWantAgent() != nullptr) ||
+            (canceledRequest->GetMaxScreenWantAgent() != nullptr))) {
                 HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_11, EventBranchId::BRANCH_0);
                 message.Message("User 0 ntf:" + notification->GetKey());
                 NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -1132,9 +1134,14 @@ void NotificationSubscriberManager::NotifyConsumedSubscribers(
 bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
 {
-    auto soltType = notification->GetNotificationRequestPoint()->GetSlotType();
+    auto request = notification->GetNotificationRequestPoint();
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return false;
+    }
+    auto soltType = request->GetSlotType();
     auto bundleNames = notification->GetBundleName();
-    auto uid = notification->GetNotificationRequestPoint()->GetOwnerUid();
+    auto uid = request->GetOwnerUid();
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     if (!record->isSubscribeSelf &&
         EXTENTION_WRAPPER->IsSubscribeControl(record->subscriberBundleName_, soltType)) {
@@ -1146,7 +1153,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     auto iterUid = std::find(record->uidList_.begin(), record->uidList_.end(), uid);
     bool isSubscribedTheNotification =
         record->subscribedAll || (iter != record->bundleList_.end()) || (iterUid != record->uidList_.end()) ||
-        (notification->GetNotificationRequestPoint()->GetCreatorUid() == record->subscriberUid);
+        (request->GetCreatorUid() == record->subscriberUid);
     if (!isSubscribedTheNotification) {
         return false;
     }
@@ -1160,7 +1167,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
         return true;
     }
 
-    int32_t recvUserId = notification->GetNotificationRequestPoint()->GetReceiverUserId();
+    int32_t recvUserId = request->GetReceiverUserId();
     int32_t sendUserId = notification->GetUserId();
     if (record->userId == recvUserId) {
         return true;
@@ -1220,6 +1227,10 @@ sptr<Notification> NotificationSubscriberManager::GenerateSubscribedNotification
             NotificationConstant::PriorityNotificationType::OTHER);
     }
 #endif
+    if (notificationStub == nullptr) {
+        ANS_LOGE("null notificationStub");
+        return nullptr;
+    }
     if (!voiceContent.empty()) {
         auto content = std::make_shared<NotificationVoiceContent>();
         if (content != nullptr) {
