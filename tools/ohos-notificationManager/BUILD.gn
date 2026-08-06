@@ -54,12 +54,14 @@ ohos_cli_executable("ohos-notificationManager") {
     configs = [ "${frameworks_module_ans_path}:ans_innerkits_public_config" ]
 
     external_deps = [
+        "ability_runtime:wantagent_innerkits",
         "cJSON:cjson",
         "access_token:libnativetoken_shared",
         "access_token:libtokensetproc_shared",
         "c_utils:utils",
         "ffrt:libffrt",
         "hilog:libhilog",
+        "image_framework:image_native"
     ]
     external_deps += component_external_deps
 

@@ -428,10 +428,8 @@ bool NotificationPreferencesDatabase::UpdateCustomTimeDbData(int64_t offsetMs)
 }
 
 bool NotificationPreferencesDatabase::QueryStatisticsByBundle(
-    const int32_t bundleUid, int32_t &recentCount, int64_t &lastTime)
+    const int32_t bundleUid, const int32_t tableUserId, int32_t &recentCount, int64_t &lastTime)
 {
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId);
     if (!CheckRdbStore()) {
         ANS_LOGE("null RdbStore");
         return false;
@@ -441,7 +439,8 @@ bool NotificationPreferencesDatabase::QueryStatisticsByBundle(
     auto targetUtc = std::chrono::system_clock::time_point(targetLocalDuration - getCurrentTimezoneOffset());
     auto beginDuration = std::chrono::duration_cast<std::chrono::milliseconds>(targetUtc.time_since_epoch());
     int64_t beginTime = beginDuration.count();
-    int32_t result = rdbDataManager_->QueryStatisticsByBundle(bundleUid, userId, beginTime, recentCount, lastTime);
+    int32_t result = rdbDataManager_->QueryStatisticsByBundle(
+        bundleUid, tableUserId, beginTime, recentCount, lastTime);
 
     return result == NativeRdb::E_OK ? true : false;
 }

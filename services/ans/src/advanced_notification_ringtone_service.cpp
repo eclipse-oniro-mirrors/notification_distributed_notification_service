@@ -26,9 +26,6 @@
 #include "os_account_manager_helper.h"
 #include "system_sound_helper.h"
 
-namespace {
-static const uint64_t DEL_TASK_DELAY = 5 * 1000;
-}
 namespace OHOS {
 namespace Notification {
 ErrCode AdvancedNotificationService::SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
@@ -108,7 +105,7 @@ void AdvancedNotificationService::ClearRingtoneByApplication(int32_t userId,
         ANS_LOGE("Empty queue %{public}d %{public}zu.", userId, cloneRingtoneInfos.size());
         return;
     }
-    notificationSvrQueue_.Submit(std::bind([&, userId, cloneRingtoneInfos]() {
+    notificationSvrQueue_.Submit([userId, cloneRingtoneInfos]() {
         std::unordered_map<std::string, std::string> bundlesMap;
         if (NotificationPreferences::GetInstance()->InitBundlesInfo(userId, bundlesMap) != ERR_OK) {
             return;
@@ -144,8 +141,7 @@ void AdvancedNotificationService::ClearRingtoneByApplication(int32_t userId,
             delRingtoneInfos.push_back(item);
         }
         SystemSoundHelper::GetInstance()->RemoveCustomizedTones(delRingtoneInfos);
-    }),
-        DEL_TASK_DELAY, "delRingtone");
+    });
 }
 
 void AdvancedNotificationService::ClearOverTimeRingToneInfo()
@@ -155,7 +151,7 @@ void AdvancedNotificationService::ClearOverTimeRingToneInfo()
     if (cloneTime != 0 && cloneTime < curTime && (curTime - cloneTime) >=
         NotificationConstant::MAX_CLONE_TIME) {
         ANS_LOGI("Start clear overtime ringinfo.");
-        notificationSvrQueue_.Submit(std::bind([&]() {
+        notificationSvrQueue_.Submit([this]() {
             int32_t userId = -1;
             if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
                 ANS_LOGE("Failed to get active user id!");
@@ -173,8 +169,7 @@ void AdvancedNotificationService::ClearOverTimeRingToneInfo()
             ClearRingtoneByApplication(ZERO_USERID, cloneRingtoneInfos);
             NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId, 0);
             ANS_LOGI("Clear overtime ringinfo %{public}d", userId);
-        }),
-            DEL_TASK_DELAY, "ringtone");
+        });
     }
 }
 }  // namespace Notification

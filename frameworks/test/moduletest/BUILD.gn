@@ -51,12 +51,17 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "ans_innerkits_module_publish_test.cpp",
     "mock/mock_accesstoken_kit.cpp",
+    "mock/mock_ans_rdb_mgr_builder.cpp",
     "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
@@ -127,6 +132,10 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   sources = [
@@ -134,6 +143,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "ans_innerkits_module_slot_test.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
+    "mock/mock_ans_rdb_mgr_builder.cpp",
     "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
@@ -210,6 +220,10 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   sources = [

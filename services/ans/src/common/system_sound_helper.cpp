@@ -32,20 +32,12 @@ using REMOVE_TONE_FUNC = bool (*)(std::string);
 using REMOVE_TONE_LIST_FUNC = bool (*)(std::vector<std::string>);
 #endif
 
-ffrt::mutex SystemSoundHelper::instanceMutex_;
-std::shared_ptr<SystemSoundHelper> SystemSoundHelper::instance_;
-
 SystemSoundHelper::SystemSoundHelper() : soundHelperQueue_(std::make_shared<ffrt::queue>("SoundHelper")) {}
 
 std::shared_ptr<SystemSoundHelper> SystemSoundHelper::GetInstance()
 {
-    if (instance_ == nullptr) {
-        std::lock_guard<ffrt::mutex> lock(instanceMutex_);
-        if (instance_ == nullptr) {
-            instance_ = std::make_shared<SystemSoundHelper>();
-        }
-    }
-    return instance_;
+    static std::shared_ptr<SystemSoundHelper> instance = std::make_shared<SystemSoundHelper>();
+    return instance;
 }
 
 void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)

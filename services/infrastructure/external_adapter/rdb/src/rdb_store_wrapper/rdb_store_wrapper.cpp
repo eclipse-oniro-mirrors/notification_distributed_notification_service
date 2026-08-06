@@ -15,6 +15,8 @@
 #include "rdb_store_wrapper.h"
 
 #include <sstream>
+#include "ans_common_utils.h"
+#include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "rdb_errno.h"
 #include "rdb_helper.h"
@@ -26,6 +28,16 @@
 namespace OHOS::Notification::Infra {
 namespace {
 const int32_t NOTIFICATION_RDB_MAX_MEMORY_SIZE = 1;
+
+bool IsLegacyStatisticsTable(const std::string &name)
+{
+    static const std::string prefix = NOTIFICATION_STATISTICS_TABLENAME + "_";
+    if (name.size() <= prefix.size() || name.compare(0, prefix.size(), prefix) != 0) {
+        return false;
+    }
+    int32_t userId = AnsCommonUtils::StringToInt(name.substr(prefix.size()));
+    return userId > ZERO_USERID && userId < DEFAULT_USER_ID;
+}
 }
 
 NtfRdbStoreWrapper::NtfRdbStoreWrapper(const NotificationRdbConfig& config, const NtfRdbHook &hooks,
@@ -107,12 +119,33 @@ int32_t NtfRdbStoreWrapper::InitCreatedTables()
         tableNames.insert(tableName);
     } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
     absSharedResultSet->Close();
+    CleanLegacyStatisticsTables(tableNames);
     {
         std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
         createdTables_ = tableNames;
     }
     ANS_LOGI("create tables successfully");
     return NativeRdb::E_OK;
+}
+
+void NtfRdbStoreWrapper::CleanLegacyStatisticsTables(std::set<std::string> &tableNames)
+{
+    for (auto it = tableNames.begin(); it != tableNames.end();) {
+        const std::string &name = *it;
+        if (!IsLegacyStatisticsTable(name)) {
+            ++it;
+            continue;
+        }
+        std::string dropSql = "DROP TABLE IF EXISTS " + name;
+        int32_t ret = rdbStore_->ExecuteSql(dropSql);
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGW("Drop legacy table %{public}s failed: %{public}d", name.c_str(), ret);
+            ++it;
+            continue;
+        }
+        ANS_LOGI("Dropped legacy statistics table %{public}s", name.c_str());
+        it = tableNames.erase(it);
+    }
 }
 
 int32_t NtfRdbStoreWrapper::Destroy()

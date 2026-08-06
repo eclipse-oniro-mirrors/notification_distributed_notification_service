@@ -63,6 +63,7 @@ ohos_executable("anm") {
 
   external_deps = [
     "ability_base:configuration",
+    "ability_runtime:wantagent_innerkits",
     "access_token:libnativetoken_shared",
     "access_token:libtokensetproc_shared",
     "cJSON:cjson",

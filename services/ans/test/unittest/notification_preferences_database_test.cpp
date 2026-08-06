@@ -465,7 +465,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, QueryStatisticsByBundle_00100, Fun
     EXPECT_TRUE(preferncesDB_->CheckRdbStore());
     int32_t recentCount = 0;
     int64_t lastTime = 0;
-    EXPECT_TRUE(preferncesDB_->QueryStatisticsByBundle(100, recentCount, lastTime));
+    EXPECT_TRUE(preferncesDB_->QueryStatisticsByBundle(100, 100, recentCount, lastTime));
 }
 
 /**

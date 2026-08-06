@@ -369,6 +369,11 @@ void AdvancedNotificationService::SetLiveViewShareSwitchToExtendInfo(const sptr<
         ANS_LOGE("request is null");
         return;
     }
+    if (!request->IsCommonLiveView()) {
+        ANS_LOGD("SetLiveViewShareSwitchToExtendInfo not liveView");
+        return;
+    }
+
     std::string switchValue;
     ErrCode result = NotificationPreferences::GetInstance()->GetKvFromDb(
         LIVE_VIEW_SHARE_FUNC_SWITCH_KEY, switchValue, SUBSCRIBE_USER_INIT);
@@ -689,11 +694,11 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
         request->SetExtendInfo(nullptr);
     }
 
-    if (!isAgentController) {
+    if (!isAgentController || !request->IsCommonLiveView() || !request->IsAgentNotification()) {
         std::shared_ptr<AAFwk::WantParams> sharedExtendInfo = request->GetExtendInfo();
         if (sharedExtendInfo != nullptr && sharedExtendInfo->HasParam("isShared")) {
             sharedExtendInfo->Remove("isShared");
-            ANS_LOGW("Caller lacks agent permission, isShared removed from extendInfo");
+            ANS_LOGD("isShared removed from extendInfo");
         }
     }
 

@@ -15,9 +15,13 @@
 
 #include "mock_notification_rdb_data_mgr.h"
 
+#include <map>
+#include <utility>
+
 #include "notification_rdb_data_mgr.h"
 #include "notification_rdb_mgr.h"
 #include "rdb_errno.h"
+#include "rdb_store_wrapper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -31,8 +35,20 @@ namespace {
     bool g_mockDeleteDataRet = true;
     bool g_mockQueryAllData = true;
     bool g_mockDropTable = true;
+    bool g_mockInsertStatisticsDataRet = true;
+    bool g_mockQueryStatisticsByBundleRet = true;
+    bool g_mockUpdateStatisticsTimeRet = true;
+    bool g_mockDropStatisticsTableRet = true;
+    bool g_mockCleanStatisticsExperDataRet = true;
+    bool g_mockDeleteStatisticsByBundleRet = true;
     std::string g_mockDataValue;
     std::unordered_map<std::string, std::string> g_mockDataValues;
+
+    struct StatisticsState {
+        int32_t count {0};
+        int64_t lastTime {0};
+    };
+    std::map<std::pair<int32_t, int32_t>, StatisticsState> g_statisticsState;
 }
 
 void MockInit(bool mockRet)
@@ -88,6 +104,41 @@ void MockQueryAllData(bool mockRet)
 void MockDropTable(bool mockRet)
 {
     g_mockDropTable = mockRet;
+}
+
+void MockInsertStatisticsData(bool mockRet)
+{
+    g_mockInsertStatisticsDataRet = mockRet;
+}
+
+void MockQueryStatisticsByBundle(bool mockRet)
+{
+    g_mockQueryStatisticsByBundleRet = mockRet;
+}
+
+void MockUpdateStatisticsTime(bool mockRet)
+{
+    g_mockUpdateStatisticsTimeRet = mockRet;
+}
+
+void MockDropStatisticsTable(bool mockRet)
+{
+    g_mockDropStatisticsTableRet = mockRet;
+}
+
+void MockCleanStatisticsExperData(bool mockRet)
+{
+    g_mockCleanStatisticsExperDataRet = mockRet;
+}
+
+void MockDeleteStatisticsByBundle(bool mockRet)
+{
+    g_mockDeleteStatisticsByBundleRet = mockRet;
+}
+
+void MockClearStatisticsState()
+{
+    g_statisticsState.clear();
 }
 
 int32_t NotificationDataMgr::Init()
@@ -251,6 +302,91 @@ int32_t NotificationRdbMgr::DropUserTable(const int32_t userId)
 {
     if (g_mockDropTable == false) {
         return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationRdbMgr::InsertStatisticsData(const int32_t userId, const struct StatisticsWrapperInfo &info)
+{
+    if (g_mockInsertStatisticsDataRet == false) {
+        return NativeRdb::E_ERROR;
+    }
+    auto key = std::make_pair(userId, info.uid);
+    auto &state = g_statisticsState[key];
+    state.count += 1;
+    state.lastTime = info.notificationTime;
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationRdbMgr::QueryStatisticsByBundle(const int32_t bundleUid,
+    const int32_t uid, const int64_t beginTime, int32_t &totalCount, int64_t &lastTime)
+{
+    totalCount = 0;
+    lastTime = 0;
+    if (g_mockQueryStatisticsByBundleRet == false) {
+        return NativeRdb::E_ERROR;
+    }
+    auto it = g_statisticsState.find(std::make_pair(uid, bundleUid));
+    if (it != g_statisticsState.end()) {
+        totalCount = it->second.count;
+        lastTime = it->second.lastTime;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationRdbMgr::UpdateStatisticsTime(const int32_t userId, int64_t offsetMs)
+{
+    if (g_mockUpdateStatisticsTimeRet == false) {
+        return NativeRdb::E_ERROR;
+    }
+    for (auto &entry : g_statisticsState) {
+        if (entry.first.first == userId) {
+            entry.second.lastTime += offsetMs;
+        }
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationRdbMgr::DropStatisticsTable(const int32_t userId)
+{
+    if (g_mockDropStatisticsTableRet == false) {
+        return NativeRdb::E_ERROR;
+    }
+    for (auto it = g_statisticsState.begin(); it != g_statisticsState.end();) {
+        if (it->first.first == userId) {
+            it = g_statisticsState.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationRdbMgr::CleanStatisticsExperData(const int32_t userId)
+{
+    if (g_mockCleanStatisticsExperDataRet == false) {
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationRdbMgr::CleanStatisticsExperDataTimer(const std::vector<int32_t> &userIds)
+{
+    if (g_mockCleanStatisticsExperDataRet == false) {
+        return NativeRdb::E_ERROR;
+    }
+    return NativeRdb::E_OK;
+}
+
+int32_t NotificationRdbMgr::DeleteStatisticsByBundle(const int32_t userId,
+    const std::string &bundleName, int32_t packageId)
+{
+    if (g_mockDeleteStatisticsByBundleRet == false) {
+        return NativeRdb::E_ERROR;
+    }
+    auto it = g_statisticsState.find(std::make_pair(userId, packageId));
+    if (it != g_statisticsState.end()) {
+        g_statisticsState.erase(it);
     }
     return NativeRdb::E_OK;
 }

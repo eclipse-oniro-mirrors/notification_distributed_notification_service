@@ -31,6 +31,8 @@
 #undef protected
 
 extern void MockIsOsAccountExists(bool mockRet);
+extern int32_t StringToInt(const std::string &str);
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 using namespace testing::ext;
 namespace OHOS {
@@ -4747,6 +4749,107 @@ HWTEST_F(NotificationPreferencesTest, BuildCloneSlotInfo_WithSlots_00001,
     EXPECT_TRUE(prefs->BuildCloneSlotInfo(cloneInfo, bundleInfo, slots));
     EXPECT_EQ(slots.size(), 1);
     EXPECT_NE(slots[0], nullptr);
+}
+
+/**
+ * @tc.name: ResolveStatisticsTableUserId_001
+ * @tc.desc: Verify ResolveStatisticsTableUserId returns ZERO_USERID for an Anco app.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesTest, ResolveStatisticsTableUserId_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", 1000);
+    ASSERT_NE(bundleOption, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // resolve to a valid userId
+    MockBundleManager::MockIsAncoApp(true);
+    int32_t ret = NotificationPreferences::ResolveStatisticsTableUserId(*bundleOption);
+    EXPECT_EQ(ret, 0); // ZERO_USERID
+    MockBundleManager::MockIsAncoApp(false);
+}
+
+/**
+ * @tc.name: ResolveStatisticsTableUserId_002
+ * @tc.desc: Verify ResolveStatisticsTableUserId returns the real userId for a non-Anco app.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesTest, ResolveStatisticsTableUserId_002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", 1000);
+    ASSERT_NE(bundleOption, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // resolve to userId 100
+    MockBundleManager::MockIsAncoApp(false);
+    int32_t ret = NotificationPreferences::ResolveStatisticsTableUserId(*bundleOption);
+    EXPECT_EQ(ret, 100); // real userId
+}
+
+/**
+ * @tc.name: ResolveStatisticsTableUserId_003
+ * @tc.desc: Verify ResolveStatisticsTableUserId returns INVALID_USER_ID when userId resolution fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesTest, ResolveStatisticsTableUserId_003, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", 1000);
+    ASSERT_NE(bundleOption, nullptr);
+    MockBundleManager::MockIsAncoApp(false);
+    MockGetOsAccountLocalIdFromUid(false, 1); // resolve fails, userId < 0
+    int32_t ret = NotificationPreferences::ResolveStatisticsTableUserId(*bundleOption);
+    EXPECT_EQ(ret, -1); // INVALID_USER_ID
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default
+}
+
+/**
+ * @tc.name: DeleteStatisticsByBundle_DBFail_001
+ * @tc.desc: Verify DeleteStatisticsByBundle returns ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED
+ *           when both per-userId and ZERO_USERID deletes fail (line 233 branch).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesTest, DeleteStatisticsByBundle_DBFail_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr; // DB ops fail (CheckRdbStore returns false)
+
+    auto ret = notificationPreferences.DeleteStatisticsByBundle(100, "testBundle", 20010044);
+    EXPECT_EQ(ret, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+}
+
+/**
+ * @tc.name: UpdateStatisticsAll_DBFail_001
+ * @tc.desc: Verify UpdateStatisticsAll returns early (line 307) when QueryStatisticsByBundle fails, leaving the
+ *           cached entry intact (not removed/updated).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesTest, UpdateStatisticsAll_DBFail_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr; // DB query will fail
+
+    // Seed the in-memory cache so the loop runs and reaches the DB query at line 307.
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 20010044);
+    NotificationStatistics statistics;
+    statistics.SetBundleOption(*bundle);
+    statistics.SetRecentCount(5);
+    statistics.SetLastTime(1000);
+    notificationPreferences.preferencesInfo_.UpdateNotificationStatisticsByBundle(bundle->GetUid(), statistics);
+
+    MockGetOsAccountLocalIdFromUid(true, 0); // valid userId so ResolveStatisticsTableUserId proceeds to the DB query
+    notificationPreferences.UpdateStatisticsAll(); // query fails -> line 307 early return
+
+    // Cache entry must still be present (recentCount unchanged) because the early return skipped the
+    // remove/update step. If the guard were broken, recentCount would be reset to 0 and the entry removed.
+    NotificationStatistics after;
+    bool found = notificationPreferences.preferencesInfo_.GetNotificationStatisticsByBundle(bundle->GetUid(), after);
+    EXPECT_TRUE(found);
+    EXPECT_EQ(after.GetRecentCount(), 5);
+
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default
 }
 
 /**

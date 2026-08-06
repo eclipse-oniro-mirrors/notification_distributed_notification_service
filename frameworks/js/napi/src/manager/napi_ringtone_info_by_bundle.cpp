@@ -166,26 +166,22 @@ napi_value NapiSetRingtoneInfoByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create setRingtoneInfoByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue setRingtoneInfoByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
@@ -229,26 +225,22 @@ napi_value NapiGetRingtoneInfoByBundle(napi_env env, napi_callback_info info)
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
     if (status != napi_ok) {
-        ANS_LOGE("Create async work failed.");
+        ANS_LOGE("Create getRingtoneInfoByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
 
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
-        ANS_LOGE("Queue async work failed.");
+        ANS_LOGE("Queue getRingtoneInfoByBundle async work failed.");
         asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
         Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
         return promise;
     }
     return promise;

@@ -44,7 +44,7 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "IsSupportTemplate", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
-    napi_create_async_work(env,
+    napi_status status = napi_create_async_work(env,
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
@@ -75,11 +75,35 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
         },
         (void *)asyncCallbackinfo,
         &asyncCallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create IsSupportTemplate async work failed.");
+        asyncCallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asyncCallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asyncCallbackinfo->info.isCallback;
+        if (asyncCallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asyncCallbackinfo->info.callback);
+        }
+        delete asyncCallbackinfo;
+        asyncCallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    bool isCallback = asyncCallbackinfo->info.isCallback;
-    napi_queue_async_work_with_qos(env, asyncCallbackinfo->asyncWork, napi_qos_user_initiated);
+    status = napi_queue_async_work_with_qos(env, asyncCallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue IsSupportTemplate async work failed.");
+        asyncCallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asyncCallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asyncCallbackinfo->info.isCallback;
+        if (asyncCallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asyncCallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asyncCallbackinfo->asyncWork);
+        delete asyncCallbackinfo;
+        asyncCallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    if (isCallback) {
+    if (asyncCallbackinfo->info.isCallback) {
         return Common::NapiGetNull(env);
     } else {
         return promise;

@@ -152,40 +152,26 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
             !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
             return AnsStatus(ERR_ANS_INNER_PERMISSION_DENIED, "ERR_ANS_INNER_PERMISSION_DENIED");
         }
-
         isShared = request->IsSharedThirdpartyLiveView();
         ANS_LOGI("isShared = %{public}d", isShared);
-        int32_t uid = -1;
-        bool isSharedRestored = false;
         if (isShared) {
-            std::shared_ptr<NotificationRecord> oldRecord = nullptr;
-            auto submitResult = notificationSvrQueue_.SyncSubmit([&]() {
-                oldRecord = GetSharedNotificationRecordFromList(request);
-            });
-            ANS_COND_DO_ERR(submitResult != ERR_OK,
-                return AnsStatus(submitResult, "Shared thirdparty lookup serial queue invalid"),
-                "Shared thirdparty liveview lookup failed");
-            if (oldRecord != nullptr && oldRecord->request != nullptr) {
-                uid = oldRecord->request->GetOwnerUid();
-                request->SetOwnerUserId(oldRecord->request->GetOwnerUserId());
-                isSharedRestored = true;
-                ANS_LOGD("Shared thirdparty liveview update, restore ownerUid from existing record: %{public}d", uid);
+            request->SetOwnerUid(DEFAULT_UID);
+            int32_t userId = SUBSCRIBE_USER_INIT;
+            if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId)!= ERR_OK) {
+                ANS_LOGE("GetActiveUserId is false");
+                return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "ERR_ANS_INNER_GET_ACTIVE_USER_FAILED");
             }
-        }
-        if (!isSharedRestored) {
+            request->SetOwnerUserId(userId);
+        } else {
             std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+            int32_t uid = -1;
             if (request->GetOwnerUserId() != SUBSCRIBE_USER_INIT) {
                 if (bundleManager != nullptr) {
                     uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(),
                     request->GetOwnerUserId());
                 }
                 if (uid < 0) {
-                    if (isShared) {
-                        ANS_LOGD("Shared thirdparty liveview owner app not installed, keep ownerUid default");
-                        uid = DEFAULT_UID;
-                    } else {
-                        return AnsStatus::InvalidUid(EventSceneId::SCENE_14, EventBranchId::BRANCH_2);
-                    }
+                    return AnsStatus::InvalidUid(EventSceneId::SCENE_14, EventBranchId::BRANCH_2);
                 }
             } else {
                 int32_t userId = SUBSCRIBE_USER_INIT;
@@ -194,24 +180,15 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
                         EventSceneId::SCENE_14, EventBranchId::BRANCH_3);
                 }
                 if (request->GetOwnerUid() == DEFAULT_UID) {
-                    if (bundleManager != nullptr) {
-                        OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
-                        uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(), userId);
-                    }
-                    if (uid < 0) {
-                        if (isShared) {
-                            ANS_LOGD("Shared thirdparty liveview owner app not installed, keep ownerUid default");
-                            uid = DEFAULT_UID;
-                        } else {
-                            return AnsStatus::InvalidUid(EventSceneId::SCENE_14, EventBranchId::BRANCH_2);
-                        }
-                    }
+                    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+                    uid = bundleManager->GetDefaultUidByBundleName(request->GetOwnerBundleName(), userId);
                 } else {
                     uid = request->GetOwnerUid();
                 }
             }
+            request->SetOwnerUid(uid);
         }
-        request->SetOwnerUid(uid);
+        
         // set agentBundle
         std::string bundle = "";
         if (!AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID())) {
@@ -291,11 +268,7 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
     if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT) {
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
-        if(!isShared) {
-            request->SetOwnerUserId(ownerUserId);
-        } else {
-            request->SetOwnerUserId(request->GetCreatorUserId());
-        }
+        request->SetOwnerUserId(ownerUserId);
         std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
         if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
             AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER) &&
@@ -825,16 +798,13 @@ void AdvancedNotificationService::SetNotificationStatisticsToDB(const std::share
         return;
     }
     if (!isExists) {
-        int32_t userId = INVALID_USER_ID;
-        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-        if (userId < 0) {
+        int32_t tableUserId = NotificationPreferences::ResolveStatisticsTableUserId(*bundleOption);
+        if (tableUserId < 0) {
             return;
         }
-        auto result = NotificationPreferences::GetInstance()->PutNotificationStatistics(
-            userId, bundleOption);
+        auto result = NotificationPreferences::GetInstance()->PutNotificationStatistics(tableUserId, bundleOption);
         ANS_LOGD("AdvancedNotificationService PutNotificationStatistics: %{public}d", result);
-
-        result = NotificationPreferences::GetInstance()->CleanExperData(userId);
+        result = NotificationPreferences::GetInstance()->CleanExperData(tableUserId);
         ANS_LOGD("AdvancedNotificationService CleanExperData: %{public}d", result);
     }
 }
@@ -1366,8 +1336,7 @@ ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<No
         }
     }
     if (record->request->IsSystemLiveView() || record->isAtomicService ||
-        (record->request->IsSharedThirdpartyLiveView() &&
-        record->request->GetOwnerUid() == DEFAULT_UID)) {
+        record->request->IsSharedThirdpartyLiveView()) {
         ANS_LOGI("System live view, stomicService or shared thirdparty uninstalled no need add slot");
         return ERR_OK;
     }
@@ -1424,8 +1393,7 @@ AnsStatus AdvancedNotificationService::Filter(const std::shared_ptr<Notification
         }
     }
 
-    if (record->isAtomicService ||
-        (record->request->IsSharedThirdpartyLiveView() && record->request->GetOwnerUid() == DEFAULT_UID)) {
+    if (record->isAtomicService || record->request->IsSharedThirdpartyLiveView()) {
         return AnsStatus();
     }
 
@@ -1968,29 +1936,6 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromNotifica
             item->request->GetLabel() == request->GetLabel()) {
             return item;
         }
-    }
-    return nullptr;
-}
-
-std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetSharedNotificationRecordFromList(
-    const sptr<NotificationRequest> &request)
-{
-    if (request == nullptr) {
-        return nullptr;
-    }
-    for (auto item : notificationList_) {
-        if (item == nullptr || item->request == nullptr) {
-            continue;
-        }
-        if (!item->request->IsAgentNotification() || !item->request->IsSharedThirdpartyLiveView()) {
-            continue;
-        }
-        if (item->request->GetOwnerBundleName() != request->GetOwnerBundleName() ||
-            item->request->GetLabel() != request->GetLabel() ||
-            item->request->GetNotificationId() != request->GetNotificationId()) {
-            continue;
-        }
-        return item;
     }
     return nullptr;
 }

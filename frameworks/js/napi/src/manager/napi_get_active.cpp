@@ -99,7 +99,7 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getAllActiveNotifications", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
-    napi_create_async_work(
+    napi_status status = napi_create_async_work(
         env,
         nullptr,
         resourceName,
@@ -115,11 +115,35 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
         AsyncCompleteCallbackNapiGetAllActiveNotifications,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create getAllActiveNotifications async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    bool isCallback = asynccallbackinfo->info.isCallback;
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue getAllActiveNotifications async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    if (isCallback) {
+    if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
@@ -198,7 +222,7 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getActiveNotifications", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
-    napi_create_async_work(
+    napi_status status = napi_create_async_work(
         env,
         nullptr,
         resourceName,
@@ -215,11 +239,35 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
         AsyncCompleteCallbackNapiGetActiveNotifications,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create getActiveNotifications async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    bool isCallback = asynccallbackinfo->info.isCallback;
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue getActiveNotifications async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    if (isCallback) {
+    if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
@@ -273,7 +321,7 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getActiveNotificationCount", NAPI_AUTO_LENGTH, &resourceName);
     // Asynchronous function call
-    napi_create_async_work(
+    napi_status status = napi_create_async_work(
         env,
         nullptr,
         resourceName,
@@ -290,11 +338,35 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
         AsyncCompleteCallbackNapiGetActiveNotificationCount,
         (void *)asynccallbackinfo,
         &asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create getActiveNotificationCount async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    bool isCallback = asynccallbackinfo->info.isCallback;
-    napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue getActiveNotificationCount async work failed.");
+        asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+        bool isCallback = asynccallbackinfo->info.isCallback;
+        if (asynccallbackinfo->info.callback != nullptr) {
+            napi_delete_reference(env, asynccallbackinfo->info.callback);
+        }
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    if (isCallback) {
+    if (asynccallbackinfo->info.isCallback) {
         ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     } else {
@@ -455,14 +527,39 @@ napi_value NapiGetActiveNotificationByFilter(napi_env env, napi_callback_info in
 
     napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getActiveNotificationByFilter", NAPI_AUTO_LENGTH, &resourceName);
-    napi_create_async_work(env, nullptr, resourceName,
+    napi_status status = napi_create_async_work(env, nullptr, resourceName,
         AsyncGetLiveViewExecute, AsyncGetLiveViewComplete,
         (void *)asyncLiveViewCallBackInfo, &asyncLiveViewCallBackInfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create getActiveNotificationByFilter async work failed.");
+        asyncLiveViewCallBackInfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asyncLiveViewCallBackInfo->info, Common::NapiGetNull(env));
+        bool isCallback = asyncLiveViewCallBackInfo->info.isCallback;
+        if (asyncLiveViewCallBackInfo->info.callback != nullptr) {
+            napi_delete_reference(env, asyncLiveViewCallBackInfo->info.callback);
+        }
+        delete asyncLiveViewCallBackInfo;
+        asyncLiveViewCallBackInfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    bool isCallback = asyncLiveViewCallBackInfo->info.isCallback;
-    napi_queue_async_work_with_qos(env, asyncLiveViewCallBackInfo->asyncWork, napi_qos_user_initiated);
+    status = napi_queue_async_work_with_qos(env, asyncLiveViewCallBackInfo->asyncWork,
+        napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue getActiveNotificationByFilter async work failed.");
+        asyncLiveViewCallBackInfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        Common::CreateReturnValue(env, asyncLiveViewCallBackInfo->info, Common::NapiGetNull(env));
+        bool isCallback = asyncLiveViewCallBackInfo->info.isCallback;
+        if (asyncLiveViewCallBackInfo->info.callback != nullptr) {
+            napi_delete_reference(env, asyncLiveViewCallBackInfo->info.callback);
+        }
+        napi_delete_async_work(env, asyncLiveViewCallBackInfo->asyncWork);
+        delete asyncLiveViewCallBackInfo;
+        asyncLiveViewCallBackInfo = nullptr;
+        return isCallback ? Common::NapiGetNull(env) : promise;
+    }
 
-    if (isCallback) {
+    if (asyncLiveViewCallBackInfo->info.isCallback) {
         ANS_LOGD("null isCallback");
         return Common::NapiGetNull(env);
     }

@@ -63,6 +63,9 @@ public:
     
     ErrCode PutNotificationStatistics(const int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
 
+    /** @brief Resolve the statistics table user id (ZERO_USERID for Anco apps, real userId otherwise). */
+    static int32_t ResolveStatisticsTableUserId(const NotificationBundleOption &bundle);
+
     ErrCode CleanExperData(const int32_t userId);
 
     ErrCode DeleteStatisticsByBundle(const int32_t userId, const std::string &bundleName, int32_t packageId);
@@ -884,8 +887,6 @@ public:
 
 private:
     std::map<int32_t, int64_t> cloneTimestamp;
-    static ffrt::mutex instanceMutex_;
-    static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};
     ffrt::mutex preferenceMutex_;
 

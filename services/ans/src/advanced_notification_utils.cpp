@@ -1238,6 +1238,10 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
         NotificationPreferences::GetInstance()->GetAllAncoBundlesInfo(ZERO_USER_ID, userId, bundles);
         for (auto bundleOption : bundles) {
             OnBundleRemoved(bundleOption);
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+            NotificationPreferences::GetInstance()->DeleteStatisticsByBundle(
+                userId, bundleOption->GetBundleName(), bundleOption->GetUid());
+#endif
         }
     }));
 }
