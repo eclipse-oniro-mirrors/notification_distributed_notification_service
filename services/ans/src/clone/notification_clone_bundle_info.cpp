@@ -283,7 +283,6 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
         jsonObject[BUNDLE_INFO_SUBSCRIPTION_BUNDLES] = jsonNodes;
     }
 
-    jsonObject[COLLABORATION_SWITCH] = collaborationSwitch.ToJson();
     jsonObject[BUNDLE_INFO_NAME] = bundleName_;
     jsonObject[BUNDLE_INFO_APP_INDEX] = appIndex_;
     jsonObject[BUNDLE_INFO_SLOT_FLAGS] = slotFlags_;
@@ -422,7 +421,6 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
         }
     }
 
-    collaborationSwitch.FromJson(jsonObject);
     SlotsFromJson(jsonObject);
     RingtoneFromJson(jsonObject);
     SubscriptionInfosFromJson(jsonObject);

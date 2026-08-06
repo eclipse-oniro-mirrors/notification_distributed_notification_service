@@ -2355,10 +2355,12 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
     OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId);
     std::vector<std::string> keys;
     std::string key = std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_NOTIFICATION).append(
-        KEY_MIDDLE_LINE).append(std::string(bundleName).append(KEY_MIDDLE_LINE));
+        KEY_MIDDLE_LINE).append(std::string(bundleName).append(KEY_MIDDLE_LINE)).append(
+        std::to_string(bundleUid)).append(KEY_MIDDLE_LINE);
     GetDistributedRemoveEnabledDb(key, userId, keys);
     key = std::string(KEY_ENABLE_BUNDLE_DISTRIBUTED_LIVEVIEW).append(
-        KEY_MIDDLE_LINE).append(std::string(bundleName).append(KEY_MIDDLE_LINE));
+        KEY_MIDDLE_LINE).append(std::string(bundleName).append(KEY_MIDDLE_LINE)).append(
+        std::to_string(bundleUid)).append(KEY_MIDDLE_LINE);
     GetDistributedRemoveEnabledDb(key, userId, keys);
     int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
     if (result != NativeRdb::E_OK) {
