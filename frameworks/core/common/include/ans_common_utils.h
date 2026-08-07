@@ -23,9 +23,11 @@
 
 #include "ans_log_wrapper.h"
 #include "ans_const_define.h"
+#include "bool_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
 #include "notification_constant.h"
+#include "notification_request.h"
 
 namespace OHOS {
 namespace Notification {
@@ -96,6 +98,16 @@ public:
             return 0;
         }
         return static_cast<int64_t>(result);
+    }
+
+    static bool IsCollaborationNotification(const sptr<NotificationRequest> &request)
+    {
+        auto extendInfo = request->GetExtendInfo();
+        AAFwk::IBoolean* ao = nullptr;
+        if (extendInfo != nullptr) {
+            ao = AAFwk::IBoolean::Query(extendInfo->GetParam(ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG));
+        }
+        return ao != nullptr && AAFwk::Boolean::Unbox(ao);
     }
 };
 }  // namespace Notification

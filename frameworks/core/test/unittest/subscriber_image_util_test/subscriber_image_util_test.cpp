@@ -32,6 +32,9 @@
 #include "array_wrapper.h"
 #include "int_wrapper.h"
 #include "long_wrapper.h"
+#include "bool_wrapper.h"
+#include "ans_common_utils.h"
+#include "ans_const_define.h"
 #include "pixelmap_cache_manager.h"
 #include "../mock/mock_application_context.h"
 #include "../mock/mock_resource_manager.h"
@@ -373,6 +376,40 @@ HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00013, Function | SmallTe
     SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
     EXPECT_TRUE(extraInfo->HasParam("otherKey"));
     EXPECT_FALSE(extraInfo->HasParam("pic1"));
+    EXPECT_EQ(liveViewContent->GetPicture().size(), 0);
+}
+
+/**
+ * @tc.name: ProcessPictureOption_00014
+ * @tc.desc: Test ProcessPictureOption with LIVE_VIEW collaboration notification should skip picture parsing.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00014, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam("pic1", AAFwk::String::Box("test_path.png"));
+    liveViewContent->SetExtraInfo(extraInfo);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    // Set collaboration flag to true in extend info
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    std::string flagKey = ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG;
+    extendInfo->SetParam(flagKey, AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+
+    sptr<Notification> notification = new Notification(request);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
+
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
+
+    // Collaboration notification should skip picture processing even though extraInfo has valid pic path
+    EXPECT_TRUE(AnsCommonUtils::IsCollaborationNotification(request));
+    EXPECT_TRUE(extraInfo->HasParam("pic1"));
     EXPECT_EQ(liveViewContent->GetPicture().size(), 0);
 }
 

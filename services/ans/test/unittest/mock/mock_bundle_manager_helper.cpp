@@ -24,6 +24,12 @@
 namespace OHOS {
 namespace Notification {
 
+bool g_isNonBundleName = false;
+void MockIsNonBundleName(bool isNonBundleName)
+{
+    g_isNonBundleName = isNonBundleName;
+}
+
 bool g_getBundle = true;
 bool g_systemBundle = false;
 int32_t g_bundleHelperResult = 0;
@@ -78,7 +84,10 @@ void BundleManagerHelper::OnRemoteDied(const wptr<IRemoteObject> &object)
 
 std::string BundleManagerHelper::GetBundleNameByUid(int uid)
 {
-    return (uid == NON_BUNDLE_NAME_UID) ? "" : "bundleName";
+    if (g_isNonBundleName || uid == NON_BUNDLE_NAME_UID) {
+        return "";
+    }
+    return "bundleName";
 }
 
 int BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId)
