@@ -26,6 +26,7 @@
 #include "notification_bundle_option.h"
 #include "notification_clone_priority_info.h"
 #include "notification_preferences_info.h"
+#include "rdb_errno.h"
 
 namespace OHOS {
 namespace Notification {
