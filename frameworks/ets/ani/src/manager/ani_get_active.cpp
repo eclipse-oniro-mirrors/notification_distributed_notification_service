@@ -16,7 +16,6 @@
 
 #include "ans_notification.h"
 #include "ans_service_errors.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_request.h"
@@ -209,7 +208,7 @@ ani_object AniGetActiveNotificationCount(ani_env *env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackActiveInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationNums(
+                    AnsNotification::GetInstance()->GetActiveNotificationNums(
                         asyncCallbackInfo->notificationNums);
             }
         },
@@ -253,7 +252,7 @@ ani_object AniGetAllActiveNotifications(ani_env *env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackActiveInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllActiveNotifications(
+                    AnsNotification::GetInstance()->GetAllActiveNotifications(
                         asyncCallbackInfo->notifications);
             }
         },
@@ -297,7 +296,7 @@ ani_object AniGetActiveNotifications(ani_env *env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackActiveInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotifications(
+                    AnsNotification::GetInstance()->GetActiveNotifications(
                         asyncCallbackInfo->requests);
             }
         },
@@ -318,7 +317,7 @@ void ExecuteGetActiveNotificationByFilter(ani_env* env, void* data)
     auto asyncCallbackInfo = static_cast<AsyncCallbackActiveInfo*>(data);
     if (asyncCallbackInfo) {
         asyncCallbackInfo->info.returnCode =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationByFilter(
+            AnsNotification::GetInstance()->GetActiveNotificationByFilter(
                 asyncCallbackInfo->liveViewFilter, asyncCallbackInfo->notificationRequest);
         ani_env *envCurr = nullptr;
         if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, &envCurr) != ANI_OK || envCurr == nullptr) {
@@ -409,7 +408,7 @@ ani_object AniGetActiveNotification(ani_env *env, ani_string hashCode)
             auto asyncCallbackInfo = static_cast<AsyncCallbackActiveInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationRequestByHashCode(
+                    AnsNotification::GetInstance()->GetNotificationRequestByHashCode(
                         asyncCallbackInfo->hashCode, asyncCallbackInfo->notificationRequest);
             }
         },

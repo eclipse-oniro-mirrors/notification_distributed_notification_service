@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_flow_control_service.h"
+#include "singleton.h"
 
 #include <tuple>
 #include <vector>

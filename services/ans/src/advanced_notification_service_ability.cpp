@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service_ability.h"
+#include "singleton.h"
 #include "notification_extension_wrapper.h"
 #include "system_event_observer.h"
 #include "common_event_manager.h"

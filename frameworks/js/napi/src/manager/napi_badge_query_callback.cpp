@@ -27,7 +27,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "accesstoken_kit.h"
@@ -402,7 +401,7 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackBadgeNumberQuery *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->RegisterBadgeQueryCallback(
+                    AnsNotification::GetInstance()->RegisterBadgeQueryCallback(
                         asynccallbackinfo->objectInfo);
             }
         },
@@ -511,7 +510,7 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackOffBadgeNumberQuery *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->UnRegisterBadgeQueryCallback(
+                    AnsNotification::GetInstance()->UnRegisterBadgeQueryCallback(
                         asynccallbackinfo->objectInfo);
             }
         },

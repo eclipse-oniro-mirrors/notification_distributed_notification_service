@@ -22,7 +22,6 @@
 #include "sts_throw_erro.h"
 #include "sts_common.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "notification_bundle_option.h"
 #include "sts_convert_other.h"
 #include "ipc_skeleton.h"
@@ -289,7 +288,7 @@ void StsBadgeQueryCallBackManager::AniOnBadgeNumberQuery(ani_env *env, ani_fn_ob
         return;
     }
     OHOS::Notification::InnerErrorCode status = OHOS::Notification::ERR_ANS_INNER_OK;
-    status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->RegisterBadgeQueryCallback(
+    status = OHOS::Notification::AnsNotification::GetInstance()->RegisterBadgeQueryCallback(
         objectInfo);
     if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
         ANS_LOGD("AniOnBadgeNumberQuery faild. UserId %{public}d status %{public}d",
@@ -327,7 +326,7 @@ void StsBadgeQueryCallBackManager::AniOffBadgeNumberQuery(ani_env *env)
     }
 
     OHOS::Notification::InnerErrorCode status = OHOS::Notification::ERR_ANS_INNER_OK;
-    status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->UnRegisterBadgeQueryCallback(
+    status = OHOS::Notification::AnsNotification::GetInstance()->UnRegisterBadgeQueryCallback(
         callback);
     if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
         ANS_LOGE("AniOffBadgeNumberQuery faild. UserId %{public}d status %{public}d",

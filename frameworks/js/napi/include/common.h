@@ -24,7 +24,6 @@
 #include "notification_classification.h"
 #include "notification_flags.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "notification_helper.h"
 #include "notification_local_live_view_button.h"
 #include "notification_parameters.h"

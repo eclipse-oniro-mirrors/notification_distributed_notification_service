@@ -21,7 +21,6 @@
 #include "sts_reminder_info.h"
 #include "sts_notification_manager.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "notification_reminder_info.h"
 
 namespace OHOS {
@@ -152,7 +151,7 @@ ani_object AniGetReminderInfoByBundles(ani_env *env, ani_object obj, ani_object 
             auto asyncCallbackInfo = static_cast<AsyncCallbackReminderInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetReminderInfoByBundles(
+                    AnsNotification::GetInstance()->GetReminderInfoByBundles(
                         asyncCallbackInfo->bundles, asyncCallbackInfo->reminders);
             }
         },
@@ -200,7 +199,7 @@ ani_object AniSetReminderInfoByBundles(ani_env *env, ani_object obj, ani_object 
             auto asyncCallbackInfo = static_cast<AsyncCallbackReminderInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetReminderInfoByBundles(
+                    AnsNotification::GetInstance()->SetReminderInfoByBundles(
                         asyncCallbackInfo->reminders);
             }
         },

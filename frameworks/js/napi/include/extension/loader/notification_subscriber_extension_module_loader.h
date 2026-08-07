@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_SUBSCRIBER_EXTENSION_MODULE_LOADER_H
 
 #include "extension_module_loader.h"
+#include "singleton.h"
 #include "runtime.h"
 
 namespace OHOS {

@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "singleton.h"
 
 #define private public
 

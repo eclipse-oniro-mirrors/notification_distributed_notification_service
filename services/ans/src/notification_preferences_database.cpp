@@ -14,6 +14,7 @@
  */
 
 #include "notification_preferences_database.h"
+#include "singleton.h"
 
 #include <regex>
 #include <string>

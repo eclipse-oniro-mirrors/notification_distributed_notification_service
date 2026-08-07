@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
@@ -127,7 +126,7 @@ napi_value NapiSnoozeNotification(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoSnooze *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SnoozeNotification(
+                    AnsNotification::GetInstance()->SnoozeNotification(
                         asynccallbackinfo->hashCode, asynccallbackinfo->delayTime);
             }
         },

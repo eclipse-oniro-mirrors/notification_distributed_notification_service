@@ -48,7 +48,7 @@ void AnsManagerDeathRecipient::SystemAbilityStatusChangeListener::OnRemoveSystem
     int32_t systemAbilityId, const std::string& deviceId)
 {
     ANS_LOGW("Ans manager service died");
-    DelayedSingleton<AnsNotification>::GetInstance()->OnServiceDied();
+    AnsNotification::GetInstance()->OnServiceDied();
 }
 }  // namespace Notification
 }  // namespace OHOS

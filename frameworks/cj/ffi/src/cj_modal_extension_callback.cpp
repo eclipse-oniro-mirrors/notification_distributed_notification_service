@@ -54,7 +54,7 @@ void CjModalExtensionCallback::OnError(int32_t code, const std::string& name, co
 {
     LOGD("called, name = %{public}s, message = %{public}s", name.c_str(), msg.c_str());
     ReleaseOrErrorHandle(code);
-    DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
+    OHOS::Notification::AnsNotification::GetInstance()->RemoveEnableNotificationDialog();
 }
 
 void CjModalExtensionCallback::OnRemoteReady(const std::shared_ptr<Ace::ModalUIExtensionProxy>& uiProxy)

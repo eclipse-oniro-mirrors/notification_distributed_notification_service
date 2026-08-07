@@ -14,6 +14,7 @@
  */
 
 #include <chrono>
+#include "singleton.h"
 #include <functional>
 #include <memory>
 #include <thread>

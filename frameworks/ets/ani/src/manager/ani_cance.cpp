@@ -15,7 +15,6 @@
 #include "ani_cance.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -135,7 +134,7 @@ ani_object AniCancelAll(ani_env *env, ani_object callback)
             auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
             if (asyncData) {
                 asyncData->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->CancelAllNotifications();
+                    AnsNotification::GetInstance()->CancelAllNotifications();
             }
         },
         HandleCancelCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -179,7 +178,7 @@ ani_object AniCancelWithId(ani_env *env, ani_int id, ani_object callback)
             auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
             if (asyncData) {
                 asyncData->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(
+                    AnsNotification::GetInstance()->CancelNotification(
                         asyncData->notificationId);
             }
         },
@@ -230,7 +229,7 @@ ani_object AniCancelWithIdLabel(ani_env *env, ani_int id, ani_string label, ani_
             auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
             if (asyncData) {
                 asyncData->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(
+                    AnsNotification::GetInstance()->CancelNotification(
                         asyncData->labelStr, asyncData->notificationId);
             }
         },
@@ -282,7 +281,7 @@ ani_object AniCancelWithBundle(ani_env *env, ani_object bundleObj, ani_int id, a
             auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
             if (asyncData) {
                 asyncData->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundleWithAgent(
+                    AnsNotification::GetInstance()->CancelAsBundleWithAgent(
                         asyncData->bundleOption, asyncData->notificationId);
             }
         },
@@ -334,7 +333,7 @@ ani_object AniCancelAsBundle(ani_env *env, ani_int id, ani_string representative
             auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
             if (asyncData) {
                 asyncData->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
+                    AnsNotification::GetInstance()->CancelAsBundle(
                         asyncData->convertedId, asyncData->bundleStr, asyncData->userId);
             }
         },
@@ -384,7 +383,7 @@ ani_object AniCancelAsBundleWithBundleOption(ani_env *env, ani_object representa
             auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
             if (asyncData) {
                 asyncData->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
+                    AnsNotification::GetInstance()->CancelAsBundle(
                         asyncData->bundleOption, asyncData->userId);
             }
         },
@@ -435,7 +434,7 @@ ani_object AniCancelGroup(ani_env *env, ani_string groupName, ani_object callbac
             auto asyncData = static_cast<AsyncCallbackCancelInfo*>(data);
             if (asyncData) {
                 asyncData->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->CancelGroup(
+                    AnsNotification::GetInstance()->CancelGroup(
                         asyncData->groupNameStr);
             }
         },

@@ -14,6 +14,7 @@
 */
 
 #include "notification_analytics_util.h"
+#include "singleton.h"
 
 #include <regex>
 

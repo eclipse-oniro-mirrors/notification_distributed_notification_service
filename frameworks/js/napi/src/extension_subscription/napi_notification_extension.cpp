@@ -620,10 +620,10 @@ napi_value NapiNotificationSettingResult(napi_env env, void *data)
     }
     bool enabled = false;
     std::vector<sptr<NotificationBundleOption>> bundles;    asynccallbackinfo->info.errorCode =
-        DelayedSingleton<AnsNotification>::GetInstance()->IsUserGranted(enabled);
+        AnsNotification::GetInstance()->IsUserGranted(enabled);
     if (asynccallbackinfo->info.errorCode == ERR_OK && enabled) {
         asynccallbackinfo->info.errorCode =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundlesForSelf(bundles);
+            AnsNotification::GetInstance()->GetUserGrantedEnabledBundlesForSelf(bundles);
     }
     napi_create_object(env, &result);
     napi_value enableValue;
@@ -966,7 +966,7 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_
         AsyncCallbackInfoOpenSettings *asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings *>(data);
         if (asynccallbackinfo) {
             asynccallbackinfo->info.errorCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->CanOpenSubscribeSettings();
+                AnsNotification::GetInstance()->CanOpenSubscribeSettings();
         }
     };
     auto jsCb = [](napi_env env, napi_status, void* data) {
@@ -1030,7 +1030,7 @@ napi_value NapiNotificationExtensionOpenSubscriptionSettingsWithResult(napi_env 
         AsyncCallbackInfoOpenSettings *asynccallbackinfo = static_cast<AsyncCallbackInfoOpenSettings *>(data);
         if (asynccallbackinfo) {
             asynccallbackinfo->info.errorCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->CanOpenSubscribeSettings();
+                AnsNotification::GetInstance()->CanOpenSubscribeSettings();
         }
     };
     auto jsCb = [](napi_env env, napi_status, void* data) {
@@ -1099,7 +1099,7 @@ napi_value NapiNotificationExtensionSubscribe(napi_env env, napi_callback_info i
                 static_cast<AsyncCallbackInfoNotificationExtensionSubscription *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionSubscribe(
+                    AnsNotification::GetInstance()->NotificationExtensionSubscribe(
                         asynccallbackinfo->subscriptionInfo);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -1180,7 +1180,7 @@ napi_value NapiNotificationExtensionSubscribeNotification(napi_env env, napi_cal
                 static_cast<AsyncCallbackInfoNotificationExtensionSubscription *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionSubscribeNotification(
+                    AnsNotification::GetInstance()->NotificationExtensionSubscribeNotification(
                         asynccallbackinfo->priorityStrategy);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -1242,7 +1242,7 @@ napi_value NapiNotificationExtensionUnsubscribe(napi_env env, napi_callback_info
                 static_cast<AsyncCallbackInfoNotificationExtensionSubscription *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionUnsubscribe();
+                    AnsNotification::GetInstance()->NotificationExtensionUnsubscribe();
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
         },
@@ -1303,7 +1303,7 @@ napi_value NapiGetSubscribeInfo(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoNotificationExtensionSubscription *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetSubscribeInfo(
+                    AnsNotification::GetInstance()->GetSubscribeInfo(
                         asynccallbackinfo->subscriptionInfo);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -1365,7 +1365,7 @@ napi_value NapiGetAllSubscriptionBundles(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllSubscriptionBundles(
+                    AnsNotification::GetInstance()->GetAllSubscriptionBundles(
                         asynccallbackinfo->params.bundles);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -1427,7 +1427,7 @@ napi_value NapiIsUserGranted(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsUserGranted(
+                    AnsNotification::GetInstance()->IsUserGranted(
                         asynccallbackinfo->params.enabled);
                 ANS_LOGI("IsUserGranted async work: User grant check completed with errorCode=%{public}d",
                     asynccallbackinfo->info.errorCode);
@@ -1498,7 +1498,7 @@ napi_value NapiGetUserGrantedState(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedState(
+                    AnsNotification::GetInstance()->GetUserGrantedState(
                         asynccallbackinfo->params.targetBundle, asynccallbackinfo->params.enabled);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -1568,7 +1568,7 @@ napi_value NapiSetUserGrantedState(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedState(
+                    AnsNotification::GetInstance()->SetUserGrantedState(
                         asynccallbackinfo->params.targetBundle, asynccallbackinfo->params.enabled);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -1635,7 +1635,7 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundlesForSelf(
+                    AnsNotification::GetInstance()->GetUserGrantedEnabledBundlesForSelf(
                         asynccallbackinfo->params.bundles);
                 ANS_LOGI("GetUserGrantedEnabledBundles errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -1661,7 +1661,7 @@ napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info inf
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundles(
+                    AnsNotification::GetInstance()->GetUserGrantedEnabledBundles(
                         asynccallbackinfo->params.targetBundle, asynccallbackinfo->params.bundles);
                 ANS_LOGI("GetUserGrantedEnabledBundles errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -1742,7 +1742,7 @@ napi_value NapiSetUserGrantedBundleState(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedBundleState(
+                    AnsNotification::GetInstance()->SetUserGrantedBundleState(
                         asynccallbackinfo->params.targetBundle,
                         asynccallbackinfo->params.bundles, asynccallbackinfo->params.enabled);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);

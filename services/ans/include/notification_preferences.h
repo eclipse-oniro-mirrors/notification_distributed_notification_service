@@ -17,7 +17,6 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_NOTIFICATION_PREFERENCES_H
 
 #include "refbase.h"
-#include "singleton.h"
 #include "ffrt_inner.h"
 
 #include "notification_bundle_option.h"

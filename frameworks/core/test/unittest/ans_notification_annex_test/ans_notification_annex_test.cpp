@@ -25,7 +25,6 @@
 #include "ans_service_errors.h"
 #include "ipc_types.h"
 #include "notification.h"
-#include "singleton.h"
 #include "notification_subscriber.h"
 
 using namespace testing;
@@ -59,7 +58,7 @@ void AnsNotificationUnitAnnexTest::TearDownTestCase() {}
 void AnsNotificationUnitAnnexTest::SetUp()
 {
     if (!ans_) {
-        ans_ = DelayedSingleton<AnsNotification>::GetInstance();
+        ans_ = AnsNotification::GetInstance();
     }
 }
 

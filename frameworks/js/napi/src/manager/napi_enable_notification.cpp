@@ -21,7 +21,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "enable_notification.h"
 #include "js_ans_dialog_callback.h"
 #include "common_event_manager.h"
@@ -81,7 +80,7 @@ napi_value NapiEnableNotification(napi_env env, napi_callback_info info)
                 std::string deviceId {""};
 
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     SetNotificationsEnabledForSpecifiedBundle(
                         asynccallbackinfo->params.option, deviceId, asynccallbackinfo->params.enable);
                 ANS_LOGI("enableNotification code=%{public}d", asynccallbackinfo->info.errorCode);
@@ -179,7 +178,7 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(
+                        AnsNotification::GetInstance()->IsAllowedNotify(
                             asynccallbackinfo->params.option, asynccallbackinfo->allowed);
                     ANS_LOGI("isNotificationEnabled bundle:%{public}s,uid:%{public}d,"
                         "code=%{public}d,allowed=%{public}d",
@@ -188,14 +187,14 @@ __attribute__((no_sanitize("cfi"))) napi_value NapiIsNotificationEnabled(napi_en
                         asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
                 } else if (asynccallbackinfo->params.hasUserId) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(
+                        AnsNotification::GetInstance()->IsAllowedNotify(
                             asynccallbackinfo->params.userId, asynccallbackinfo->allowed);
                     ANS_LOGI("isNotificationEnabled userId=%{public}d,code=%{public}d,allowed=%{public}d",
                         asynccallbackinfo->params.userId,
                         asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(
+                        AnsNotification::GetInstance()->IsAllowedNotifySelf(
                             asynccallbackinfo->allowed);
                     ANS_LOGI("isNotificationEnabled code=%{public}d,allowed=%{public}d",
                         asynccallbackinfo->info.errorCode, asynccallbackinfo->allowed);
@@ -273,7 +272,7 @@ napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info)
                     ANS_LOGE("Not allowed to query another application");
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(
+                        AnsNotification::GetInstance()->IsAllowedNotifySelf(
                             asynccallbackinfo->allowed);
                 }
                 ANS_LOGD("errorCode: %{public}u, allowed:%{public}d",
@@ -393,7 +392,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             bool canPop = false;
             std::string bundleName {""};            ErrCode errCode = static_cast<ErrCode>(
 
-                DelayedSingleton<AnsNotification>::GetInstance()->CanPopEnableNotificationDialog(
+                AnsNotification::GetInstance()->CanPopEnableNotificationDialog(
                     client, canPop, bundleName));
             ANS_LOGI("canPopDialog code:%{public}d,canPop:%{public}d", errCode, canPop);
             if (canPop == false) {
@@ -406,7 +405,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
             std::string deviceId {""};
 
             asynccallbackinfo->info.errorCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(
+                AnsNotification::GetInstance()->RequestEnableNotification(
                     deviceId, client, asynccallbackinfo->params.callerToken);
             ANS_LOGI("requestEnable code:%{public}d", asynccallbackinfo->info.errorCode);
         }
@@ -425,7 +424,7 @@ napi_value NapiRequestEnableNotification(napi_env env, napi_callback_info info)
                 asynccallbackinfo->info.errorCode = ERR_ANS_INNER_DIALOG_POP_SUCCEEDED;
             } else {
                 asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
-                DelayedSingleton<AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
+                AnsNotification::GetInstance()->RemoveEnableNotificationDialog();
             }
         }
         ErrCode errCode = asynccallbackinfo->info.errorCode;
@@ -605,12 +604,12 @@ napi_value NapiGetAllNotificationEnabledBundles(napi_env env, napi_callback_info
             if (asynccallbackinfo != nullptr) {
                 if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(
+                        AnsNotification::GetInstance()->GetAllNotificationEnabledBundles(
                             asynccallbackinfo->bundleOptionVector, asynccallbackinfo->userId);
                     ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}u", asynccallbackinfo->info.errorCode);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(
+                        AnsNotification::GetInstance()->GetAllNotificationEnabledBundles(
                             asynccallbackinfo->bundleOptionVector);
                     ANS_LOGD("asynccallbackinfo->info.errorCode = %{public}u", asynccallbackinfo->info.errorCode);
                 }
@@ -665,7 +664,7 @@ napi_value NapiIsNotificationEnabledSync(napi_env env, napi_callback_info info)
     }
 
     bool allowed = false;
-    DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(allowed);
+    AnsNotification::GetInstance()->IsAllowedNotifySelf(allowed);
     napi_value result = nullptr;
     napi_get_boolean(env, allowed, &result);
     return result;
@@ -777,7 +776,7 @@ void ModalExtensionCallback::OnError(int32_t code, const std::string& name, cons
 {
     ANS_LOGD("called, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
     ReleaseOrErrorHandle(code);
-    DelayedSingleton<AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
+    AnsNotification::GetInstance()->RemoveEnableNotificationDialog();
 }
 
 /*

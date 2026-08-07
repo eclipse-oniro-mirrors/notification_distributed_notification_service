@@ -18,7 +18,6 @@
 #include "ans_log_wrapper.h"
 #include "inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -128,7 +127,7 @@ void ModalExtensionCallback::OnError(int32_t code, const std::string& name, cons
 {
     ANS_LOGE("OnError, name = %{public}s, message = %{public}s", name.c_str(), message.c_str());
     ReleaseOrErrorHandle(code);
-    DelayedSingleton<AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
+    AnsNotification::GetInstance()->RemoveEnableNotificationDialog();
 }
 
 /*

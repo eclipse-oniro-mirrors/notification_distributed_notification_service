@@ -18,7 +18,6 @@
 #include <iostream>
 #include "ans_notification.h"
 #include "ans_service_errors.h"
-#include "singleton.h"
 #include "ani_remove.h"
 #include "ans_log_wrapper.h"
 #include "sts_subscribe.h"
@@ -79,7 +78,7 @@ ani_object AniDistributeOperation(ani_env *env, ani_string hashcode, ani_object 
     }
     callback->SetVm(vm);
     OHOS::Notification::InnerErrorCode result =
-        DelayedSingleton<AnsNotification>::GetInstance()->DistributeOperation(info, callback);
+        AnsNotification::GetInstance()->DistributeOperation(info, callback);
     ANS_LOGD("result: %{public}d", result);
     if (result != ERR_OK || noWithOperationInfo) {
         callback->OnStsOperationCallback(env, result);

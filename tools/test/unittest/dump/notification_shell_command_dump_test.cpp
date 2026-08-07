@@ -22,7 +22,6 @@
 #include "ans_service_errors.h"
 #include "ians_manager.h"
 #include "mock_ans_manager_stub.h"
-#include "singleton.h"
 
 using namespace testing::ext;
 using namespace OHOS;
@@ -209,7 +208,7 @@ void AnmManagerDumpTest::MakeMockObjects()
     proxyPtr_ = iface_cast<IAnsManager>(stubPtr_);
 
     // set the mock proxy
-    auto ansNotificationPtr = DelayedSingleton<AnsNotification>::GetInstance();
+    auto ansNotificationPtr = AnsNotification::GetInstance();
 }
 
 /**

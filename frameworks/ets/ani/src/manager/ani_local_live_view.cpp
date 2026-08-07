@@ -15,7 +15,6 @@
 #include "ani_local_live_view.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -146,7 +145,7 @@ ani_object AniTriggerSystemLiveView(ani_env *env, ani_object bundleOptionObj, an
             auto asyncCallbackInfo = static_cast<AsyncCallbackLiveViewInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->TriggerLocalLiveView(
+                    AnsNotification::GetInstance()->TriggerLocalLiveView(
                         asyncCallbackInfo->bundleOption,
                         static_cast<int32_t>(asyncCallbackInfo->notificationId),
                         asyncCallbackInfo->buttonOption);
@@ -208,7 +207,7 @@ ani_object AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj, an
             auto asyncCallbackInfo = static_cast<AsyncCallbackLiveViewInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SubscribeLocalLiveViewNotification(
+                    AnsNotification::GetInstance()->SubscribeLocalLiveViewNotification(
                         *(asyncCallbackInfo->localLiveViewSubscriber), false);
             }
         },

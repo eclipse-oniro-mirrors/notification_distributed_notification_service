@@ -15,7 +15,6 @@
 #include "ani_notification_subscriber_extension.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -119,7 +118,7 @@ ani_object AniSubscribe(ani_env *env, ani_object notificationInfoArrayobj)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionSubscribe(
+                    AnsNotification::GetInstance()->NotificationExtensionSubscribe(
                         asyncCallbackInfo->subscriptionInfo);
             }
         },
@@ -163,7 +162,7 @@ ani_object AniSubscribeNotification(ani_env *env, ani_int priorityStrategy)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionSubscribeNotification(
+                    AnsNotification::GetInstance()->NotificationExtensionSubscribeNotification(
                         asyncCallbackInfo->priorityStrategy);
             }
         },
@@ -206,7 +205,7 @@ ani_object AniUnsubscribe(ani_env *env)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->NotificationExtensionUnsubscribe();
+                    AnsNotification::GetInstance()->NotificationExtensionUnsubscribe();
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -248,7 +247,7 @@ ani_object AniGetSubscribeInfo(ani_env *env)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetSubscribeInfo(
+                    AnsNotification::GetInstance()->GetSubscribeInfo(
                         asyncCallbackInfo->subscriptionInfo);
             }
         },
@@ -291,7 +290,7 @@ ani_object AniGetAllSubscriptionBundles(ani_env *env)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllSubscriptionBundles(
+                    AnsNotification::GetInstance()->GetAllSubscriptionBundles(
                         asyncCallbackInfo->bundles);
             }
         },
@@ -334,7 +333,7 @@ ani_object AniIsUserGranted(ani_env *env)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsUserGranted(asyncCallbackInfo->enabled);
+                    AnsNotification::GetInstance()->IsUserGranted(asyncCallbackInfo->enabled);
             }
         },
         HandleAsyncCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -383,7 +382,7 @@ ani_object AniGetUserGrantedState(ani_env *env, ani_object bundleOption)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedState(
+                    AnsNotification::GetInstance()->GetUserGrantedState(
                         asyncCallbackInfo->targetBundle, asyncCallbackInfo->enabled);
             }
         },
@@ -434,7 +433,7 @@ ani_object AniSetUserGrantedState(ani_env *env, ani_object bundleOption, ani_boo
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedState(
+                    AnsNotification::GetInstance()->SetUserGrantedState(
                         asyncCallbackInfo->targetBundle, asyncCallbackInfo->enabled);
             }
         },
@@ -484,7 +483,7 @@ ani_object AniGetUserGrantedEnabledBundles(ani_env *env, ani_object bundleOption
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundles(
+                    AnsNotification::GetInstance()->GetUserGrantedEnabledBundles(
                         asyncCallbackInfo->targetBundle, asyncCallbackInfo->bundles);
             }
         },
@@ -527,7 +526,7 @@ ani_object AniGetUserGrantedEnabledBundlesForSelf(ani_env *env)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundlesForSelf(
+                    AnsNotification::GetInstance()->GetUserGrantedEnabledBundlesForSelf(
                         asyncCallbackInfo->bundles);
             }
         },
@@ -588,7 +587,7 @@ ani_object AniSetUserGrantedBundleState(ani_env *env, ani_object bundleOption, a
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetUserGrantedBundleState(
+                    AnsNotification::GetInstance()->SetUserGrantedBundleState(
                         asyncCallbackInfo->targetBundle, asyncCallbackInfo->bundles, asyncCallbackInfo->enabled);
             }
         },

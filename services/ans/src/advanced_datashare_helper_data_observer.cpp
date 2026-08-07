@@ -14,6 +14,7 @@
  */
 
 #include "advanced_datashare_helper_data_observer.h"
+#include "singleton.h"
 
 #include "advanced_datashare_helper.h"
 #include "ans_log_wrapper.h"

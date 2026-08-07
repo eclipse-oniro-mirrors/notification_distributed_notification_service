@@ -20,7 +20,6 @@
 #include <vector>
 #include <string>
 
-#include "singleton.h"
 #include "ffrt.h"
 #include "notification_ringtone_info.h"
 

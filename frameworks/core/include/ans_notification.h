@@ -2098,6 +2098,9 @@ private:
      */
     InnerErrorCode CancelAsBundleWithAgentNoBlockIPC(const NotificationBundleOption &bundleOption, const int32_t id);
 
+public:
+    static std::shared_ptr<AnsNotification> GetInstance();
+
 private:
     std::mutex subscriberMutex_;
     std::map<std::shared_ptr<NotificationSubscriber>, sptr<SubscriberListener>> subscribers_;

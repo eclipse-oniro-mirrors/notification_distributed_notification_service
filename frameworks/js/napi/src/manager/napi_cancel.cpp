@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "cancel.h"
 
 namespace OHOS {
@@ -61,12 +60,12 @@ napi_value NapiCancel(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->hasOption) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundleWithAgent(
+                        AnsNotification::GetInstance()->CancelAsBundleWithAgent(
                             asynccallbackinfo->option, asynccallbackinfo->id);
                 } else {
                     std::string instanceKey = Common::GetAppInstanceKey();
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(
+                        AnsNotification::GetInstance()->CancelNotification(
                             asynccallbackinfo->label, asynccallbackinfo->id, instanceKey);
                 }
             }
@@ -153,7 +152,7 @@ napi_value NapiCancelAll(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->CancelAllNotifications(instanceKey);
+                    AnsNotification::GetInstance()->CancelAllNotifications(instanceKey);
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -240,7 +239,7 @@ napi_value NapiCancelGroup(napi_env env, napi_callback_info info)
                 ANS_LOGI("cancel groupName=%{public}s", asynccallbackinfo->params.groupName.c_str());
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->CancelGroup(
+                    AnsNotification::GetInstance()->CancelGroup(
                         asynccallbackinfo->params.groupName, instanceKey);
             }
         },
@@ -334,11 +333,11 @@ napi_value NapiCancelAsBundle(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->hasOption) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
+                        AnsNotification::GetInstance()->CancelAsBundle(
                             asynccallbackinfo->option, asynccallbackinfo->id);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->CancelAsBundle(
+                        AnsNotification::GetInstance()->CancelAsBundle(
                             asynccallbackinfo->id, asynccallbackinfo->representativeBundle,
                             asynccallbackinfo->userId);
                 }

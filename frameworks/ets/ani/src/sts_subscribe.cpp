@@ -18,7 +18,6 @@
 #include "subscriber_image_util.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
 #include "sts_sorting_map.h"
@@ -869,10 +868,10 @@ bool SubscriberInstanceManager::SubscribeNotificationWithInfo(ani_env *env, ani_
     }
     OHOS::Notification::InnerErrorCode status = OHOS::Notification::ERR_ANS_INNER_OK;
     if (info == nullptr) {
-        status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->SubscribeNotificationV26(
+        status = OHOS::Notification::AnsNotification::GetInstance()->SubscribeNotificationV26(
             stsSubscriber);
     } else {
-        status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->SubscribeNotificationV26(
+        status = OHOS::Notification::AnsNotification::GetInstance()->SubscribeNotificationV26(
             stsSubscriber, SubscribeInfo);
     }
     if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
@@ -927,10 +926,10 @@ bool SubscriberInstanceManager::Subscribe(ani_env *env, ani_object subscriber, a
     }
     OHOS::Notification::InnerErrorCode status = OHOS::Notification::ERR_ANS_INNER_OK;
     if (!isInfoUndefine) {
-        status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->SubscribeNotification(
+        status = OHOS::Notification::AnsNotification::GetInstance()->SubscribeNotification(
             stsSubscriber, SubscribeInfo);
     } else {
-        status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->SubscribeNotification(
+        status = OHOS::Notification::AnsNotification::GetInstance()->SubscribeNotification(
             stsSubscriber);
     }
     if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
@@ -958,7 +957,7 @@ bool SubscriberInstanceManager::UnSubscribe(ani_env *env, ani_object subscriber)
     bool ret = AddDeletingSubscriber(stsSubscriber);
     if (ret) {
         OHOS::Notification::InnerErrorCode status =
-            DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->UnSubscribeNotification(
+            OHOS::Notification::AnsNotification::GetInstance()->UnSubscribeNotification(
                 stsSubscriber);
         if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
             ANS_LOGD("UnSubscribe faild. status %{public}d", status);
@@ -995,7 +994,7 @@ bool SubscriberInstanceManager::SubscribeSelf(ani_env *env, ani_object subscribe
         }
     }
     OHOS::Notification::InnerErrorCode status = OHOS::Notification::ERR_ANS_INNER_OK;
-    status = DelayedSingleton<OHOS::Notification::AnsNotification>::GetInstance()->SubscribeNotificationSelf(
+    status = OHOS::Notification::AnsNotification::GetInstance()->SubscribeNotificationSelf(
         stsSubscriber);
     if (status != OHOS::Notification::ERR_ANS_INNER_OK) {
         ANS_LOGD("SubscribeNotificationSelf faild. status %{public}d", status);

@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "distributed.h"
 
 namespace OHOS {
@@ -72,7 +71,7 @@ napi_value DoIsDistributedEnabledWithDeviceType(napi_env env, napi_callback_info
 
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabled(
+                    AnsNotification::GetInstance()->IsDistributedEnabled(
                         asynccallbackinfo->deviceType, asynccallbackinfo->enable);
                 ANS_LOGI("IsDistributedEnabled device=%{public}s,enable=%{public}d",
                     asynccallbackinfo->deviceType.c_str(), asynccallbackinfo->enable);
@@ -138,7 +137,7 @@ napi_value NapiIsDistributedEnabled(napi_env env, napi_callback_info info)
 
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabled(
+                    AnsNotification::GetInstance()->IsDistributedEnabled(
                         asynccallbackinfo->enable);
                 ANS_LOGI("IsDistributedEnabled enable=%{public}d", asynccallbackinfo->enable);
             }
@@ -219,7 +218,7 @@ napi_value NapiEnableDistributed(napi_env env, napi_callback_info info)
 
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->EnableDistributed(
+                    AnsNotification::GetInstance()->EnableDistributed(
                         asynccallbackinfo->params.enable);
             }
         },
@@ -304,7 +303,7 @@ napi_value NapiSetDistributedEnabled(napi_env env, napi_callback_info info)
             AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabled(
+                    AnsNotification::GetInstance()->SetDistributedEnabled(
                         asynccallbackinfo->params.deviceType, asynccallbackinfo->params.enable);
                 ANS_LOGD("errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -376,7 +375,7 @@ napi_value NapiEnableDistributedByBundle(napi_env env, napi_callback_info info)
             AsyncCallbackInfoEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabledByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->EnableDistributedByBundle(
+                    AnsNotification::GetInstance()->EnableDistributedByBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->params.enable);
             }
         },
@@ -464,7 +463,7 @@ napi_value NapiEnableDistributedSelf(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->EnableDistributedSelf(
+                    AnsNotification::GetInstance()->EnableDistributedSelf(
                         asynccallbackinfo->params.enable);
                 ANS_LOGI("isEnableDistributedSelf enable=%{public}d", asynccallbackinfo->params.enable);
             }
@@ -583,7 +582,7 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
                     int32_t enabledType = 0;
                     std::string deviceType = asynccallbackinfo->params.deviceType;
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledByBundle(
+                        AnsNotification::GetInstance()->IsDistributedEnabledByBundle(
                             asynccallbackinfo->params.option, deviceType, true, enabledType);
                     asynccallbackinfo->enable = ((enabledType == static_cast<int32_t>(SwitchState::USER_MODIFIED_ON)) ||
                         (enabledType == static_cast<int32_t>(SwitchState::SYSTEM_DEFAULT_ON)));
@@ -591,7 +590,7 @@ napi_value NapiIsDistributedEnableByBundle(napi_env env, napi_callback_info info
                         asynccallbackinfo->info.errorCode);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnableByBundle(
+                        AnsNotification::GetInstance()->IsDistributedEnableByBundle(
                             asynccallbackinfo->params.option, asynccallbackinfo->enable);
                 }
             }
@@ -697,7 +696,7 @@ napi_value NapiGetDeviceRemindType(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetRemindType *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetDeviceRemindType(
+                    AnsNotification::GetInstance()->GetDeviceRemindType(
                         asynccallbackinfo->remindType);
             }
         },
@@ -772,7 +771,7 @@ napi_value NapiSetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
                 static_cast<AsyncCallbackInfoEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetSyncNotificationEnabledWithoutApp(
+                    AnsNotification::GetInstance()->SetSyncNotificationEnabledWithoutApp(
                         asynccallbackinfo->params.userId, asynccallbackinfo->params.enable);
             }
         },
@@ -863,7 +862,7 @@ napi_value NapiGetSyncNotificationEnabledWithoutApp(napi_env env, napi_callback_
                 static_cast<AsyncCallbackInfoGetEnabledWithoutApp *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetSyncNotificationEnabledWithoutApp(
+                    AnsNotification::GetInstance()->GetSyncNotificationEnabledWithoutApp(
                         asynccallbackinfo->params.userId, asynccallbackinfo->enable);
             }
         },
@@ -956,7 +955,7 @@ napi_value NapiSetTargetDeviceStatus(napi_env env, napi_callback_info info)
             AsynDeviceStatusConfig *asynccallbackinfo = static_cast<AsynDeviceStatusConfig *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(
+                    AnsNotification::GetInstance()->SetTargetDeviceStatus(
                         asynccallbackinfo->deviceStatus.deviceType, asynccallbackinfo->deviceStatus.status,
                         DISTURB_DEFAULT_FLAG);
             }
@@ -1068,7 +1067,7 @@ napi_value NapiGetDistributedDeviceList(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsynCallbackInfoGetDistributedDeviceList *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedDevicelist(
+                    AnsNotification::GetInstance()->GetDistributedDevicelist(
                         asynccallbackinfo->deviceList);
             }
         },

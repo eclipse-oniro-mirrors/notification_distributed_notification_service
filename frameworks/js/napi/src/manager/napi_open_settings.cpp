@@ -20,7 +20,6 @@
 #include "ans_service_errors.h"
 #include "ans_notification.h"
 #include "ws_common.h"
-#include "singleton.h"
 
 namespace OHOS {
 namespace NotificationNapi {
@@ -39,7 +38,7 @@ napi_value NapiNotificationSettingResult(napi_env env, void *data)
         return result;
     }
     uint32_t slotFlags = 0;    asynccallbackinfo->info.errorCode =
-        DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSettings(slotFlags);
+        AnsNotification::GetInstance()->GetNotificationSettings(slotFlags);
     if (asynccallbackinfo->info.errorCode != ERR_OK) {
         return result;
     }

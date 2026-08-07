@@ -14,6 +14,7 @@
  */
 
 #include "notification_subscriber_manager.h"
+#include "singleton.h"
 
 #include <algorithm>
 #include <memory>
