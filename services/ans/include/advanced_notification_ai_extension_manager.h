@@ -33,7 +33,6 @@ public:
 private:
     void BuildCommandForUpdate(
         const sptr<NotificationRequest> &request, nlohmann::json &command, bool hasAggregationSubscriber);
-    bool IsCollaborationNotification(const sptr<NotificationRequest> &request);
 
 private:
     static constexpr const char *HAS_COMMAND = "hasCommand";

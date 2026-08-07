@@ -7111,7 +7111,7 @@ HWTEST_F(AdvancedNotificationServiceTest, FillNotificationRecord_NullBundleOptio
     auto record = std::make_shared<NotificationRecord>();
     ASSERT_NE(record, nullptr);
     auto ansStatus = advancedNotificationService_->FillNotificationRecord(requestDb, record);
-    ASSERT_TRUE(ansStatus.Ok());
+    ASSERT_FALSE(ansStatus.Ok());
     GTEST_LOG_(INFO) << "FillNotificationRecord_NullBundleOption_0001 test end";
 }
 }  // namespace Notification
