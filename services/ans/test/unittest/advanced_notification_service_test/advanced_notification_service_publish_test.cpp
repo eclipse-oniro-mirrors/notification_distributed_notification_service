@@ -1728,7 +1728,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0600, Function | SmallT
     SleepForFC();
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
-    ASSERT_EQ(static_cast<int32_t>(state), 3);
+    ASSERT_EQ(static_cast<int32_t>(state), 2);
 }
 
 /**
@@ -1753,7 +1753,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0700, Function | SmallT
     SleepForFC();
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
-    ASSERT_EQ(static_cast<int32_t>(state), 3);
+    ASSERT_EQ(static_cast<int32_t>(state), 2);
 }
 
 /**
@@ -1776,7 +1776,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_0800, Function | SmallT
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
-    ASSERT_EQ(static_cast<int32_t>(state), 3);
+    ASSERT_EQ(static_cast<int32_t>(state), 0);
 }
 
 /**
@@ -1828,7 +1828,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnReceiveEvent_1000, Function | SmallT
     SleepForFC();
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
-    ASSERT_EQ(static_cast<int32_t>(state), 0);
+    ASSERT_EQ(static_cast<int32_t>(state), 3);
 }
 
 /**

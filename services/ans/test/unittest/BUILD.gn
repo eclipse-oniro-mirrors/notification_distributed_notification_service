@@ -1390,6 +1390,7 @@ ohos_unittest("notification_service_test") {
     "advanced_notification_service_test.cpp",
     "advanced_notification_slot_service_test.cpp",
     "advanced_notification_utils_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -2036,6 +2037,7 @@ ohos_unittest("notification_service_publish_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_test/advanced_notification_service_publish_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -2704,6 +2706,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_branch_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -3166,6 +3169,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_test/advanced_notification_distributed_manager_service_test.cpp",
     "advanced_notification_service_test/advanced_notification_service_unit_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "advanced_notification_service_test/advanced_notification_system_live_view_service_test.cpp",
     "distributed_device_status_test.cpp",
     "mock/mock_accesstoken_kit.cpp",

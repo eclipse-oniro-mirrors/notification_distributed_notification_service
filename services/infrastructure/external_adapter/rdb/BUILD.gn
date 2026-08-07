@@ -69,6 +69,13 @@ if (is_build_source_set_ntf) {
     public_configs = [ ":ans_base_rdb_config_public" ]
 
     external_deps = [
+      "ability_base:want",
+      "ability_runtime:appkit_native",
+      "ability_runtime:wantagent_innerkits",
+      "image_framework:image",
+      "image_framework:image_source",
+      "image_framework:pixelmap",
+      "ability_base:zuri",
       "c_utils:utils",
       "ffrt:libffrt",
       "hilog:libhilog",
@@ -113,6 +120,13 @@ if (is_build_source_set_ntf) {
     public_configs = [ ":ans_base_rdb_config_public" ]
 
     external_deps = [
+      "ability_base:want",
+      "ability_runtime:appkit_native",
+      "ability_runtime:wantagent_innerkits",
+      "image_framework:image",
+      "image_framework:image_source",
+      "image_framework:pixelmap",
+      "ability_base:zuri",
       "c_utils:utils",
       "ffrt:libffrt",
       "hilog:libhilog",

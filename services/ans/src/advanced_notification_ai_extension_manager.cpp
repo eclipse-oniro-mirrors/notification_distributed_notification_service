@@ -16,6 +16,7 @@
 
 #include "advanced_notification_aggregation_helper.h"
 #include "advanced_notification_priority_helper.h"
+#include "ans_common_utils.h"
 #include "bool_wrapper.h"
 #include "notification_ai_extension_wrapper.h"
 #include "notification_preferences.h"
@@ -71,7 +72,8 @@ void AdvancedNotificationAiExtensionManager::BuildCommandForUpdate(
         return;
     }
 
-    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW || IsCollaborationNotification(request)) {
+    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW ||
+        AnsCommonUtils::IsCollaborationNotification(request)) {
         return;
     }
 
@@ -93,16 +95,6 @@ void AdvancedNotificationAiExtensionManager::BuildCommandForUpdate(
 #else
     (void)hasAggregationSubscriber;
 #endif
-}
-
-bool AdvancedNotificationAiExtensionManager::IsCollaborationNotification(const sptr<NotificationRequest> &request)
-{
-    auto extendInfo = request->GetExtendInfo();
-    AAFwk::IBoolean* ao = nullptr;
-    if (extendInfo != nullptr) {
-        ao = AAFwk::IBoolean::Query(extendInfo->GetParam(ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG));
-    }
-    return ao != nullptr && AAFwk::Boolean::Unbox(ao);
 }
 }  // namespace Notification
 }  // namespace OHOS
