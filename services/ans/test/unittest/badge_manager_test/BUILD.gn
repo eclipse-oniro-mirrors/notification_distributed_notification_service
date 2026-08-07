@@ -49,7 +49,6 @@ ohos_unittest("advanced_notification_badge_manager_test") {
     "../mock/mock_notification_helper.cpp",
     "../mock/mock_push_callback_stub.cpp",
     "../mock/mock_time_service_client.cpp",
-    "advanced_notification_badge_manager_test.cpp",
   ]
 
   defines = []
