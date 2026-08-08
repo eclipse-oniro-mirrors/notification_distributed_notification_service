@@ -69,21 +69,21 @@ namespace CJSystemapi {
             return ERROR_PARAM_INVALID;
         }
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(request);
+            AnsNotification::GetInstance()->PublishNotification(request);
         return InnerErrorToExternal(result);
     }
 
     int NotificationManagerImplV2::Cancel(int32_t id, const char* label)
     {
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->CancelNotification(label, id);
+            AnsNotification::GetInstance()->CancelNotification(label, id);
         return InnerErrorToExternal(result);
     }
 
     int NotificationManagerImplV2::CancelAll()
     {
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->CancelAllNotifications();
+            AnsNotification::GetInstance()->CancelAllNotifications();
         return InnerErrorToExternal(result);
     }
 
@@ -94,7 +94,7 @@ namespace CJSystemapi {
             return ERROR_PARAM_INVALID;
         }
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->AddSlotByType(slot);
+            AnsNotification::GetInstance()->AddSlotByType(slot);
         return InnerErrorToExternal(result);
     }
 
@@ -122,7 +122,7 @@ namespace CJSystemapi {
 
         sptr<NotificationSlot> slot = nullptr;
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlot(slotType, slot);
+            AnsNotification::GetInstance()->GetNotificationSlot(slotType, slot);
         errCode = InnerErrorToExternal(result);
         if (slot != nullptr && !SetNotificationSlotV2(*slot, notificationSlot)) {
             errCode = ERROR_PARAM_INVALID;
@@ -135,7 +135,7 @@ namespace CJSystemapi {
         CArrayNotificationSlotsV2 notificationSlots = { .head = nullptr, .size = 0 };
         std::vector<sptr<NotificationSlot>> slots;
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlots(slots);
+            AnsNotification::GetInstance()->GetNotificationSlots(slots);
         errCode = InnerErrorToExternal(result);
         if (errCode != SUCCESS_CODE) {
             return notificationSlots;
@@ -175,14 +175,14 @@ namespace CJSystemapi {
             return ERROR_PARAM_INVALID;
         }
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotificationSlot(slot);
+            AnsNotification::GetInstance()->RemoveNotificationSlot(slot);
         return InnerErrorToExternal(result);
     }
 
     int NotificationManagerImplV2::RemoveAllSlots()
     {
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->RemoveAllSlots();
+            AnsNotification::GetInstance()->RemoveAllSlots();
         return InnerErrorToExternal(result);
     }
 
@@ -191,7 +191,7 @@ namespace CJSystemapi {
         RetDataUI32 ret = { .code = 0, .data = 0 };
         uint64_t num = 0;
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationNums(num);
+            AnsNotification::GetInstance()->GetActiveNotificationNums(num);
         ret.code = static_cast<uint32_t>(InnerErrorToExternal(result));
         ret.data = static_cast<uint32_t>(num);
         return ret;
@@ -202,7 +202,7 @@ namespace CJSystemapi {
         CArrayNotificationRequestV2 notificationRequests = { .head = nullptr, .size = 0 };
         std::vector<sptr<NotificationRequest>> requests;
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotifications(requests);
+            AnsNotification::GetInstance()->GetActiveNotifications(requests);
         errCode = InnerErrorToExternal(result);
         if (result != ERR_ANS_INNER_OK) {
             return notificationRequests;
@@ -242,7 +242,7 @@ namespace CJSystemapi {
     {
         std::string groupName(cGroupName);
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->CancelGroup(groupName);
+            AnsNotification::GetInstance()->CancelGroup(groupName);
         return InnerErrorToExternal(result);
     }
 
@@ -252,7 +252,7 @@ namespace CJSystemapi {
         std::string templateName(cTemplateName);
         bool isSupport = false;
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->IsSupportTemplate(templateName, isSupport);
+            AnsNotification::GetInstance()->IsSupportTemplate(templateName, isSupport);
         ret.code = InnerErrorToExternal(result);
         ret.data = isSupport;
         return ret;
@@ -266,7 +266,7 @@ namespace CJSystemapi {
         }
         std::string deviceId {""};
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationsEnabledForSpecifiedBundle(
+            AnsNotification::GetInstance()->SetNotificationsEnabledForSpecifiedBundle(
                 bundleOption, deviceId, enable);
         return InnerErrorToExternal(result);
     }
@@ -278,7 +278,7 @@ namespace CJSystemapi {
             return ERROR_PARAM_INVALID;
         }
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->SetShowBadgeEnabledForBundle(bundleOption, enable);
+            AnsNotification::GetInstance()->SetShowBadgeEnabledForBundle(bundleOption, enable);
         return InnerErrorToExternal(result);
     }
 
@@ -292,7 +292,7 @@ namespace CJSystemapi {
         }
         bool enabled = false;
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabledForBundle(bundleOption, enabled);
+            AnsNotification::GetInstance()->GetShowBadgeEnabledForBundle(bundleOption, enabled);
         ret.code = InnerErrorToExternal(result);
         ret.data = enabled;
         return ret;
@@ -305,7 +305,7 @@ namespace CJSystemapi {
             return ERROR_PARAM_INVALID;
         }
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
+            AnsNotification::GetInstance()->SetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
         return InnerErrorToExternal(result);
     }
 
@@ -319,7 +319,7 @@ namespace CJSystemapi {
             return ret;
         }
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
+            AnsNotification::GetInstance()->GetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
         ret.code = static_cast<uint32_t>(InnerErrorToExternal(result));
         ret.data = slotFlags;
         return ret;
@@ -335,7 +335,7 @@ namespace CJSystemapi {
             return ret;
         }
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotNumAsBundle(bundleOption, num);
+            AnsNotification::GetInstance()->GetNotificationSlotNumAsBundle(bundleOption, num);
         ret.code = static_cast<uint32_t>(InnerErrorToExternal(result));
         ret.data = static_cast<uint32_t>(num);
         return ret;
@@ -349,7 +349,7 @@ namespace CJSystemapi {
         }
         std::string groupName(cGroupName);
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->RemoveGroupByBundle(bundleOption, groupName);
+            AnsNotification::GetInstance()->RemoveGroupByBundle(bundleOption, groupName);
         return InnerErrorToExternal(result);
     }
 
@@ -363,12 +363,12 @@ namespace CJSystemapi {
             LOGI("option.bundle : %{public}s option.uid : %{public}d",
                 params.option.GetBundleName().c_str(),
                 params.option.GetUid());
-            result = DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(params.option, allowed);
+            result = AnsNotification::GetInstance()->IsAllowedNotify(params.option, allowed);
         } else if (params.hasUserId) {
             LOGI("userId : %{public}d", params.userId);
-            result = DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(params.userId, allowed);
+            result = AnsNotification::GetInstance()->IsAllowedNotify(params.userId, allowed);
         } else {
-            result = DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(allowed);
+            result = AnsNotification::GetInstance()->IsAllowedNotifySelf(allowed);
         }
         ret.code = InnerErrorToExternal(result);
         ret.data = allowed;
@@ -380,7 +380,7 @@ namespace CJSystemapi {
     int NotificationManagerImplV2::SetBadgeNumber(int32_t badgeNumber)
     {
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(badgeNumber);
+            AnsNotification::GetInstance()->SetBadgeNumber(badgeNumber);
         return InnerErrorToExternal(result);
     }
 
@@ -394,7 +394,7 @@ namespace CJSystemapi {
             return InnerErrorToExternal(ERR_ANS_INNER_DIALOG_IS_POPPING);
         }
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(
+            AnsNotification::GetInstance()->RequestEnableNotification(
                 deviceId, client, params.callerToken);
         LOGI("done, result is %{public}d.", InnerErrorToExternal(result))
         return InnerErrorToExternal(result);
@@ -412,7 +412,7 @@ namespace CJSystemapi {
         }
         bool canPop = false;
         std::string bundleName {""};
-        uint32_t result = DelayedSingleton<AnsNotification>::GetInstance()->CanPopEnableNotificationDialog(
+        uint32_t result = AnsNotification::GetInstance()->CanPopEnableNotificationDialog(
             client, canPop, bundleName);
         LOGI("canPopDialog result=%{public}d canPop=%{public}d bundleName=%{public}s.",
             result, canPop, bundleName.c_str());
@@ -421,7 +421,7 @@ namespace CJSystemapi {
         }
         bool success = CreateUIExtension(context, bundleName);
         if (!success) {
-            DelayedSingleton<AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
+            AnsNotification::GetInstance()->RemoveEnableNotificationDialog();
             return InnerErrorToExternal(ERR_ANS_INNER_TASK_ERR);
         }
         return ERR_OK;
@@ -432,7 +432,7 @@ namespace CJSystemapi {
         RetDataBool ret = { .code = EINVAL, .data = false };
         bool enable = false;
         uint32_t result =
-            DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabled(enable);
+            AnsNotification::GetInstance()->IsDistributedEnabled(enable);
         LOGI("IsDistributedEnabled enable = %{public}d", enable);
         ret.code = InnerErrorToExternal(result);
         ret.data = enable;

@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_DIALOG_MANAGER_H
 
 #include <list>
+#include "nocopyable.h"
 #include <memory>
 #include <mutex>
 #include <string>

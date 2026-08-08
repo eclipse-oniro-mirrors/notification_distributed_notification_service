@@ -15,7 +15,6 @@
 #include "ani_do_not_disturb_date.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -163,7 +162,7 @@ ani_object AniSetDoNotDisturbDate(ani_env *env, ani_object date, ani_object call
             auto asyncCallbackInfo = static_cast<AsyncCallbackDisturbInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetDoNotDisturbDate(
+                    AnsNotification::GetInstance()->SetDoNotDisturbDate(
                         asyncCallbackInfo->doNotDisturbDate);
             }
         },
@@ -211,7 +210,7 @@ ani_object AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_int u
             auto asyncCallbackInfo = static_cast<AsyncCallbackDisturbInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetDoNotDisturbDate(
+                    AnsNotification::GetInstance()->SetDoNotDisturbDate(
                         asyncCallbackInfo->userId, asyncCallbackInfo->doNotDisturbDate);
             }
         },
@@ -255,7 +254,7 @@ ani_object AniGetDoNotDisturbDate(ani_env *env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackDisturbInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(
+                    AnsNotification::GetInstance()->GetDoNotDisturbDate(
                         asyncCallbackInfo->doNotDisturbDate);
             }
         },
@@ -300,7 +299,7 @@ ani_object AniGetDoNotDisturbDateWithId(ani_env *env, ani_int userId, ani_object
             auto asyncCallbackInfo = static_cast<AsyncCallbackDisturbInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(
+                    AnsNotification::GetInstance()->GetDoNotDisturbDate(
                         asyncCallbackInfo->userId, asyncCallbackInfo->doNotDisturbDate);
             }
         },
@@ -344,7 +343,7 @@ ani_object AniIsSupportDoNotDisturbMode(ani_env *env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackDisturbInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->DoesSupportDoNotDisturbMode(
+                    AnsNotification::GetInstance()->DoesSupportDoNotDisturbMode(
                         asyncCallbackInfo->isSupportDoNotDisturbMode);
             }
         },

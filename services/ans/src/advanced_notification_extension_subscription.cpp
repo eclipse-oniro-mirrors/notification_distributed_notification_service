@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "singleton.h"
 #include "access_token_helper.h"
 #include "aes_gcm_helper.h"
 #include "advanced_datashare_helper.h"

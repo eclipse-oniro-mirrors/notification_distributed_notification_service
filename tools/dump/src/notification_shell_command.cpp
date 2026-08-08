@@ -24,7 +24,6 @@
 #include "nativetoken_kit.h"
 #include "notification_bundle_option.h"
 #include "token_setproc.h"
-#include "singleton.h"
 #include "ans_convert_enum.h"
 
 namespace OHOS {
@@ -117,7 +116,7 @@ ErrCode NotificationShellCommand::Init()
     SetNativeToken();
     ErrCode result = OHOS::ERR_OK;
     if (!ans_) {
-        ans_ = DelayedSingleton<AnsNotification>::GetInstance();
+        ans_ = AnsNotification::GetInstance();
     }
     if (!ans_) {
         result = OHOS::ERR_INVALID_VALUE;

@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "common.h"
 
 namespace OHOS {
@@ -68,7 +67,7 @@ napi_value NapiSubscriteLocalAcitvity(napi_env env, napi_callback_info info)
             }
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribeLocalLiveView *>(data);
             asynccallbackinfo->info.errorCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->SubscribeLocalLiveViewNotification(
+                AnsNotification::GetInstance()->SubscribeLocalLiveViewNotification(
                     *(asynccallbackinfo->objectInfo), false);
         },
         [](napi_env env, napi_status status, void *data) {
@@ -220,7 +219,7 @@ napi_value NapiTriggerLocalLiveView(napi_env env, napi_callback_info info)
             }
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribeLocalLiveView *>(data);
             asynccallbackinfo->info.errorCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->TriggerLocalLiveView(asynccallbackinfo->bundleOption,
+                AnsNotification::GetInstance()->TriggerLocalLiveView(asynccallbackinfo->bundleOption,
                     asynccallbackinfo->notificationId, asynccallbackinfo->buttonOption);
         },
         [](napi_env env, napi_status status, void *data) {

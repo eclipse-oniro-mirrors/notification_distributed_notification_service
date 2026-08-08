@@ -15,7 +15,6 @@
 #include "ani_notification_enable.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -158,7 +157,7 @@ ani_object AniIsNotificationEnabled(ani_env *env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(
+                    AnsNotification::GetInstance()->IsAllowedNotifySelf(
                         asyncCallbackInfo->isAllowed);
             }
         },
@@ -201,7 +200,7 @@ ani_object AniIsNotificationEnabledWithId(ani_env *env, ani_int userId, ani_obje
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(
+                    AnsNotification::GetInstance()->IsAllowedNotify(
                         asyncCallbackInfo->userId, asyncCallbackInfo->isAllowed);
             }
         },
@@ -248,7 +247,7 @@ ani_object AniIsNotificationEnabledWithBundleOption(ani_env *env, ani_object bun
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotify(
+                    AnsNotification::GetInstance()->IsAllowedNotify(
                         asyncCallbackInfo->notificationOption, asyncCallbackInfo->isAllowed);
             }
         },
@@ -297,7 +296,7 @@ ani_object AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_b
             if (asyncCallbackInfo) {
                 std::string deviceId {""};
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationsEnabledForSpecifiedBundle(
+                    AnsNotification::GetInstance()->SetNotificationsEnabledForSpecifiedBundle(
                         asyncCallbackInfo->notificationOption, deviceId, asyncCallbackInfo->isAllowed);
             }
         },
@@ -343,7 +342,7 @@ ani_object AniSetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetSyncNotificationEnabledWithoutApp(
+                    AnsNotification::GetInstance()->SetSyncNotificationEnabledWithoutApp(
                         asyncCallbackInfo->userId, asyncCallbackInfo->isAllowed);
             }
         },
@@ -388,7 +387,7 @@ ani_object AniGetAllNotificationEnabledBundles(ani_env *env, ani_object callback
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(
+                    AnsNotification::GetInstance()->GetAllNotificationEnabledBundles(
                         asyncCallbackInfo->bundleOptions);
             }
         },
@@ -431,7 +430,7 @@ ani_object AniGetAllNotificationEnabledBundlesByUserId(ani_env *env, ani_int use
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllNotificationEnabledBundles(
+                    AnsNotification::GetInstance()->GetAllNotificationEnabledBundles(
                         asyncCallbackInfo->bundleOptions, asyncCallbackInfo->userId);
             }
         },
@@ -451,7 +450,7 @@ ani_boolean AniIsNotificationEnabledSync(ani_env *env)
 {
     bool allowed = false;
     uint32_t svcCode =
-        DelayedSingleton<AnsNotification>::GetInstance()->IsAllowedNotifySelf(allowed);
+        AnsNotification::GetInstance()->IsAllowedNotifySelf(allowed);
     if (svcCode != ERR_ANS_INNER_OK) {
         ANS_LOGE("AniIsNotificationEnabledSync error, errorCode: %{public}u", svcCode);
         OHOS::NotificationSts::ThrowErrorWithCode(env, svcCode);
@@ -488,7 +487,7 @@ ani_object AniGetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetSyncNotificationEnabledWithoutApp(
+                    AnsNotification::GetInstance()->GetSyncNotificationEnabledWithoutApp(
                         asyncCallbackInfo->userId, asyncCallbackInfo->isAllowed);
             }
         },
@@ -543,7 +542,7 @@ ani_object AniDisableNotificationFeature(ani_env *env, ani_boolean disabled, ani
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->DisableNotificationFeature(
+                    AnsNotification::GetInstance()->DisableNotificationFeature(
                         asyncCallbackInfo->param);
             }
         },
@@ -597,7 +596,7 @@ ani_object AniDisableNotificationFeatureWithId(ani_env *env, ani_boolean disable
             auto asyncCallbackInfo = static_cast<AsyncCallbackEnabledInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->DisableNotificationFeature(
+                    AnsNotification::GetInstance()->DisableNotificationFeature(
                         asyncCallbackInfo->param);
             }
         },

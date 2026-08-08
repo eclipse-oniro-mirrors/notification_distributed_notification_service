@@ -19,7 +19,6 @@
 #include "ets_error_utils.h"
 #include "ans_notification.h"
 #include "ans_service_errors.h"
-#include "singleton.h"
 #include "ani_common_util.h"
 #include "sts_throw_erro.h"
 #include "ani_ans_dialog_callback.h"
@@ -136,10 +135,10 @@ ani_object StsNotificationSettingResult(ani_env *env, std::shared_ptr<OpenSettin
     bool enabled = false;
     std::vector<sptr<NotificationBundleOption>> bundles;
     info->errorCode =
-        DelayedSingleton<AnsNotification>::GetInstance()->IsUserGranted(enabled);
+        AnsNotification::GetInstance()->IsUserGranted(enabled);
     if (info->errorCode == ERR_OK && enabled) {
         info->errorCode =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetUserGrantedEnabledBundlesForSelf(bundles);
+            AnsNotification::GetInstance()->GetUserGrantedEnabledBundlesForSelf(bundles);
     }
     if (info->errorCode != ERR_OK) {
         return nullptr;
@@ -177,7 +176,7 @@ bool ValidateAndPrepareOpenSettings(ani_env *env, ani_object content, std::share
     ani_resolver &aniResolver, ani_object &aniPromise)
 {
     uint32_t svcCode =
-        DelayedSingleton<AnsNotification>::GetInstance()->CanOpenSubscribeSettings();
+        AnsNotification::GetInstance()->CanOpenSubscribeSettings();
     if (svcCode != ERR_ANS_INNER_OK) {
         ANS_LOGE("AniOpenSubscribeSettings error, errorCode: %{public}u", svcCode);
         OHOS::NotificationSts::ThrowErrorWithCode(env, svcCode);
@@ -274,7 +273,7 @@ ani_object AniOpenSubscribeSettingsWithResult(ani_env *env, ani_object content)
 {
     ANS_LOGD("sts AniOpenSubscribeSettingsWithResult call");
     uint32_t svcCode =
-        DelayedSingleton<AnsNotification>::GetInstance()->CanOpenSubscribeSettings();
+        AnsNotification::GetInstance()->CanOpenSubscribeSettings();
     if (svcCode != ERR_ANS_INNER_OK) {
         ANS_LOGE("AniOpenSubscribeSettingsWithResult error, errorCode: %{public}u", svcCode);
         OHOS::NotificationSts::ThrowErrorWithCode(env, svcCode);

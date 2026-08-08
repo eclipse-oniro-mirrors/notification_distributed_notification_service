@@ -15,7 +15,6 @@
 #include "ani_sync_config.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -165,7 +164,7 @@ ani_object AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value
             if (asyncCallbackInfo) {
                 if (asyncCallbackInfo->result != ERR_OK) {
                     asyncCallbackInfo->info.returnCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(
+                        AnsNotification::GetInstance()->SetAdditionConfig(
                             asyncCallbackInfo->configkey, asyncCallbackInfo->configValue);
                     asyncCallbackInfo->result = ERR_OK;
                 }

@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
 #include <memory>
@@ -126,7 +125,7 @@ napi_value NapiGetNotificationParameters(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoNotificationParameters *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationParameters(
+                    AnsNotification::GetInstance()->GetNotificationParameters(
                         asynccallbackinfo->notificationId, asynccallbackinfo->label, asynccallbackinfo->parameters);
             }
         },

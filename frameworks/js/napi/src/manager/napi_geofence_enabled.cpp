@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 namespace OHOS {
 namespace NotificationNapi {
 using OHOS::Notification::AnsNotification;
@@ -126,7 +125,7 @@ napi_value NapiSetGeofenceEnabled(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackGeofenceEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetGeofenceEnabled(
+                    AnsNotification::GetInstance()->SetGeofenceEnabled(
                         asynccallbackinfo->enabled);
                 ANS_LOGI("SetGeofenceEnabled errorCode=%{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -180,7 +179,7 @@ napi_value NapiIsGeofenceEnabled(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackGeofenceEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsGeofenceEnabled(
+                    AnsNotification::GetInstance()->IsGeofenceEnabled(
                         asynccallbackinfo->enabled);
                 ANS_LOGI("IsGeofenceEnabled enabled=%{public}d", asynccallbackinfo->enabled);
             }

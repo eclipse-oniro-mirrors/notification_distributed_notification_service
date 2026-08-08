@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "singleton.h"
 #include "ans_service_errors.h"
 
 #include "ans_log_wrapper.h"

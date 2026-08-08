@@ -20,7 +20,6 @@
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "push_callback_proxy.h"
-#include "singleton.h"
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
 #include "nlohmann/json.hpp"

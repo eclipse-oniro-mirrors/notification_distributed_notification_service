@@ -14,6 +14,7 @@
  */
 
 #include "notification_preferences.h"
+#include "singleton.h"
 
 #include <chrono>
 #include <fstream>

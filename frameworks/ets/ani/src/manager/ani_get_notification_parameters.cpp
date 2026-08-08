@@ -16,7 +16,6 @@
 
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "sts_request.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -141,7 +140,7 @@ ani_object AniGetNotificationParameters(ani_env *env, ani_int id, ani_string lab
             auto asyncData = static_cast<AsyncCallbackInfoNotificationParameters*>(data);
             if (asyncData) {
                 asyncData->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationParameters(
+                    AnsNotification::GetInstance()->GetNotificationParameters(
                         asyncData->notificationId, asyncData->label, asyncData->parameters);
             }
         },

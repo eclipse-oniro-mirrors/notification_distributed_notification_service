@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "slot.h"
 
 namespace OHOS {
@@ -60,11 +59,11 @@ napi_value NapiAddSlot(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->isAddSlotByType) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->AddSlotByType(
+                        AnsNotification::GetInstance()->AddSlotByType(
                             asynccallbackinfo->inType);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->AddNotificationSlot(
+                        AnsNotification::GetInstance()->AddNotificationSlot(
                             asynccallbackinfo->slot);
                 }
             }
@@ -152,7 +151,7 @@ napi_value NapiAddSlots(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoAddSlots *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->AddNotificationSlots(
+                    AnsNotification::GetInstance()->AddNotificationSlots(
                         asynccallbackinfo->slots);
             }
         },
@@ -237,7 +236,7 @@ napi_value NapiSetSlotByBundle(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoSetSlotByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->UpdateNotificationSlots(
+                    AnsNotification::GetInstance()->UpdateNotificationSlots(
                         asynccallbackinfo->params.option, asynccallbackinfo->params.slots);
             }
         },
@@ -353,7 +352,7 @@ napi_value NapiGetSlot(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoGetSlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlot(
+                    AnsNotification::GetInstance()->GetNotificationSlot(
                         asynccallbackinfo->outType, asynccallbackinfo->slot);
             }
         },
@@ -425,7 +424,7 @@ napi_value NapiGetSlotNumByBundle(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotNumByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotNumAsBundle(
+                    AnsNotification::GetInstance()->GetNotificationSlotNumAsBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->num);
             }
         },
@@ -560,7 +559,7 @@ napi_value NapiGetSlots(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlots *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlots(
+                    AnsNotification::GetInstance()->GetNotificationSlots(
                         asynccallbackinfo->slots);
             }
         },
@@ -679,7 +678,7 @@ napi_value NapiGetSlotsByBundle(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotsByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotsForBundle(
+                    AnsNotification::GetInstance()->GetNotificationSlotsForBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->slots);
             }
         },
@@ -783,7 +782,7 @@ napi_value NapiGetSlotByBundle(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotForBundle(
+                    AnsNotification::GetInstance()->GetNotificationSlotForBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->params.outType,
                         asynccallbackinfo->slot);
             }
@@ -856,7 +855,7 @@ napi_value NapiRemoveSlot(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoRemoveSlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotificationSlot(
+                    AnsNotification::GetInstance()->RemoveNotificationSlot(
                         asynccallbackinfo->outType);
             }
         },
@@ -940,7 +939,7 @@ napi_value NapiRemoveAllSlots(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoRemoveAllSlots *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->RemoveAllSlots();
+                    AnsNotification::GetInstance()->RemoveAllSlots();
             }
         },
         [](napi_env env, napi_status status, void *data) {
@@ -1025,7 +1024,7 @@ napi_value NapiEnableNotificationSlot(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoInfoEnableSlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetEnabledForBundleSlot(
+                    AnsNotification::GetInstance()->SetEnabledForBundleSlot(
                         asynccallbackinfo->params.option,
                         asynccallbackinfo->params.outType,
                         asynccallbackinfo->params.enable,
@@ -1114,7 +1113,7 @@ napi_value NapiIsEnableNotificationSlot(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoInfoIsEnableSlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetEnabledForBundleSlot(
+                    AnsNotification::GetInstance()->GetEnabledForBundleSlot(
                         asynccallbackinfo->params.option, asynccallbackinfo->params.outType,
                         asynccallbackinfo->isEnable);
             }
@@ -1203,7 +1202,7 @@ napi_value NapiSetSlotFlagsByBundle(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoSetSlotFlagsByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSlotFlagsAsBundle(
+                    AnsNotification::GetInstance()->SetNotificationSlotFlagsAsBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->params.slotFlags);
             }
         },
@@ -1289,7 +1288,7 @@ napi_value NapiGetSlotFlagsByBundle(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetSlotFlagsByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSlotFlagsAsBundle(
+                    AnsNotification::GetInstance()->GetNotificationSlotFlagsAsBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->slotFlags);
             }
         },
@@ -1397,7 +1396,7 @@ napi_value NapiGetNotificationSettings(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoGetNotificationSettings *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSettings(
+                    AnsNotification::GetInstance()->GetNotificationSettings(
                         asynccallbackinfo->slotFlags);
             }
         },
@@ -1560,7 +1559,7 @@ napi_value NapiIsNotificationSlotEnabledByBundles(napi_env env, napi_callback_in
         [](napi_env env, void *data) {
             auto *info = static_cast<AsyncCallbackInfoBatchGetSlotEnabled *>(data);
             if (info) {
-                info->info.errorCode = DelayedSingleton<AnsNotification>::GetInstance()->GetEnabledForBundleSlots(
+                info->info.errorCode = AnsNotification::GetInstance()->GetEnabledForBundleSlots(
                     info->bundles, info->slotType, info->slotEnabled);
             }
         },

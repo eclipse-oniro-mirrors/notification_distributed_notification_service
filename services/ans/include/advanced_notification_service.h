@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_ADVANCED_NOTIFICATION_SERVICE_H
 
 #include <ctime>
+#include "nocopyable.h"
 #include <list>
 #include <memory>
 #include <mutex>

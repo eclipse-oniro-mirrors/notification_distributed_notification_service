@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "display_badge.h"
 
 namespace OHOS {
@@ -57,7 +56,7 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetShowBadgeEnabledForBundle(
+                    AnsNotification::GetInstance()->SetShowBadgeEnabledForBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->params.enable);
                 ANS_LOGI("displayBadge bundle=%{public}s uid=%{public}d enable=%{public}d code=%{public}d",
                     asynccallbackinfo->params.option.GetBundleName().c_str(),
@@ -170,7 +169,7 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabledForBundle(
+                        AnsNotification::GetInstance()->GetShowBadgeEnabledForBundle(
                             asynccallbackinfo->params.option, asynccallbackinfo->enabled);
                     ANS_LOGI("get badgeEnabled bundle:%{public}s,uid:%{public}d,code:%{public}d,enabled:%{public}d",
                         asynccallbackinfo->params.option.GetBundleName().c_str(),
@@ -178,7 +177,7 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
                         asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabled(
+                        AnsNotification::GetInstance()->GetShowBadgeEnabled(
                             asynccallbackinfo->enabled);
                     ANS_LOGI("get badgeEnabled code:%{public}d,enabled:%{public}d",
                         asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
@@ -334,7 +333,7 @@ napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
                 ANS_LOGI("setBadge n=%{public}d", asynccallbackinfo->params.badgeNumber);
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(
+                    AnsNotification::GetInstance()->SetBadgeNumber(
                         asynccallbackinfo->params.badgeNumber, instanceKey);
             }
         },
@@ -410,7 +409,7 @@ napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info)
                     asyncCallbackInfo->params.option.GetUid(),
                     asyncCallbackInfo->params.badgeNumber);
                 asyncCallbackInfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumberByBundle(
+                    AnsNotification::GetInstance()->SetBadgeNumberByBundle(
                         asyncCallbackInfo->params.option, asyncCallbackInfo->params.badgeNumber);
             }
         },
@@ -579,7 +578,7 @@ napi_value NapiSetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info i
             AsyncCallbackInfoBatchSetBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoBatchSetBadge *>(data);
             if (asynccallbackinfo != nullptr) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetShowBadgeEnabledForBundles(
+                    AnsNotification::GetInstance()->SetShowBadgeEnabledForBundles(
                         asynccallbackinfo->params);
             }
         },
@@ -686,7 +685,7 @@ napi_value NapiGetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info i
             AsyncCallbackInfoBatchGetBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoBatchGetBadge *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabledForBundles(
+                    AnsNotification::GetInstance()->GetShowBadgeEnabledForBundles(
                         asynccallbackinfo->bundles, asynccallbackinfo->bundleEnable);
             }
         },
@@ -760,7 +759,7 @@ napi_value NapiGetBadgeNumber(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackGetBadgeNumber *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetBadgeNumber(
+                    AnsNotification::GetInstance()->GetBadgeNumber(
                         asynccallbackinfo->badgeNumber);
             }
         },

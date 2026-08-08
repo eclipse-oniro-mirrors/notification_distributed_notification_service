@@ -41,7 +41,6 @@
 #include "ipc_types.h"
 #include "mock_i_remote_object.h"
 #include "notification.h"
-#include "singleton.h"
 #include "mock_ans_manager_proxy.h"
 #include "mock_pixel_map.cpp"
 
@@ -93,7 +92,7 @@ void AnsNotificationUnitTest::TearDownTestCase() {}
 void AnsNotificationUnitTest::SetUp()
 {
     if (!ans_) {
-        ans_ = DelayedSingleton<AnsNotification>::GetInstance();
+        ans_ = AnsNotification::GetInstance();
     }
     mockProxy_ = sptr<MockAnsManagerProxy>(new MockAnsManagerProxy());
     mockSAMgr_ = sptr<MockSystemAbilityManager>(new MockSystemAbilityManager());

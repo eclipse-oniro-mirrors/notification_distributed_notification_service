@@ -68,7 +68,7 @@ void NapiDistributeOperationExecuteCallback(napi_env env, void *data)
     }
     int32_t result = static_cast<int32_t>(
 
-        DelayedSingleton<AnsNotification>::GetInstance()->DistributeOperation(
+        AnsNotification::GetInstance()->DistributeOperation(
             operationInfo, callback));
     if (result != ERR_OK ||
         operationInfo->GetOperationType() != OperationType::DISTRIBUTE_OPERATION_REPLY) {
@@ -136,11 +136,11 @@ void SubscribeNotificationAsyncWork(napi_env env, void *data)
             subscribeInfo->SetEnableClassification(callbackinfo->subscriberInfo.enableClassification);
             subscribeInfo->SetNeedSilentReplayOnSubscribe(callbackinfo->subscriberInfo.needSilentReplayOnSubscribe);
             callbackinfo->info.errorCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationV26(
+                AnsNotification::GetInstance()->SubscribeNotificationV26(
                     callbackinfo->objectInfo, subscribeInfo);
         } else {
             callbackinfo->info.errorCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationV26(callbackinfo->objectInfo);
+                AnsNotification::GetInstance()->SubscribeNotificationV26(callbackinfo->objectInfo);
         }
     }
 }
@@ -286,11 +286,11 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
                         subscribeInfo->SetPictureOption(pictureOption);
                     }
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(
+                        AnsNotification::GetInstance()->SubscribeNotification(
                             asynccallbackinfo->objectInfo, subscribeInfo);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotification(
+                        AnsNotification::GetInstance()->SubscribeNotification(
                             asynccallbackinfo->objectInfo);
                 }
             }
@@ -387,7 +387,7 @@ napi_value NapiSubscribeSelf(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackInfoSubscribe *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SubscribeNotificationSelf(
+                    AnsNotification::GetInstance()->SubscribeNotificationSelf(
                         asynccallbackinfo->objectInfo);
             }
         },
@@ -486,7 +486,7 @@ napi_value NapiUnsubscribe(napi_env env, napi_callback_info info)
                 bool ret = AddDeletingSubscriber(asynccallbackinfo->objectInfo);
                 if (ret) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->UnSubscribeNotification(
+                        AnsNotification::GetInstance()->UnSubscribeNotification(
                             asynccallbackinfo->objectInfo);
                     if (asynccallbackinfo->info.errorCode != ERR_OK) {
                         DelDeletingSubscriber(asynccallbackinfo->objectInfo);

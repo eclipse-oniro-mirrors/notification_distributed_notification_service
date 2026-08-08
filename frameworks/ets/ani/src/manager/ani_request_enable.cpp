@@ -19,7 +19,6 @@
 #include "ets_error_utils.h"
 #include "ans_notification.h"
 #include "ans_service_errors.h"
-#include "singleton.h"
 #include "ani_common_util.h"
 #include "sts_common.h"
 #include "sts_throw_erro.h"
@@ -71,7 +70,7 @@ void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
         bool canPop = false;
         std::string bundleName = "";
         uint32_t errCode =
-            DelayedSingleton<AnsNotification>::GetInstance()->CanPopEnableNotificationDialog(
+            AnsNotification::GetInstance()->CanPopEnableNotificationDialog(
                 client, canPop, bundleName);
         ANS_LOGI("errCode=%{public}d,canPop=%{public}d", errCode, canPop);
         if (canPop == false) {
@@ -84,7 +83,7 @@ void RequestEnableExecute(std::shared_ptr<EnableNotificationInfo> &info)
         ANS_LOGD("un stage mode");
         std::string deviceId {""};
         uint32_t svcErrCode =
-            DelayedSingleton<AnsNotification>::GetInstance()->RequestEnableNotification(
+            AnsNotification::GetInstance()->RequestEnableNotification(
                 deviceId, client, info->callerToken);
         info->errorCode = svcErrCode;
     }
@@ -177,7 +176,7 @@ void RequestEnableComplete(ani_env *env, std::shared_ptr<EnableNotificationInfo>
         } else {
             info->errorCode = ERR_ANS_INNER_TASK_ERR;
             AnsDialogHostClient::Destroy();
-            DelayedSingleton<AnsNotification>::GetInstance()->RemoveEnableNotificationDialog();
+            AnsNotification::GetInstance()->RemoveEnableNotificationDialog();
         }
     }
     if (info->errorCode != ERR_ANS_INNER_DIALOG_POP_SUCCEEDED) {

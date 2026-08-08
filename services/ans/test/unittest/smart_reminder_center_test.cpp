@@ -15,6 +15,7 @@
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "gtest/gtest.h"
+#include "singleton.h"
 #define private public
 #define protected public
 #include "notification_preferences.h"

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "distributed_service.h"
+#include "singleton.h"
 
 #include <thread>
 #include "notification_helper.h"

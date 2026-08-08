@@ -15,7 +15,6 @@
 #include "ani_do_not_disturb_profile.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_common.h"
 #include "sts_throw_erro.h"
@@ -146,7 +145,7 @@ ani_object AniAddDoNotDisturbProfile(ani_env *env, ani_object obj, ani_object ca
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
             asyncCallbackInfo->info.returnCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(
+                AnsNotification::GetInstance()->AddDoNotDisturbProfiles(
                     asyncCallbackInfo->profiles);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -194,7 +193,7 @@ ani_object AniAddDoNotDisturbProfileByUserId(ani_env *env, ani_object obj, ani_i
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
             asyncCallbackInfo->info.returnCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(
+                AnsNotification::GetInstance()->AddDoNotDisturbProfiles(
                     asyncCallbackInfo->profiles, asyncCallbackInfo->userId);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -241,7 +240,7 @@ ani_object AniRemoveDoNotDisturbProfile(ani_env *env, ani_object obj, ani_object
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
             asyncCallbackInfo->info.returnCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(
+                AnsNotification::GetInstance()->RemoveDoNotDisturbProfiles(
                     asyncCallbackInfo->profiles);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -289,7 +288,7 @@ ani_object AniRemoveDoNotDisturbProfileByUserId(ani_env *env, ani_object obj, an
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
             asyncCallbackInfo->info.returnCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(
+                AnsNotification::GetInstance()->RemoveDoNotDisturbProfiles(
                     asyncCallbackInfo->profiles, asyncCallbackInfo->userId);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -338,7 +337,7 @@ ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_long id, ani_object callb
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
             asyncCallbackInfo->info.returnCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(
+                AnsNotification::GetInstance()->GetDoNotDisturbProfile(
                     asyncCallbackInfo->notificationId, asyncCallbackInfo->doNotDisturbProfile);
         },
         HandleDisturbProfileCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));
@@ -388,7 +387,7 @@ ani_object AniGetDoNotDisturbProfileByUserId(ani_env *env, ani_long id, ani_int 
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackProfileInfo*>(data);
             asyncCallbackInfo->info.returnCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(
+                AnsNotification::GetInstance()->GetDoNotDisturbProfile(
                     asyncCallbackInfo->notificationId, asyncCallbackInfo->doNotDisturbProfile,
                     asyncCallbackInfo->userId);
         },

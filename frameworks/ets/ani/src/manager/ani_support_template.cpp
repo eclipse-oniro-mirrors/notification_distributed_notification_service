@@ -15,7 +15,6 @@
 #include "ani_support_template.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -161,7 +160,7 @@ ani_object AniIsSupportTemplate(ani_env* env, ani_string templateName, ani_objec
             auto asyncCallbackInfo = static_cast<AsyncCallbackSupportInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsSupportTemplate(
+                    AnsNotification::GetInstance()->IsSupportTemplate(
                         asyncCallbackInfo->templateNameStr, asyncCallbackInfo->isSupport);
             }
         },
@@ -205,7 +204,7 @@ ani_object AniGetDeviceRemindType(ani_env *env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackSupportInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetDeviceRemindType(
+                    AnsNotification::GetInstance()->GetDeviceRemindType(
                         asyncCallbackInfo->remindType);
             }
         },

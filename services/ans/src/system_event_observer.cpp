@@ -14,6 +14,7 @@
  */
 
 #include "system_event_observer.h"
+#include "singleton.h"
 
 #include "advanced_datashare_helper.h"
 #include "advanced_notification_service.h"

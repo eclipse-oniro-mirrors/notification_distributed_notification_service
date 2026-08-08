@@ -22,7 +22,6 @@
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "ans_notification.h"
-#include "singleton.h"
 
 #ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
 constexpr const char* TYPE_STRING = "checkNotification";
@@ -92,7 +91,7 @@ ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkR
     }
     NotificationConstant::SlotType outSlotType = checkRequest->GetSlotType();
     stsPushCallBack_->SetJsPushCallBackObject(env, outSlotType, fn);
-    InnerErrorCode svcResult = DelayedSingleton<AnsNotification>::GetInstance()->RegisterPushCallback(
+    InnerErrorCode svcResult = AnsNotification::GetInstance()->RegisterPushCallback(
         stsPushCallBack_->AsObject(), checkRequest);
     if (svcResult != ERR_ANS_INNER_OK) {
         ANS_LOGE("Register failed, result is %{public}d", svcResult);
@@ -127,7 +126,7 @@ ani_int AniOff(ani_env *env, ani_string type, ani_fn_object fn)
         OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
         return ERR_ANS_INNER_INVALID_PARAM;
     }
-    DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
+    AnsNotification::GetInstance()->UnregisterPushCallback();
     ANS_LOGD("done.");
     return ERR_OK;
 #else

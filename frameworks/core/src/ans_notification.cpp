@@ -14,6 +14,7 @@
  */
 
 #include "ans_notification.h"
+#include "singleton.h"
 #include "ans_const_define.h"
 #include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
@@ -43,6 +44,12 @@ const uint32_t MAX_PUBLISH_DELAY_TIME = 5;
 const std::string DOWNLOAD_TITLE = "title";
 const std::string DOWNLOAD_FILENAME = "fileName";
 const static int MAX_SLOT_FLAGS = 0b111111;
+}
+
+std::shared_ptr<AnsNotification> AnsNotification::GetInstance()
+{
+    static auto instance = std::make_shared<AnsNotification>();
+    return instance;
 }
 
 InnerErrorCode AnsNotification::AddNotificationSlot(const NotificationSlot &slot)

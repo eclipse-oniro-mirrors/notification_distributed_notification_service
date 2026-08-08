@@ -16,7 +16,6 @@
 
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "sts_common.h"
 #include "sts_notification_manager.h"
 #include "sts_throw_erro.h"
@@ -154,7 +153,7 @@ ani_object AniSetSilentReminderEnabled(ani_env *env, ani_object bundleOption, an
             auto asyncCallbackInfo = static_cast<AsyncCallbackSilentInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetSilentReminderEnabled(
+                    AnsNotification::GetInstance()->SetSilentReminderEnabled(
                         asyncCallbackInfo->option, asyncCallbackInfo->isEnable);
             }
         },
@@ -203,7 +202,7 @@ ani_object AniIsSilentReminderEnabled(ani_env *env, ani_object bundleOption, ani
             auto asyncCallbackInfo = static_cast<AsyncCallbackSilentInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsSilentReminderEnabled(
+                    AnsNotification::GetInstance()->IsSilentReminderEnabled(
                         asyncCallbackInfo->option, asyncCallbackInfo->enableStatus);
             }
         },

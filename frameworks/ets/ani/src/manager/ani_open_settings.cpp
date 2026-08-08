@@ -19,7 +19,6 @@
 #include "ets_error_utils.h"
 #include "ans_notification.h"
 #include "ans_service_errors.h"
-#include "singleton.h"
 #include "ani_common_util.h"
 #include "sts_throw_erro.h"
 #include "ani_ans_dialog_callback.h"
@@ -134,7 +133,7 @@ ani_object StsNotificationSettingResult(ani_env *env, std::shared_ptr<OpenSettin
     ani_object outAniObj = nullptr;
     uint32_t slotFlags = 0;
     info->errorCode =
-        DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSettings(slotFlags);
+        AnsNotification::GetInstance()->GetNotificationSettings(slotFlags);
     if (info->errorCode != ERR_OK) {
         return nullptr;
     }

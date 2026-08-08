@@ -15,6 +15,7 @@
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "smart_reminder_center.h"
+#include "singleton.h"
 
 #include "ans_log_wrapper.h"
 #include "ipc_skeleton.h"

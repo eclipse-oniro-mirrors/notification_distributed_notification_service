@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "singleton.h"
 
 #include <functional>
 #include <iomanip>
