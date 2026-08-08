@@ -314,11 +314,13 @@ public:
      * @param bundleOptions Indicates the bundle options to query.
      * @param slotType Indicates the slot type.
      * @param slotEnabled Indicates the output map from bundle option to enabled state.
+     * @param userId Indicates the user id to query.
      * @return Return true on success, false on failure.
      */
     bool GetEnabledForBundleSlots(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         int32_t slotType,
-        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled);
+        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled,
+        int32_t userId);
 
     /**
      * @brief Remove all proferences info from DB.

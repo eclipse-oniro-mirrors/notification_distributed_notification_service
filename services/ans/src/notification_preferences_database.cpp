@@ -1112,7 +1112,8 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
 bool NotificationPreferencesDatabase::GetEnabledForBundleSlots(
     const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
     int32_t slotType,
-    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled)
+    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled,
+    int32_t userId)
 {
     ANS_LOGD("called");
     if (!CheckRdbStore()) {
@@ -1125,13 +1126,9 @@ bool NotificationPreferencesDatabase::GetEnabledForBundleSlots(
     std::vector<std::string> keys;
     keys.reserve(bundleOptions.size());
     std::unordered_map<std::string, size_t> keyToIndex;
-    int32_t firstValidUid = -1;
     for (size_t i = 0; i < bundleOptions.size(); ++i) {
         if (bundleOptions[i] == nullptr) {
             continue;
-        }
-        if (firstValidUid < 0) {
-            firstValidUid = bundleOptions[i]->GetUid();
         }
         std::string bundleKey = bundleOptions[i]->GetBundleName() + std::to_string(bundleOptions[i]->GetUid());
         std::string slotKey = GenerateSlotKey(bundleKey, std::to_string(slotType), KEY_SLOT_ENABLED);
@@ -1141,9 +1138,6 @@ bool NotificationPreferencesDatabase::GetEnabledForBundleSlots(
     if (keys.empty()) {
         return true;
     }
-
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(firstValidUid, userId);
 
     std::unordered_map<std::string, std::string> results;
     if (rdbDataManager_->QueryDataInKeys(keys, results, userId) != NativeRdb::E_OK) {

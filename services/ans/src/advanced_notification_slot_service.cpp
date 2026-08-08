@@ -1077,12 +1077,14 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
         return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         std::vector<sptr<NotificationBundleOption>> bundles = {bundle};
         std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
         bool dbResult = NotificationPreferences::GetInstance()->GetEnabledForBundleSlots(
-            bundles, slotTypeInt, slotEnabled);
+            bundles, slotTypeInt, slotEnabled, userId);
         if (!dbResult) {
             result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
             return;
@@ -1132,10 +1134,12 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlots(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_OK;
     }
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         bool dbResult = NotificationPreferences::GetInstance()->GetEnabledForBundleSlots(
-            resolvedBundles, slotType, slotEnabled);
+            resolvedBundles, slotType, slotEnabled, userId);
         if (!dbResult) {
             result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
             return;

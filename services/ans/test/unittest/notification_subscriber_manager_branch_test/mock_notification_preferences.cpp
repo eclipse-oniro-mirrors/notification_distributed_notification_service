@@ -57,7 +57,8 @@ ErrCode NotificationPreferences::GetNotificationSlot(const sptr<NotificationBund
 bool NotificationPreferences::GetEnabledForBundleSlots(
     const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
     int32_t slotType,
-    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled)
+    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled,
+    int32_t userId)
 {
     return g_mockGetEnabledForBundleSlotsRet;
 }
