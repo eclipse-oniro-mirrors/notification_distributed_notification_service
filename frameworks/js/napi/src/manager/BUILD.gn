@@ -35,6 +35,7 @@ ohos_shared_library("notificationmanager") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
+  branch_protector_frt = "bti"
 
   include_dirs = [
     "../../include",
