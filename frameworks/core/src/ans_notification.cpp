@@ -241,7 +241,8 @@ InnerErrorCode AnsNotification::PublishNotification(const std::string &label, co
     const std::string &instanceKey)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    ANS_LOGI("publish id:%{public}u label:%{public}s", request.GetNotificationId(), label.c_str());
+    ANS_LOGI("publish id:%{public}u, label:%{public}s, badgeNumber:%{public}u",
+        request.GetNotificationId(), label.c_str(), request.GetBadgeNumber());
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
         ANS_LOGE("Refuse to publish the notification without valid content");
@@ -295,7 +296,8 @@ InnerErrorCode AnsNotification::PublishNotificationForIndirectProxy(const Notifi
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     TraceChainUtil traceChain = TraceChainUtil();
-    ANS_LOGI("publish indirectProxy id:%{public}u", request.GetNotificationId());
+    ANS_LOGI("publish indirectProxy id:%{public}u, badgeNumber:%{public}u",
+        request.GetNotificationId(), request.GetBadgeNumber());
 
     if (request.GetContent() == nullptr || request.GetNotificationType() == NotificationContent::Type::NONE) {
         ANS_LOGE("Refuse to publish the notification without valid content");
@@ -567,8 +569,8 @@ InnerErrorCode AnsNotification::CanPublishNotificationAsBundle(
 InnerErrorCode AnsNotification::PublishNotificationAsBundle(
     const std::string &representativeBundle, const NotificationRequest &request)
 {
-    ANS_LOGI("publish Bundle:%{public}s, id:%{public}u",
-        representativeBundle.c_str(), request.GetNotificationId());
+    ANS_LOGI("publish Bundle:%{public}s, id:%{public}u, badgeNumber:%{public}u",
+        representativeBundle.c_str(), request.GetNotificationId(), request.GetBadgeNumber());
     if (representativeBundle.empty()) {
         ANS_LOGE("Refuse to publish the notification whit invalid representativeBundle");
         return ERR_ANS_INNER_INVALID_PARAM;

@@ -278,7 +278,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
                 NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_3));
                 continue;
             }
-            bundleEnable.insert(std::make_pair(bundleOption, enable));
+            bundleEnable.insert(std::make_pair(bundle, enable));
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get badge enable for bundle.");
