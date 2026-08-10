@@ -928,7 +928,7 @@ uint64_t AdvancedNotificationService::StartDelayPublishTimer(
             sThis->StartPublishDelayedNotificationTimeOut(ownerUid, notificationId);
         }
     };
-    std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>();
+    std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>(wThis);
     notificationTimerInfo->SetCallbackInfo(timeoutFunc);
 
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();

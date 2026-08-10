@@ -396,7 +396,7 @@ void AdvancedNotificationService::SelfClean(bool resetQueues)
 #endif
         NotificationLocalLiveViewSubscriberManager::GetInstance()->ResetFfrtQueue();
         NotificationPreferences::GetInstance()->StopCacheCleanupTimer();
-        SystemSoundHelper::GetInstance()->ResetQueue();
+        SystemSoundHelper::GetInstance()->WaitForFfrtQueue(true);
     } else {
         notificationSvrQueue_.SyncSubmit(std::function<void()>([] {}));
         NotificationSubscriberManager::GetInstance()->WaitForFfrtQueue();
@@ -404,6 +404,7 @@ void AdvancedNotificationService::SelfClean(bool resetQueues)
         DistributedNotificationManager::GetInstance()->WaitForFfrtQueue();
 #endif
         NotificationLocalLiveViewSubscriberManager::GetInstance()->WaitForFfrtQueue();
+        SystemSoundHelper::GetInstance()->WaitForFfrtQueue();
     }
 }
 

@@ -1686,7 +1686,7 @@ uint64_t AdvancedNotificationService::StartAutoDelete(const std::shared_ptr<Noti
             }
         }
     };
-    std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>();
+    std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>(wThis);
     notificationTimerInfo->SetCallbackInfo(triggerFunc);
 
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
