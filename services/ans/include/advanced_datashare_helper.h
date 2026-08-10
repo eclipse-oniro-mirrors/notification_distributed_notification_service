@@ -100,7 +100,7 @@ private:
     std::string GetIntelligentData(const std::string &uri, const std::string &key);
     std::string GetIntelligentData(const std::string &uri, const std::string &key, const int32_t userId);
     void SetPhoneNumQueryCondition(DataShare::DataSharePredicates &predicates, const std::string &phoneNumber);
-    void SetPhoneNumQueryConditionExact(DataShare::DataSharePredicates &predicates, const std::string &phoneNumber);    
+    void SetPhoneNumQueryConditionExact(DataShare::DataSharePredicates &predicates, const std::string &phoneNumber);
     void RegisterObserver(const int32_t userId, const std::string &uri, const std::vector<std::string> &keys);
     void UnregisterObserver();
     void AddDataShareItems(Uri &uri, const std::string &key, const std::string &value);
