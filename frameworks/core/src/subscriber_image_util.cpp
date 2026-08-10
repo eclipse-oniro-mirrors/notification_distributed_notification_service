@@ -34,7 +34,6 @@ void SubscriberImageUtil::ProcessPictureOption(
     const sptr<PictureOption> &pictureOption)
 {
     if (notification == nullptr || pictureOption == nullptr) {
-        ANS_LOGE("Notification or pictureOption is null");
         return;
     }
     auto request = notification->GetNotificationRequestPoint();

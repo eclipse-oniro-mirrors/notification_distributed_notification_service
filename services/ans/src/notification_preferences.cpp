@@ -1858,8 +1858,6 @@ ErrCode NotificationPreferences::GetNotificationSwitch(const std::string &switch
     // Default state: SYSTEM_DEFAULT_ON (aggregation is enabled by default)
     state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
     bool storeDBResult = preferncesDB_->GetNotificationSwitch(switchName, userId, state);
-    ANS_LOGI("GetNotificationSwitch switchName: %{public}s, userId: %{public}d, state: %{public}d, result: %{public}d",
-        switchName.c_str(), userId, static_cast<int32_t>(state), storeDBResult);
     return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 

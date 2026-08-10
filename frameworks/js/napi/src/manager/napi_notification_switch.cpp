@@ -266,9 +266,6 @@ napi_value NapiGetNotificationSwitch(napi_env env, napi_callback_info info)
                     DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSwitch(
                         asyncCallbackInfo->params.switchName, asyncCallbackInfo->params.userId,
                         asyncCallbackInfo->params.enableStatus);
-                ANS_LOGI("GetNotificationSwitch result=%{public}d, state=%{public}d",
-                    asyncCallbackInfo->info.errorCode,
-                    static_cast<int32_t>(asyncCallbackInfo->params.enableStatus));
             }
         },
         AsyncCompleteCallbackNapiGetNotificationSwitch,
