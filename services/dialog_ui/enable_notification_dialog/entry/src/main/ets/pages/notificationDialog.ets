@@ -87,9 +87,11 @@ struct NotificationDialogPage {
     builder: PermissionDialog({ isUpdate: $isUpdate }),
     autoCancel: false,
     alignment: DialogAlignment.Center,
-    customStyle: true,
+    customStyle: false,
     maskColor: $r('app.color.mask_thin'),
     systemMaterial: defaultUiMaterial,
+    edgeLightMode: EdgeLightMode.EDGELIGHT_AUTO,
+    distortionMode: DistortionMode.DISTORTION_AUTO,
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
     }
@@ -272,21 +274,14 @@ struct PermissionDialog {
             }
           }
         }
-        .borderRadius(Constants.DIALOG_PRIVACY_BORDER_RADIUS)
         .width(Constants.FULL_WIDTH)
         .clip(true)
         .id(mainWindowId)
         .onAreaChange((oldArea: Area, newArea: Area) => {
           this.updateButtomVisibility(newArea.width as number);
         })
-        .systemMaterial(defaultUiMaterial)
       }
     }
-    .margin({
-      left: this.isBottomPopover ? Constants.DIALOG_MARGIN_VERTICAL : Constants.DIALOG_MARGIN,
-      right: this.isBottomPopover ? Constants.DIALOG_MARGIN_VERTICAL : Constants.DIALOG_MARGIN,
-      bottom: this.isBottomPopover ? this.naviHeight : 0
-    })
     .constraintSize({ 
       maxHeight: this.maxHeight,
       maxWidth: Constants.MAX_DIALOG_WIDTH
