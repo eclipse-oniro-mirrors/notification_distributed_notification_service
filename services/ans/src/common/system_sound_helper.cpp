@@ -23,7 +23,6 @@ namespace OHOS {
 namespace Notification {
 #ifdef PLAYER_FRAMEWORK_ENABLE
 static const int32_t MAX_RETRY_TIME = 2;
-static const uint64_t TASK_DELAY = 2 * 1000 * 1000;
 static const std::string DYNAMIC_LIB_PATH = "libans_dynamic.z.so";
 static const std::string REMOVE_TONC_FUNC_STR = "SystemSoundRemoveCustomizedTone";
 static const std::string REMOVE_TONC_LIST_FUNC_STR = "SystemSoundRemoveCustomizedToneList";
@@ -72,7 +71,7 @@ void SystemSoundHelper::RemoveCustomizedTone(const std::string uri)
         ANS_LOGW("soundHelperQueue_ is null");
         return;
     }
-    soundHelperQueue_->submit(retryTask, ffrt::task_attr().delay(TASK_DELAY).name("RemoveTone"));
+    soundHelperQueue_->submit(retryTask, ffrt::task_attr().name("RemoveTone"));
 }
 
 void SystemSoundHelper::RemoveCustomizedTone(sptr<NotificationRingtoneInfo> ringtoneInfo)
@@ -133,10 +132,10 @@ void SystemSoundHelper::RemoveCustomizedTones(std::vector<NotificationRingtoneIn
         ANS_LOGW("soundHelperQueue_ is null");
         return;
     }
-    soundHelperQueue_->submit(retryTask, ffrt::task_attr().delay(TASK_DELAY).name("RemoveTones"));
+    soundHelperQueue_->submit(retryTask, ffrt::task_attr().name("RemoveTones"));
 }
 
-void SystemSoundHelper::ResetQueue()
+void SystemSoundHelper::WaitForFfrtQueue(bool reset)
 {
     if (soundHelperQueue_ == nullptr) {
         ANS_LOGW("soundHelperQueue_ is null");
@@ -144,7 +143,9 @@ void SystemSoundHelper::ResetQueue()
     }
     auto handler = soundHelperQueue_->submit_h([] {});
     soundHelperQueue_->wait(handler);
-    soundHelperQueue_.reset();
+    if (reset) {
+        soundHelperQueue_.reset();
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS

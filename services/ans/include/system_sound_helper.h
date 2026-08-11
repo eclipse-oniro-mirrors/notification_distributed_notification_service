@@ -35,7 +35,7 @@ public:
 
     void RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos);
 
-    void ResetQueue();
+    void WaitForFfrtQueue(bool reset = false);
 
 private:
     std::shared_ptr<ffrt::queue> soundHelperQueue_ = nullptr;

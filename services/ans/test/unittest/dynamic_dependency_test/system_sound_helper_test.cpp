@@ -55,7 +55,7 @@ void SystemSoundHelperTest::SetUp()
 
 void SystemSoundHelperTest::TearDown()
 {
-    SystemSoundHelper::GetInstance()->ResetQueue();
+    SystemSoundHelper::GetInstance()->WaitForFfrtQueue(true);
 }
 
 HWTEST_F(SystemSoundHelperTest, GetInstance_QueueInitialized_00001, Function | SmallTest | Level1)
@@ -116,7 +116,7 @@ HWTEST_F(SystemSoundHelperTest, ResetQueue_NullQueue_00001, Function | SmallTest
     auto helper = SystemSoundHelper::GetInstance();
     ASSERT_NE(helper, nullptr);
     helper->soundHelperQueue_ = nullptr;
-    helper->ResetQueue();
+    helper->WaitForFfrtQueue(true);
 }
 
 HWTEST_F(SystemSoundHelperTest, ResetQueue_Normal_00001, Function | SmallTest | Level1)
@@ -124,7 +124,7 @@ HWTEST_F(SystemSoundHelperTest, ResetQueue_Normal_00001, Function | SmallTest | 
     auto helper = SystemSoundHelper::GetInstance();
     ASSERT_NE(helper, nullptr);
     EXPECT_NE(helper->soundHelperQueue_, nullptr);
-    helper->ResetQueue();
+    helper->WaitForFfrtQueue(true);
     EXPECT_EQ(helper->soundHelperQueue_, nullptr);
 }
 
@@ -134,8 +134,9 @@ HWTEST_F(SystemSoundHelperTest, RemoveCustomizedTone_SubmitToQueue_00001, Functi
     ASSERT_NE(helper, nullptr);
     ASSERT_NE(helper->soundHelperQueue_, nullptr);
     helper->RemoveCustomizedTone("test_uri_submit");
+    helper->WaitForFfrtQueue();
     EXPECT_NE(helper->soundHelperQueue_, nullptr);
-    helper->ResetQueue();
+    helper->WaitForFfrtQueue(true);
     EXPECT_EQ(helper->soundHelperQueue_, nullptr);
 }
 
@@ -150,8 +151,29 @@ HWTEST_F(SystemSoundHelperTest, RemoveCustomizedTones_SubmitToQueue_00001, Funct
     info.SetRingtoneUri("test_uri_list");
     infos.push_back(info);
     helper->RemoveCustomizedTones(infos);
+    helper->WaitForFfrtQueue();
     EXPECT_NE(helper->soundHelperQueue_, nullptr);
-    helper->ResetQueue();
+    helper->WaitForFfrtQueue(true);
+    EXPECT_EQ(helper->soundHelperQueue_, nullptr);
+}
+
+HWTEST_F(SystemSoundHelperTest, WaitForFfrtQueue_NullQueue_00001, Function | SmallTest | Level1)
+{
+    auto helper = SystemSoundHelper::GetInstance();
+    ASSERT_NE(helper, nullptr);
+    helper->soundHelperQueue_ = nullptr;
+    helper->WaitForFfrtQueue();
+}
+
+HWTEST_F(SystemSoundHelperTest, WaitForFfrtQueue_Normal_00001, Function | SmallTest | Level1)
+{
+    auto helper = SystemSoundHelper::GetInstance();
+    ASSERT_NE(helper, nullptr);
+    EXPECT_NE(helper->soundHelperQueue_, nullptr);
+    helper->RemoveCustomizedTone("test_uri_wait");
+    helper->WaitForFfrtQueue();
+    EXPECT_NE(helper->soundHelperQueue_, nullptr);
+    helper->WaitForFfrtQueue(true);
     EXPECT_EQ(helper->soundHelperQueue_, nullptr);
 }
 }  // namespace Notification

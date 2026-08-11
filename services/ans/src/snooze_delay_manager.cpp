@@ -305,8 +305,8 @@ void AdvancedNotificationService::InsertsnoozeDelayTimer(const std::shared_ptr<N
 
 void AdvancedNotificationService::CreateSnoozeTimer()
 {
-    auto timerInfo = std::make_shared<NotificationTimerInfo>();
     wptr<AdvancedNotificationService> wThis = this;
+    auto timerInfo = std::make_shared<NotificationTimerInfo>(wThis);
     auto triggerFunc = [wThis] {
         sptr<AdvancedNotificationService> sThis = wThis.promote();
         if (sThis != nullptr) {
