@@ -395,5 +395,36 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, UpdateNotification_0500, Fu
     NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
 }
 #endif
+
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+/**
+ * @tc.name: BuildCommandForUpdate_SetsPriorityTypeOther_0100
+ * @tc.desc: Verify BuildCommandForUpdate sets the request's InnerPriorityNotificationType to OTHER
+ *           (the new line before BuildPriorityCommand, which does not modify the type).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationAiExtensionManagerTest, BuildCommandForUpdate_SetsPriorityTypeOther_0100,
+    Function | SmallTest | Level1)
+{
+    auto manager = DelayedSingleton<AdvancedNotificationAiExtensionManager>::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    // Non-LIVE_VIEW, non-collaboration so the priority block (line 78-86) is reached.
+    request->SetSlotType(NotificationConstant::SlotType::OTHER);
+
+    nlohmann::json command = nlohmann::json::object();
+    command[manager->HAS_COMMAND] = false;
+    command[manager->AI_STATUS] = 1;
+
+    manager->BuildCommandForUpdate(request, command, false);
+
+    // The new line sets InnerPriorityNotificationType to OTHER before BuildPriorityCommand (which only
+    // reads switches and does not modify the type), so the type must be OTHER afterwards.
+    EXPECT_EQ(request->GetPriorityNotificationType(), NotificationConstant::PriorityNotificationType::OTHER);
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS
