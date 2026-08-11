@@ -20,6 +20,7 @@
 #include "access_token_helper.h"
 #include "advanced_notification_inline.h"
 #include "aes_gcm_helper.h"
+#include "ans_common_utils.h"
 #include "ans_const_define.h"
 #include "ans_service_errors.h"
 #include "ans_trace_wrapper.h"
@@ -86,8 +87,7 @@ ErrCode AdvancedNotificationService::ExcuteSnoozeNotification(const std::string 
             message.ErrorCode(ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS).BranchId(BRANCH_3));
         return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
-    bool isCollaboration =
-        AdvancedNotificationPriorityHelper::GetInstance()->IsCollaborationNotification(outRecord->request);
+    bool isCollaboration = AnsCommonUtils::IsCollaborationNotification(outRecord->request);
     if (outRecord->request->IsCommonLiveView() || outRecord->request->IsSystemLiveView() ||
         !outRecord->notification->IsRemoveAllowed() || isCollaboration) {
         ANS_LOGE("notification is not supported to snooze");

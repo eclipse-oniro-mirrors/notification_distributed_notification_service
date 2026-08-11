@@ -15,6 +15,7 @@
 
 #include "subscriber_image_util.h"
 
+#include "ans_common_utils.h"
 #include "ans_log_wrapper.h"
 #include "image_pixelmap_helper.h"
 #include "int_wrapper.h"
@@ -37,8 +38,9 @@ void SubscriberImageUtil::ProcessPictureOption(
         return;
     }
     auto request = notification->GetNotificationRequestPoint();
-    if (request == nullptr || request->GetNotificationType() != NotificationContent::Type::LIVE_VIEW) {
-        ANS_LOGI("No need parse pic, not liveView");
+    if (request == nullptr || request->GetNotificationType() != NotificationContent::Type::LIVE_VIEW ||
+        AnsCommonUtils::IsCollaborationNotification(request)) {
+        ANS_LOGI("No need parse pic, not liveView or collaboration notification");
         return;
     }
     auto content = request->GetContent();

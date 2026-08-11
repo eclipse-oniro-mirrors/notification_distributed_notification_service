@@ -15,6 +15,7 @@
 #include "advanced_notification_priority_helper.h"
 
 #include "advanced_notification_service.h"
+#include "ans_common_utils.h"
 #include "ans_permission_def.h"
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
@@ -23,16 +24,6 @@
 
 namespace OHOS {
 namespace Notification {
-bool AdvancedNotificationPriorityHelper::IsCollaborationNotification(const sptr<NotificationRequest> &request)
-{
-    auto extendInfo = request->GetExtendInfo();
-    AAFwk::IBoolean* ao = nullptr;
-    if (extendInfo != nullptr) {
-        ao = AAFwk::IBoolean::Query(extendInfo->GetParam(ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG));
-    }
-    return ao != nullptr && AAFwk::Boolean::Unbox(ao);
-}
-
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
 void AdvancedNotificationPriorityHelper::UpdatePriorityType(const sptr<NotificationRequest> &request)
 {
@@ -40,7 +31,8 @@ void AdvancedNotificationPriorityHelper::UpdatePriorityType(const sptr<Notificat
         ANS_LOGE("UpdatePriorityType request is nullptr");
         return;
     }
-    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW || IsCollaborationNotification(request)) {
+    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW ||
+        AnsCommonUtils::IsCollaborationNotification(request)) {
         return;
     }
     std::vector<int32_t> results;
