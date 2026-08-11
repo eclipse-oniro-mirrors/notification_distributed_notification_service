@@ -91,7 +91,6 @@ struct NotificationDialogPage {
     maskColor: $r('app.color.mask_thin'),
     systemMaterial: defaultUiMaterial,
     edgeLightMode: EdgeLightMode.EDGELIGHT_AUTO,
-    distortionMode: DistortionMode.DISTORTION_AUTO,
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
     }
