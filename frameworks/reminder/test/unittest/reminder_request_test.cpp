@@ -2631,5 +2631,72 @@ HWTEST_F(ReminderRequestTest, SerializeDeserializeNotificationRequestProxy_Escap
     EXPECT_EQ(dst.GetNotificationRequestProxy().appMessageId, "a\"b");
     EXPECT_FALSE(dst.GetNotificationRequestProxy().isAlertOnce);
 }
+
+/**
+ * @tc.name: UpdateNotificationCommon_00400
+ * @tc.desc: Test UpdateNotificationCommon when isUpdateDeliveryTime is true.
+ * @tc.type: FUNC
+ * @tc.require: issueII8F9EZ
+ */
+HWTEST_F(ReminderRequestTest, UpdateNotificationCommon_00400, Function | SmallTest | Level1)
+{
+    // given
+    auto rrc = std::make_shared<ReminderRequestChild>();
+
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    // when
+    rrc->UpdateNotificationCommon(notificationRequest, false, true);
+
+    // then
+    EXPECT_EQ(notificationRequest.GetDeliveryTime(), static_cast<int64_t>(now) * ReminderRequest::MILLI_SECONDS);
+}
+
+/**
+ * @tc.name: UpdateNotificationCommon_00500
+ * @tc.desc: Test UpdateNotificationCommon when deliveryTime_ is zero and assign triggerTimeInMilli_.
+ * @tc.type: FUNC
+ * @tc.require: issueII8F9EZ
+ */
+HWTEST_F(ReminderRequestTest, UpdateNotificationCommon_00500, Function | SmallTest | Level1)
+{
+    // given
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    rrc->triggerTimeInMilli_ = static_cast<int64_t>(now) * ReminderRequest::MILLI_SECONDS;
+    EXPECT_EQ(rrc->deliveryTime_, 0);
+
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
+    // when
+    rrc->UpdateNotificationCommon(notificationRequest, false, false);
+    // then
+    EXPECT_EQ(notificationRequest.GetDeliveryTime(), rrc->triggerTimeInMilli_);
+    EXPECT_EQ(rrc->deliveryTime_, rrc->triggerTimeInMilli_);
+}
+
+/**
+ * @tc.name: UpdateNotificationCommon_00600
+ * @tc.desc: Test UpdateNotificationCommon when deliveryTime_ is not zero.
+ * @tc.type: FUNC
+ * @tc.require: issueII8F9EZ
+ */
+HWTEST_F(ReminderRequestTest, UpdateNotificationCommon_00600, Function | SmallTest | Level1)
+{
+    // given
+    auto rrc = std::make_shared<ReminderRequestChild>();
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    rrc->deliveryTime_ = 1000;
+    rrc->triggerTimeInMilli_ = 3000;
+
+    NotificationRequest notificationRequest(rrc->GetNotificationId());
+    // when
+    rrc->UpdateNotificationCommon(notificationRequest, false, false);
+    // then
+    EXPECT_EQ(notificationRequest.GetDeliveryTime(), rrc->deliveryTime_);
+    EXPECT_NE(notificationRequest.GetDeliveryTime(), rrc->triggerTimeInMilli_);
+}
 }
 }

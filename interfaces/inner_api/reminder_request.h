@@ -1017,8 +1017,11 @@ public:
      *
      * @param notificationRequest notification request object
      * @param isSnooze isSnooze
+     * @param index the app clone id
+     * @param isUpdateDeliveryTime is update the notification sending time to the current time
      */
-    void UpdateNotificationRequest(NotificationRequest& notificationRequest, bool isSnooze, const int32_t index);
+    void UpdateNotificationRequest(NotificationRequest& notificationRequest, bool isSnooze, const int32_t index,
+        const bool isUpdateDeliveryTime = true);
 
     /**
      * @brief Get repeated days of the week.
@@ -1207,7 +1210,8 @@ private:
     bool UpdateNextReminder(const bool &force);
     void AddActionButtons(NotificationRequest& notificationRequest, const bool includeSnooze);
     void UpdateNotificationContent(NotificationRequest& notificationRequest, const bool &setSnooze);
-    void UpdateNotificationCommon(NotificationRequest& notificationRequest, bool isSnooze);
+    void UpdateNotificationCommon(NotificationRequest& notificationRequest, bool isSnooze,
+        const bool isUpdateDeliveryTime = true);
     void UpdateNotificationAddRemovalWantAgent(NotificationRequest& notificationRequest);
     void UpdateNotificationWantAgent(NotificationRequest& notificationRequest, const int32_t index);
     void UpdateNotificationMaxScreenWantAgent(NotificationRequest& notificationRequest);
@@ -1255,35 +1259,34 @@ private:
     static const std::string SEP_BUTTON_MULTI;
     static const std::string SEP_WANT_AGENT;
 
-    std::string content_ {};
-    std::string expiredContent_ {};
-    std::string snoozeContent_ {};
-    std::string displayContent_ {};
-    std::string title_ {};
-    std::string bundleName_ {};
     bool isExpired_ {false};
     bool isShare_ {false};
-    uint8_t snoozeTimes_ {0};
-    uint8_t snoozeTimesDynamic_ {0};
-    uint8_t state_ {0};
-    RingChannel ringChannel_ {RingChannel::ALARM};
-    TimeZoneType timeZoneType_ {TimeZoneType::DEFAULT};
-    int32_t notificationId_ {0};
-    std::string groupId_ {};
-    int32_t reminderId_ {-1};
-    int32_t userId_ {-1};
-    int32_t uid_ {-1};
     bool isSystemApp_ {false};
     bool tapDismissed_ {true};
     bool isRingLoop_ {true};
     bool forceDistributed_ {false};
     bool notDistributed_ {false};
-    int64_t autoDeletedTime_ {0};
-    std::string customButtonUri_ {};
-    std::string customRingUri_ {};
-    std::string creatorBundleName_ {};
-    int32_t creatorUid_ {-1};
 
+    uint8_t snoozeTimes_ {0};
+    uint8_t snoozeTimesDynamic_ {0};
+    uint8_t state_ {0};
+    RingChannel ringChannel_ {RingChannel::ALARM};
+    TimeZoneType timeZoneType_ {TimeZoneType::DEFAULT};
+    ReminderType reminderType_ {ReminderType::INVALID};
+
+    int32_t notificationId_ {0};
+    int32_t reminderId_ {-1};
+    int32_t userId_ {-1};
+    int32_t uid_ {-1};
+    int32_t creatorUid_ {-1};
+    int32_t titleResourceId_ {0};
+    int32_t contentResourceId_ {0};
+    int32_t expiredContentResourceId_ {0};
+    int32_t snoozeContentResourceId_ {0};
+    NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::SOCIAL_COMMUNICATION};
+    NotificationConstant::SlotType snoozeSlotType_ {NotificationConstant::SlotType::OTHER};
+
+    int64_t autoDeletedTime_ {0};
     // Indicates the reminder has been shown in the past time.
     // When the reminder has been created but not showed, it is equals to 0.
     uint64_t reminderTimeInMilli_ {0};
@@ -1291,23 +1294,28 @@ private:
     uint64_t triggerTimeInMilli_ {0};
     uint64_t oriTriggerTimeInMilli_ {0};
     uint64_t timeIntervalInMilli_ {0};
-    ReminderType reminderType_ {ReminderType::INVALID};
-    NotificationConstant::SlotType slotType_ {NotificationConstant::SlotType::SOCIAL_COMMUNICATION};
-    NotificationConstant::SlotType snoozeSlotType_ {NotificationConstant::SlotType::OTHER};
-    std::shared_ptr<WantAgentInfo> wantAgentInfo_ = nullptr;
-    std::shared_ptr<MaxScreenAgentInfo> maxScreenWantAgentInfo_ = nullptr;
-    std::map<ActionButtonType, ActionButtonInfo> actionButtonMap_ {};
-    NotificationRequestProxy notificationRequestProxy_;
-
-    std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_ {};
-    std::string wantAgentStr_{};
-    std::string maxWantAgentStr_{};
+    uint64_t deliveryTime_ {0};  // Notification sent time
+    
+    std::string customButtonUri_;
+    std::string customRingUri_;
+    std::string creatorBundleName_;
+    std::string content_;
+    std::string expiredContent_;
+    std::string snoozeContent_;
+    std::string displayContent_;
+    std::string title_;
+    std::string bundleName_;
+    std::string groupId_;
+    std::string wantAgentStr_;
+    std::string maxWantAgentStr_;
     std::string identifier_;
 
-    int32_t titleResourceId_ {0};
-    int32_t contentResourceId_ {0};
-    int32_t expiredContentResourceId_ {0};
-    int32_t snoozeContentResourceId_ {0};
+    NotificationRequestProxy notificationRequestProxy_;
+
+    std::shared_ptr<WantAgentInfo> wantAgentInfo_ {nullptr};
+    std::shared_ptr<MaxScreenAgentInfo> maxScreenWantAgentInfo_ {nullptr};
+    std::vector<std::shared_ptr<NotificationActionButton>> actionButtons_;
+    std::map<ActionButtonType, ActionButtonInfo> actionButtonMap_;
 };
 }  // namespace Notification
 }  // namespace OHOS

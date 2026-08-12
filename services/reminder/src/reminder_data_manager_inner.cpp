@@ -237,7 +237,7 @@ void ReminderDataManager::OnDataShareInsertOrDelete()
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
     ShowLimit limits;
-    HandleImmediatelyShow(immediatelyReminders, limits, false, false);
+    HandleImmediatelyShow(immediatelyReminders, limits);
     StartRecentReminder();
 }
 
@@ -262,7 +262,10 @@ void ReminderDataManager::UpdateShareReminders(const std::map<std::string, sptr<
         ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>((*it).GetRefPtr());
         calendar->Copy(iter->second);
         if ((*it)->IsShowing()) {
-            ShowReminder((*it), false, false, false, true);
+            ShowLimit limits;
+            limits.isSlienceNotification = true;
+            limits.isUpdateDeliveryTime = false;
+            ShowReminder((*it), limits);
         }
     }
 }

@@ -36,7 +36,8 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     sptr<Notification::ReminderRequest> reminder = new Notification::ReminderRequestTimer(SECONDS);
     reminder->SetReminderId(SECONDS);
     bool value = fdp->ConsumeBool();
-    manager->ShowReminder(reminder, value, value, value, value);
+    Notification::ReminderDataManager::ShowLimit limits;
+    manager->ShowReminder(reminder, limits);
     Notification::NotificationRequest notificationRequest;
     manager->SlienceNotification(value, value, notificationRequest);
     manager->SnoozeReminderImpl(reminder);
@@ -72,7 +73,6 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     manager->CancelReminderToDb(id, id);
     manager->CheckAndCloseShareReminder(reminder);
     manager->CollapseNotificationPanel();
-    Notification::ReminderDataManager::ShowLimit limits;
     manager->CheckShowLimit(limits, reminder);
 }
 

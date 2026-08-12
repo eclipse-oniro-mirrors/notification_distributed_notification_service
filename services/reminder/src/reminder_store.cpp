@@ -541,6 +541,7 @@ __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderS
 
 __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderStore::GetHalfHourReminders()
 {
+    std::lock_guard<std::mutex> lock(initMutex_);
     int32_t recoverFailCount = 0;
     int32_t ret = GetConfigValue(RECOVER_FAIL_COUNT_KEY, recoverFailCount);
     if (ret != STATE_OK) {

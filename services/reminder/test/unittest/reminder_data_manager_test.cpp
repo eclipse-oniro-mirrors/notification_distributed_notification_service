@@ -348,14 +348,20 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_011, Level1)
 {
     sptr<ReminderRequest> reminder(new ReminderRequestTimer(10));
     reminder->SetReminderId(0);
-    manager->ShowReminder(reminder, true, true, true, true);
+    ReminderDataManager::ShowLimit limits;
+    limits.isPlaySound = true;
+    limits.isSysTimeChanged = true;
+    limits.isCloseDefaultSound = true;
+    limits.isSlienceNotification = true;
+    manager->ShowReminder(reminder, limits);
     reminder->SetReminderId(10);
-    manager->ShowReminder(reminder, true, true, true, true);
-    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, limits);
+    manager->ShowReminder(reminder, limits);
     manager->alertingReminderId_ = 1;
-    manager->ShowReminder(reminder, true, true, true, true);
+    manager->ShowReminder(reminder, limits);
     manager->alertingReminderId_ = -1;
-    manager->ShowReminder(reminder, true, true, true, false);
+    limits.isSlienceNotification = false;
+    manager->ShowReminder(reminder, limits);
     remove("/data/service/el1/public/notification/notification.db");
     EXPECT_TRUE(manager != nullptr);
 }
@@ -427,7 +433,9 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     std::vector<sptr<ReminderRequest>> vec;
     vec.push_back(reminder);
     ReminderDataManager::ShowLimit limits;
-    manager->HandleImmediatelyShow(vec, limits, true, true);
+    limits.isSysTimeChanged = true;
+    limits.isSlienceNotification = true;
+    manager->HandleImmediatelyShow(vec, limits);
     manager->HandleRefreshReminder(0, reminder);
     manager->HandleSameNotificationIdShowing(reminder);
     manager->Init();

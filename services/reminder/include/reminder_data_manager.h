@@ -349,6 +349,16 @@ private:
         // Whether to play custom ringtones.
         bool isAlerting {false};
         bool checkIsShowing {true};
+        // Whether need to play sound.
+        bool isPlaySound {false};
+        // Whether it is triggerred as system time changed by user.
+        bool isSysTimeChanged {false};
+        // Whether need to close default sound.
+        bool isCloseDefaultSound {false};
+        // Whether need to slience show notification.
+        bool isSlienceNotification {false};
+        // Whether need to update delivery time.
+        bool isUpdateDeliveryTime {true};
     };
 
     static std::shared_ptr<ffrt::queue> serviceQueue_;
@@ -475,7 +485,7 @@ private:
     sptr<ReminderRequest> GetRecentReminder();
 
     void HandleImmediatelyShow(std::vector<sptr<ReminderRequest>>& showImmediately, ShowLimit& limits,
-        const bool isSysTimeChanged, const bool isSlienceNotification, size_t index = 0);
+        size_t index = 0);
     void HandleExtensionReminder(std::vector<sptr<ReminderRequest>> &extensionReminders, const int8_t type);
 
     /**
@@ -611,13 +621,11 @@ private:
      * @brief Show the reminder on SystemUI.
      *
      * @param reminder Indicates the reminder to show.
-     * @param isPlaySound Indicates whether need to play sound.
-     * @param isSysTimeChanged Indicates whether it is triggerred as system time changed by user.
-     * @param isCloseDefaultSound Indicates whether need to close default sound.
-     * @param isSlienceNotification Indicates whether need to slience show notification.
+     * @param limits Indicates the show limit and behavior flags, including whether need to play sound,
+     *               whether it is triggerred as system time changed by user, whether need to close
+     *               default sound and whether need to slience show notification.
      */
-    void ShowReminder(const sptr<ReminderRequest>& reminder, const bool isPlaySound,
-        const bool isSysTimeChanged, const bool isCloseDefaultSound, const bool isSlienceNotification);
+    void ShowReminder(const sptr<ReminderRequest>& reminder, const ShowLimit& limits);
     void SlienceNotification(const bool isCloseDefaultSound, const bool isSlienceNotification,
         NotificationRequest& notification);
 
