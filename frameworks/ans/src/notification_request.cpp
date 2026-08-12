@@ -22,6 +22,7 @@
 #include "ans_log_wrapper.h"
 #include "bool_wrapper.h"
 #include "errors.h"
+#include "int_wrapper.h"
 #include "notification_action_button.h"
 #include "notification_live_view_content.h"
 #include "notification_want_params_helper.h"
@@ -3095,11 +3096,11 @@ bool NotificationRequest::IsSharedThirdpartyLiveView() const
         return false;
     }
     auto value = extendInfo_->GetParam("isShared");
-    auto ao = AAFwk::IBoolean::Query(value);
+    auto ao = AAFwk::IInteger::Query(value);
     if (ao == nullptr) {
         return false;
     }
-    return AAFwk::Boolean::Unbox(ao);
+    return AAFwk::Integer::Unbox(ao) == 1;
 }
 
 bool NotificationRequest::IsSystemLiveView() const

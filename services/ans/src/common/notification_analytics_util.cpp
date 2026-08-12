@@ -20,6 +20,7 @@
 
 #include "want_params_wrapper.h"
 #include "string_wrapper.h"
+#include "int_wrapper.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "common_event_publish_info.h"
@@ -1117,6 +1118,13 @@ std::string NotificationAnalyticsUtil::BuildExtraInfoWithReq(const HaMetaMessage
     reason["time"] = now;
 
     reason["traceId"] = GetTraceIdStr();
+    std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
+    if (extendInfo != nullptr && extendInfo->HasParam("isShared")) {
+        auto ao = AAFwk::IInteger::Query(extendInfo->GetParam("isShared"));
+        if (ao != nullptr) {
+            reason["isShared"] = AAFwk::Integer::Unbox(ao);
+        }
+    }
     std::shared_ptr<AAFwk::WantParams> extraInfo = nullptr;
     if (request->GetUnifiedGroupInfo() != nullptr &&
         request->GetUnifiedGroupInfo()->GetExtraInfo() != nullptr) {
