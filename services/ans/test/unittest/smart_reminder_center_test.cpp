@@ -30,6 +30,7 @@
 #include "notification_live_view_content.h"
 #include "notification_content.h"
 #include "bool_wrapper.h"
+#include "int_wrapper.h"
 #include "want_params.h"
 
 using namespace testing::ext;
@@ -137,7 +138,7 @@ HWTEST_F(SmartReminderCenterTest, IsCollaborationAllowed_SharedThirdpartyLiveVie
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
     auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
     request->SetExtendInfo(extendInfo);
     EXPECT_TRUE(request->IsSharedThirdpartyLiveView());
 

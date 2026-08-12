@@ -710,7 +710,7 @@ HWTEST_F(NotificationRequestTest, IsSharedThirdpartyLiveView_0004, Level1)
 
 /**
  * @tc.name: IsSharedThirdpartyLiveView_0005
- * @tc.desc: Common live view with isShared boolean true returns true.
+ * @tc.desc: Common live view with isShared number 1 returns true.
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -722,14 +722,14 @@ HWTEST_F(NotificationRequestTest, IsSharedThirdpartyLiveView_0005, Level1)
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
     auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
     notificationRequest.SetExtendInfo(extendInfo);
     EXPECT_EQ(notificationRequest.IsSharedThirdpartyLiveView(), true);
 }
 
 /**
  * @tc.name: IsSharedThirdpartyLiveView_0006
- * @tc.desc: Common live view with isShared boolean false returns false.
+ * @tc.desc: Common live view with isShared number 0 returns false.
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -741,7 +741,26 @@ HWTEST_F(NotificationRequestTest, IsSharedThirdpartyLiveView_0006, Level1)
     auto content = std::make_shared<NotificationContent>(liveContent);
     notificationRequest.SetContent(content);
     auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(false));
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(0));
+    notificationRequest.SetExtendInfo(extendInfo);
+    EXPECT_EQ(notificationRequest.IsSharedThirdpartyLiveView(), false);
+}
+
+/**
+ * @tc.name: IsSharedThirdpartyLiveView_0007
+ * @tc.desc: Common live view with isShared number other than 1 returns false.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, IsSharedThirdpartyLiveView_0007, Level1)
+{
+    NotificationRequest notificationRequest(1);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    notificationRequest.SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(2));
     notificationRequest.SetExtendInfo(extendInfo);
     EXPECT_EQ(notificationRequest.IsSharedThirdpartyLiveView(), false);
 }

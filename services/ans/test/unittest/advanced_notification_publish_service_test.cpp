@@ -4344,7 +4344,7 @@ HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_PreserveIsShared_AgentL
     request->SetContent(content);
     request->SetIsAgentNotification(true);
     auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
     request->SetExtendInfo(extendInfo);
     ASSERT_TRUE(request->IsCommonLiveView());
     ASSERT_TRUE(request->IsAgentNotification());
@@ -4373,7 +4373,7 @@ HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_RemoveIsShared_NotAgent
     request->SetContent(content);
     request->SetIsAgentNotification(false);
     auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
     extendInfo->SetParam("keepParam", AAFwk::String::Box("keep"));
     request->SetExtendInfo(extendInfo);
     ASSERT_TRUE(request->IsCommonLiveView());
@@ -4400,7 +4400,7 @@ HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_RemoveIsShared_NotCommo
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     request->SetIsAgentNotification(true);
     auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
     request->SetExtendInfo(extendInfo);
     ASSERT_FALSE(request->IsCommonLiveView());
 

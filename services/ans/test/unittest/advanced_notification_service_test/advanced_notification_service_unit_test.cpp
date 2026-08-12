@@ -367,7 +367,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest,
     auto content = std::make_shared<NotificationContent>(liveContent);
     req->SetContent(content);
     auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
     req->SetExtendInfo(extendInfo);
     ASSERT_TRUE(req->IsSharedThirdpartyLiveView());
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
@@ -400,7 +400,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest,
     auto content = std::make_shared<NotificationContent>(liveContent);
     req->SetContent(content);
     auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
     req->SetExtendInfo(extendInfo);
     ASSERT_TRUE(req->IsSharedThirdpartyLiveView());
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
@@ -1198,7 +1198,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationKeys_SkipSharedThir
     auto content = std::make_shared<NotificationContent>(liveContent);
     request2->SetContent(content);
     auto extendInfo = std::make_shared<AAFwk::WantParams>();
-    extendInfo->SetParam("isShared", AAFwk::Boolean::Box(true));
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
     request2->SetExtendInfo(extendInfo);
     auto record2 = advancedNotificationService_->MakeNotificationRecord(request2, bundle);
     ASSERT_TRUE(record2->request->IsSharedThirdpartyLiveView());
