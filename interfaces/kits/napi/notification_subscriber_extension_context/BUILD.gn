@@ -59,7 +59,11 @@ ohos_shared_library("notificationsubscriberextensioncontext_napi") {
     ":notification_subscriber_extension_context_js",
   ]
 
-  external_deps = [ "napi:ace_napi" ]
+  external_deps = [ 
+   "napi:ace_napi",
+   "node:node_header_notice",
+   "libuv:uv"
+  ]
 
   relative_install_dir = "module/application"
   subsystem_name = "${subsystem_name}"
