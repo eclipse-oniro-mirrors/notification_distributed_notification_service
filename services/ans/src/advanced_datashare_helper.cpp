@@ -261,8 +261,8 @@ void AdvancedDatashareHelper::AddDataShareItems(Uri &uri, const std::string &key
 }
 
 ErrCode AdvancedDatashareHelper::QueryContactInnerExact(Uri &uri, const std::string &phoneNumber,
-    const std::string &policy, const std::string &profileId, const std::string isSupportIntelligentScene,
-    const int32_t userId)
+    const std::string &policy, const std::string &profileId,
+    const std::string isSupportIntelligentScene, const int32_t userId)
 {
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     std::shared_ptr<DataShare::DataShareResultSet> resultSet = nullptr;
@@ -378,7 +378,7 @@ std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetConta
         DataShare::DataSharePredicates predicates;
         predicates.EqualTo(MODE_ID, profileId);
         predicates.EqualTo(FOCUS_MODE_LIST, focusModeList);
-#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
+#ifdef  ENABLE_ANS_TELEPHONY_CUST_WRAPPER
         SetPhoneNumQueryCondition(predicates, phoneNumber);
 #else
         SetPhoneNumQueryConditionExact(predicates, phoneNumber);
@@ -394,7 +394,7 @@ std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetConta
         DataShare::DataSharePredicates predicates;
         predicates.EqualTo(IS_DELETED, 0);
         predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);
-#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
+#ifdef  ENABLE_ANS_TELEPHONY_CUST_WRAPPER
         SetPhoneNumQueryCondition(predicates, phoneNumber);
 #else
         SetPhoneNumQueryConditionExact(predicates, phoneNumber);
