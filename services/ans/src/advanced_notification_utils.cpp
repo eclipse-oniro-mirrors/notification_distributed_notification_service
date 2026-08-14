@@ -1187,6 +1187,11 @@ AnsStatus AdvancedNotificationService::PrepareContinuousTaskNotificationRequest(
     }
 
     AnsStatus ansStatus = CheckPictureSize(request);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
+    }
+    request->SetAppName(BundleManagerHelper::GetInstance()->GetBundleLabel(request->GetOwnerBundleName()));
+    request->SetAppIndex(BundleManagerHelper::GetInstance()->GetAppIndexByUid(uid));
     return ansStatus;
 }
 

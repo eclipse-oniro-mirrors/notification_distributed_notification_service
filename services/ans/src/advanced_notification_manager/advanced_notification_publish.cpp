@@ -460,6 +460,8 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
     int32_t uid = request->GetCreatorUid();
     request->SetOwnerUid(uid);
     request->SetOwnerBundleName(bundle);
+    request->SetAppName(BundleManagerHelper::GetInstance()->GetBundleLabel(request->GetOwnerBundleName()));
+    request->SetAppIndex(BundleManagerHelper::GetInstance()->GetAppIndexByUid(request->GetOwnerUid()));
 
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
