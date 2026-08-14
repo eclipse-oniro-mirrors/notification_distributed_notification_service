@@ -628,7 +628,9 @@ void ReminderDataManager::InitShareReminders(const bool registerObserver)
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
     ShowLimit limits;
-    HandleImmediatelyShow(immediatelyReminders, limits, false, true);
+    limits.isSlienceNotification = true;
+    limits.isUpdateDeliveryTime = false;
+    HandleImmediatelyShow(immediatelyReminders, limits);
     StartRecentReminder();
 }
 
@@ -830,7 +832,8 @@ void ReminderDataManager::RefreshRemindersDueToSysTimeChange(uint8_t type)
     std::vector<sptr<ReminderRequest>> extensionReminders;
     RefreshRemindersLocked(type, showImmediately, extensionReminders);
     ShowLimit limits;
-    HandleImmediatelyShow(showImmediately, limits, true, false);
+    limits.isSysTimeChanged = true;
+    HandleImmediatelyShow(showImmediately, limits);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
     StartLoadTimer();
@@ -960,7 +963,7 @@ void ReminderDataManager::ShowActiveReminder(const EventFwk::Want &want)
     ShowActiveReminderExtendLocked(reminder->GetTriggerTimeInMilli(), showImmediately, extensionReminders);
     ShowLimit limits;
     limits.checkIsShowing = false;
-    HandleImmediatelyShow(showImmediately, limits, false, false);
+    HandleImmediatelyShow(showImmediately, limits);
     HandleExtensionReminder(extensionReminders, NORMAL_CALLBACK);
     StartRecentReminder();
 }
@@ -1006,29 +1009,28 @@ void ReminderDataManager::ShowActiveReminderExtendLocked(const uint64_t triggerT
     }
 }
 
-void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, const bool isPlaySound,
-    const bool isSysTimeChanged, const bool isCloseDefaultSound, const bool isSlienceNotification)
+void ReminderDataManager::ShowReminder(const sptr<ReminderRequest>& reminder, const ShowLimit& limits)
 {
     int32_t reminderId = reminder->GetReminderId();
     bool isShare = reminder->IsShare();
     if (!IsAllowedNotify(reminder)) {
         ANSR_LOGE("Not allow to notify[%{public}s](%{public}d).",
             reminder->GetBundleName().c_str(), reminder->GetUid());
-        reminder->OnShow(false, isSysTimeChanged, false);
+        reminder->OnShow(false, limits.isSysTimeChanged, false);
         store_->UpdateOrInsert(reminder);
         return;
     }
     ReportSysEvent(reminder);
-    bool toPlaySound = isPlaySound && ShouldAlert(reminder) ? true : false;
-    reminder->OnShow(toPlaySound, isSysTimeChanged, true);
-    AddToShowedReminders(reminder);
     NotificationRequest notificationRequest(reminder->GetNotificationId());
     int32_t appIndex = ReminderBundleManagerHelper::GetInstance().GetAppIndexByUid(reminder->GetUid());
-    reminder->UpdateNotificationRequest(notificationRequest, false, appIndex);
+    reminder->UpdateNotificationRequest(notificationRequest, false, appIndex, limits.isUpdateDeliveryTime);
+    bool toPlaySound = limits.isPlaySound && ShouldAlert(reminder) ? true : false;
+    reminder->OnShow(toPlaySound, limits.isSysTimeChanged, true);
+    AddToShowedReminders(reminder);
     if (alertingReminderId_ != -1) {
         TerminateAlerting(alertingReminder_, "PlaySoundAndVibration");
     }
-    SlienceNotification(toPlaySound || isCloseDefaultSound, isSlienceNotification, notificationRequest);
+    SlienceNotification(toPlaySound || limits.isCloseDefaultSound, limits.isSlienceNotification, notificationRequest);
     ErrCode errCode = IN_PROCESS_CALL(NotificationHelper::PublishNotification(ReminderRequest::NOTIFICATION_LABEL,
         notificationRequest));
     if (errCode != ERR_OK) {
@@ -1189,7 +1191,7 @@ sptr<ReminderRequest> ReminderDataManager::GetRecentReminder()
 }
 
 void ReminderDataManager::HandleImmediatelyShow(std::vector<sptr<ReminderRequest>>& showImmediately,
-    ShowLimit& limits, const bool isSysTimeChanged, const bool isSlienceNotification, size_t index)
+    ShowLimit& limits, size_t index)
 {
     if (index >= showImmediately.size()) {
         return;
@@ -1210,7 +1212,7 @@ void ReminderDataManager::HandleImmediatelyShow(std::vector<sptr<ReminderRequest
         }
         if (!CheckShowLimit(limits, (*it))) {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-            (*it)->OnShow(false, isSysTimeChanged, false);
+            (*it)->OnShow(false, limits.isSysTimeChanged, false);
             store_->UpdateOrInsert((*it));
             continue;
         }
@@ -1220,23 +1222,27 @@ void ReminderDataManager::HandleImmediatelyShow(std::vector<sptr<ReminderRequest
             limits.isAlerting = true;
         } else {
             std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-            ShowReminder((*it), false, isSysTimeChanged, limits.isAlerting, isSlienceNotification);
+            limits.isPlaySound = false;
+            limits.isCloseDefaultSound = limits.isAlerting;
+            ShowReminder((*it), limits);
         }
     }
     if (playSoundReminder != nullptr) {
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-        ShowReminder(playSoundReminder, true, isSysTimeChanged, true, isSlienceNotification);
+        limits.isPlaySound = true;
+        limits.isCloseDefaultSound = true;
+        ShowReminder(playSoundReminder, limits);
     }
     if (!needFfrtTask) {
         return;
     }
     ANSR_LOGI("Too many notifications need to be displayed, execute in batches.");
-    auto callback = [showImmediately, limits, isSysTimeChanged, isSlienceNotification, index]() mutable {
+    auto callback = [showImmediately, limits, index]() mutable {
         auto manager = ReminderDataManager::GetInstance();
         if (manager == nullptr) {
             return;
         }
-        manager->HandleImmediatelyShow(showImmediately, limits, isSysTimeChanged, isSlienceNotification, index);
+        manager->HandleImmediatelyShow(showImmediately, limits, index);
     };
     queue_->submit(callback);
 }
@@ -1328,7 +1334,9 @@ void ReminderDataManager::Init()
     std::vector<sptr<ReminderRequest>> extensionReminders;
     CheckReminderTime(immediatelyReminders, extensionReminders);
     ShowLimit limits;
-    HandleImmediatelyShow(immediatelyReminders, limits, false, true);
+    limits.isSlienceNotification = true;
+    limits.isUpdateDeliveryTime = false;
+    HandleImmediatelyShow(immediatelyReminders, limits);
     HandleExtensionReminder(extensionReminders, REISSUE_CALLBACK);
     StartRecentReminder();
     StartLoadTimer();
@@ -1962,12 +1970,15 @@ void ReminderDataManager::OnLanguageChanged()
         std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
         showedReminder = showedReminderVector_;
     }
+    ShowLimit limits;
+    limits.isSlienceNotification = true;
+    limits.isUpdateDeliveryTime = false;
     for (auto it = showedReminder.begin(); it != showedReminder.end(); ++it) {
         if ((*it)->IsShare()) {
             continue;
         }
         std::lock_guard<std::mutex> lock(ReminderDataManager::MUTEX);
-        ShowReminder((*it), false, false, false, true);
+        ShowReminder((*it), limits);
     }
     ReminderDataShareHelper::GetInstance().StartDataExtension(ReminderCalendarShareTable::START_BY_LANGUAGE_CHANGE);
     ANSR_LOGD("end");
@@ -2075,7 +2086,10 @@ void ReminderDataManager::LoadShareReminders()
             calendar->Copy(iter->second);
             // In the logic of insertion or deletion, it can only be updated if the id changes.
             if ((*it)->IsShowing() && reminderId != iter->second->GetReminderId()) {
-                ShowReminder((*it), false, false, false, false);
+                ShowLimit limits;
+                limits.isSlienceNotification = true;
+                limits.isUpdateDeliveryTime = false;
+                ShowReminder((*it), limits);
             }
             reminders.erase(iter);
             ++it;

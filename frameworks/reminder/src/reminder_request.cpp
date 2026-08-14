@@ -1156,14 +1156,14 @@ void ReminderRequest::SetNotDistributed(const bool notDistributed)
 }
 
 void ReminderRequest::UpdateNotificationRequest(NotificationRequest& notificationRequest, const bool isSnooze,
-    const int32_t index)
+    const int32_t index, const bool isUpdateDeliveryTime)
 {
     if (isSnooze) {
         UpdateNotificationStateForSnooze(notificationRequest);
     } else {
         UpdateNotificationStateForAlert(notificationRequest);
     }
-    UpdateNotificationCommon(notificationRequest, isSnooze);
+    UpdateNotificationCommon(notificationRequest, isSnooze, isUpdateDeliveryTime);
     UpdateNotificationAddRemovalWantAgent(notificationRequest);
     UpdateNotificationWantAgent(notificationRequest, index);
     UpdateNotificationMaxScreenWantAgent(notificationRequest);
@@ -1900,12 +1900,19 @@ bool ReminderRequest::UpdateNextReminder(const bool &force)
     return result;
 }
 
-void ReminderRequest::UpdateNotificationCommon(NotificationRequest& notificationRequest, bool isSnooze)
+void ReminderRequest::UpdateNotificationCommon(NotificationRequest& notificationRequest, bool isSnooze,
+    const bool isUpdateDeliveryTime)
 {
     ANSR_LOGI("UpdateNotification common information");
-    time_t now;
-    (void)time(&now);  // unit is seconds.
-    notificationRequest.SetDeliveryTime(GetDurationSinceEpochInMilli(now));
+    if (isUpdateDeliveryTime) {
+        time_t now;
+        (void)time(&now);  // unit is seconds.
+        deliveryTime_ = GetDurationSinceEpochInMilli(now);
+    }
+    if (deliveryTime_ == 0) {
+        deliveryTime_ = triggerTimeInMilli_;
+    }
+    notificationRequest.SetDeliveryTime(static_cast<int64_t>(deliveryTime_));
     notificationRequest.SetLabel(NOTIFICATION_LABEL);
     notificationRequest.SetShowDeliveryTime(true);
     if (isSnooze) {
