@@ -92,6 +92,7 @@ ohos_unittest("advanced_notification_extension_subscription_test") {
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "time_service:time_client",
+    "ability_runtime:wantagent_innerkits"
   ]
 
   subsystem_name = "${subsystem_name}"
