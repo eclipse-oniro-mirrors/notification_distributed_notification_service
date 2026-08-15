@@ -113,7 +113,7 @@ bool ParsePraramForAdditionalConfig(ani_env *env,
     ani_string key, ani_string value, AsyncCallbackConfigInfo* asyncCallbackInfo)
 {
     std::string tempKey;
-    if (NotificationSts::GetStringByAniString(env, key, tempKey) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, key, tempKey, NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse key failed");
         asyncCallbackInfo->result = RESULT_FAILED;
         return false;
@@ -121,7 +121,8 @@ bool ParsePraramForAdditionalConfig(ani_env *env,
     std::string keyStr = NotificationSts::GetResizeStr(tempKey, NotificationSts::STR_MAX_SIZE);
 
     std::string tempValue;
-    if (NotificationSts::GetStringByAniString(env, value, tempValue) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, value, tempValue,
+        NotificationSts::STR_500K_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse value failed");
         asyncCallbackInfo->result = RESULT_FAILED;
         return false;

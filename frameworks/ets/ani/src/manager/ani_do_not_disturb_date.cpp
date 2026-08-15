@@ -198,6 +198,7 @@ ani_object AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_int u
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->userId = userId;
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;

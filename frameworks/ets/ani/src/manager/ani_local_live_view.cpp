@@ -42,6 +42,11 @@ void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackLiveViewInfo* a
         DeleteAsyncWork(env, asyncCallbackInfo->asyncWork);
         asyncCallbackInfo->asyncWork = nullptr;
     }
+    if (asyncCallbackInfo->localLiveViewSubscriber != nullptr) {
+        ANS_LOGD("Delete localLiveViewSubscriber");
+        delete asyncCallbackInfo->localLiveViewSubscriber;
+        asyncCallbackInfo->localLiveViewSubscriber = nullptr;
+    }
     delete asyncCallbackInfo;
     asyncCallbackInfo = nullptr;
 }

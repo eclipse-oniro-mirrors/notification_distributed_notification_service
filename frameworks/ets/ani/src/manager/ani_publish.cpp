@@ -232,7 +232,8 @@ ani_object AniPublishAsBundle(ani_env *env, ani_object request, ani_string repre
         return nullptr;
     }
     std::string bundleStr;
-    if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr)) {
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr,
+        NotificationSts::STR_MAX_SIZE)) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse representativeBundle failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;

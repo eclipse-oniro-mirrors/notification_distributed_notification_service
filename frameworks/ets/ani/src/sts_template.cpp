@@ -39,7 +39,8 @@ ani_status UnwrapNotificationTemplate(ani_env *env, ani_object aniObj, Notificat
         return status;
     }
     std::string nameStr = "";
-    if (ANI_OK != (status = GetStringByAniString(env, static_cast<ani_string>(nameRef), nameStr))) {
+    if (ANI_OK != (status = GetStringByAniString(env, static_cast<ani_string>(nameRef), nameStr,
+        NotificationSts::STR_MAX_SIZE))) {
         ANS_LOGE("GetStringByAniString faild. status %{public}d", status);
         return status;
     }

@@ -198,7 +198,7 @@ ani_object AniCancelWithIdLabel(ani_env *env, ani_int id, ani_string label, ani_
 {
     ANS_LOGD("AniCancelWithIdLabel called");
     std::string tempStr;
-    if (ANI_OK != NotificationSts::GetStringByAniString(env, label, tempStr)) {
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, label, tempStr, NotificationSts::STR_MAX_SIZE)) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse label failed!");
         return nullptr;
     }
@@ -301,7 +301,8 @@ ani_object AniCancelAsBundle(ani_env *env, ani_int id, ani_string representative
     ani_int userId, ani_object callback)
 {
     std::string bundleStr;
-    if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr)) {
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr,
+        NotificationSts::STR_MAX_SIZE)) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "representativeBundle parse failed!");
         return nullptr;
     }
@@ -403,7 +404,7 @@ ani_object AniCancelGroup(ani_env *env, ani_string groupName, ani_object callbac
 {
     ANS_LOGD("AniCancelGroup called");
     std::string tempStr;
-    if (ANI_OK != NotificationSts::GetStringByAniString(env, groupName, tempStr)) {
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, groupName, tempStr, NotificationSts::STR_MAX_SIZE)) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse groupName failed!");
         return nullptr;
     }

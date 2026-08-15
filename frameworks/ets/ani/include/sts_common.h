@@ -20,6 +20,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <set>
 #include "ans_log_wrapper.h"
 #include <ani_signature_builder.h>
 #ifdef ANS_FEATURE_API_METRICS_HISTOGRAM
@@ -51,7 +52,7 @@ ani_object CreateLong(ani_env *env, int64_t value);
 bool CreateDate(ani_env *env, int64_t time, ani_object &outObj);
 bool GetDateByObject(ani_env *env, ani_object timeObj, int64_t &time);
 ani_status GetAniStringByString(ani_env* env, const std::string str, ani_string &aniStr);
-ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res);
+ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res, ani_size maxLen = 0);
 bool GetStringArrayByAniObj(ani_env *env, const ani_object ani_obj, std::vector<std::string> &stdVString);
 ani_object GetAniStringArrayByVectorString(ani_env *env, std::vector<std::string> strs);
 bool GetAniStringArrayByVectorStringV2(ani_env *env, std::vector<std::string> strs, ani_object& aniArray);
@@ -202,7 +203,12 @@ void deletePoint(T &result)
 template<class T>
 void deleteVectorWithPoints(std::vector<T> &results)
 {
-    for (auto result : results) {
+    std::set<T> deleted;
+    for (auto &result : results) {
+        if (result == nullptr || deleted.count(result) > 0) {
+            continue;
+        }
+        deleted.insert(result);
         deletePoint(result);
     }
     results.clear();

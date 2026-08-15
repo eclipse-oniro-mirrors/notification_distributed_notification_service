@@ -137,7 +137,8 @@ ani_object AniSetNotificationSwitch(ani_env *env, ani_string switchName, ani_boo
         ANS_LOGE("asyncCallbackInfo is nullptr");
         return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_NO_MEMORY);
     }
-    if (NotificationSts::GetStringByAniString(env, switchName, asyncCallbackInfo->switchName) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, switchName, asyncCallbackInfo->switchName,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         ANS_LOGE("GetStringByAniString failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_INVALID_PARAM);
@@ -183,7 +184,8 @@ ani_object AniGetNotificationSwitch(ani_env *env, ani_string switchName, ani_int
         ANS_LOGE("asyncCallbackInfo is nullptr");
         return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_NO_MEMORY);
     }
-    if (NotificationSts::GetStringByAniString(env, switchName, asyncCallbackInfo->switchName) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, switchName, asyncCallbackInfo->switchName,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         ANS_LOGE("GetStringByAniString failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_INVALID_PARAM);
