@@ -84,6 +84,8 @@ bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackSlotInfo* asyncCal
 {
     if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
+        delete asyncCallbackInfo;
+        asyncCallbackInfo = nullptr;
         return false;
     }
     if (asyncCallbackInfo->info.returnCode != ERR_OK) {
@@ -150,6 +152,8 @@ bool CheckSlotBundleCompleteEnvironment(ani_env **envCurr, AsyncCallbackSlotBund
 {
     if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
+        delete asyncCallbackInfo;
+        asyncCallbackInfo = nullptr;
         return false;
     }
     if (asyncCallbackInfo->info.returnCode != ERR_OK) {

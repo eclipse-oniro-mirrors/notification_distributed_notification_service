@@ -80,6 +80,8 @@ bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackDistributedInfo* a
 {
     if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
+        delete asyncCallbackInfo;
+        asyncCallbackInfo = nullptr;
         return false;
     }
     if (asyncCallbackInfo->info.returnCode != ERR_OK) {
@@ -241,7 +243,8 @@ ani_object AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, ani
         return nullptr;
     }
     std::string deviceTypeStr;
-    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "deviceType parse failed!");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -389,7 +392,8 @@ ani_object AniSetDistributedEnableByBundleAndType(ani_env* env, ani_object obj, 
         return nullptr;
     }
 
-    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse slotType failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -450,7 +454,8 @@ ani_object AniIsDistributedEnabledBySlot(ani_env* env, ani_enum_item slot, ani_s
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -505,7 +510,8 @@ ani_object AniSetDistributedEnableBySlot(ani_env *env, ani_enum_item slot, ani_s
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -554,7 +560,8 @@ ani_object AniIsDistributedEnabledByDeviceType(ani_env* env, ani_string deviceTy
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -604,7 +611,8 @@ ani_object AniSetDistributedEnabledByDeviceType(ani_env* env,
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -653,7 +661,8 @@ ani_object AniSetDistributedEnableByBundles(ani_env* env, ani_object obj, ani_st
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -750,7 +759,8 @@ ani_object AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_lon
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -799,7 +809,8 @@ ani_object AniIsSmartReminderEnabled(ani_env* env, ani_string deviceType, ani_ob
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -848,7 +859,8 @@ ani_object AniSetSmartReminderEnable(ani_env* env, ani_string deviceType, ani_bo
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse deviceType failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;

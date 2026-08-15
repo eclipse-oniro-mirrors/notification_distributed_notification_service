@@ -82,6 +82,7 @@ bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackSupportInfo* async
     if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
+        asyncCallbackInfo = nullptr;
         return false;
     }
     if (asyncCallbackInfo->info.returnCode != ERR_OK) {
@@ -133,7 +134,8 @@ ani_object AniIsSupportTemplate(ani_env* env, ani_string templateName, ani_objec
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, templateName, asyncCallbackInfo->templateNameStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, templateName, asyncCallbackInfo->templateNameStr,
+        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "templateName parse failed!");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;

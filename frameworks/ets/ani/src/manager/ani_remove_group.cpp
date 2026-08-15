@@ -86,7 +86,7 @@ bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackGroupInfo* asyncCa
     if (asyncCallbackInfo->info.returnCode != ERR_OK) {
         ANS_LOGE("return ErrCode: %{public}d", asyncCallbackInfo->info.returnCode);
         NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
-        DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
+        DeleteCallBackInfo(*envCurr, asyncCallbackInfo);
         return false;
     }
     return true;
@@ -104,7 +104,7 @@ void HandleRemoveGroupCallbackComplete(ani_env* env, WorkStatus status, void* da
         return;
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
-    DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
+    DeleteCallBackInfo(envCurr, asyncCallbackInfo);
 }
 
 ani_object AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string groupName, ani_object callback)
@@ -120,7 +120,8 @@ ani_object AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_str
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, groupName, asyncCallbackInfo->groupNameStr) !=  ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, groupName, asyncCallbackInfo->groupNameStr,
+        NotificationSts::STR_MAX_SIZE) !=  ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse groupName failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;

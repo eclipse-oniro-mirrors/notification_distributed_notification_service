@@ -108,7 +108,7 @@ ani_object AniGetNotificationParameters(ani_env *env, ani_int id, ani_string lab
     int32_t notificationId = static_cast<int32_t>(id);
 
     std::string labelStr = "";
-    if (NotificationSts::GetStringByAniString(env, label, labelStr) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, label, labelStr, NotificationSts::STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "label parse failed");
         return nullptr;
     }

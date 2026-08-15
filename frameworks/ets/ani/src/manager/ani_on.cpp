@@ -62,7 +62,7 @@ ani_int AniOn(ani_env *env, ani_string type, ani_fn_object fn, ani_object checkR
     ANS_LOGD("enter");
 #ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
     std::string typeStr = "";
-    ani_status status = NotificationSts::GetStringByAniString(env, type, typeStr);
+    ani_status status = NotificationSts::GetStringByAniString(env, type, typeStr, NotificationSts::STR_MAX_SIZE);
     if (status != ANI_OK || typeStr.compare(TYPE_STRING)) {
         ANS_LOGE("InvalidParam 'type'");
         OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);
@@ -112,7 +112,7 @@ ani_int AniOff(ani_env *env, ani_string type, ani_fn_object fn)
     ANS_LOGD("enter");
 #ifdef ANS_FEATURE_LIVEVIEW_LOCAL_LIVEVIEW
     std::string typeStr = "";
-    ani_status status = NotificationSts::GetStringByAniString(env, type, typeStr);
+    ani_status status = NotificationSts::GetStringByAniString(env, type, typeStr, NotificationSts::STR_MAX_SIZE);
     if (status != ANI_OK || typeStr.compare(TYPE_STRING)) {
         ANS_LOGE("InvalidParam 'type'");
         OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM);

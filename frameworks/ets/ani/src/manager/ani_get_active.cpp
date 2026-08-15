@@ -383,7 +383,8 @@ ani_object AniGetActiveNotification(ani_env *env, ani_string hashCode)
         return nullptr;
     }
     std::string hashCodeStr;
-    ani_status status = NotificationSts::GetStringByAniString(env, hashCode, hashCodeStr);
+    ani_status status = NotificationSts::GetStringByAniString(env, hashCode, hashCodeStr,
+        NotificationSts::LONG_STR_MAX_SIZE);
     if (status != ANI_OK) {
         ANS_LOGE("GetStringByAniString failed, status: %{public}d", status);
         NotificationSts::ThrowInternerErrorWithLogE(env, "GetStringByAniString failed");

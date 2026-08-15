@@ -94,7 +94,8 @@ ani_object AniSetNotificationSnooze(ani_env *env, ani_string hashCode, ani_long 
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, hashCode, asyncCallbackInfo->hashCode) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, hashCode, asyncCallbackInfo->hashCode,
+        NotificationSts::LONG_STR_MAX_SIZE) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse hashCode failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
