@@ -84,7 +84,6 @@ ErrCode AdvancedNotificationService::IsGeofenceEnabled(bool &enabled)
 
 ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const PublishNotificationParameter &parameter)
 {
-    ANS_LOGD("Called OnNotifyDelayedNotification, delayRecords size %{public}zu", triggerNotificationList_.size());
     if (parameter.request == nullptr || parameter.request->GetNotificationTrigger() == nullptr) {
         ANS_LOGE("Request or trigger is null.");
         return ERR_ANS_INNER_INVALID_PARAM;
