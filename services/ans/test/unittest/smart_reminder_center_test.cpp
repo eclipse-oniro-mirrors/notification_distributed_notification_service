@@ -965,6 +965,7 @@ HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_200, Function | SmallTest
  */
 HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_300, Function | SmallTest | Level1)
 {
+    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "", -1);
     std::string deviceType = NotificationConstant::WEARABLE_DEVICE_TYPE;;
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);

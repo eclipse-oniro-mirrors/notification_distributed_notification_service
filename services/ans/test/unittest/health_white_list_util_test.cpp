@@ -36,7 +36,7 @@ public:
     static void SetUpTestCase() {};
     static void TearDownTestCase() {};
     void SetUp();
-    void TearDown() {};
+    void TearDown();
 
 public:
     std::shared_ptr<HealthWhiteListUtil> healthWhiteListUtil_;
@@ -45,6 +45,11 @@ public:
 void HealthWhiteListUtilTest::SetUp(void)
 {
     healthWhiteListUtil_ = DelayedSingleton<HealthWhiteListUtil>::GetInstance();
+}
+
+void HealthWhiteListUtilTest::TearDown(void)
+{
+    NotificationPreferences::GetInstance()->SetKvToDb(HEALTH_BUNDLE_WHITE_LIST_KEY, "", -1);
 }
 
 /**
