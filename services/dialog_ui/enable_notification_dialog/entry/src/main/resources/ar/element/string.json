@@ -60,14 +60,14 @@
             "name":"ban_affect",
             "value":"\nإذا حددت \"رفض\"، فلن تتلقى إشعارات برسائل الدردشة من هذا التطبيق.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"cjy_click_detail",
             "value":"عرض التفاصيل >>",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]
