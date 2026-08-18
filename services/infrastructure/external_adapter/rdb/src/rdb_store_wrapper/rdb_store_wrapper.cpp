@@ -352,3 +352,4 @@ void NtfRdbStoreWrapper::RecoverDatabase()
     return;
 }
 } // namespace OHOS::Notification::Infra
+

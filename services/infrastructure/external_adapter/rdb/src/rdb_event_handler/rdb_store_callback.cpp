@@ -23,7 +23,7 @@
 
 namespace OHOS::Notification::Infra {
 RdbStoreCallback::RdbStoreCallback(const NotificationRdbConfig& config, std::shared_ptr<NtfRdbHookMgr> hookMgr,
-    const std::set<RdbEventHandlerType> &eventHandlerTypes)
+    const std::set<RdbEventHandlerType> &eventHandlerTypes) : hookMgr_(hookMgr)
 {
     ANS_LOGD("Create rdb store callback instance");
     InitializeHandlers(config, hookMgr, eventHandlerTypes);
@@ -45,7 +45,7 @@ int32_t RdbStoreCallback::OnUpgrade(
 {
     ANS_LOGD("RdbStoreCallback::OnUpgrade oldVersion: %{public}d, newVersion: %{public}d",
         oldVersion, newVersion);
-    return handlerManager_.ExecuteOnUpgrade(rdbStore, oldVersion, newVersion);
+    return handlerManager_.ExecuteOnUpgradeWithCrashRecovery(rdbStore, oldVersion, newVersion);
 }
 
 int32_t RdbStoreCallback::OnDowngrade(

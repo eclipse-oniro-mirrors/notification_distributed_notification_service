@@ -1989,4 +1989,22 @@ HWTEST_F(NtfRdbStoreWrapperTest, QueryAllData_700, Function | SmallTest | Level1
     ret = rdbWrapper.QueryAllData(values, nonSystemUserId);
     EXPECT_EQ(ret, NativeRdb::E_OK);
 }
+
+/**
+ * @tc.name: Init_UpgradeFailure_100
+ * @tc.desc: Verify Init returns non-E_OK when InitRdbStore fails; per-business counting is in OnUpgrade.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, Init_UpgradeFailure_100, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.dbPath = "/data/local/tmp";
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    SetMockGetRdbHelperErrCodes({NativeRdb::E_ERROR});
+    SetMockRdbStoreResults({nullptr});
+    int32_t ret = rdbWrapper.Init();
+    EXPECT_NE(ret, NativeRdb::E_OK);
+}
 } // OHOS::Notification::Infra

@@ -59,6 +59,10 @@ public:
      */
     int32_t OnUpgrade(NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion) override;
 
+    void OnUpgradeFailure(NativeRdb::RdbStore &rdbStore) override;
+
+    std::string GetMigrationMarkKey() const override;
+
     /** @brief Return the fixed handler name used for registration. */
     std::string GetHandlerName() const override;
 
