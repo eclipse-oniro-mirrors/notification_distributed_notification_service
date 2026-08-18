@@ -72,14 +72,14 @@
             "name":"ban_affect",
             "value":"選擇「不允許」，將無法收到聊天訊息通知。",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"cjy_click_detail",
             "value":"輕觸以檢視詳細資訊",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

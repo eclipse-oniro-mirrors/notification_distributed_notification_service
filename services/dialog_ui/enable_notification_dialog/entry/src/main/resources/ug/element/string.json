@@ -72,14 +72,14 @@
             "name":"ban_affect",
             "value":"چەكلىسىڭىز، بۇ ئەپنىڭ ئۇچۇرلىرى ئۈچۈن ئۇقتۇرۇش كەلمەيدۇ.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"cjy_click_detail",
             "value":"چېكىپ تەپسىلاتىنى كۆرۈڭ >>",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

@@ -60,14 +60,14 @@
             "name":"ban_affect",
             "value":"\nSi seleccionas Denegar, no recibirás notificaciones de mensajes de chat de esta aplicación.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"cjy_click_detail",
             "value":"Ver detalles >>",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

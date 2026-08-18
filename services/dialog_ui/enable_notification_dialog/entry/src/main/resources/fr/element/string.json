@@ -25,7 +25,7 @@
             "name":"reason",
             "value":"Cela peut inclure des notifications sur l'écran verrouillé, bannières, badges, sons et vibrations. Vous pouvez changer cela dans Paramètres.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
@@ -60,14 +60,14 @@
             "name":"ban_affect",
             "value":"\nSi vous sélectionnez Refuser, vous n'allez plus recevoir de notifications des messages du chat de cette application.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"cjy_click_detail",
             "value":"Voir les détails >>",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]
