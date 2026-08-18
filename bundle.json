@@ -136,7 +136,7 @@
         "api_metrics",
         "ets_frontend",
         "taihe_ffi_gen",
-        "bounds_checking_funtion"
+        "bounds_checking_function"
       ],
       "third_party": [
         "libuv",
