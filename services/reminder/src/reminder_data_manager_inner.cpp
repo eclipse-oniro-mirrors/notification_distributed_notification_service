@@ -604,9 +604,14 @@ bool ReminderDataManager::IsInDoNotDisturbMode(const int32_t userId, const int32
 }
 
 bool ReminderDataManager::CheckSoundConfig(const bool isInDoNotDisturbMode, const int32_t isSilentEnabled,
-    const uint32_t slotFlag)
+    const uint32_t slotFlag, const bool isBundleForbidden)
 {
 #ifdef PLAYER_FRAMEWORK_ENABLE
+    // 被健康使用设备禁用
+    if (isBundleForbidden) {
+        ANSR_LOGW("The application has forbidden.");
+        return false;
+    }
     if (isInDoNotDisturbMode) {
         return false;
     }
@@ -667,9 +672,14 @@ bool ReminderDataManager::GetSettingsData(const int32_t userId)
 }
 
 bool ReminderDataManager::CheckVibrationConfig(const int32_t userId, const bool isInDoNotDisturbMode,
-    const int32_t isSilentEnabled, const uint32_t slotFlag)
+    const int32_t isSilentEnabled, const uint32_t slotFlag, const bool isBundleForbidden)
 {
 #ifdef PLAYER_FRAMEWORK_ENABLE
+    // 被健康使用设备禁用
+    if (isBundleForbidden) {
+        ANSR_LOGW("The application has forbidden.");
+        return false;
+    }
     // 免打扰开关
     if (isInDoNotDisturbMode) {
         return false;

@@ -554,7 +554,8 @@ private:
     // sound
     std::string GetFullPath(const std::string& path);
     void SetPlayerParam(const sptr<ReminderRequest> reminder);
-    bool CheckSoundConfig(const bool isInDoNotDisturbMode, const int32_t isSilentEnabled, const uint32_t slotFlag);
+    bool CheckSoundConfig(const bool isInDoNotDisturbMode, const int32_t isSilentEnabled, const uint32_t slotFlag,
+        const bool isBundleForbidden);
     int32_t ConvertRingChannel(ReminderRequest::RingChannel channel);
 
     /**
@@ -572,7 +573,7 @@ private:
     void StartVibration();
     bool GetSettingsData(const int32_t userId);
     bool CheckVibrationConfig(const int32_t userId, const bool isInDoNotDisturbMode,
-        const int32_t isSilentEnabled, const uint32_t slotFlag);
+        const int32_t isSilentEnabled, const uint32_t slotFlag, const bool isBundleForbidden);
 
     /**
      * Remove from showed reminder vector.

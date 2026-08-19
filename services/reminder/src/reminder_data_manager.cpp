@@ -1566,18 +1566,20 @@ void ReminderDataManager::PlaySoundAndVibrationLocked(const sptr<ReminderRequest
         systemSoundClient_ = Media::SystemSoundManagerFactory::CreateSystemSoundManager();
     }
     SetPlayerParam(reminder);
-    bool isInDoNotDisturbMode = IsInDoNotDisturbMode(reminder->GetUserId(), reminder->GetUid(),
-        reminder->GetBundleName());
-    NotificationBundleOption option(reminder->GetBundleName(), reminder->GetUid());
+    std::string bundleName = reminder->GetBundleName();
+    bool isForbidden = ReminderBundleManagerHelper::GetInstance().CheckControlRule(reminder->GetUserId(),
+        reminder->GetUid(), bundleName);
+    bool isInDoNotDisturbMode = IsInDoNotDisturbMode(reminder->GetUserId(), reminder->GetUid(), bundleName);
+    NotificationBundleOption option(bundleName, reminder->GetUid());
     uint32_t slotFlag = 0;
     NotificationHelper::GetNotificationSlotFlagsAsBundle(option, slotFlag);
     int32_t isSilentEnabled = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
     NotificationHelper::IsSilentReminderEnabled(option, isSilentEnabled);
-    if (CheckSoundConfig(isInDoNotDisturbMode, isSilentEnabled, slotFlag)) {
+    if (CheckSoundConfig(isInDoNotDisturbMode, isSilentEnabled, slotFlag, isForbidden)) {
         soundPlayer_->PrepareAsync();
         soundPlayer_->Play();
     }
-    if (CheckVibrationConfig(reminder->GetUserId(), isInDoNotDisturbMode, isSilentEnabled, slotFlag)) {
+    if (CheckVibrationConfig(reminder->GetUserId(), isInDoNotDisturbMode, isSilentEnabled, slotFlag, isForbidden)) {
         isVibration_ = true;
         StartVibration();
     }
