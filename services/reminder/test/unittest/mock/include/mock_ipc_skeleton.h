@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_IPC_IPC_SKELETON_H
-#define OHOS_IPC_IPC_SKELETON_H
+#ifndef BASE_NOTIFICATION_REMINDER_MOCK_IPC_SKELETON_H
+#define BASE_NOTIFICATION_REMINDER_MOCK_IPC_SKELETON_H
 
 #include "accesstoken_kit.h"
 #include "iremote_object.h"
@@ -133,7 +133,14 @@ public:
      */
     static void SetCallingUid(pid_t uid);
 
+    /**
+     * @brief Set calling pid.
+     *
+     * @param pid Indicates the pid.
+     */
+    static void SetCallingPid(pid_t pid);
+
     static void SetCallingTokenID(Security::AccessToken::AccessTokenID callerToken);
 };
 }  // namespace OHOS
-#endif  // OHOS_IPC_IPC_SKELETON_H
+#endif  // BASE_NOTIFICATION_REMINDER_MOCK_IPC_SKELETON_H

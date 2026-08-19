@@ -31,7 +31,7 @@ ohos_unittest("reminder_unit_test") {
   defines = []
 
   sources = [
-    "mock/mock_ipc.cpp",
+    "mock/mock_ipc_skeleton.cpp",
     "reminder_data_manager_test.cpp",
   ]
 

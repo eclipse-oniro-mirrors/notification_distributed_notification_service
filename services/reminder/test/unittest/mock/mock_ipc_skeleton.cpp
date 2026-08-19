@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,35 +16,37 @@
 #include "mock_ipc_skeleton.h"
 
 namespace OHOS {
-#ifdef CONFIG_IPC_SINGLE
-using namespace IPC_SINGLE;
-#endif
-
-pid_t uid_ = 1;
-Security::AccessToken::AccessTokenID callerToken_ = 0;
+static pid_t g_mockUid = 1;
+static pid_t g_mockPid = 1;
+static Security::AccessToken::AccessTokenID g_mockCallerToken = 0;
 
 pid_t IPCSkeleton::GetCallingUid()
 {
-    return uid_;
+    return g_mockUid;
 }
 
 pid_t IPCSkeleton::GetCallingPid()
 {
-    return 1;
+    return g_mockPid;
 }
 
 Security::AccessToken::AccessTokenID IPCSkeleton::GetCallingTokenID()
 {
-    return callerToken_;
+    return g_mockCallerToken;
 }
 
 void IPCSkeleton::SetCallingUid(pid_t uid)
 {
-    uid_ = uid;
+    g_mockUid = uid;
+}
+
+void IPCSkeleton::SetCallingPid(pid_t pid)
+{
+    g_mockPid = pid;
 }
 
 void IPCSkeleton::SetCallingTokenID(Security::AccessToken::AccessTokenID callerToken)
 {
-    callerToken_ = callerToken;
+    g_mockCallerToken = callerToken;
 }
 }  // namespace OHOS
