@@ -2631,19 +2631,19 @@ ErrCode AdvancedNotificationService::DisableNotificationFeature(const sptr<Notif
         }
     }
     auto submitResult = notificationSvrQueue_.SyncSubmit(
-        std::bind([copyNotificationDisable = notificationDisable]() {
+        std::bind([copyNotificationDisable = notificationDisable, userId, this]() {
             ANS_LOGD("the ffrt enter");
             NotificationPreferences::GetInstance()->SetDisableNotificationInfo(copyNotificationDisable);
+            if (copyNotificationDisable->GetDisabled()) {
+                std::vector<std::string> bundleList = copyNotificationDisable->GetBundleList();
+                for (auto bundle : bundleList) {
+                    ExcuteRemoveAllNotificationsByBundleName(
+                        bundle, NotificationConstant::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE, userId);
+                }
+                RemoveAllFromSnoozeDelayListByUser(userId);
+            }
         }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Disable notification feature.");
-    if (notificationDisable->GetDisabled()) {
-        std::vector<std::string> bundleList = notificationDisable->GetBundleList();
-        for (auto bundle : bundleList) {
-            RemoveAllNotificationsByBundleName(
-                bundle, NotificationConstant::DISABLE_NOTIFICATION_FEATURE_REASON_DELETE, userId);
-        }
-        RemoveAllFromSnoozeDelayListByUser(userId);
-    }
     return ERR_OK;
 }
 

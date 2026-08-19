@@ -3131,7 +3131,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00001, Functi
     std::string bundleName = TEST_DEFUALT_BUNDLE;
     int32_t reason = 0;
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
-    auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason);
+    advancedNotificationService_->ExcuteRemoveAllNotificationsByBundleName(bundleName, reason, -1);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
 
@@ -3642,13 +3642,13 @@ HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00002, Functi
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
     int32_t userId = 100;
     MockGetOsAccountLocalIdFromUid(false, 1);
-    auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    advancedNotificationService_->ExcuteRemoveAllNotificationsByBundleName(bundleName, reason, 100);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
     MockGetOsAccountLocalIdFromUid(true, 1);
-    ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    advancedNotificationService_->ExcuteRemoveAllNotificationsByBundleName(bundleName, reason, 100);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
     MockGetOsAccountLocalIdFromUid(true, 3);
-    ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    advancedNotificationService_->ExcuteRemoveAllNotificationsByBundleName(bundleName, reason, 100);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
 
@@ -3677,7 +3677,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00003, Functi
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
     int32_t userId = 100;
     MockGetOsAccountLocalIdFromUid(false, 1);
-    auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    advancedNotificationService_->ExcuteRemoveAllNotificationsByBundleName(bundleName, reason, 100);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
 

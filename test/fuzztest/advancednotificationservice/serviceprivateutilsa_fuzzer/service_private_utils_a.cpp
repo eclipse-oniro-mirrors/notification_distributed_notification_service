@@ -193,9 +193,9 @@ namespace Notification {
         service->QueryContactByProfileId(phoneNum, policy, fuzzData->ConsumeIntegral<int32_t>());
 
         service->PublishSubscriberExistFlagEvent(fuzzData->ConsumeBool(), fuzzData->ConsumeBool());
-        service->RemoveAllNotificationsByBundleName(ConsumePrintableString(fuzzData),
+        service->ExcuteRemoveAllNotificationsByBundleName(ConsumePrintableString(fuzzData),
             fuzzData->ConsumeIntegral<int32_t>(), fuzzData->ConsumeIntegral<int32_t>());
-        service->RemoveAllNotificationsByBundleName("", 0, 0);
+        service->ExcuteRemoveAllNotificationsByBundleName("", 0, 0);
 
         request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
         auto liveContent = std::make_shared<NotificationLiveViewContent>();

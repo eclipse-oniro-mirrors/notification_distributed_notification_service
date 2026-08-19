@@ -1969,7 +1969,6 @@ public:
     bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
 
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
-    ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason, int32_t userId = -1);
     static sptr<NotificationBundleOption> GenerateBundleOption();
     static sptr<NotificationBundleOption> GenerateValidBundleOption(
         const sptr<NotificationBundleOption> &bundleOption);
@@ -2462,6 +2461,7 @@ private:
     AnsStatus RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
     void ExcuteRemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &bundle, int32_t &reason);
+    void ExcuteRemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason, int32_t userId);
     void GetRemoveListForRemoveAll(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &bundle, std::vector<std::shared_ptr<NotificationRecord>> &removeList);
     AnsStatus ValidRightsForCancelAsBundle(int32_t notificationId, int32_t &reason);
