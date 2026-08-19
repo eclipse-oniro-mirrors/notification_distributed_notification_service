@@ -34,6 +34,7 @@
 #include "distributed_data_define.h"
 #include "ans_rdb_mgr_builder.h"
 #include "notification_rdb_mgr.h"
+#include "rdb_errno.h"
 #include "advanced_notification_inline.h"
 
 namespace OHOS {

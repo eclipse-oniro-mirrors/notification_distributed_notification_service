@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "notification_bundle_option.h"
-#include "notification_rdb_data_mgr.h"
 #include "notification_clone_priority_info.h"
 #include "notification_preferences_info.h"
 
