@@ -2556,6 +2556,7 @@ private:
     void SetIsFromSAToExtendInfo(const sptr<NotificationRequest> &request);
     void SetVersionCodeToExtendInfo(const sptr<NotificationRequest> &request);
     void SetLiveViewShareSwitchToExtendInfo(const sptr<NotificationRequest> &request);
+    void SetCreateTimeToExtendInfo(const sptr<NotificationRequest> &request, int64_t createTime);
 
     ErrCode CheckNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode CheckNotificationRequestLineWantAgents(const std::shared_ptr<NotificationContent> &content,

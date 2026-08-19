@@ -36,6 +36,7 @@
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
+#include "long_wrapper.h"
 #include "notification_live_view_content.h"
 #include "notification_content.h"
 #include "want_params.h"
@@ -487,6 +488,104 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, AssignToNotificationList_400, Func
 
     ret = advancedNotificationService_->AssignToNotificationList(record);
     ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: AssignToNotificationList_CreateTimeInExtendInfo_00001
+ * @tc.desc: Test AssignToNotificationList stores createTime in extendInfo on create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    AssignToNotificationList_CreateTimeInExtendInfo_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetNotificationId(1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    auto ret = advancedNotificationService_->AssignToNotificationList(record);
+    ASSERT_EQ(ret, (int)ERR_OK);
+
+    auto extendInfo = request->GetExtendInfo();
+    ASSERT_NE(extendInfo, nullptr);
+    EXPECT_TRUE(extendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    auto param = extendInfo->GetParam(EXTENDINFO_CREATE_TIME);
+    AAFwk::ILong* iLong = AAFwk::ILong::Query(param);
+    ASSERT_NE(iLong, nullptr);
+    EXPECT_EQ(AAFwk::Long::Unbox(iLong), request->GetCreateTime());
+}
+
+/**
+ * @tc.name: FillMissingParameters_PreserveCreateTime_00001
+ * @tc.desc: Test FillMissingParameters preserves createTime from old request on update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    FillMissingParameters_PreserveCreateTime_00001, Function | SmallTest | Level1)
+{
+    const int64_t fixedCreateTime = 1718000000000;
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    auto oldExtendInfo = std::make_shared<AAFwk::WantParams>();
+    oldExtendInfo->SetParam(EXTENDINFO_CREATE_TIME,
+        AAFwk::Long::Box(static_cast<long>(fixedCreateTime)));
+    oldRequest->SetExtendInfo(oldExtendInfo);
+
+    sptr<NotificationRequest> newRequest = new (std::nothrow) NotificationRequest();
+    newRequest->FillMissingParameters(oldRequest);
+
+    auto newExtendInfo = newRequest->GetExtendInfo();
+    ASSERT_NE(newExtendInfo, nullptr);
+    EXPECT_TRUE(newExtendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    auto param = newExtendInfo->GetParam(EXTENDINFO_CREATE_TIME);
+    AAFwk::ILong* iLong = AAFwk::ILong::Query(param);
+    ASSERT_NE(iLong, nullptr);
+    EXPECT_EQ(AAFwk::Long::Unbox(iLong), fixedCreateTime);
+}
+
+/**
+ * @tc.name: FillMissingParameters_NoCreateTimeInOld_00001
+ * @tc.desc: Test FillMissingParameters does not write createTime when old request lacks it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    FillMissingParameters_NoCreateTimeInOld_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    auto oldExtendInfo = std::make_shared<AAFwk::WantParams>();
+    oldExtendInfo->SetParam("otherParam", AAFwk::String::Box("value"));
+    oldRequest->SetExtendInfo(oldExtendInfo);
+
+    sptr<NotificationRequest> newRequest = new (std::nothrow) NotificationRequest();
+    newRequest->FillMissingParameters(oldRequest);
+
+    auto newExtendInfo = newRequest->GetExtendInfo();
+    if (newExtendInfo != nullptr) {
+        EXPECT_FALSE(newExtendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    }
+}
+
+/**
+ * @tc.name: SetCreateTimeToExtendInfo_00001
+ * @tc.desc: Test SetCreateTimeToExtendInfo for nullptr request, null and existing extendInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetCreateTimeToExtendInfo_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->SetCreateTimeToExtendInfo(nullptr, 1000);
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    advancedNotificationService_->SetCreateTimeToExtendInfo(request, 2000);
+    auto extendInfo = request->GetExtendInfo();
+    ASSERT_NE(extendInfo, nullptr);
+    EXPECT_TRUE(extendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+
+    auto existingExtendInfo = std::make_shared<AAFwk::WantParams>();
+    existingExtendInfo->SetParam("existingParam", AAFwk::String::Box("value"));
+    request->SetExtendInfo(existingExtendInfo);
+    advancedNotificationService_->SetCreateTimeToExtendInfo(request, 3000);
+    auto newExtendInfo = request->GetExtendInfo();
+    ASSERT_NE(newExtendInfo, nullptr);
+    EXPECT_TRUE(newExtendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    EXPECT_TRUE(newExtendInfo->HasParam("existingParam"));
 }
 
 /**
