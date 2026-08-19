@@ -34,5 +34,6 @@ const std::string KIOSK_APP_TRUST_LIST_KEY = "kiosk_app_trust_list";
 const std::string COLLABORATION_BLOCKLIST = "COLLABORATION_BLOCKLIST";
 const std::string VOICE_BROADCAST_CONFIG_RULE_KEY = "voice_broadcast_config_rule";
 const std::string LIVE_VIEW_SHARE_FUNC_SWITCH_KEY = "LIVE_VIEW_SHARE_FUNC_SWITCH_KEY";
+const std::string EXTENDINFO_CREATE_TIME = "createTime";
 }
 }

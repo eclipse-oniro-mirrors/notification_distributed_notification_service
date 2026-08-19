@@ -67,6 +67,7 @@
 #include "reminder_swing_decision_center.h"
 #include "notification_extension_wrapper.h"
 #include "bool_wrapper.h"
+#include "long_wrapper.h"
 #include "notification_config_parse.h"
 #include "notification_statistics.h"
 
@@ -417,6 +418,7 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
             return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
         }
         record->request->SetCreateTime(GetCurrentTime());
+        SetCreateTimeToExtendInfo(record->request, record->request->GetCreateTime());
         if (record->request->GetLiveViewStatus() != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END) {
             result = PublishInNotificationList(record);
         }
@@ -1546,6 +1548,20 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
 
     SortNotificationList();
     return ERR_OK;
+}
+
+void AdvancedNotificationService::SetCreateTimeToExtendInfo(
+    const sptr<NotificationRequest> &request, int64_t createTime)
+{
+    if (request == nullptr) {
+        return;
+    }
+    std::shared_ptr<AAFwk::WantParams> extendInfo = request->GetExtendInfo();
+    if (!extendInfo) {
+        extendInfo = std::make_shared<AAFwk::WantParams>();
+    }
+    extendInfo->SetParam(EXTENDINFO_CREATE_TIME, AAFwk::Long::Box(static_cast<long>(createTime)));
+    request->SetExtendInfo(extendInfo);
 }
 
 void AdvancedNotificationService::SortNotificationList()

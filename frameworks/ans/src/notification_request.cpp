@@ -3215,7 +3215,19 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
 
 void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> &oldRequest)
 {
-    if (!IsCommonLiveView() || (oldRequest == nullptr)) {
+    if (oldRequest == nullptr) {
+        return;
+    }
+    auto oldExtendInfo = oldRequest->GetExtendInfo();
+    if (oldExtendInfo != nullptr && oldExtendInfo->HasParam(EXTENDINFO_CREATE_TIME)) {
+        std::shared_ptr<AAFwk::WantParams> extendInfo = GetExtendInfo();
+        if (!extendInfo) {
+            extendInfo = std::make_shared<AAFwk::WantParams>();
+        }
+        extendInfo->SetParam(EXTENDINFO_CREATE_TIME, oldExtendInfo->GetParam(EXTENDINFO_CREATE_TIME));
+        SetExtendInfo(extendInfo);
+    }
+    if (!IsCommonLiveView()) {
         return;
     }
 
