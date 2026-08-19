@@ -40,14 +40,12 @@ ohos_unittest("advanced_notification_badge_manager_test") {
     "${services_path}/infrastructure/external_adapter/rdb/include",
     "${services_path}/infrastructure/external_adapter/rdb/include/public",
     "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
-    "${frameworks_path}/test/moduletest/mock/include",
   ]
   version_script = "../libans_test.map"
 
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "../mock/mock_accesstoken_kit.cpp",
-    "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp",
     "../mock/mock_bluetooth.cpp",
     "../mock/mock_bundle_mgr.cpp",
     "../mock/mock_datashare.cpp",
@@ -65,7 +63,7 @@ ohos_unittest("advanced_notification_badge_manager_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 

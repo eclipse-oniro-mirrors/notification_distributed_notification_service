@@ -76,6 +76,10 @@ ohos_source_set("ans_service_sources") {
     "${services_path}/infrastructure/interfaces",
   ]
 
+  if (distributed_notification_service_feature_original_distributed) {
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
+
   defines = []
 
   if (distributed_notification_service_feature_notification_extension_subscription) {
@@ -232,7 +236,6 @@ ohos_source_set("ans_service_sources") {
   if (distributed_notification_service_feature_original_distributed) {
     defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
     deps += [ "${services_path}/distributed:libans_distributed" ]
-    include_dirs += [ "${services_path}/distributed/include" ]
   }
 
   if (notification_smart_reminder_supported) {
@@ -367,6 +370,40 @@ ohos_source_set("ans_service_sources") {
   }
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
+}
+
+config("ans_service_sources_test_config") {
+  include_dirs = [
+    "${frameworks_path}/test/moduletest/mock/include",
+    "${services_path}/ans/include",
+    "${services_path}/ans/include/clone",
+    "${services_path}/ans/include/aggregation_notification",
+    "${services_path}/ans/include/notification_extension",
+    "${services_path}/ans/include/utils",
+    "${services_path}/ans/src",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${services_path}/infrastructure/interfaces",
+  ]
+
+  if (distributed_notification_service_feature_original_distributed) {
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
+}
+
+ohos_source_set("ans_service_sources_test") {
+  testonly = true
+  public_deps = [ ":ans_service_sources" ]
+  public_configs = [ ":ans_service_sources_test_config" ]
+
+  sources = [ "${frameworks_path}/test/moduletest/mock/mock_ans_rdb_mgr_builder.cpp" ]
+
+  external_deps = [
+    "ffrt:libffrt",
+    "c_utils:utils",
+  ]
 }
 
 ohos_shared_library("libans") {

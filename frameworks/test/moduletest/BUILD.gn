@@ -48,7 +48,6 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${core_path}/common/include",
     "${core_path}/include",
     "${inner_api_path}",
-    "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/domain/settings/rdb_mgr_repo/include",
@@ -61,7 +60,6 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "ans_innerkits_module_publish_test.cpp",
     "mock/mock_accesstoken_kit.cpp",
-    "mock/mock_ans_rdb_mgr_builder.cpp",
     "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
@@ -70,7 +68,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   defines = []
@@ -129,7 +127,6 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "${core_path}/common/include",
     "${core_path}/include",
     "${inner_api_path}",
-    "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/domain/settings/rdb_mgr_repo/include",
@@ -143,7 +140,6 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "ans_innerkits_module_slot_test.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
-    "mock/mock_ans_rdb_mgr_builder.cpp",
     "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
@@ -153,7 +149,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   defines = []
@@ -217,7 +213,6 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "${core_path}/common/include",
     "${core_path}/include",
     "${inner_api_path}",
-    "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/domain/settings/rdb_mgr_repo/include",
@@ -237,7 +232,7 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   defines = []
