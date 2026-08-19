@@ -86,7 +86,7 @@ bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackGroupInfo* asyncCa
     if (asyncCallbackInfo->info.returnCode != ERR_OK) {
         ANS_LOGE("return ErrCode: %{public}d", asyncCallbackInfo->info.returnCode);
         NotificationSts::CreateReturnData(*envCurr, asyncCallbackInfo->info);
-        DeleteCallBackInfo(*envCurr, asyncCallbackInfo);
+        DeleteCallBackInfoWithoutPromise(*envCurr, asyncCallbackInfo);
         return false;
     }
     return true;
@@ -104,7 +104,7 @@ void HandleRemoveGroupCallbackComplete(ani_env* env, WorkStatus status, void* da
         return;
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
-    DeleteCallBackInfo(envCurr, asyncCallbackInfo);
+    DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
 }
 
 ani_object AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_string groupName, ani_object callback)
