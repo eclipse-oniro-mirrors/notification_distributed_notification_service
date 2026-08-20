@@ -29,7 +29,7 @@
 
 namespace OHOS {
 namespace Notification {
-bool AdvancedDatashareHelper::isDataShareReady_ = false;
+std::atomic<bool> AdvancedDatashareHelper::isDataShareReady_ = false;
 namespace {
 constexpr const char *SETTINGS_DATA_EXT_URI = "datashare:///com.ohos.settingsdata.DataAbility";
 constexpr const char *SETTINGS_DATASHARE_URI =

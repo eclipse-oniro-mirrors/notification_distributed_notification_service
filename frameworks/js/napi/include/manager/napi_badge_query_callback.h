@@ -39,6 +39,7 @@ public:
     napi_threadsafe_function GetThreadSafeFunction();
     void SetEnv(const napi_env &env);
     void ClearEnv();
+    void RemoveEnvCleanupHook();
     napi_ref ref = nullptr;
     ffrt::mutex tsfnMutex_;
 private:

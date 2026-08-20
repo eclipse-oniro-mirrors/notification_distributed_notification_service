@@ -142,6 +142,7 @@ static const int32_t LIVE_VIEW_CREATE = 0;
 static bool g_reportLiveViewFlag = false;
 OperationalData HaOperationMessage::notificationData = OperationalData();
 OperationalData HaOperationMessage::liveViewData = OperationalData();
+static ffrt::mutex haOperationDataMutex_;
 
 HaMetaMessage::HaMetaMessage(uint32_t sceneId, uint32_t branchId)
     : sceneId_(sceneId), branchId_(branchId)
@@ -279,6 +280,7 @@ void OperationalData::ToJson(nlohmann::json& jsonObject)
 
 HaOperationMessage& HaOperationMessage::KeyNode(bool keyNodeFlag)
 {
+    std::lock_guard<ffrt::mutex> lock(haOperationDataMutex_);
     if (keyNodeFlag) {
         liveViewData.keyNode++;
     }
@@ -287,6 +289,7 @@ HaOperationMessage& HaOperationMessage::KeyNode(bool keyNodeFlag)
 
 std::string HaOperationMessage::ToJson()
 {
+    std::lock_guard<ffrt::mutex> lock(haOperationDataMutex_);
     nlohmann::json jsonMessage;
     nlohmann::json jsonObject;
     if (isLiveView_) {
@@ -334,6 +337,7 @@ void SetDeleteTime(const std::string& hashCode, OperationalData& data)
 HaOperationMessage& HaOperationMessage::SyncPublish(const std::string& hashCode,
     std::vector<std::string>& deviceTypes)
 {
+    std::lock_guard<ffrt::mutex> lock(haOperationDataMutex_);
     if (isLiveView_) {
         SetPublishTime(hashCode, deviceTypes, liveViewData);
     } else {
@@ -344,6 +348,7 @@ HaOperationMessage& HaOperationMessage::SyncPublish(const std::string& hashCode,
 
 HaOperationMessage& HaOperationMessage::SyncDelete(const std::string& hashCode)
 {
+    std::lock_guard<ffrt::mutex> lock(haOperationDataMutex_);
     if (isLiveView_) {
         SetDeleteTime(hashCode, liveViewData);
     } else {
@@ -354,6 +359,7 @@ HaOperationMessage& HaOperationMessage::SyncDelete(const std::string& hashCode)
 
 HaOperationMessage& HaOperationMessage::SyncDelete(std::string deviceType, const std::string& reason)
 {
+    std::lock_guard<ffrt::mutex> lock(haOperationDataMutex_);
     if (isLiveView_) {
         if (liveViewData.dataMap.find(deviceType) != liveViewData.dataMap.end()) {
             liveViewData.dataMap[deviceType].delTime++;
@@ -370,6 +376,7 @@ HaOperationMessage& HaOperationMessage::SyncDelete(std::string deviceType, const
 
 HaOperationMessage& HaOperationMessage::SyncClick(std::string deviceType)
 {
+    std::lock_guard<ffrt::mutex> lock(haOperationDataMutex_);
     if (isLiveView_) {
         if (liveViewData.dataMap.find(deviceType) != liveViewData.dataMap.end()) {
             liveViewData.dataMap[deviceType].clickTime++;
@@ -386,6 +393,7 @@ HaOperationMessage& HaOperationMessage::SyncClick(std::string deviceType)
 
 HaOperationMessage& HaOperationMessage::SyncReply(std::string deviceType)
 {
+    std::lock_guard<ffrt::mutex> lock(haOperationDataMutex_);
     if (isLiveView_) {
         if (liveViewData.dataMap.find(deviceType) != liveViewData.dataMap.end()) {
             liveViewData.dataMap[deviceType].replyTime++;
@@ -402,6 +410,7 @@ HaOperationMessage& HaOperationMessage::SyncReply(std::string deviceType)
 
 bool HaOperationMessage::DetermineWhetherToSend()
 {
+    std::lock_guard<ffrt::mutex> lock(haOperationDataMutex_);
     if (isLiveView_ && liveViewData.keyNode != 0) {
         return true;
     }
@@ -432,6 +441,7 @@ void ResetOperationalData(OperationalData& data)
 
 void HaOperationMessage::ResetData()
 {
+    std::lock_guard<ffrt::mutex> lock(haOperationDataMutex_);
     if (isLiveView_) {
         ResetOperationalData(liveViewData);
     } else {

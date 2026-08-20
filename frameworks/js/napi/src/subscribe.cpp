@@ -202,6 +202,7 @@ SubscriberInstance::~SubscriberInstance()
 
 void SubscriberInstance::SubDeleteRef()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     if (enabledPriorityCallbackInfo_.ref != nullptr) {
         napi_delete_reference(enabledPriorityCallbackInfo_.env, enabledPriorityCallbackInfo_.ref);
         enabledPriorityCallbackInfo_.ref = nullptr;
@@ -256,41 +257,44 @@ void SubscriberInstance::DeleteRef()
             tsfn_ = nullptr;
         }
     }
-    if (canceCallbackInfo_.ref != nullptr) {
-        napi_delete_reference(canceCallbackInfo_.env, canceCallbackInfo_.ref);
-        canceCallbackInfo_.ref = nullptr;
-    }
-    if (consumeCallbackInfo_.ref != nullptr) {
-        napi_delete_reference(consumeCallbackInfo_.env, consumeCallbackInfo_.ref);
-        consumeCallbackInfo_.ref = nullptr;
-    }
-    if (updateCallbackInfo_.ref != nullptr) {
-        napi_delete_reference(updateCallbackInfo_.env, updateCallbackInfo_.ref);
-        updateCallbackInfo_.ref = nullptr;
-    }
-    if (subscribeCallbackInfo_.ref != nullptr) {
-        napi_delete_reference(subscribeCallbackInfo_.env, subscribeCallbackInfo_.ref);
-        subscribeCallbackInfo_.ref = nullptr;
-    }
-    if (unsubscribeCallbackInfo_.ref != nullptr) {
-        napi_delete_reference(unsubscribeCallbackInfo_.env, unsubscribeCallbackInfo_.ref);
-        unsubscribeCallbackInfo_.ref = nullptr;
-    }
-    if (dieCallbackInfo_.ref != nullptr) {
-        napi_delete_reference(dieCallbackInfo_.env, dieCallbackInfo_.ref);
-        dieCallbackInfo_.ref = nullptr;
-    }
-    if (disturbModeCallbackInfo_.ref != nullptr) {
-        napi_delete_reference(disturbModeCallbackInfo_.env, disturbModeCallbackInfo_.ref);
-        disturbModeCallbackInfo_.ref = nullptr;
-    }
-    if (enabledNotificationCallbackInfo_.ref != nullptr) {
-        napi_delete_reference(enabledNotificationCallbackInfo_.env, enabledNotificationCallbackInfo_.ref);
-        enabledNotificationCallbackInfo_.ref = nullptr;
-    }
-    if (batchCancelCallbackInfo_.ref != nullptr) {
-        napi_delete_reference(batchCancelCallbackInfo_.env, batchCancelCallbackInfo_.ref);
-        batchCancelCallbackInfo_.ref = nullptr;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        if (canceCallbackInfo_.ref != nullptr) {
+            napi_delete_reference(canceCallbackInfo_.env, canceCallbackInfo_.ref);
+            canceCallbackInfo_.ref = nullptr;
+        }
+        if (consumeCallbackInfo_.ref != nullptr) {
+            napi_delete_reference(consumeCallbackInfo_.env, consumeCallbackInfo_.ref);
+            consumeCallbackInfo_.ref = nullptr;
+        }
+        if (updateCallbackInfo_.ref != nullptr) {
+            napi_delete_reference(updateCallbackInfo_.env, updateCallbackInfo_.ref);
+            updateCallbackInfo_.ref = nullptr;
+        }
+        if (subscribeCallbackInfo_.ref != nullptr) {
+            napi_delete_reference(subscribeCallbackInfo_.env, subscribeCallbackInfo_.ref);
+            subscribeCallbackInfo_.ref = nullptr;
+        }
+        if (unsubscribeCallbackInfo_.ref != nullptr) {
+            napi_delete_reference(unsubscribeCallbackInfo_.env, unsubscribeCallbackInfo_.ref);
+            unsubscribeCallbackInfo_.ref = nullptr;
+        }
+        if (dieCallbackInfo_.ref != nullptr) {
+            napi_delete_reference(dieCallbackInfo_.env, dieCallbackInfo_.ref);
+            dieCallbackInfo_.ref = nullptr;
+        }
+        if (disturbModeCallbackInfo_.ref != nullptr) {
+            napi_delete_reference(disturbModeCallbackInfo_.env, disturbModeCallbackInfo_.ref);
+            disturbModeCallbackInfo_.ref = nullptr;
+        }
+        if (enabledNotificationCallbackInfo_.ref != nullptr) {
+            napi_delete_reference(enabledNotificationCallbackInfo_.env, enabledNotificationCallbackInfo_.ref);
+            enabledNotificationCallbackInfo_.ref = nullptr;
+        }
+        if (batchCancelCallbackInfo_.ref != nullptr) {
+            napi_delete_reference(batchCancelCallbackInfo_.env, batchCancelCallbackInfo_.ref);
+            batchCancelCallbackInfo_.ref = nullptr;
+        }
     }
     SubDeleteRef();
     if (env_ != nullptr) {
@@ -359,7 +363,12 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
 {
     ANS_LOGD("called");
 
-    if (canceCallbackInfo_.ref == nullptr || canceCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = canceCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
 
@@ -437,7 +446,12 @@ void ThreadSafeOnBatchCancel(napi_env env, napi_value jsCallback, void* context,
 void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS::Notification::Notification>>
     &requestList, const std::shared_ptr<NotificationSortingMap> &sortingMap, int32_t deleteReason)
 {
-    if (batchCancelCallbackInfo_.ref == nullptr || batchCancelCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = batchCancelCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
     if (requestList.empty()) {
@@ -476,6 +490,7 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
 
 bool SubscriberInstance::HasOnBatchCancelCallback()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     if (batchCancelCallbackInfo_.ref == nullptr) {
         ANS_LOGE("null ref");
         return false;
@@ -533,7 +548,12 @@ void SubscriberInstance::OnConsumed(const std::shared_ptr<OHOS::Notification::No
 {
     ANS_LOGD("called");
 
-    if (consumeCallbackInfo_.ref == nullptr || consumeCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = consumeCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
 
@@ -601,7 +621,12 @@ void SubscriberInstance::OnUpdate(const std::shared_ptr<NotificationSortingMap> 
 {
     ANS_LOGD("called");
 
-    if (updateCallbackInfo_.ref == nullptr || updateCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = updateCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
 
@@ -645,7 +670,12 @@ void SubscriberInstance::OnConnected()
 {
     ANS_LOGD("called");
 
-    if (subscribeCallbackInfo_.ref == nullptr || subscribeCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = subscribeCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
 
@@ -723,7 +753,12 @@ void SubscriberInstance::OnDied()
 {
     ANS_LOGD("called");
 
-    if (dieCallbackInfo_.ref == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = dieCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr) {
         return;
     }
 
@@ -776,7 +811,12 @@ void SubscriberInstance::OnDoNotDisturbDateChange(const std::shared_ptr<Notifica
 
     onDoNotDisturbChanged(date);
 
-    if (disturbDateCallbackInfo_.ref == nullptr || disturbDateCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = disturbDateCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
 
@@ -834,7 +874,12 @@ void SubscriberInstance::onDoNotDisturbChanged(const std::shared_ptr<Notificatio
 {
     ANS_LOGD("called");
 
-    if (disturbChangedCallbackInfo_.ref == nullptr || disturbChangedCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = disturbChangedCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
 
@@ -892,7 +937,12 @@ void SubscriberInstance::OnEnabledNotificationChanged(
 {
     ANS_LOGD("called");
 
-    if (enabledNotificationCallbackInfo_.ref == nullptr || enabledNotificationCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = enabledNotificationCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
 
@@ -951,7 +1001,12 @@ void SubscriberInstance::OnEnabledSilentReminderChanged(
 {
     ANS_LOGD("called");
 
-    if (enabledSilentReminderCallbackInfo_.ref == nullptr || enabledSilentReminderCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = enabledSilentReminderCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
 
@@ -1010,8 +1065,13 @@ void SubscriberInstance::OnNotificationSwitchChanged(
 {
     ANS_LOGD("called");
 
-    if (notificationSwitchChangedCallbackInfo_.ref == nullptr ||
-        notificationSwitchChangedCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = notificationSwitchChangedCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr ||
+        callbackInfo.env == nullptr) {
         return;
     }
 
@@ -1065,7 +1125,12 @@ void ThreadSafeOnEnabledPriorityChanged(napi_env env, napi_value jsCallback, voi
 void SubscriberInstance::OnEnabledPriorityChanged(const std::shared_ptr<EnabledNotificationCallbackData> &callbackData)
 {
     ANS_LOGD("called");
-    if (enabledPriorityCallbackInfo_.ref == nullptr || enabledPriorityCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = enabledPriorityCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
     NotificationReceiveDataWorker *dataWorker = new (std::nothrow) NotificationReceiveDataWorker();
@@ -1114,7 +1179,12 @@ void SubscriberInstance::OnEnabledPriorityByBundleChanged(
     const std::shared_ptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData)
 {
     ANS_LOGD("called");
-    if (enabledPriorityByBundleCallbackInfo_.ref == nullptr || enabledPriorityByBundleCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = enabledPriorityByBundleCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
     if (callbackData == nullptr) {
@@ -1165,7 +1235,12 @@ void ThreadSafeOnSystemUpdate(napi_env env, napi_value jsCallback, void* context
 void SubscriberInstance::OnSystemUpdate(const std::shared_ptr<OHOS::Notification::Notification> &request)
 {
     ANS_LOGD("called");
-    if (systemUpdateCallbackInfo_.ref == nullptr || systemUpdateCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = systemUpdateCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
     if (request == nullptr) {
@@ -1219,7 +1294,12 @@ void SubscriberInstance::OnBadgeChanged(
 {
     ANS_LOGD("called");
 
-    if (setBadgeCallbackInfo_.ref == nullptr || setBadgeCallbackInfo_.env == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = setBadgeCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
         return;
     }
 
@@ -1275,7 +1355,12 @@ void ThreadSafeOnBadgeEnabledChanged(napi_env env, napi_value jsCallback, void* 
 void SubscriberInstance::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
-    if (setBadgeEnabledCallbackInfo_.ref == nullptr) {
+    CallbackInfo callbackInfo;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        callbackInfo = setBadgeEnabledCallbackInfo_;
+    }
+    if (callbackInfo.ref == nullptr) {
         return;
     }
     if (callbackData == nullptr) {
@@ -1309,199 +1394,271 @@ void SubscriberInstance::SetEnv(const napi_env &env)
 
 void SubscriberInstance::SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    canceCallbackInfo_.env = env;
-    canceCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        canceCallbackInfo_.env = env;
+        canceCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetCancelCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return canceCallbackInfo_;
 }
 
 void SubscriberInstance::SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    consumeCallbackInfo_.env = env;
-    consumeCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        consumeCallbackInfo_.env = env;
+        consumeCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetConsumeCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return consumeCallbackInfo_;
 }
 
 void SubscriberInstance::SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    updateCallbackInfo_.env = env;
-    updateCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        updateCallbackInfo_.env = env;
+        updateCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetUpdateCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return updateCallbackInfo_;
 }
 
 void SubscriberInstance::SetSubscribeCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    subscribeCallbackInfo_.env = env;
-    subscribeCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        subscribeCallbackInfo_.env = env;
+        subscribeCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetSubscribeCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return subscribeCallbackInfo_;
 }
 
 void SubscriberInstance::SetUnsubscribeCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    unsubscribeCallbackInfo_.env = env;
-    unsubscribeCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        unsubscribeCallbackInfo_.env = env;
+        unsubscribeCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetUnsubscribeCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return unsubscribeCallbackInfo_;
 }
 
 void SubscriberInstance::SetDieCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    dieCallbackInfo_.env = env;
-    dieCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        dieCallbackInfo_.env = env;
+        dieCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetDieCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return dieCallbackInfo_;
 }
 
 void SubscriberInstance::SetDisturbModeCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    disturbModeCallbackInfo_.env = env;
-    disturbModeCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        disturbModeCallbackInfo_.env = env;
+        disturbModeCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetDisturbModeCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return disturbModeCallbackInfo_;
 }
 
 void SubscriberInstance::SetEnabledNotificationCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    enabledNotificationCallbackInfo_.env = env;
-    enabledNotificationCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        enabledNotificationCallbackInfo_.env = env;
+        enabledNotificationCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetEnabledNotificationCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return enabledNotificationCallbackInfo_;
 }
 
 void SubscriberInstance::SetEnabledSilentReminderCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    enabledSilentReminderCallbackInfo_.env = env;
-    enabledSilentReminderCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        enabledSilentReminderCallbackInfo_.env = env;
+        enabledSilentReminderCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetEnabledSilentReminderCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return enabledSilentReminderCallbackInfo_;
 }
 
 void SubscriberInstance::SetNotificationSwitchChangedCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    notificationSwitchChangedCallbackInfo_.env = env;
-    notificationSwitchChangedCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        notificationSwitchChangedCallbackInfo_.env = env;
+        notificationSwitchChangedCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetNotificationSwitchChangedCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return notificationSwitchChangedCallbackInfo_;
 }
 
 void SubscriberInstance::SetEnabledPriorityCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    enabledPriorityCallbackInfo_.env = env;
-    enabledPriorityCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        enabledPriorityCallbackInfo_.env = env;
+        enabledPriorityCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetEnabledPriorityCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return enabledPriorityCallbackInfo_;
 }
 
 void SubscriberInstance::SetEnabledPriorityByBundleCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    enabledPriorityByBundleCallbackInfo_.env = env;
-    enabledPriorityByBundleCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        enabledPriorityByBundleCallbackInfo_.env = env;
+        enabledPriorityByBundleCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetEnabledPriorityByBundleCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return enabledPriorityByBundleCallbackInfo_;
 }
 
 void SubscriberInstance::SetSystemUpdateCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    systemUpdateCallbackInfo_.env = env;
-    systemUpdateCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        systemUpdateCallbackInfo_.env = env;
+        systemUpdateCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetSystemUpdateCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return systemUpdateCallbackInfo_;
 }
 
 void SubscriberInstance::SetDisturbDateCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    disturbDateCallbackInfo_.env = env;
-    disturbDateCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        disturbDateCallbackInfo_.env = env;
+        disturbDateCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetDisturbDateCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return disturbDateCallbackInfo_;
 }
 
 void SubscriberInstance::SetDisturbChangedCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    disturbChangedCallbackInfo_.env = env;
-    disturbChangedCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        disturbChangedCallbackInfo_.env = env;
+        disturbChangedCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetDisturbChangedCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return disturbChangedCallbackInfo_;
 }
 
 void SubscriberInstance::SetBadgeCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    setBadgeCallbackInfo_.env = env;
-    setBadgeCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        setBadgeCallbackInfo_.env = env;
+        setBadgeCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetBadgeCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return setBadgeCallbackInfo_;
 }
 
 void SubscriberInstance::SetBadgeEnabledCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    setBadgeEnabledCallbackInfo_.env = env;
-    setBadgeEnabledCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        setBadgeEnabledCallbackInfo_.env = env;
+        setBadgeEnabledCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetBadgeEnabledCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return setBadgeEnabledCallbackInfo_;
 }
 
 void SubscriberInstance::SetBatchCancelCallbackInfo(const napi_env &env, const napi_ref &ref)
 {
-    batchCancelCallbackInfo_.env = env;
-    batchCancelCallbackInfo_.ref = ref;
+    {
+        std::lock_guard<ffrt::mutex> lock(callbackMutex_);
+        batchCancelCallbackInfo_.env = env;
+        batchCancelCallbackInfo_.ref = ref;
+    }
 }
 
 SubscriberInstance::CallbackInfo SubscriberInstance::GetBatchCancelCallbackInfo()
 {
+    std::lock_guard<ffrt::mutex> lock(callbackMutex_);
     return batchCancelCallbackInfo_;
 }
 

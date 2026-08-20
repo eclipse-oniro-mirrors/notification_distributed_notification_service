@@ -287,6 +287,11 @@ bool AddBadgeQueryCallBackInfo(const napi_env &env, const int32_t &userId,
         return false;
     }
     std::lock_guard<ffrt::mutex> lock(badgeQueryCallbackInfoMutex_);
+    auto it = badgeQueryCallbackInfos_.find(userId);
+    if (it != badgeQueryCallbackInfos_.end() && it->second != nullptr &&
+        it->second != badgeQueryCallbackInfo) {
+        it->second->RemoveEnvCleanupHook();
+    }
     badgeQueryCallbackInfos_.insert_or_assign(userId, badgeQueryCallbackInfo);
 
     return true;
@@ -455,6 +460,7 @@ void AsyncCompleteCallbackNapiOffBadgeNumberQuery(napi_env env, napi_status stat
             napi_delete_reference(env, asynccallbackinfo->objectInfo->ref);
             asynccallbackinfo->objectInfo->ref = nullptr;
         }
+        asynccallbackinfo->objectInfo->RemoveEnvCleanupHook();
         asynccallbackinfo->objectInfo->SetEnv(nullptr);
     }
 
@@ -570,9 +576,14 @@ void JSBadgeQueryCallBack::ClearEnv()
         napi_delete_reference(env_, ref);
         ref = nullptr;
     }
+    RemoveEnvCleanupHook();
+    env_ = nullptr;
+}
+
+void JSBadgeQueryCallBack::RemoveEnvCleanupHook()
+{
     if (env_ != nullptr) {
         napi_remove_env_cleanup_hook(env_, ClearEnvCallback, this);
-        env_ = nullptr;
     }
 }
 
