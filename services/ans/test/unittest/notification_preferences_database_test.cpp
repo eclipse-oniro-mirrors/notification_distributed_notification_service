@@ -19,8 +19,8 @@
 #define private public
 #define protected public
 #include "notification_preferences_database.h"
-#include "notification_rdb_data_mgr.h"
 #include "notification_preferences.h"
+#include "rdb_errno.h"
 #undef private
 #undef protected
 #include "mock_os_account_manager.h"

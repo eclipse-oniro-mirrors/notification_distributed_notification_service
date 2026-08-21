@@ -85,7 +85,7 @@
 | 通知发布流程变更 | `services/ans/src/advanced_notification_publish/` + `services/ans/src/advanced_notification_manager/` |
 | 分布式通知变更 | `services/distributed/` + `notification.gni` 中分布式相关特性开关 |
 | 权限/安全变更 | `frameworks/core/common/include/ans_permission_def.h` + `services/ans/include/access_token_helper.h` + `services/ans/include/permission_filter.h` |
-| 偏好设置/持久化变更 | `services/ans/src/notification_preferences*.cpp` + `services/ans/src/notification_rdb_data_mgr.cpp` |
+| 偏好设置/持久化变更 | `services/ans/src/notification_preferences*.cpp` + `services/infrastructure/external_adapter/rdb/` + `services/domain/settings/rdb_mgr_repo/` |
 | 新增特性 | `notification.gni` 添加特性开关 → 条件编译包裹代码 |
 | 新增/修改测试 | 对应模块 `test/unittest/` 目录 + 对应 `BUILD.gn` |
 
