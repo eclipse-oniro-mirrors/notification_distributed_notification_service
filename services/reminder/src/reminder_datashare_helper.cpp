@@ -20,6 +20,7 @@
 #include "reminder_request_calendar.h"
 #include "reminder_calendar_share_table.h"
 
+#include "parameters.h"
 #include "iservice_registry.h"
 #include "ability_manager_client.h"
 #include "in_process_call_wrapper.h"
@@ -142,6 +143,10 @@ DataShare::DataSharePredicates ReminderDataShareHelper::BuildQueryPredicates(int
 
 bool ReminderDataShareHelper::Query(std::map<std::string, sptr<ReminderRequest>>& reminders)
 {
+    if (IsBopdRunMode()) {
+        ANSR_LOGE("The current system is in bopd mode.");
+        return false;
+    }
     auto helper = CreateDataShareHelper(ReminderCalendarShareTable::PROXY);
     if (helper == nullptr) {
         ANSR_LOGE("DataShareHelper is null.");
@@ -305,6 +310,10 @@ void ReminderDataShareHelper::InsertCacheReminders(const std::map<std::string, s
 
 void ReminderDataShareHelper::OnDataInsertOrDelete()
 {
+    if (IsBopdRunMode()) {
+        ANSR_LOGE("The current system is in bopd mode.");
+        return;
+    }
     auto func = []() {
         auto manager = ReminderDataManager::GetInstance();
         if (manager == nullptr) {
@@ -331,6 +340,10 @@ void ReminderDataShareHelper::OnDataInsertOrDelete()
 
 void ReminderDataShareHelper::OnDataUpdate(const DataShare::DataShareObserver::ChangeInfo& info)
 {
+    if (IsBopdRunMode()) {
+        ANSR_LOGE("The current system is in bopd mode.");
+        return;
+    }
     auto func = []() {
         auto manager = ReminderDataManager::GetInstance();
         if (manager == nullptr) {
@@ -636,6 +649,26 @@ void ReminderDataShareHelper::CheckWantAgent(sptr<ReminderRequest>& reminder)
         HiviewDFX::HiSysEvent::EventType::STATISTIC, "MODULE_NAME", "ReminderDataShareHelper",
         "FUNC_NAME", "CheckWantAgent", "ERR_INFO", "WantAgent is not the target");
 #endif
+}
+
+bool ReminderDataShareHelper::IsBopdRunMode()
+{
+    constexpr size_t validParamLen = 3;
+    std::string paramValue = system::GetParameter("ohos.boot.bopd.mode", "NA");
+    if (paramValue.size() != validParamLen) {
+        return false;
+    }
+
+    constexpr const char* bopdBeforeDl = "0x2";
+    constexpr const char* bopdStgRoBeforeDl = "0x3";
+    constexpr const char* bopdHwDegBeforeDl = "0x6";
+    constexpr const char* bopdStgRoHwDegBeforeDl = "0x7";
+    constexpr const char* bopdAfterDl = "0xa";
+    constexpr const char* bopdHwDegAfterDl = "0xe";
+    constexpr const char* bopdHwDegViaEupdater = "0xf";
+    return paramValue == bopdBeforeDl || paramValue == bopdStgRoBeforeDl || paramValue == bopdHwDegBeforeDl ||
+        paramValue == bopdStgRoHwDegBeforeDl || paramValue == bopdAfterDl || paramValue == bopdHwDegAfterDl ||
+        paramValue == bopdHwDegViaEupdater;
 }
 
 ReminderDataShareHelper::ReminderDataShareHelper()

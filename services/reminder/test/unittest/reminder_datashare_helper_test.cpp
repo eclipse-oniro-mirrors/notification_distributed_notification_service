@@ -20,6 +20,7 @@
 #include "reminder_datashare_helper.h"
 #include "reminder_calendar_share_table.h"
 
+#include "parameters.h"
 #include "mock_service_registry.h"
 #include "mock_datashare_helper.h"
 #include "mock_datashare_result_set.h"
@@ -27,6 +28,20 @@
 #include "mock_reminder_bundle_manager_helper.h"
 
 using namespace testing::ext;
+namespace OHOS::system {
+static std::string g_mockValue = "0x0000";
+std::string GetParameter(const std::string& key, const std::string& def)
+{
+    return g_mockValue;
+}
+
+bool SetParameter(const std::string& key, const std::string& value)
+{
+    g_mockValue = value;
+    return true;
+}
+}
+
 namespace OHOS::Notification {
 class ReminderDataShareHelperTest : public testing::Test {
 public:
@@ -703,5 +718,60 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_020, Level1)
     EXPECT_EQ(wantAgentInfo->pkgName, ReminderCalendarShareTable::NAME);
     EXPECT_EQ(wantAgentInfo->abilityName, ReminderCalendarShareTable::MAIN_ABILITY);
     EXPECT_EQ(wantAgentInfo->uri, "");
+}
+
+/**
+ * @tc.name: ReminderDataShareHelper_021
+ * @tc.desc: test IsBopdRunMode function
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_021, Level1)
+{
+    std::string defaultParam = system::GetParameter("ohos.boot.bopd.mode", "NA");
+    system::SetParameter("ohos.boot.bopd.mode", "test");
+    bool ret = ReminderDataShareHelper::GetInstance().IsBopdRunMode();
+    EXPECT_EQ(ret, false);
+
+    system::SetParameter("ohos.boot.bopd.mode", "0x2");
+    ret = ReminderDataShareHelper::GetInstance().IsBopdRunMode();
+    EXPECT_EQ(ret, true);
+    std::map<std::string, sptr<ReminderRequest>> reminders;
+    ret = ReminderDataShareHelper::GetInstance().Query(reminders);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(reminders.size(), 0);
+
+    system::SetParameter("ohos.boot.bopd.mode", "0x3");
+    ret = ReminderDataShareHelper::GetInstance().IsBopdRunMode();
+    EXPECT_EQ(ret, true);
+    ReminderDataShareHelper::GetInstance().OnDataInsertOrDelete();
+
+    system::SetParameter("ohos.boot.bopd.mode", "0x6");
+    ret = ReminderDataShareHelper::GetInstance().IsBopdRunMode();
+    EXPECT_EQ(ret, true);
+    DataShare::DataShareObserver::ChangeInfo info;
+    ReminderDataShareHelper::GetInstance().OnDataUpdate(info);
+
+    system::SetParameter("ohos.boot.bopd.mode", "0x7");
+    ret = ReminderDataShareHelper::GetInstance().IsBopdRunMode();
+    EXPECT_EQ(ret, true);
+
+    system::SetParameter("ohos.boot.bopd.mode", "0xa");
+    ret = ReminderDataShareHelper::GetInstance().IsBopdRunMode();
+    EXPECT_EQ(ret, true);
+
+    system::SetParameter("ohos.boot.bopd.mode", "0xe");
+    ret = ReminderDataShareHelper::GetInstance().IsBopdRunMode();
+    EXPECT_EQ(ret, true);
+
+    system::SetParameter("ohos.boot.bopd.mode", "0xf");
+    ret = ReminderDataShareHelper::GetInstance().IsBopdRunMode();
+    EXPECT_EQ(ret, true);
+
+    system::SetParameter("ohos.boot.bopd.mode", "0xc");
+    ret = ReminderDataShareHelper::GetInstance().IsBopdRunMode();
+    EXPECT_EQ(ret, false);
+
+    system::SetParameter("ohos.boot.bopd.mode", defaultParam);
 }
 }
