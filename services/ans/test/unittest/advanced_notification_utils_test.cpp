@@ -36,7 +36,6 @@
 #include "int_wrapper.h"
 #include "accesstoken_kit.h"
 #include "notification_preferences.h"
-#include "notification_constant.h"
 #include "notification_record.h"
 #include "notification_subscriber.h"
 #include "refbase.h"
@@ -54,6 +53,7 @@ using namespace OHOS::Security::AccessToken;
 
 extern void MockIsOsAccountExists(bool mockRet);
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 namespace OHOS {
 namespace Notification {
@@ -650,6 +650,40 @@ HWTEST_F(AnsUtilsTest, GetBundleInfoByNotificationBundleOption_00001, Function |
     bool res = advancedNotificationService_->GetBundleInfoByNotificationBundleOption(bundle, bundleInfo);
     EXPECT_EQ(res, true);
     MockSetBundleInfoFailed(false);
+}
+
+/**
+ * @tc.name: GetBundleInfoByNotificationBundleOption_00002
+ * @tc.desc: Test GetBundleInfoByNotificationBundleOption when GetOsAccountLocalIdFromUid fails
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetBundleInfoByNotificationBundleOption_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    AppExecFwk::BundleInfo bundleInfo;
+
+    MockGetOsAccountLocalIdFromUid(false, 0);
+    bool res = advancedNotificationService_->GetBundleInfoByNotificationBundleOption(bundle, bundleInfo);
+    EXPECT_EQ(res, false);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GetBundleInfoByNotificationBundleOption_00003
+ * @tc.desc: Test GetBundleInfoByNotificationBundleOption when resolved userId is invalid (< 0)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetBundleInfoByNotificationBundleOption_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    AppExecFwk::BundleInfo bundleInfo;
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    bool res = advancedNotificationService_->GetBundleInfoByNotificationBundleOption(bundle, bundleInfo);
+    EXPECT_EQ(res, false);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**
@@ -1810,5 +1844,172 @@ HWTEST_F(AnsUtilsTest, GetBundleVersionCode_ValidBundle_00001, Function | SmallT
     ErrCode ret = advancedNotificationService_->GetBundleVersionCode(bundleOption, versionCode);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: ResolveCreatorUserId_PresetUserId_00001
+ * @tc.desc: Test ResolveCreatorUserId returns Ok immediately when CreatorUserId is preset
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_PresetUserId_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUserId(2); // already resolved, early Ok
+
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_TRUE(result.Ok());
+    EXPECT_EQ(request->GetCreatorUserId(), 2);
+}
+
+/**
+ * @tc.name: ResolveCreatorUserId_GetOsAccountFailed_00001
+ * @tc.desc: Test ResolveCreatorUserId with non-zero CreatorUid when GetOsAccountLocalIdFromUid fails
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_GetOsAccountFailed_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(100);
+
+    MockGetOsAccountLocalIdFromUid(false, 0);
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_FALSE(result.Ok());
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: ResolveCreatorUserId_InvalidUserId_00001
+ * @tc.desc: Test ResolveCreatorUserId with non-zero CreatorUid when resolved userId is invalid (<= 0)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_InvalidUserId_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(100);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_FALSE(result.Ok());
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: ResolveCreatorUserId_ZeroUidGetOsAccountFailed_00001
+ * @tc.desc: Test ResolveCreatorUserId with zero CreatorUid (callingUid path) when resolution fails
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_ZeroUidGetOsAccountFailed_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(0); // falls into the callingUid branch
+
+    MockGetOsAccountLocalIdFromUid(false, 0);
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_FALSE(result.Ok());
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: ResolveCreatorUserId_ValidUid_00001
+ * @tc.desc: Test ResolveCreatorUserId resolves userId from uid and stores it in the request
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_ValidUid_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(100);
+
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_TRUE(result.Ok());
+    EXPECT_EQ(request->GetCreatorUserId(), 100); // annex mock default id is 100
+}
+
+/**
+ * @tc.name: PrePublishNotificationBySa_ResolveCreatorFailed_00001
+ * @tc.desc: Test PrePublishNotificationBySa propagates the ResolveCreatorUserId failure
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, PrePublishNotificationBySa_ResolveCreatorFailed_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(100);
+    std::string bundle = "";
+
+    MockGetOsAccountLocalIdFromUid(false, 0);
+    auto result = advancedNotificationService_->PrePublishNotificationBySa(request, 100, bundle);
+    EXPECT_FALSE(result.Ok());
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: PrePublishNotificationBySa_OwnerUidInvalidUserId_00001
+ * @tc.desc: Test PrePublishNotificationBySa fails when OwnerUid resolves to invalid userId
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, PrePublishNotificationBySa_OwnerUidInvalidUserId_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(100);
+    request->SetOwnerUid(200); // non-default owner uid, OwnerUserId stays SUBSCRIBE_USER_INIT
+    std::string bundle = "";
+
+    // first resolution (CreatorUid) succeeds with default id 100, owner resolution fails
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto result = advancedNotificationService_->PrePublishNotificationBySa(request, 100, bundle);
+    EXPECT_FALSE(result.Ok());
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
+/**
+ * @tc.name: DelNormalCloneBundleForExtensionSubscription_InvalidUserId_00001
+ * @tc.desc: Test DelNormalCloneBundleForExtensionSubscription returns early when
+ *           GetOsAccountLocalIdFromUid fails or resolved userId < 0
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, DelNormalCloneBundleForExtensionSubscription_InvalidUserId_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 1);
+
+    MockGetOsAccountLocalIdFromUid(false, 0); // resolution fails
+    advancedNotificationService_->DelNormalCloneBundleForExtensionSubscription(bundle);
+    EXPECT_NE(bundle, nullptr);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // invalid userId (-2)
+    advancedNotificationService_->DelNormalCloneBundleForExtensionSubscription(bundle);
+    EXPECT_NE(bundle, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: DelNormalCloneBundleForExtensionSubscription_EmptyUpdatedBundles_00001
+ * @tc.desc: Test DelNormalCloneBundleForExtensionSubscription with valid userId and empty
+ *           updated bundles returns early without crash
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, DelNormalCloneBundleForExtensionSubscription_EmptyUpdatedBundles_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 1);
+
+    // mock default userId 100 is a system account, updated bundles are empty -> early return
+    advancedNotificationService_->DelNormalCloneBundleForExtensionSubscription(bundle);
+    EXPECT_NE(bundle, nullptr);
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

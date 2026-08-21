@@ -1993,6 +1993,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_06
 HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07000, Function | SmallTest | Level1)
 {
     MockIsSystemApp(true);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for GetCurrentActiveUserId
     AdvancedNotificationService advancedNotificationService;
     auto result = advancedNotificationService.SetGeofenceEnabled(true);
     EXPECT_EQ(result, ERR_OK);

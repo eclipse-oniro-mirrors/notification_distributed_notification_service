@@ -16,7 +16,11 @@
 #include <functional>
 #include <gtest/gtest.h>
 
+#include "ans_const_define.h"
 #include "ans_ut_constant.h"
+
+#include "iremote_object.h"
+#include "mock_bundle_mgr.h"
 #define private public
 #define protected public
 #include "bundle_manager_helper.h"
@@ -24,10 +28,66 @@
 #undef protected
 
 extern void MockGetSystemAbilityManager(bool mockRet);
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
+extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase = 0);
 
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
+// Minimal IRemoteObject stub so BundleMgrProxy holds a valid remote object:
+// AsObject() must not return nullptr, otherwise ~BundleManagerHelper ->
+// Disconnect() dereferences a null remote when removing the death recipient.
+class MockRemoteObject : public IRemoteObject {
+public:
+    MockRemoteObject() : IRemoteObject(u"bundle_manager_helper_branch_test_mock") {}
+    ~MockRemoteObject() override {}
+
+    int32_t GetObjectRefCount() override
+    {
+        return 0;
+    }
+
+    int SendRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override
+    {
+        return 0;
+    }
+
+    bool IsProxyObject() const override
+    {
+        return false;
+    }
+
+    bool CheckObjectLegality() const override
+    {
+        return true;
+    }
+
+    bool AddDeathRecipient(const sptr<DeathRecipient> &recipient) override
+    {
+        return true;
+    }
+
+    bool RemoveDeathRecipient(const sptr<DeathRecipient> &recipient) override
+    {
+        return true;
+    }
+
+    bool Marshalling(Parcel &parcel) const override
+    {
+        return true;
+    }
+
+    sptr<IRemoteBroker> AsInterface() override
+    {
+        return nullptr;
+    }
+
+    int Dump(int fd, const std::vector<std::u16string> &args) override
+    {
+        return 0;
+    }
+};
+
 class BundleManagerHelperBranchTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -130,6 +190,38 @@ HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_00700, Function | Sm
     BundleManagerHelper bundleManagerHelper;
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     ASSERT_EQ(false, bundleManagerHelper.CheckApiCompatibility(bundleOption));
+}
+
+/**
+ * @tc.number    : BundleManagerHelper_01700
+ * @tc.name      : BundleManagerHelper_01700
+ * @tc.desc      : test CheckApiCompatibility with invalid uid, GetOsAccountLocalIdFromUid fails
+ */
+HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01700, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    MockGetOsAccountLocalIdFromUid(false, 0); // uid-to-userId resolution fails
+    ASSERT_EQ(false, bundleManagerHelper.CheckApiCompatibility(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID));
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.number    : BundleManagerHelper_01800
+ * @tc.name      : BundleManagerHelper_01800
+ * @tc.desc      : test GetBundleInfo with invalid uid, GetOsAccountLocalIdFromUid fails
+ */
+HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01800, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    // inject a non-null bundleMgr_ holding a valid mock remote so the nullptr guard passes
+    // (line 307); a nullptr remote would crash in ~BundleManagerHelper -> Disconnect()
+    // -> AsObject()->RemoveDeathRecipient().
+    bundleManagerHelper.bundleMgr_ = new AppExecFwk::BundleMgrProxy(new MockRemoteObject());
+    AppExecFwk::BundleInfo bundleInfo;
+    MockGetOsAccountLocalIdFromUid(false, 0); // uid-to-userId resolution fails (line 311-312)
+    ASSERT_EQ(false, bundleManagerHelper.GetBundleInfo(
+        TEST_DEFUALT_BUNDLE, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, SYSTEM_APP_UID, bundleInfo));
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**
@@ -316,21 +408,6 @@ HWTEST_F(BundleManagerHelperBranchTest, GetApplicationInfo_00001, Function | Sma
 }
 
 /**
- * @tc.number    : CheckSystemApp_00001
- * @tc.name      : CheckSystemApp_00001
- * @tc.desc      : test CheckSystemApp
- */
-HWTEST_F(BundleManagerHelperBranchTest, CheckSystemApp_00001, Function | SmallTest | Level1)
-{
-    BundleManagerHelper bundleManagerHelper;
-    auto result = bundleManagerHelper.CheckSystemApp("testBundle", -1);
-    ASSERT_EQ(false, result);
-
-    result = bundleManagerHelper.CheckSystemApp("testBundle", 100);
-    ASSERT_EQ(false, result);
-}
-
-/**
  * @tc.number    : GetAllBundleInfo_00001
  * @tc.name      : GetAllBundleInfo_00001
  * @tc.desc      : test GetAllBundleInfo
@@ -400,6 +477,46 @@ HWTEST_F(BundleManagerHelperBranchTest, CheckBundleImplExtensionAbility_00001, F
 }
 
 /**
+ * @tc.number    : IsAncoApp_00001
+ * @tc.name      : IsAncoApp_00001
+ * @tc.desc      : test IsAncoApp when GetOsAccountLocalIdFromUid fails
+ */
+HWTEST_F(BundleManagerHelperBranchTest, IsAncoApp_00001, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    MockGetOsAccountLocalIdFromUid(false, 0); // resolution fails (line 533-535)
+    ASSERT_EQ(false, bundleManagerHelper.IsAncoApp(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID));
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.number    : IsAncoApp_00002
+ * @tc.name      : IsAncoApp_00002
+ * @tc.desc      : test IsAncoApp when resolved userId >= DEFAULT_USER_ID
+ */
+HWTEST_F(BundleManagerHelperBranchTest, IsAncoApp_00002, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    // mock id 100 == DEFAULT_USER_ID: anco app lives in privacy space only (line 534)
+    ASSERT_EQ(false, bundleManagerHelper.IsAncoApp(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID));
+}
+
+/**
+ * @tc.number    : IsAncoApp_00003
+ * @tc.name      : IsAncoApp_00003
+ * @tc.desc      : test IsAncoApp with valid privacy-space userId and GetBundleInfoV9 failure
+ */
+HWTEST_F(BundleManagerHelperBranchTest, IsAncoApp_00003, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    MockGetSystemAbilityManager(true); // samgr null -> bundleMgr_ null -> GetBundleInfoV9 false
+    MockGetOsAccountLocalIdFromUid(true, 2); // mock privacy-space id 88 (0 < 88 < 100)
+    ASSERT_EQ(false, bundleManagerHelper.IsAncoApp(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID));
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    MockGetSystemAbilityManager(false);
+}
+
+/**
  * @tc.number    : CheckBundleImplExtensionAbility_00002
  * @tc.name      : CheckBundleImplExtensionAbility_00002
  * @tc.desc      : Test CheckBundleImplExtensionAbility returns false when bundleMgr_ is nullptr
@@ -424,5 +541,34 @@ HWTEST_F(BundleManagerHelperBranchTest, Disconnect_NullDeathRecipient_00001, Fun
     bundleManagerHelper.Disconnect();
     EXPECT_EQ(bundleManagerHelper.deathRecipient_, nullptr);
 }
+
+/**
+ * @tc.number    : BundleManagerHelper_01500
+ * @tc.name      : BundleManagerHelper_01500
+ * @tc.desc      : test GetBundleInfoByBundleName function with empty bundle name
+ */
+HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01500, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    std::string bundle = "";
+    int32_t userId = 1;
+    AppExecFwk::BundleInfo bundleInfo;
+    ASSERT_EQ(false, bundleManagerHelper.GetBundleInfoByBundleName(bundle, userId, bundleInfo));
+}
+
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+/**
+ * @tc.number    : BundleManagerHelper_01600
+ * @tc.name      : BundleManagerHelper_01600
+ * @tc.desc      : test GetDistributedNotificationEnabled function with empty bundleName
+ */
+HWTEST_F(BundleManagerHelperBranchTest, BundleManagerHelper_01600, Function | SmallTest | Level1)
+{
+    BundleManagerHelper bundleManagerHelper;
+    std::string bundleName = "";
+    int32_t userId = 1;
+    ASSERT_EQ(false, bundleManagerHelper.GetDistributedNotificationEnabled(bundleName, userId));
+}
+#endif // ANS_FEATURE_ORIGINAL_DISTRIBUTED
 }  // namespace Notification
 }  // namespace OHOS

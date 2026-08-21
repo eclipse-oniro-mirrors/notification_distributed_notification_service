@@ -2121,6 +2121,13 @@ private:
         const napi_env &env, const napi_value &value, const char* name, NotificationConstant::FlagStatus &result);
     static napi_value GetNotificationFlagsInfo(
         const napi_env &env, const napi_value &value, std::shared_ptr<NotificationFlags> &result);
+    static napi_value GetVibrationValues(
+        const napi_env &env, const napi_value &value, NotificationSlot &slot);
+    static napi_value GetSubscriberSlotTypeElement(
+        const napi_env &env, const napi_value &nSlotType, NotificationSubscribeInfo &subscriberInfo);
+    static napi_value GetUnifiedGroupStringProperty(const napi_env &env, const napi_value &info,
+        const char *propName, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo,
+        void (NotificationUnifiedGroupInfo::*setter)(const std::string &));
     static const char *GetPropertyNameByContentType(ContentType type);
     static napi_value NapiReturnFalseCbInner(napi_env env, napi_callback_info info, bool newType);
     static napi_value GetNotificationGeofenceByLongitude(const napi_env &env, const napi_value &value,
@@ -2153,6 +2160,9 @@ private:
         std::shared_ptr<NotificationTrigger> &notificationTrigger);
     static napi_value GetNotificationTriggerDisplayTime(const napi_env &env, const napi_value &value,
         std::shared_ptr<NotificationTrigger> &notificationTrigger);
+    static napi_value GetRingtoneStringProperty(const napi_env &env, const napi_value &value,
+        const char *propName, NotificationRingtoneInfo &ringtoneInfo,
+        void (NotificationRingtoneInfo::*setter)(const std::string &));
 };
 }  // namespace NotificationNapi
 }  // namespace OHOS

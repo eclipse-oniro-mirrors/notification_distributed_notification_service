@@ -32,7 +32,7 @@ namespace Notification {
 namespace {
 constexpr int32_t MAX_VECTOR_SIZE = 3;
 constexpr int32_t MIN_USER_ID = -1;
-constexpr int32_t MAX_USER_ID = 100;
+constexpr int32_t MAX_FUZZ_USER_ID = 100;
 }
     bool TestAdvancedOperations(FuzzedDataProvider* fdp, NotificationHelper& notificationHelper)
     {
@@ -127,12 +127,12 @@ constexpr int32_t MAX_USER_ID = 100;
         auto userIdsSize = fdp->ConsumeIntegralInRange<int32_t>(0, MAX_VECTOR_SIZE);
         std::vector<int32_t> userIds;
         for (int i = 0; i < userIdsSize; ++i) {
-            userIds.push_back(fdp->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_USER_ID));
+            userIds.push_back(fdp->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_FUZZ_USER_ID));
         }
         notificationHelper.ClearDelayNotification(triggerKeys, userIds);
 
         auto triggerKey = fdp->ConsumeRandomLengthString();
-        auto userId = fdp->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_USER_ID);
+        auto userId = fdp->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_FUZZ_USER_ID);
         notificationHelper.PublishDelayedNotification(triggerKey, userId);
         return true;
     }
@@ -178,7 +178,7 @@ constexpr int32_t MAX_USER_ID = 100;
 
         std::string switchName = fdp->ConsumeRandomLengthString();
         bool switchState = fdp->ConsumeBool();
-        int32_t userId = fdp->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_USER_ID);
+        int32_t userId = fdp->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_FUZZ_USER_ID);
         notificationHelper.SetNotificationSwitch(switchName, switchState, userId);
 
         NotificationConstant::SWITCH_STATE getState;

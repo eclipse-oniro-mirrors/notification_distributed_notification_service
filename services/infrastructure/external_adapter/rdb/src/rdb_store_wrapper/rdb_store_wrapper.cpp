@@ -175,7 +175,6 @@ int32_t NtfRdbStoreWrapper::Destroy()
 static bool IsSystemAccount(const int32_t userId)
 {
     const int32_t START_USER_ID = 100;
-    const int32_t MAX_USER_ID = 10736;
     return userId >= START_USER_ID && userId <= MAX_USER_ID;
 }
 

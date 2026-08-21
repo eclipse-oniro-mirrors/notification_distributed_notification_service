@@ -17,6 +17,7 @@
 #include "advanced_aggregation_data_roaming_observer.h"
 #define private public
 #include "advanced_datashare_helper.h"
+#include "ans_const_define.h"
 #undef private
 #include "mock_datashare.h"
 
@@ -475,6 +476,268 @@ HWTEST_F(AdvancedDatashareHelperTest, OnUserSwitch_002, Function | SmallTest | L
     advancedDatashareHelper.OnUserSwitch(userId);
     
     EXPECT_EQ(advancedDatashareHelper.dataObservers_.size(), sizeAfterFirst);
+}
+
+/**
+ * @tc.name: QueryContact_EmptyPhoneNumber_0001
+ * @tc.desc: Test QueryContact with empty phoneNumber returns ERROR_QUERY_INFO_FAILED
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContact_EmptyPhoneNumber_0001, Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "";
+
+    int ret = advancedDatashareHelper.QueryContact(contactUri, phoneNumber, "6", "1", "true");
+    EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: GetIntelligentData_EmptyUri_0001
+ * @tc.desc: Test GetIntelligentData with empty uri returns empty string
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetIntelligentData_EmptyUri_0001, Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string result = advancedDatashareHelper.GetIntelligentData("", "key");
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetIntelligentData_PathTraversal_0001
+ * @tc.desc: Test GetIntelligentData with uri containing ".." returns empty string
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetIntelligentData_PathTraversal_0001, Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string result = advancedDatashareHelper.GetIntelligentData("../etc/passwd", "key");
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetIntelligentDataWithUserId_NegativeUserId_0001
+ * @tc.desc: Test GetIntelligentData(uri, key, userId) with negative userId returns empty string
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetIntelligentDataWithUserId_NegativeUserId_0001,
+    Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string result = advancedDatashareHelper.GetIntelligentData("intelligent", "key", -1);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetIntelligentDataWithUserId_ExceedMaxUserId_0001
+ * @tc.desc: Test GetIntelligentData(uri, key, userId) with userId exceeding MAX_USER_ID
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetIntelligentDataWithUserId_ExceedMaxUserId_0001,
+    Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string result = advancedDatashareHelper.GetIntelligentData("intelligent", "key", MAX_USER_ID + 1);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetIntelligentDataWithUserId_PathTraversal_0001
+ * @tc.desc: Test GetIntelligentData(uri, key, userId) with path traversal uri returns empty string
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetIntelligentDataWithUserId_PathTraversal_0001,
+    Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string result = advancedDatashareHelper.GetIntelligentData("../etc/passwd", "key", 100);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetIntelligentDataWithUserId_EmptyUri_0001
+ * @tc.desc: Test GetIntelligentData(uri, key, userId) with empty uri returns empty string
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetIntelligentDataWithUserId_EmptyUri_0001,
+    Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string result = advancedDatashareHelper.GetIntelligentData("", "key", 100);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetIntelligentDataWithUserId_LeadingSlashUri_0001
+ * @tc.desc: Test GetIntelligentData(uri, key, userId) with leading slash uri returns empty string
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetIntelligentDataWithUserId_LeadingSlashUri_0001,
+    Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string result = advancedDatashareHelper.GetIntelligentData("/intelligent", "key", 100);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: GetIntelligentDataWithUserId_QuerySuccess_0001
+ * @tc.desc: Test GetIntelligentData(uri, key, userId) with successful query returns value plus userId
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetIntelligentDataWithUserId_QuerySuccess_0001,
+    Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    MockGetStringValue("value");
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string result = advancedDatashareHelper.GetIntelligentData("intelligent", "key", 100);
+    EXPECT_EQ(result, "value100");
+}
+
+/**
+ * @tc.name: GetIntelligentDataWithUserId_QueryFail_0001
+ * @tc.desc: Test GetIntelligentData(uri, key, userId) with failed query returns empty string
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetIntelligentDataWithUserId_QueryFail_0001,
+    Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(false);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string result = advancedDatashareHelper.GetIntelligentData("intelligent", "key", 100);
+    EXPECT_EQ(result, "");
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+}
+
+/**
+ * @tc.name: QueryByDataShare_GetColumnIndexFailed_0001
+ * @tc.desc: Test QueryByDataShare returns false when GetColumnIndex fails
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryByDataShare_GetColumnIndexFailed_0001,
+    Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    Uri uri("datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true");
+    std::string value;
+
+    MockGetColumnIndex(-1, 0); // GetColumnIndex returns failure
+    bool ret = advancedDatashareHelper.QueryByDataShare(uri, "key", value);
+    EXPECT_EQ(ret, false);
+
+    MockGetColumnIndex(0, -1); // columnIndex < 0
+    ret = advancedDatashareHelper.QueryByDataShare(uri, "key", value);
+    EXPECT_EQ(ret, false);
+    MockGetColumnIndex(0, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: QueryByDataShare_GetStringFailed_0001
+ * @tc.desc: Test QueryByDataShare returns false when GetString fails
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryByDataShare_GetStringFailed_0001,
+    Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    Uri uri("datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true");
+    std::string value;
+
+    MockGetStringRet(-1); // GetString returns failure
+    bool ret = advancedDatashareHelper.QueryByDataShare(uri, "key", value);
+    EXPECT_EQ(ret, false);
+    MockGetStringRet(0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: DealWithContactResult_FavoriteGetColumnIndexFailed_0001
+ * @tc.desc: Test dealWithContactResult(FAVORITE policy) returns false when GetColumnIndex fails
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, DealWithContactResult_FavoriteGetColumnIndexFailed_0001,
+    Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::shared_ptr<DataShare::DataShareResultSet> resultSet = CreateMockDataShareResultSet();
+
+    MockGetColumnIndex(-1, 0); // GetColumnIndex returns failure
+    // ALLOW_FAVORITE_CONTACTS(4) policy: GetColumnIndex break leaves isNoNeedSilent false
+    bool ret = advancedDatashareHelper.dealWithContactResult(resultSet, "4");
+    EXPECT_EQ(ret, false);
+    MockGetColumnIndex(0, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: DealWithContactResult_FocusModeGetColumnIndexFailed_0001
+ * @tc.desc: Test dealWithContactResult(FOCUS_MODE_LIST policy) returns false when GetColumnIndex fails
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, DealWithContactResult_FocusModeGetColumnIndexFailed_0001,
+    Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::shared_ptr<DataShare::DataShareResultSet> resultSet = CreateMockDataShareResultSet();
+
+    MockGetColumnIndex(-1, 0); // GetColumnIndex returns failure
+    // ALLOW_SPECIFIED_CONTACTS(5) policy: GetColumnIndex break leaves isNoNeedSilent false
+    bool ret = advancedDatashareHelper.dealWithContactResult(resultSet, "5");
+    EXPECT_EQ(ret, false);
+    MockGetColumnIndex(0, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: DealWithContactResult_ContactPolicyValues_0001
+ * @tc.desc: Test dealWithContactResult with focus mode list values 0/1/2
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, DealWithContactResult_ContactPolicyValues_0001,
+    Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::shared_ptr<DataShare::DataShareResultSet> resultSet = CreateMockDataShareResultSet();
+    MockGoToGetNextRow(-1); // single row, stop after first iteration
+
+    MockGetStringValue("0"); // focus_mode_list[0] == '0' -> not allowed
+    bool ret = advancedDatashareHelper.dealWithContactResult(resultSet, "5");
+    EXPECT_EQ(ret, false);
+
+    MockGetStringValue("1"); // focus_mode_list[0] == '1' -> allowed, break
+    ret = advancedDatashareHelper.dealWithContactResult(resultSet, "5");
+    EXPECT_EQ(ret, true);
+
+    MockGetStringValue("2"); // focus_mode_list[0] == '2' -> not allowed, break
+    ret = advancedDatashareHelper.dealWithContactResult(resultSet, "5");
+    EXPECT_EQ(ret, false);
+
+    MockGetStringValue(""); // empty focus_mode_list -> not allowed
+    ret = advancedDatashareHelper.dealWithContactResult(resultSet, "5");
+    EXPECT_EQ(ret, false);
+    MockGoToGetNextRow(0); // reset to default for subsequent tests
 }
 
 }

@@ -20,6 +20,8 @@
 namespace OHOS {
 namespace {
 int32_t g_mockGetForegroundOsAccountLocalId = 0;
+int32_t g_mockGetOsAccountLocalIdFromUid = 100; // 100 default mock userId
+int32_t g_mockQueryActiveOsAccountIdsRet = 0; // 0 default mock result (ERR_OK)
 }
 
 namespace Notification {
@@ -27,12 +29,38 @@ void MockOsAccountManager::MockGetForegroundOsAccountLocalId(const int32_t id)
 {
     g_mockGetForegroundOsAccountLocalId = id;
 }
+
+void MockOsAccountManager::MockGetOsAccountLocalIdFromUid(const int32_t id)
+{
+    g_mockGetOsAccountLocalIdFromUid = id;
+}
+
+void MockOsAccountManager::MockQueryActiveOsAccountIds(const int32_t ret)
+{
+    g_mockQueryActiveOsAccountIdsRet = ret;
+}
 }
 
 namespace AccountSA {
 ErrCode OsAccountManager::GetForegroundOsAccountLocalId(int32_t& id)
 {
     id = g_mockGetForegroundOsAccountLocalId;
+    return ERR_OK;
+}
+
+ErrCode OsAccountManager::GetOsAccountLocalIdFromUid(const int32_t uid, int32_t& id)
+{
+    id = g_mockGetOsAccountLocalIdFromUid;
+    return ERR_OK;
+}
+
+ErrCode OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t>& ids)
+{
+    if (g_mockQueryActiveOsAccountIdsRet != ERR_OK) {
+        ids.clear();
+        return g_mockQueryActiveOsAccountIdsRet;
+    }
+    ids = {100}; // 100 default mock active user
     return ERR_OK;
 }
 }

@@ -110,7 +110,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
-    napi_get_value_bool(env, argv[PARAM0], &params.enable);
+    NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM0], &params.enable));
 
     // argv[1]:callback
     if (argc >= ENABLED_MAX_PARA) {
@@ -119,7 +119,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             ANS_LOGE("Callback is not function excute promise.");
             return Common::NapiGetNull(env);
         }
-        napi_create_reference(env, argv[PARAM1], 1, &params.callback);
+        NAPI_CALL(env, napi_create_reference(env, argv[PARAM1], 1, &params.callback));
     }
 
     return Common::NapiGetNull(env);
@@ -147,7 +147,7 @@ napi_value ParseSetDistributedEnabledParams(const napi_env &env, const napi_call
         Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
-    napi_get_value_bool(env, argv[PARAM0], &params.enable);
+    NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM0], &params.enable));
 
     // argv[1]: deviceType
     NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
@@ -188,7 +188,7 @@ napi_value ParseIsDistributedEnabledParams(const napi_env &env, const napi_callb
     if (argc >= ARGC_ONE) {
         NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valuetype));
         if (valuetype == napi_function) {
-            napi_create_reference(env, argv[PARAM0], 1, &params.callback);
+            NAPI_CALL(env, napi_create_reference(env, argv[PARAM0], 1, &params.callback));
         } else if (valuetype == napi_string) {
             char str[STR_MAX_SIZE] = { 0 };
             size_t strLen = 0;
@@ -246,7 +246,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
-    napi_get_value_bool(env, argv[PARAM1], &params.enable);
+    NAPI_CALL(env, napi_get_value_bool(env, argv[PARAM1], &params.enable));
 
     // argv[2]:callback
     if (argc >= ENABLED_BUNDLE_MAX_PARA) {
@@ -255,7 +255,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             ANS_LOGE("Callback is not function excute promise.");
             return Common::NapiGetNull(env);
         }
-        napi_create_reference(env, argv[PARAM2], 1, &params.callback);
+        NAPI_CALL(env, napi_create_reference(env, argv[PARAM2], 1, &params.callback));
     }
 
     return Common::NapiGetNull(env);
@@ -306,7 +306,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             params.deviceType = str;
             params.hasDeviceType = true;
         } else if (valuetype == napi_function) {
-            napi_create_reference(env, argv[PARAM1], 1, &params.callback);
+            NAPI_CALL(env, napi_create_reference(env, argv[PARAM1], 1, &params.callback));
         } else {
             ANS_LOGE("Property is error");
             Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, PARAMETER_VERIFICATION_FAILED);
@@ -705,7 +705,11 @@ void AsyncCompleteCallbackIsDistributedEnableByBundle(napi_env env, napi_status 
         if (asynccallbackinfo->info.errorCode != ERR_OK) {
             result = Common::NapiGetNull(env);
         } else {
-            napi_get_boolean(env, asynccallbackinfo->enable, &result);
+            if (napi_get_boolean(env, asynccallbackinfo->enable, &result) != napi_ok) {
+                ANS_LOGE("napi_get_boolean failed");
+                asynccallbackinfo->info.errorCode = ERROR;
+                result = Common::NapiGetNull(env);
+            }
         }
         Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -802,16 +806,23 @@ void AsyncCompleteCallbackGetDeviceRemindType(napi_env env, napi_status status, 
     AsyncCallbackInfoGetRemindType *asynccallbackinfo = static_cast<AsyncCallbackInfoGetRemindType *>(data);
     if (asynccallbackinfo) {
         napi_value result = nullptr;
+        bool needNull = false;
         if (asynccallbackinfo->info.errorCode != ERR_OK) {
             ANS_LOGD("errorCode is not ERR_OK.");
-            result = Common::NapiGetNull(env);
+            needNull = true;
         } else {
             DeviceRemindType outType = DeviceRemindType::IDLE_DONOT_REMIND;
             if (!AnsEnumUtil::DeviceRemindTypeCToJS(asynccallbackinfo->remindType, outType)) {
                 asynccallbackinfo->info.errorCode = ERROR;
-                result = Common::NapiGetNull(env);
+                needNull = true;
+            } else if (napi_create_int32(env, (int32_t)outType, &result) != napi_ok) {
+                ANS_LOGE("napi_create_int32 failed");
+                asynccallbackinfo->info.errorCode = ERROR;
+                needNull = true;
             }
-            napi_create_int32(env, (int32_t)outType, &result);
+        }
+        if (needNull) {
+            result = Common::NapiGetNull(env);
         }
         Common::ReturnCallbackPromise(env, asynccallbackinfo->info, result);
         if (asynccallbackinfo->info.callback != nullptr) {
@@ -934,7 +945,10 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
     }
-    napi_get_value_bool(env, argv[PARAM1], &params.enable);
+    if (napi_get_value_bool(env, argv[PARAM1], &params.enable) != napi_ok) {
+        ANS_LOGE("napi_get_value_bool failed");
+        return nullptr;
+    }
 
     // argv[2]:callback
     if (argc >= ENABLED_SYNC_MAX_PARA) {
@@ -943,7 +957,10 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             ANS_LOGE("Callback is not function excute promise.");
             return Common::NapiGetNull(env);
         }
-        napi_create_reference(env, argv[PARAM2], 1, &params.callback);
+        if (napi_create_reference(env, argv[PARAM2], 1, &params.callback) != napi_ok) {
+            ANS_LOGE("napi_create_reference failed");
+            return nullptr;
+        }
     }
 
     return Common::NapiGetNull(env);
@@ -1073,7 +1090,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             ANS_LOGE("Callback is not function excute promise.");
             return Common::NapiGetNull(env);
         }
-        napi_create_reference(env, argv[PARAM1], 1, &params.callback);
+        NAPI_CALL(env, napi_create_reference(env, argv[PARAM1], 1, &params.callback));
     }
 
     return Common::NapiGetNull(env);

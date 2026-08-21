@@ -19,7 +19,6 @@
 #include <string>
 
 #include "ans_const_define.h"
-#include "notification_constant.h"
 #include "parcel.h"
 
 namespace OHOS {

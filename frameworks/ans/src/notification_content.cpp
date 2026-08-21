@@ -221,49 +221,49 @@ NotificationContent *NotificationContent::Unmarshalling(Parcel &parcel)
     return pContent;
 }
 
-bool NotificationContent::ReadFromParcel(Parcel &parcel)
+namespace {
+template<typename T>
+std::shared_ptr<NotificationBasicContent> ReadContentAs(Parcel &parcel)
 {
-    contentType_ = static_cast<NotificationContent::Type>(parcel.ReadInt32());
+    return std::static_pointer_cast<NotificationBasicContent>(
+        std::shared_ptr<T>(parcel.ReadParcelable<T>()));
+}
+}
 
-    if (!parcel.ReadBool()) {
-        return true;
-    }
-
+bool NotificationContent::ReadContentFromParcel(Parcel &parcel)
+{
     switch (contentType_) {
         case NotificationContent::Type::BASIC_TEXT:
-            content_ = std::static_pointer_cast<NotificationBasicContent>(
-                std::shared_ptr<NotificationNormalContent>(parcel.ReadParcelable<NotificationNormalContent>()));
+            content_ = ReadContentAs<NotificationNormalContent>(parcel);
             break;
         case NotificationContent::Type::CONVERSATION:
-            content_ =
-                std::static_pointer_cast<NotificationBasicContent>(std::shared_ptr<NotificationConversationalContent>(
-                    parcel.ReadParcelable<NotificationConversationalContent>()));
+            content_ = ReadContentAs<NotificationConversationalContent>(parcel);
             break;
         case NotificationContent::Type::LONG_TEXT:
-            content_ = std::static_pointer_cast<NotificationBasicContent>(
-                std::shared_ptr<NotificationLongTextContent>(parcel.ReadParcelable<NotificationLongTextContent>()));
+            content_ = ReadContentAs<NotificationLongTextContent>(parcel);
             break;
         case NotificationContent::Type::MEDIA:
-            content_ = std::static_pointer_cast<NotificationBasicContent>(
-                std::shared_ptr<NotificationMediaContent>(parcel.ReadParcelable<NotificationMediaContent>()));
+            content_ = ReadContentAs<NotificationMediaContent>(parcel);
             break;
         case NotificationContent::Type::MULTILINE:
-            content_ = std::static_pointer_cast<NotificationBasicContent>(
-                std::shared_ptr<NotificationMultiLineContent>(parcel.ReadParcelable<NotificationMultiLineContent>()));
+            content_ = ReadContentAs<NotificationMultiLineContent>(parcel);
             break;
         case NotificationContent::Type::PICTURE:
-            content_ = std::static_pointer_cast<NotificationBasicContent>(
-                std::shared_ptr<NotificationPictureContent>(parcel.ReadParcelable<NotificationPictureContent>()));
+            content_ = ReadContentAs<NotificationPictureContent>(parcel);
             break;
         case NotificationContent::Type::LOCAL_LIVE_VIEW:
-            content_ = std::static_pointer_cast<NotificationBasicContent>(
-                std::shared_ptr<NotificationLocalLiveViewContent>(
-                    parcel.ReadParcelable<NotificationLocalLiveViewContent>()));
+            content_ = ReadContentAs<NotificationLocalLiveViewContent>(parcel);
             break;
-        case NotificationContent::Type::LIVE_VIEW:
-            content_ = std::static_pointer_cast<NotificationBasicContent>(
-                std::shared_ptr<NotificationLiveViewContent>(parcel.ReadParcelable<NotificationLiveViewContent>()));
+        case NotificationContent::Type::LIVE_VIEW: {
+            auto liveView = std::shared_ptr<NotificationLiveViewContent>(
+                parcel.ReadParcelable<NotificationLiveViewContent>());
+            if (liveView == nullptr) {
+                ANS_LOGE("null content");
+                return false;
+            }
+            content_ = std::static_pointer_cast<NotificationBasicContent>(liveView);
             break;
+        }
         default:
             ANS_LOGE("Invalid contentType");
             return false;
@@ -272,8 +272,18 @@ bool NotificationContent::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Failed to read content");
         return false;
     }
-
     return true;
+}
+
+bool NotificationContent::ReadFromParcel(Parcel &parcel)
+{
+    contentType_ = static_cast<NotificationContent::Type>(parcel.ReadInt32());
+
+    if (!parcel.ReadBool()) {
+        return true;
+    }
+
+    return ReadContentFromParcel(parcel);
 }
 
 bool NotificationContent::ConvertJsonToContent(NotificationContent *target, const nlohmann::json &jsonObject)

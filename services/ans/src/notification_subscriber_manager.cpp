@@ -35,7 +35,6 @@
 #include "voice_extension_wrapper.h"
 #include "notification_ai_extension_wrapper.h"
 #include "notification_classification_mgr.h"
-#include "notification_constant.h"
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
 #include "voice_content_option.h"
@@ -1608,7 +1607,10 @@ void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
     int32_t uid = callbackData->GetUid();
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return;
+    }
     NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGEENABLE_CHANGED,
         &IAnsSubscriber::OnBadgeEnabledChanged, callbackData);
 }
@@ -1626,7 +1628,11 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
         return;
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId) != ERR_OK ||
+        userId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return;
+    }
     std::string bundle = callbackData->GetBundle();
     NotifySubscribers(userId, bundle, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLENOTIFICATION_CHANGED,
         &IAnsSubscriber::OnEnabledNotificationChanged, callbackData);
@@ -1641,7 +1647,10 @@ void NotificationSubscriberManager::NotifyEnabledSilentReminderChangedInner(
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
     int32_t uid = callbackData->GetUid();
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return;
+    }
     NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEDSILENTREMINDER_CHANGED,
         &IAnsSubscriber::OnEnabledSilentReminderChanged, callbackData);
 }
@@ -1724,7 +1733,11 @@ void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbac
     std::function<void()> setBadgeNumberFunc = [this, badgeData] () {
         int32_t userId = SUBSCRIBE_USER_INIT;
         int32_t uid = badgeData->GetUid();
-        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+        if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK ||
+            userId <= 0) {
+            ANS_LOGE("Failed to get valid userId from uid");
+            return;
+        }
         NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGE_CHANGED,
             &IAnsSubscriber::OnBadgeChanged, badgeData);
         NotificationAnalyticsUtil::ReportBadgeChange(badgeData);

@@ -18,7 +18,6 @@
 
 #include "ans_const_define.h"
 #include "nlohmann/json.hpp"
-#include "notification_constant.h"
 
 namespace OHOS {
 namespace Notification {

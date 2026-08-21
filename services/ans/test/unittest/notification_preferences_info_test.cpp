@@ -15,7 +15,9 @@
 
 #include <gtest/gtest.h>
 
+#include "ans_const_define.h"
 #include "ans_inner_errors.h"
+#include "ans_service_errors.h"
 #include "ans_ut_constant.h"
 #include "notification_bundle_option.h"
 #include "notification_constant.h"
@@ -25,6 +27,8 @@
 #include "advanced_notification_service.h"
 #undef private
 #undef protected
+
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 using namespace testing::ext;
 namespace OHOS {
@@ -1145,6 +1149,297 @@ HWTEST_F(NotificationPreferencesInfoTest, GetExtensionSubscriptionInfosJson_Null
     bundleInfo.extensionSubscriptionInfos_.push_back(validInfo);
     std::string result = bundleInfo.GetExtensionSubscriptionInfosJson();
     EXPECT_FALSE(result.empty());
+}
+
+/**
+ * @tc.name: SetBundleUserId_0100
+ * @tc.desc: test SetBundleUserId with userId less than SUBSCRIBE_USER_INIT, userId should be clamped.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetBundleUserId_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleUserId(SUBSCRIBE_USER_INIT - 1);
+    EXPECT_EQ(bundleInfo.GetBundleUserId(), SUBSCRIBE_USER_INIT);
+}
+
+/**
+ * @tc.name: SetBundleUserId_0200
+ * @tc.desc: test SetBundleUserId with boundary and valid values, userId should be set directly.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, SetBundleUserId_0200, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleUserId(SUBSCRIBE_USER_INIT);
+    EXPECT_EQ(bundleInfo.GetBundleUserId(), SUBSCRIBE_USER_INIT);
+    bundleInfo.SetBundleUserId(0);
+    EXPECT_EQ(bundleInfo.GetBundleUserId(), 0);
+    bundleInfo.SetBundleUserId(100);
+    EXPECT_EQ(bundleInfo.GetBundleUserId(), 100);
+}
+
+/**
+ * @tc.name: GetExtensionSubscriptionEnabled_0100
+ * @tc.desc: test GetExtensionSubscriptionEnabled with state below valid range returns SYSTEM_DEFAULT_OFF.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetExtensionSubscriptionEnabled_0100, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.enabledExtensionSubscription_ =
+        static_cast<NotificationConstant::SWITCH_STATE>(
+            static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) - 1);
+    EXPECT_EQ(bundleInfo.GetExtensionSubscriptionEnabled(),
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+}
+
+/**
+ * @tc.name: GetExtensionSubscriptionEnabled_0200
+ * @tc.desc: test GetExtensionSubscriptionEnabled with state above valid range returns SYSTEM_DEFAULT_OFF.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetExtensionSubscriptionEnabled_0200, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.enabledExtensionSubscription_ =
+        static_cast<NotificationConstant::SWITCH_STATE>(
+            static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) + 1);
+    EXPECT_EQ(bundleInfo.GetExtensionSubscriptionEnabled(),
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+}
+
+/**
+ * @tc.name: GetExtensionSubscriptionEnabled_0300
+ * @tc.desc: test GetExtensionSubscriptionEnabled with all valid states including boundaries.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetExtensionSubscriptionEnabled_0300, TestSize.Level1)
+{
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetExtensionSubscriptionEnabled(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    EXPECT_EQ(bundleInfo.GetExtensionSubscriptionEnabled(),
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    bundleInfo.SetExtensionSubscriptionEnabled(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    EXPECT_EQ(bundleInfo.GetExtensionSubscriptionEnabled(),
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    bundleInfo.SetExtensionSubscriptionEnabled(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    EXPECT_EQ(bundleInfo.GetExtensionSubscriptionEnabled(),
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    bundleInfo.SetExtensionSubscriptionEnabled(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+    EXPECT_EQ(bundleInfo.GetExtensionSubscriptionEnabled(),
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+}
+
+/**
+ * @tc.name: GetAllDoNotDisturbProfiles_0400
+ * @tc.desc: test GetAllDoNotDisturbProfiles: key "100_5" matches userId 100 as first segment.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllDoNotDisturbProfiles_0400, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    preferencesInfo->doNotDisturbProfiles_["100_5"] = profile;
+
+    preferencesInfo->GetAllDoNotDisturbProfiles(100, profiles);
+    ASSERT_EQ(profiles.size(), 1);
+}
+
+/**
+ * @tc.name: GetAllDoNotDisturbProfiles_0500
+ * @tc.desc: test GetAllDoNotDisturbProfiles: key "5_100" matches userId 100 as last segment.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllDoNotDisturbProfiles_0500, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    preferencesInfo->doNotDisturbProfiles_["5_100"] = profile;
+
+    preferencesInfo->GetAllDoNotDisturbProfiles(100, profiles);
+    ASSERT_EQ(profiles.size(), 1);
+}
+
+/**
+ * @tc.name: GetAllDoNotDisturbProfiles_0600
+ * @tc.desc: test GetAllDoNotDisturbProfiles: key without underline only matches when equal to userId string.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllDoNotDisturbProfiles_0600, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::vector<sptr<NotificationDoNotDisturbProfile>> profiles;
+    sptr<NotificationDoNotDisturbProfile> profile = new NotificationDoNotDisturbProfile();
+    preferencesInfo->doNotDisturbProfiles_["101"] = profile;
+    preferencesInfo->doNotDisturbProfiles_["100"] = profile;
+
+    preferencesInfo->GetAllDoNotDisturbProfiles(100, profiles);
+    ASSERT_EQ(profiles.size(), 1);
+}
+
+/**
+ * @tc.name: GetRestrictedModeTrustList_0100
+ * @tc.desc: test GetRestrictedModeTrustList with empty trust list returns false.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetRestrictedModeTrustList_0100, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::unordered_map<int32_t, std::vector<std::string>> resultList;
+    auto ret = preferencesInfo->GetRestrictedModeTrustList(resultList);
+    EXPECT_FALSE(ret);
+    EXPECT_TRUE(resultList.empty());
+}
+
+/**
+ * @tc.name: GetRestrictedModeTrustList_0200
+ * @tc.desc: test GetRestrictedModeTrustList with valid bundle list sizes returns true and copies list.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetRestrictedModeTrustList_0200, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;
+    restrictedModeTrustList[100] = {"com.test.example"};
+    preferencesInfo->SetRestrictedModeTrustList(restrictedModeTrustList);
+
+    std::unordered_map<int32_t, std::vector<std::string>> resultList;
+    auto ret = preferencesInfo->GetRestrictedModeTrustList(resultList);
+    EXPECT_TRUE(ret);
+    ASSERT_EQ(resultList.size(), 1);
+    EXPECT_EQ(resultList[100].size(), 1);
+    EXPECT_EQ(resultList[100][0], "com.test.example");
+}
+
+/**
+ * @tc.name: GetRestrictedModeTrustList_0300
+ * @tc.desc: test GetRestrictedModeTrustList with bundle list size exceeding MAX_BUNDLE_LIST_SIZE returns false.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetRestrictedModeTrustList_0300, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;
+    restrictedModeTrustList[100] = {"com.test.example"};
+    restrictedModeTrustList[101] = std::vector<std::string>(MAX_BUNDLE_LIST_SIZE + 1, "bundle");
+    preferencesInfo->SetRestrictedModeTrustList(restrictedModeTrustList);
+
+    std::unordered_map<int32_t, std::vector<std::string>> resultList;
+    auto ret = preferencesInfo->GetRestrictedModeTrustList(resultList);
+    EXPECT_FALSE(ret);
+    EXPECT_TRUE(resultList.empty());
+}
+
+/**
+ * @tc.name: GetRestrictedModeTrustList_0400
+ * @tc.desc: test GetRestrictedModeTrustList with bundle list size equal to MAX_BUNDLE_LIST_SIZE returns true.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetRestrictedModeTrustList_0400, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+    std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;
+    restrictedModeTrustList[100] = std::vector<std::string>(MAX_BUNDLE_LIST_SIZE, "bundle");
+    preferencesInfo->SetRestrictedModeTrustList(restrictedModeTrustList);
+
+    std::unordered_map<int32_t, std::vector<std::string>> resultList;
+    auto ret = preferencesInfo->GetRestrictedModeTrustList(resultList);
+    EXPECT_TRUE(ret);
+    ASSERT_EQ(resultList.size(), 1);
+    EXPECT_EQ(resultList[100].size(), static_cast<size_t>(MAX_BUNDLE_LIST_SIZE));
+}
+
+/**
+ * @tc.name: GetAllLiveViewEnabledBundles_0600
+ * @tc.desc: test GetAllLiveViewEnabledBundles returns error when GetOsAccountLocalIdFromUid fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllLiveViewEnabledBundles_0600, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationSlot> slot(new NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW));
+    slot->SetEnable(true);
+    bundleInfo.SetSlot(slot);
+    bundleInfo.SetBundleUserId(SUBSCRIBE_USER_INIT);
+    preferencesInfo->SetBundleInfoFromDb(bundleInfo, "test100");
+    preferencesInfo->SetEnabledAllNotification(100, true);
+
+    MockGetOsAccountLocalIdFromUid(false, 0); // uid-to-userId resolution fails
+    std::vector<NotificationBundleOption> bundleOption;
+    auto res = preferencesInfo->GetAllLiveViewEnabledBundles(100, bundleOption);
+    EXPECT_EQ(res, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(bundleOption.size(), 0);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GetAllLiveViewEnabledBundles_0700
+ * @tc.desc: test GetAllLiveViewEnabledBundles returns error when resolved userId is invalid (<= 0).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllLiveViewEnabledBundles_0700, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationSlot> slot(new NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW));
+    slot->SetEnable(true);
+    bundleInfo.SetSlot(slot);
+    bundleInfo.SetBundleUserId(SUBSCRIBE_USER_INIT);
+    preferencesInfo->SetBundleInfoFromDb(bundleInfo, "test100");
+    preferencesInfo->SetEnabledAllNotification(100, true);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // resolved userId is -2, invalid
+    std::vector<NotificationBundleOption> bundleOption;
+    auto res = preferencesInfo->GetAllLiveViewEnabledBundles(100, bundleOption);
+    EXPECT_EQ(res, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(bundleOption.size(), 0);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GetAllLiveViewEnabledBundles_0800
+ * @tc.desc: test GetAllLiveViewEnabledBundles succeeds when resolved userId is valid and matches.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationPreferencesInfoTest, GetAllLiveViewEnabledBundles_0800, TestSize.Level1)
+{
+    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
+
+    NotificationPreferencesInfo::BundleInfo bundleInfo;
+    sptr<NotificationSlot> slot(new NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW));
+    slot->SetEnable(true);
+    bundleInfo.SetSlot(slot);
+    bundleInfo.SetBundleUserId(SUBSCRIBE_USER_INIT);
+    preferencesInfo->SetBundleInfoFromDb(bundleInfo, "test100");
+    preferencesInfo->SetEnabledAllNotification(100, true);
+
+    MockGetOsAccountLocalIdFromUid(true, 0); // resolved userId is 100, valid
+    std::vector<NotificationBundleOption> bundleOption;
+    auto res = preferencesInfo->GetAllLiveViewEnabledBundles(100, bundleOption);
+    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(bundleOption.size(), 1);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 }
 }

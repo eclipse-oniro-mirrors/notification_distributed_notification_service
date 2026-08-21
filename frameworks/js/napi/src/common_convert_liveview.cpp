@@ -473,6 +473,10 @@ napi_value Common::SetLiveViewPictureInfo(
     NAPI_CALL(env, napi_create_object(env, &pictureMapObj));
 
     for (auto iter = pictureMap.begin(); iter != pictureMap.end(); iter++) {
+        if (iter->second.empty()) {
+            ANS_LOGE("The picture vector is empty.");
+            return nullptr;
+        }
         int count = 0;
         napi_value picturesObj = nullptr;
         napi_create_array(env, &picturesObj);

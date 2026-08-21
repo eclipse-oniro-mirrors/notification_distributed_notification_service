@@ -223,6 +223,32 @@ HWTEST_F(AnsLiveViewServiceTest, SetNotificationRequestToDb_00002, Function | Sm
 }
 
 /**
+ * @tc.name: SetNotificationRequestToDb_00003
+ * @tc.desc: Test SetNotificationRequestToDb returns ERR_ANS_INNER_INVALID_PARAM when the
+ *           serialized json of the live view request exceeds MAX_JSON_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsLiveViewServiceTest, SetNotificationRequestToDb_00003, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    request->SetReceiverUserId(100);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    // payload larger than MAX_JSON_SIZE (1MB) so the dumped json exceeds the limit
+    liveContent->SetAdditionalText(std::string(1200 * 1024, 'a'));
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    auto bundle = new NotificationBundleOption("test", 1);
+    AdvancedNotificationService::NotificationRequestDb requestDb =
+        { .request = request, .bundleOption = bundle};
+    auto ret = advancedNotificationService_->SetNotificationRequestToDb(requestDb);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
  * @tc.name: FillLockScreenPicture_00001
  * @tc.desc: Test FillLockScreenPicture
  * @tc.type: FUNC
@@ -1012,11 +1038,50 @@ HWTEST_F(AnsLiveViewServiceTest, AddAppObserverSet_00004, Function | SmallTest |
     newRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     auto newLiveViewContent = std::make_shared<NotificationLiveViewContent>();
     newLiveViewContent->SetRemoveOnProcessExitState(
-        NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_INVAILD);
+        NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_REMOVE);
     auto newContent = std::make_shared<NotificationContent>(newLiveViewContent);
     newRequest->SetContent(newContent);
-    service->AddAppObserver(newRequest);
-    service->RemoveAppObserver(5);
+    advancedNotificationService_->AddAppObserver(newRequest);
+    advancedNotificationService_->RemoveCommonLiveViewNotification(100);
+}
+
+/**
+ * @tc.name: RemoveCommonLiveViewNotification_00011
+ * @tc.desc: Test RemoveCommonLiveViewNotification with a fully matched CommonLiveView record:
+ *           the record passes GetCommonLiveViewRecordList filter, the sanitize loop iterates
+ *           valid records (++it branch at line 2629) and removal executes.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_00011, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    request->SetCreatorPid(100);
+
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    ASSERT_NE(liveContent, nullptr);
+    liveContent->SetCreatePid(100); // must match the pid passed below
+    liveContent->SetRemoveOnProcessExitState(
+        NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_REMOVE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    // register pid in observers directly (AddAppObserver registration depends on AppMgrClient)
+    auto notificationAppObserver = sptr<NotificationAppStateObserver>::MakeSptr();
+    advancedNotificationService_->appObserverMap_.insert(std::make_pair(100, notificationAppObserver));
+
+    advancedNotificationService_->RemoveCommonLiveViewNotification(100);
+
+    // matched record is removed from notificationList by the removal flow
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
 }
 
 /**
@@ -1464,6 +1529,46 @@ HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_00010, Functio
     newRequest->SetContent(newContent);
     advancedNotificationService_->AddAppObserver(newRequest);
     advancedNotificationService_->RemoveCommonLiveViewNotification(100);
+}
+
+/**
+ * @tc.name: RemoveCommonLiveViewNotification_00012
+ * @tc.desc: Test RemoveCommonLiveViewNotification with a CommonLiveView record whose inner
+ *           content is null: GetCommonLiveViewRecordList skips it at line 2658, recordList
+ *           stays empty and nothing is removed.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsLiveViewServiceTest, RemoveCommonLiveViewNotification_00012, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    request->SetCreatorPid(100);
+
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    ASSERT_NE(liveContent, nullptr);
+    liveContent->SetCreatePid(100);
+    liveContent->SetRemoveOnProcessExitState(
+        NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_REMOVE);
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content); // sets notificationContentType_ to LIVE_VIEW
+    // clear the inner content so GetNotificationContent() returns null (line 2657-2658)
+    content->content_ = nullptr;
+
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    auto notificationAppObserver = sptr<NotificationAppStateObserver>::MakeSptr();
+    advancedNotificationService_->appObserverMap_.insert(std::make_pair(100, notificationAppObserver));
+
+    advancedNotificationService_->RemoveCommonLiveViewNotification(100);
+
+    // record is skipped by the null-content filter and stays in the list
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
 
 /**

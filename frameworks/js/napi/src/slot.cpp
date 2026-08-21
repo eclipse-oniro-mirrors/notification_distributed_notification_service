@@ -507,7 +507,7 @@ napi_value ParseParametersSetSlotFlagsByBundle(
         // argv[1]:slotFlags
         ANS_LOGD("ParseParametersSetSlotByBundle enter1");
         int32_t slotFlags = 0;
-        napi_get_value_int32(env, argv[PARAM1], &slotFlags);
+        NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM1], &slotFlags));
         params.slotFlags = slotFlags;
         ANS_LOGD("enter2");
 

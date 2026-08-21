@@ -369,7 +369,11 @@ void NotificationDialogManager::SetDialogPoppedTimeInterVal(const sptr<Notificat
 {
     ANS_LOGD("SetDialogPoppedTimeInterVal called.");
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
+        userId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return;
+    }
     EXTENTION_WRAPPER->SetDialogOpenSuccessTimeInterval(bundleOption, userId);
     ANS_LOGD("SetDialogPoppedTimeInterVal end.");
 }

@@ -14,6 +14,7 @@
  */
 
 #include "notification_ringtone_info.h"
+#include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "nlohmann/json.hpp"
 
@@ -81,6 +82,18 @@ std::string NotificationRingtoneInfo::GetRingtoneUri() const
 
 bool NotificationRingtoneInfo::Marshalling(Parcel &parcel) const
 {
+    if (ringtoneTitle_.length() > STR_MAX_SIZE) {
+        ANS_LOGE("ringtoneTitle_ length exceeds limit");
+        return false;
+    }
+    if (ringtoneFileName_.length() > STR_MAX_SIZE) {
+        ANS_LOGE("ringtoneFileName_ length exceeds limit");
+        return false;
+    }
+    if (ringtoneUri_.length() > STR_MAX_SIZE) {
+        ANS_LOGE("ringtoneUri_ length exceeds limit");
+        return false;
+    }
     if (!parcel.WriteInt32(static_cast<int32_t>(ringtoneType_))) {
         ANS_LOGE("Failed to write ringtone type");
         return false;
@@ -116,10 +129,38 @@ NotificationRingtoneInfo *NotificationRingtoneInfo::Unmarshalling(Parcel &parcel
 
 bool NotificationRingtoneInfo::ReadFromParcel(Parcel &parcel)
 {
-    ringtoneType_ = static_cast<NotificationConstant::RingtoneType>(parcel.ReadInt32());
-    ringtoneTitle_ = parcel.ReadString();
-    ringtoneFileName_ = parcel.ReadString();
-    ringtoneUri_ = parcel.ReadString();
+    int32_t ringtoneType = 0;
+    if (!parcel.ReadInt32(ringtoneType)) {
+        ANS_LOGE("ReadInt32 failed");
+        return false;
+    }
+    if (ringtoneType < static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM) ||
+        ringtoneType >= static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT)) {
+        ANS_LOGE("Invalid ringtone type: %{public}d", ringtoneType);
+        return false;
+    }
+    ringtoneType_ = static_cast<NotificationConstant::RingtoneType>(ringtoneType);
+
+    std::string ringtoneTitle;
+    if (!parcel.ReadString(ringtoneTitle)) {
+        ANS_LOGE("ReadString failed");
+        return false;
+    }
+    ringtoneTitle_ = ringtoneTitle;
+
+    std::string ringtoneFileName;
+    if (!parcel.ReadString(ringtoneFileName)) {
+        ANS_LOGE("ReadString failed");
+        return false;
+    }
+    ringtoneFileName_ = ringtoneFileName;
+
+    std::string ringtoneUri;
+    if (!parcel.ReadString(ringtoneUri)) {
+        ANS_LOGE("ReadString failed");
+        return false;
+    }
+    ringtoneUri_ = ringtoneUri;
     return true;
 }
 
@@ -145,8 +186,13 @@ void NotificationRingtoneInfo::FromJson(const std::string &jsonObj)
         return;
     }
     if (jsonObject.contains(RINGTONE_INFO_RINGTONE_TYPE) && jsonObject[RINGTONE_INFO_RINGTONE_TYPE].is_number()) {
-        ringtoneType_ =
-            static_cast<NotificationConstant::RingtoneType>(jsonObject.at(RINGTONE_INFO_RINGTONE_TYPE).get<int32_t>());
+        int32_t ringtoneType = jsonObject.at(RINGTONE_INFO_RINGTONE_TYPE).get<int32_t>();
+        if (ringtoneType < static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM) ||
+            ringtoneType >= static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT)) {
+            ANS_LOGE("Invalid ringtone type: %{public}d", ringtoneType);
+        } else {
+            ringtoneType_ = static_cast<NotificationConstant::RingtoneType>(ringtoneType);
+        }
     }
     if (jsonObject.contains(RINGTONE_INFO_RINGTONE_TITLE) && jsonObject[RINGTONE_INFO_RINGTONE_TITLE].is_string()) {
         ringtoneTitle_ = jsonObject.at(RINGTONE_INFO_RINGTONE_TITLE).get<std::string>();

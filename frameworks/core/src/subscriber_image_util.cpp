@@ -162,6 +162,10 @@ bool SubscriberImageUtil::ExtractFromStringArray(
     if (iArray->GetLength(size) != ERR_OK) {
         return false;
     }
+    if (size > MAX_PARCELABLE_VECTOR_NUM) {
+        ANS_LOGE("array size too large: %{public}ld", size);
+        return false;
+    }
     if (size == 0) {
         ANS_LOGI("Empty Array<string> found");
         return true;

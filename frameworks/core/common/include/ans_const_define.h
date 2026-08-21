@@ -45,8 +45,17 @@ constexpr int32_t MAX_PARCELABLE_VECTOR_NUM = 10000;
 constexpr int32_t MAX_STATUS_VECTOR_NUM = 1000;
 constexpr uint32_t MAX_CANCELED_PARCELABLE_VECTOR_NUM = 200;
 
+constexpr int32_t STR_MAX_SIZE = 204;
+constexpr int32_t STR_500K_SIZE = 512000 + 2;
+constexpr int32_t COMMON_TEXT_SIZE = 3074;
+constexpr int32_t MAX_BUNDLE_LIST_SIZE = 1000;
+constexpr uint32_t MAX_SLOT_SIZE = 1000;
+constexpr uint32_t MAX_VIBRATION_VALUES_SIZE = 1000;
+constexpr uint32_t MAX_EXTENSION_SUBSCRIPTION_INFO_SIZE = 1000;
+
 constexpr int32_t DEFAULT_UID = 0;
 constexpr int32_t INVALID_USER_ID = -1;
+constexpr int32_t MAX_USER_ID = 10736;
 constexpr int64_t INVALID_PROFILE_ID = -1;
 constexpr int32_t SUBSCRIBE_USER_INIT = -1;
 constexpr int32_t SUBSCRIBE_USER_ALL = -2;
@@ -57,6 +66,7 @@ constexpr int32_t SUBSCRIBE_USER_SYSTEM_BEGIN = 0;
 constexpr int32_t SUBSCRIBE_USER_SYSTEM_END = 99;
 constexpr int32_t NOTIFICATION_MIN_COUNT = 0;
 constexpr int32_t NOTIFICATION_MAX_COUNT = 1024;
+constexpr uint32_t MAX_PUBLISH_DELAY_TIME = 5;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MIN_ID = 1;
 constexpr int32_t DO_NOT_DISTURB_PROFILE_MAX_ID = 10;
 constexpr int32_t PKG_INSTALL_STATUS_UNKMOWN = -1;

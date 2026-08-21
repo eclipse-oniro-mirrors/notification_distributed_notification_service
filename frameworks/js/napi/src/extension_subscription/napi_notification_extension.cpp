@@ -20,6 +20,7 @@
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "napi_base_context.h"
+#include "ans_const_define.h"
 #include "ws_common.h"
 
 namespace OHOS {
@@ -177,6 +178,12 @@ napi_value ParseParameters(const napi_env& env, const napi_callback_info& info,
     }
     uint32_t length = 0;
     napi_get_array_length(env, argv[PARAM0], &length);
+    if (length > MAX_EXTENSION_SUBSCRIPTION_INFO_SIZE) {
+        ANS_LOGE("The array length exceeds limit.");
+        std::string msg = "The array length exceeds limit.";
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+        return nullptr;
+    }
     if (length == 0) {
         ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";

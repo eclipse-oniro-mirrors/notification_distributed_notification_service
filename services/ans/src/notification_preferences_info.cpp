@@ -16,7 +16,7 @@
 
 #include "aes_gcm_helper.h"
 #include "ans_log_wrapper.h"
-#include "notification_constant.h"
+#include "ans_const_define.h"
 #include "bundle_manager_helper.h"
 #include "os_account_manager_helper.h"
 
@@ -25,6 +25,20 @@ namespace Notification {
 namespace {
 using ExtensionSubscriptionVectorPtr = std::vector<sptr<NotificationExtensionSubscriptionInfo>>;
 const static std::string KEY_UNDER_LINE = "_";
+
+bool IsKeyMatchedUserId(const std::string &key, const std::string &userIdStr)
+{
+    size_t start = 0;
+    size_t end = key.find(KEY_UNDER_LINE);
+    while (end != std::string::npos) {
+        if (key.substr(start, end - start) == userIdStr) {
+            return true;
+        }
+        start = end + 1;
+        end = key.find(KEY_UNDER_LINE, start);
+    }
+    return key.substr(start) == userIdStr;
+}
 } // namespace
 
 NotificationPreferencesInfo::BundleInfo::BundleInfo()
@@ -227,6 +241,11 @@ int32_t NotificationPreferencesInfo::BundleInfo::GetBundleUid() const
 
 void NotificationPreferencesInfo::BundleInfo::SetBundleUserId(const int32_t &userId)
 {
+    if (userId < SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Invalid bundle userId: %{public}d.", userId);
+        userId_ = SUBSCRIBE_USER_INIT;
+        return;
+    }
     userId_ = userId;
 }
 
@@ -328,6 +347,12 @@ bool NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionInfosFromJ
 
 NotificationConstant::SWITCH_STATE NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionEnabled() const
 {
+    int32_t stateValue = static_cast<int32_t>(enabledExtensionSubscription_);
+    if (stateValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+        stateValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+        ANS_LOGE("Invalid extension subscription enabled state: %{public}d", stateValue);
+        return NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    }
     return enabledExtensionSubscription_;
 }
 
@@ -548,13 +573,10 @@ bool NotificationPreferencesInfo::GetDoNotDisturbProfiles(
 void NotificationPreferencesInfo::GetAllDoNotDisturbProfiles(
     int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
+    std::string userIdStr = std::to_string(userId);
     for (const auto &doNotDisturbProfile : doNotDisturbProfiles_) {
-        std::string key = doNotDisturbProfile.first;
-        std::string userIdStr = std::to_string(userId);
-        if (key == userIdStr || key.find(userIdStr + KEY_UNDER_LINE) == 0 ||
-            key.find(KEY_UNDER_LINE + userIdStr) != std::string::npos) {
-            auto profile = doNotDisturbProfile.second;
-            profiles.emplace_back(profile);
+        if (IsKeyMatchedUserId(doNotDisturbProfile.first, userIdStr)) {
+            profiles.emplace_back(doNotDisturbProfile.second);
         }
     }
 }
@@ -754,6 +776,12 @@ bool NotificationPreferencesInfo::GetRestrictedModeTrustList(std::unordered_map<
         ANS_LOGE("restrictedModeTrustList is empty");
         return false;
     }
+    for (const auto &item : restrictedModeTrustList_) {
+        if (item.second.size() > MAX_BUNDLE_LIST_SIZE) {
+            ANS_LOGE("restrictedModeTrustList bundle list size exceeds limit");
+            return false;
+        }
+    }
     restrictedModeTrustList = restrictedModeTrustList_;
     return true;
 }
@@ -798,8 +826,11 @@ ErrCode NotificationPreferencesInfo::GetAllLiveViewEnabledBundles(const int32_t 
         }
         int32_t bundleUserId = info.GetBundleUserId();
         if (bundleUserId == SUBSCRIBE_USER_INIT) {
-            OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
-                info.GetBundleUid(), bundleUserId);
+            if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
+                info.GetBundleUid(), bundleUserId) != ERR_OK || bundleUserId <= 0) {
+                ANS_LOGE("Failed to get valid userId from uid");
+                return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+            }
         }
         if (liveSlot->GetEnable() && bundleUserId == userId) {
             NotificationBundleOption bundleItem(info.GetBundleName(), info.GetBundleUid());

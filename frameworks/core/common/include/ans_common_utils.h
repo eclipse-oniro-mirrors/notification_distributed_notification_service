@@ -26,7 +26,6 @@
 #include "bool_wrapper.h"
 #include "ipc_skeleton.h"
 #include "iremote_broker.h"
-#include "notification_constant.h"
 #include "notification_request.h"
 
 namespace OHOS {
@@ -62,6 +61,10 @@ public:
         parcelableInfos.clear();
         for (int32_t index = 0; index < infoSize; index++) {
             std::shared_ptr<T> info = std::shared_ptr<T>(data.ReadParcelable<T>());
+            if (info == nullptr) {
+                ANS_LOGE("ReadParcelable returned null");
+                return false;
+            }
             parcelableInfos.emplace_back(info);
         }
 

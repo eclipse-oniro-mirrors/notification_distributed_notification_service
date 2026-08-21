@@ -362,7 +362,7 @@ HWTEST_F(AnsNotificationUnitTest, CanPopEnableNotificationDialog_0100, Function 
     bool enable = true;
     std::string bundleName = "";
     InnerErrorCode ret1 = ans_->CanPopEnableNotificationDialog(client, enable, bundleName);
-    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2584,7 +2584,7 @@ HWTEST_F(AnsNotificationUnitTest, CanPopEnableNotificationDialog_0200, Function 
     bool enable = true;
     std::string bundleName = "";
     InnerErrorCode ret = ans_->CanPopEnableNotificationDialog(client, enable, bundleName);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*
@@ -2661,6 +2661,54 @@ HWTEST_F(AnsNotificationUnitTest, GetBundleImportance_0200, Function | MediumTes
     NotificationSlot::NotificationLevel importance = NotificationSlot::NotificationLevel::LEVEL_NONE;
     InnerErrorCode ret = ans_->GetBundleImportance(importance);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: GetBundleImportance_0300
+ * @tc.desc: test GetBundleImportance success with valid importance level.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetBundleImportance_0300, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    mockProxy_->mockBundleImportance_ = NotificationSlot::LEVEL_LOW;
+    NotificationSlot::NotificationLevel importance = NotificationSlot::NotificationLevel::LEVEL_UNDEFINED;
+    InnerErrorCode ret = ans_->GetBundleImportance(importance);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(importance, NotificationSlot::NotificationLevel::LEVEL_LOW);
+}
+
+/*
+ * @tc.name: GetBundleImportance_0400
+ * @tc.desc: test GetBundleImportance with importance below LEVEL_NONE.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetBundleImportance_0400, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    mockProxy_->mockBundleImportance_ = NotificationSlot::LEVEL_NONE - 1;
+    NotificationSlot::NotificationLevel importance = NotificationSlot::NotificationLevel::LEVEL_LOW;
+    InnerErrorCode ret = ans_->GetBundleImportance(importance);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(importance, NotificationSlot::NotificationLevel::LEVEL_UNDEFINED);
+}
+
+/*
+ * @tc.name: GetBundleImportance_0500
+ * @tc.desc: test GetBundleImportance with error return code.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, GetBundleImportance_0500, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    mockProxy_->mockBundleImportanceRet_ = ERR_ANS_INNER_INVALID_PARAM;
+    NotificationSlot::NotificationLevel importance = NotificationSlot::NotificationLevel::LEVEL_LOW;
+    InnerErrorCode ret = ans_->GetBundleImportance(importance);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+    EXPECT_EQ(importance, NotificationSlot::NotificationLevel::LEVEL_UNDEFINED);
 }
 
 /*
@@ -3680,6 +3728,184 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0500, Function | MediumT
     NotificationConstant::SWITCH_STATE state;
     InnerErrorCode ret = ans_->GetNotificationSwitch(bundleOption, state);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: SetNotificationBadgeNum_Invalid
+ * @tc.desc: test SetNotificationBadgeNum with invalid num.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetNotificationBadgeNum_Invalid, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+
+    InnerErrorCode ret1 = ans_->SetNotificationBadgeNum(-1);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
+    InnerErrorCode ret2 = ans_->SetNotificationBadgeNum(100);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetNotificationBadgeNum_0200
+ * @tc.desc: test SetNotificationBadgeNum success with valid num and valid proxy.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetNotificationBadgeNum_0200, Function | MediumTest | Level1)
+{
+    sptr<MockAnsManagerProxy> proxy = new (std::nothrow) MockAnsManagerProxy();
+    ASSERT_NE(nullptr, proxy);
+    ON_CALL(*mockSAMgr_, GetSystemAbility(testing::_)).WillByDefault(Return(mockProxy_));
+    int32_t num = 3;
+    InnerErrorCode ret = ans_->SetNotificationBadgeNum(num);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: UnSubscribeNotification_TooLargeAppNames_0100
+ * @tc.desc: test UnSubscribeNotification with too large appNames.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_TooLargeAppNames_0100, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    auto subscriber = TestAnsSubscriber();
+    NotificationSubscribeInfo info;
+    std::vector<std::string> appNames;
+    for (int i = 0; i < 1001; i++) {
+        appNames.push_back("appName");
+    }
+    info.AddAppNames(appNames);
+    InnerErrorCode ret = ans_->UnSubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: UnSubscribeNotification_TooLargeAppNames_0200
+ * @tc.desc: test UnSubscribeNotification with too large appNames.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_TooLargeAppNames_0200, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    auto subscriber = std::make_shared<TestAnsSubscriber>();
+    sptr<NotificationSubscribeInfo> info = new (std::nothrow) NotificationSubscribeInfo();
+    ASSERT_NE(nullptr, info);
+    std::vector<std::string> appNames;
+    for (int i = 0; i < 1001; i++) {
+        appNames.push_back("appName");
+    }
+    info->AddAppNames(appNames);
+    InnerErrorCode ret = ans_->UnSubscribeNotification(subscriber, info);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetBadgeNumber_Negative
+ * @tc.desc: test SetBadgeNumber with negative badgeNumber.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetBadgeNumber_Negative, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+
+    InnerErrorCode ret = ans_->SetBadgeNumber(-1, "instanceKey");
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetBundlePriorityConfig_TooLong
+ * @tc.desc: test SetBundlePriorityConfig with too long value.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetBundlePriorityConfig_TooLong, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("bundleName");
+    std::string value(3075, 'a');
+    InnerErrorCode ret = ans_->SetBundlePriorityConfig(bundleOption, value);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetDistributedEnabledByBundle_TooLong
+ * @tc.desc: test SetDistributedEnabledByBundle with too long bundleName or deviceType.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetDistributedEnabledByBundle_TooLong, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+
+    NotificationBundleOption bundleOption;
+    std::string bundleName(205, 'a');
+    bundleOption.SetBundleName(bundleName);
+    bundleOption.SetUid(1);
+    std::string deviceType = "testDeviceType";
+    InnerErrorCode ret1 = ans_->SetDistributedEnabledByBundle(bundleOption, deviceType, true, true);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
+
+    NotificationBundleOption bundleOption2;
+    bundleOption2.SetBundleName("bundleName");
+    bundleOption2.SetUid(1);
+    std::string deviceTypeTooLong(205, 'a');
+    InnerErrorCode ret2 = ans_->SetDistributedEnabledByBundle(bundleOption2, deviceTypeTooLong, true, true);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: UpdateDistributedDeviceList_TooLong
+ * @tc.desc: test UpdateDistributedDeviceList with too long deviceType.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, UpdateDistributedDeviceList_TooLong, Function | MediumTest | Level1)
+{
+    std::string deviceType(205, 'a');
+    InnerErrorCode ret = ans_->UpdateDistributedDeviceList(deviceType);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: SetTargetDeviceAbility_Invalid
+ * @tc.desc: test SetTargetDeviceAbility with invalid deviceType.
+ * @tc.type: FUNC
+ * @tc.require: #I62SME
+ */
+HWTEST_F(AnsNotificationUnitTest, SetTargetDeviceAbility_Invalid, Function | MediumTest | Level1)
+{
+    InnerErrorCode ret1 = ans_->SetTargetDeviceAbility("", 0);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
+    std::string deviceType(205, 'a');
+    InnerErrorCode ret2 = ans_->SetTargetDeviceAbility(deviceType, 0);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_INVALID_PARAM);
 }
 }  // namespace Notification
 }  // namespace OHOS

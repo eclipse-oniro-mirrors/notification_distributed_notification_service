@@ -23,10 +23,10 @@
 #include "refbase.h"
 #include "voice_content_option.h"
 #include "picture_option.h"
+#include "ans_const_define.h"
 
 namespace OHOS {
 namespace Notification {
-constexpr uint32_t MAX_SLOT_SIZE = 1000;
 NotificationSubscribeInfo::NotificationSubscribeInfo()
 {}
 
@@ -226,7 +226,11 @@ uint32_t NotificationSubscribeInfo::GetSubscribedFlags() const
 
 bool NotificationSubscribeInfo::ReadVoiceContentOptionFromParcel(Parcel &parcel)
 {
-    bool hasVoiceContentOption = parcel.ReadBool();
+    bool hasVoiceContentOption = false;
+    if (!parcel.ReadBool(hasVoiceContentOption)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
     if (hasVoiceContentOption) {
         voiceContentOption_ = VoiceContentOption::Unmarshalling(parcel);
         if (voiceContentOption_ == nullptr) {
@@ -239,7 +243,11 @@ bool NotificationSubscribeInfo::ReadVoiceContentOptionFromParcel(Parcel &parcel)
 
 bool NotificationSubscribeInfo::ReadPictureOptionFromParcel(Parcel &parcel)
 {
-    bool hasPictureOption = parcel.ReadBool();
+    bool hasPictureOption = false;
+    if (!parcel.ReadBool(hasPictureOption)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
     if (hasPictureOption) {
         pictureOption_ = PictureOption::Unmarshalling(parcel);
         if (pictureOption_ == nullptr) {
@@ -250,20 +258,8 @@ bool NotificationSubscribeInfo::ReadPictureOptionFromParcel(Parcel &parcel)
     return true;
 }
 
-bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
+bool NotificationSubscribeInfo::ReadSlotTypesFromParcel(Parcel &parcel)
 {
-    if (!parcel.ReadStringVector(&appNames_)) {
-        ANS_LOGE("Can't read appNames_");
-        return false;
-    }
-    if (!parcel.ReadString(deviceType_)) {
-        ANS_LOGE("Can't read deviceType_");
-        return false;
-    }
-    if (!parcel.ReadInt32(userId_)) {
-        ANS_LOGE("Can't read userId_");
-        return false;
-    }
     uint32_t size = 0;
     if (!parcel.ReadUint32(size)) {
         ANS_LOGE("Can't read size");
@@ -279,7 +275,36 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
             ANS_LOGE("Can't read slotType");
             return false;
         }
+        if (slotType < static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION) ||
+            slotType >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+            ANS_LOGE("Invalid slot type: %{public}d", slotType);
+            return false;
+        }
         slotTypes_.emplace_back(static_cast<NotificationConstant::SlotType>(slotType));
+    }
+    return true;
+}
+
+bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
+{
+    if (!parcel.ReadStringVector(&appNames_)) {
+        ANS_LOGE("Can't read appNames_");
+        return false;
+    }
+    if (appNames_.size() > MAX_BUNDLE_LIST_SIZE) {
+        ANS_LOGE("appNames_ size exceeds limit: %{public}zu", appNames_.size());
+        return false;
+    }
+    if (!parcel.ReadString(deviceType_)) {
+        ANS_LOGE("Can't read deviceType_");
+        return false;
+    }
+    if (!parcel.ReadInt32(userId_)) {
+        ANS_LOGE("Can't read userId_");
+        return false;
+    }
+    if (!ReadSlotTypesFromParcel(parcel)) {
+        return false;
     }
     if (!parcel.ReadUint32(filterType_)) {
         ANS_LOGE("Can't read filterType_");
@@ -359,6 +384,10 @@ int32_t NotificationSubscribeInfo::GetSubscriberUid() const
 
 void NotificationSubscribeInfo::SetSubscriberBundleName(const std::string &bundleName)
 {
+    if (bundleName.empty() || bundleName.length() > STR_MAX_SIZE) {
+        ANS_LOGE("invalid bundleName");
+        return;
+    }
     subscriberBundleName_ = bundleName;
 }
 

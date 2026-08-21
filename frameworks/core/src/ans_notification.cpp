@@ -40,10 +40,10 @@ namespace Notification {
 namespace {
 const int32_t MAX_RETRY_TIME = 30;
 const int32_t SLEEP_TIME = 1000;
-const uint32_t MAX_PUBLISH_DELAY_TIME = 5;
 const std::string DOWNLOAD_TITLE = "title";
 const std::string DOWNLOAD_FILENAME = "fileName";
 const static int MAX_SLOT_FLAGS = 0b111111;
+const int32_t MAX_BADGE_NUMBER = 99;
 }
 
 std::shared_ptr<AnsNotification> AnsNotification::GetInstance()
@@ -631,6 +631,10 @@ InnerErrorCode AnsNotification::SetNotificationBadgeNum()
 
 InnerErrorCode AnsNotification::SetNotificationBadgeNum(int32_t num)
 {
+    if (num < 0 || num > MAX_BADGE_NUMBER) {
+        ANS_LOGE("Invalid badge number: %{public}d", num);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -664,6 +668,10 @@ InnerErrorCode AnsNotification::CanPopEnableNotificationDialog(sptr<AnsDialogHos
     bool &canPop, std::string &bundleName)
 {
     ANS_LOGD("called");
+    if (hostClient == nullptr) {
+        ANS_LOGE("hostClient is nullptr");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -716,6 +724,7 @@ InnerErrorCode AnsNotification::RequestEnableNotification(const std::string bund
 
 InnerErrorCode AnsNotification::HasNotificationPolicyAccessPermission(bool &hasPermission)
 {
+    hasPermission = false;
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -731,9 +740,10 @@ InnerErrorCode AnsNotification::GetBundleImportance(NotificationSlot::Notificati
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
-    int32_t importanceTemp;
+    int32_t importanceTemp = 0;
     InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetBundleImportance(importanceTemp));
-    if ((NotificationSlot::LEVEL_NONE <= importanceTemp) && (importanceTemp <= NotificationSlot::LEVEL_HIGH)) {
+    if (ret == ERR_ANS_INNER_OK &&
+        (NotificationSlot::LEVEL_NONE <= importanceTemp) && (importanceTemp <= NotificationSlot::LEVEL_HIGH)) {
         importance = static_cast<NotificationSlot::NotificationLevel>(importanceTemp);
     } else {
         importance = NotificationSlot::LEVEL_UNDEFINED;
@@ -892,6 +902,11 @@ InnerErrorCode AnsNotification::UnSubscribeNotification(
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
+    if (subscribeInfo.GetAppNames().size() > MAX_BUNDLE_LIST_SIZE) {
+        ANS_LOGE("appNames size exceeds limit: %{public}zu", subscribeInfo.GetAppNames().size());
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
     sptr<NotificationSubscribeInfo> sptrInfo = new (std::nothrow) NotificationSubscribeInfo(subscribeInfo);
     if (sptrInfo == nullptr) {
         ANS_LOGE("null sptrInfo");
@@ -990,6 +1005,10 @@ InnerErrorCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<No
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
+    }
+    if (subscribeInfo != nullptr && subscribeInfo->GetAppNames().size() > MAX_BUNDLE_LIST_SIZE) {
+        ANS_LOGE("appNames size exceeds limit: %{public}zu", subscribeInfo->GetAppNames().size());
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<std::mutex> lock(subscriberMutex_);
     auto item = subscribers_.find(subscriber);
@@ -1270,6 +1289,7 @@ InnerErrorCode AnsNotification::GetAllActiveNotificationsNoBlockIPC(std::vector<
 
 InnerErrorCode AnsNotification::GetAllActiveNotifications(std::vector<sptr<Notification>> &notification)
 {
+    notification.clear();
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -1281,6 +1301,7 @@ InnerErrorCode AnsNotification::GetAllActiveNotifications(std::vector<sptr<Notif
 InnerErrorCode AnsNotification::GetAllActiveNotifications(
     const std::vector<std::string> key, std::vector<sptr<Notification>> &notification)
 {
+    notification.clear();
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -2318,6 +2339,10 @@ InnerErrorCode AnsNotification::GetSyncNotificationEnabledWithoutApp(const int32
 
 InnerErrorCode AnsNotification::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)
 {
+    if (badgeNumber < 0) {
+        ANS_LOGE("Invalid badge number: %{public}d", badgeNumber);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("SetBadgeNumber fail.");
@@ -2445,6 +2470,10 @@ InnerErrorCode AnsNotification::SetBundlePriorityConfig(
     ANS_LOGD("called");
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    if (value.length() > COMMON_TEXT_SIZE) {
+        ANS_LOGE("Invalid value length.");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
 
@@ -2706,6 +2735,11 @@ InnerErrorCode AnsNotification::SetDistributedEnabledByBundle(const Notification
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
+    if (bundleOption.GetBundleName().length() > STR_MAX_SIZE ||
+        deviceType.length() > STR_MAX_SIZE) {
+        ANS_LOGE("Invalid bundle name or deviceType length.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -2877,7 +2911,7 @@ InnerErrorCode AnsNotification::SetDistributedAuthStatus(
 InnerErrorCode AnsNotification::UpdateDistributedDeviceList(const std::string &deviceType)
 {
     ANS_LOGD("called");
-    if (deviceType.empty()) {
+    if (deviceType.empty() || deviceType.length() > static_cast<size_t>(STR_MAX_SIZE)) {
         ANS_LOGE("Invalid deviceType.");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
@@ -3109,6 +3143,10 @@ InnerErrorCode AnsNotification::SetDeviceDistributedBundleList(DistributedBundle
 }
 InnerErrorCode AnsNotification::SetTargetDeviceAbility(const std::string& deviceType, const int32_t ability)
 {
+    if (deviceType.empty() || deviceType.length() > static_cast<size_t>(STR_MAX_SIZE)) {
+        ANS_LOGE("Invalid deviceType.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");

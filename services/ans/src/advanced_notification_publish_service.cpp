@@ -30,7 +30,6 @@
 
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
-#include "notification_constant.h"
 #include "notification_unified_group_Info.h"
 #include "os_account_manager.h"
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
@@ -398,6 +397,11 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbModeInner(
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("IsNeedSilentInDoNotDisturbMode CheckPermission failed.");
         return ERR_ANS_INNER_PERMISSION_DENIED;
+    }
+
+    if (phoneNumber.empty()) {
+        ANS_LOGE("empty phoneNumber");
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     return CheckNeedSilent(phoneNumber, callerType, userId);
@@ -1073,7 +1077,11 @@ void AdvancedNotificationService::SetDialogPoppedUnEnableTime(const sptr<Notific
 {
     ANS_LOGD("SetDialogPoppedRefuseTime called.");
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
+        userId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return;
+    }
     EXTENTION_WRAPPER->SetDialogOpenSuccessTimeStamp(bundleOption, userId);
     ANS_LOGD("SetDialogPoppedRefuseTime end.");
 }

@@ -46,7 +46,10 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
-    napi_get_value_bool(env, argv[PARAM0], &enabled);
+    if (napi_get_value_bool(env, argv[PARAM0], &enabled) != napi_ok) {
+        ANS_LOGE("Failed to parse the parameter as boolean.");
+        return nullptr;
+    }
     return Common::NapiGetNull(env);
 }
 

@@ -24,13 +24,13 @@ namespace Notification {
 namespace {
 constexpr int32_t MAX_VECTOR_SIZE = 3;
 constexpr int32_t MIN_USER_ID = -1;
-constexpr int32_t MAX_USER_ID = 100;
+constexpr int32_t MAX_FUZZ_USER_ID = 100;
 }
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
         auto service = AdvancedNotificationService::GetInstance();
         auto triggerKey = fuzzData->ConsumeRandomLengthString();
-        auto userId = fuzzData->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_USER_ID);
+        auto userId = fuzzData->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_FUZZ_USER_ID);
         service->PublishDelayedNotification(triggerKey, userId);
         return true;
     }

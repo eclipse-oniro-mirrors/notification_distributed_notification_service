@@ -1503,6 +1503,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationListForDelet
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetNotificationId(1);
+    request->SetCreatorUserId(100);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     record->notification->SetRemoveAllowed(false);
     advancedNotificationService_->AddToNotificationList(record);
@@ -1523,6 +1524,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationListForDelet
 {
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUserId(100);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     record->notification->SetRemoveAllowed(true);
     record->request->SetUnremovable(true);
@@ -1713,6 +1715,68 @@ HWTEST_F(AdvancedNotificationServiceUnitTest,
 
     auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
     EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00006
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey when GetOsAccountLocalIdFromUid fails
+ *           with non-default owner uid, returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00006, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", NON_SYSTEM_APP_UID, INVALID_USER_ID, 0);
+    request->SetLabel("testLabel");
+    auto record = CreateAtomicServiceRecord(1, "com.test.bundle", NON_SYSTEM_APP_UID, 100);
+    record->request->SetLabel("testLabel");
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    MockGetOsAccountLocalIdFromUid(false, 1);
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_EQ(result, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00007
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey when resolved ownerUserId is invalid (<= 0),
+ *           returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00007, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", NON_SYSTEM_APP_UID, INVALID_USER_ID, 0);
+    request->SetLabel("testLabel");
+    auto record = CreateAtomicServiceRecord(1, "com.test.bundle", NON_SYSTEM_APP_UID, 100);
+    record->request->SetLabel("testLabel");
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_EQ(result, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00008
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey resolves ownerUserId from uid and matches record
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00008, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", NON_SYSTEM_APP_UID, INVALID_USER_ID, 0);
+    request->SetLabel("testLabel");
+    auto record = CreateAtomicServiceRecord(1, "com.test.bundle", NON_SYSTEM_APP_UID, 100);
+    record->request->SetLabel("testLabel");
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    // annex mock default resolves uid to userId 100, request ownerUserId becomes 100 and matches record
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->request->GetNotificationId(), 1);
 }
 
 /**
@@ -3019,7 +3083,8 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationStatisticsToDB_200,
 /**
  * @tc.name: SystemEventObserver_OnReceiveEvent_TimeChanged_001
  * @tc.desc: Verify OnReceiveEvent enters the TIME_CHANGED judgment (line 140): the handler calls
- *           UpdateCustomTimeData, which shifts the seeded row's notificationTime in the _0 table.
+ *           UpdateCustomTimeData, which shifts the seeded row's notificationTime in the active user's
+ *           statistics table (QueryStatisticsByBundle requires a positive tableUserId).
  * @tc.type: FUNC
  */
 HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_OnReceiveEvent_TimeChanged_001,
@@ -3028,25 +3093,26 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_OnReceiveEvent
     ASSERT_NE(advancedNotificationService_, nullptr);
     ASSERT_NE(advancedNotificationService_->systemEventObserver_, nullptr);
 
-    // Seed a row in the ZERO_USERID statistics table (_0); UpdateCustomTimeData always shifts this table.
+    constexpr int32_t STATS_USER_ID = 100; // positive userId required by QueryStatisticsByBundle
+    // Seed a row in the active user's statistics table; UpdateCustomTimeData shifts active user tables.
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundleStats140", 20014044);
-    ASSERT_EQ(NotificationPreferences::GetInstance()->PutNotificationStatistics(ZERO_USERID, bundle), ERR_OK);
+    ASSERT_EQ(NotificationPreferences::GetInstance()->PutNotificationStatistics(STATS_USER_ID, bundle), ERR_OK);
 
     int32_t recentCount = 0;
     int64_t lastTimeBefore = 0;
     ASSERT_TRUE(NotificationPreferences::GetInstance()->preferncesDB_->QueryStatisticsByBundle(
-        bundle->GetUid(), ZERO_USERID, recentCount, lastTimeBefore));
+        bundle->GetUid(), STATS_USER_ID, recentCount, lastTimeBefore));
     ASSERT_GT(recentCount, 0);
 
     EventFwk::CommonEventData data;
     AAFwk::Want want;
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
     data.SetWant(want);
-    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data); // line 140 -> shifts _0 rows
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data); // line 140 -> shifts user rows
 
     int64_t lastTimeAfter = 0;
     ASSERT_TRUE(NotificationPreferences::GetInstance()->preferncesDB_->QueryStatisticsByBundle(
-        bundle->GetUid(), ZERO_USERID, recentCount, lastTimeAfter));
+        bundle->GetUid(), STATS_USER_ID, recentCount, lastTimeAfter));
     // line 140 entered -> UpdateCustomTimeData shifted notificationTime -> lastTime must change.
     EXPECT_NE(lastTimeAfter, lastTimeBefore);
 }

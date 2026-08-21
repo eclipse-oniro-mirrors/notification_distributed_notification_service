@@ -45,7 +45,6 @@
 #include "event_report.h"
 #include "ipc_skeleton.h"
 #include "nlohmann/json.hpp"
-#include "notification_constant.h"
 #include "notification_dialog_manager.h"
 #include "notification_filter.h"
 #include "notification_preferences.h"
@@ -258,7 +257,11 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK ||
+        userId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
+    }
     request->SetCreatorUserId(userId);
     request->SetCreatorBundleName(bundle);
     if (request->GetOwnerBundleName().empty()) {
@@ -268,7 +271,11 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
     request->SetAppIndex(BundleManagerHelper::GetInstance()->GetAppIndexByUid(request->GetOwnerUid()));
     if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT) {
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
-        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
+        if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
+            request->GetOwnerUid(), ownerUserId) != ERR_OK || ownerUserId <= 0) {
+            ANS_LOGE("Failed to get valid userId from uid");
+            return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
+        }
         request->SetOwnerUserId(ownerUserId);
         std::shared_ptr<AAFwk::WantParams> additionalData = request->GetAdditionalData();
         if (AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) &&
@@ -1232,7 +1239,11 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     int32_t userId = record->notification->GetRecvUserId();
     if (userId == FIRST_USERID) {
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
-        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(record->bundleOption->GetUid(), userId);
+        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
+            record->bundleOption->GetUid(), userId) != ERR_OK || userId <= 0) {
+            ANS_LOGE("Failed to get valid userId from uid");
+            return;
+        }
 #else
         OHOS::AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(userId);
 #endif
@@ -1611,13 +1622,13 @@ ErrCode AdvancedNotificationService::GetUnifiedGroupInfoFromDb(std::string &enab
     auto datashareHelper = DelayedSingleton<AdvancedDatashareHelperExt>::GetInstance();
     if (datashareHelper == nullptr) {
         ANS_LOGE("The data share helper is nullptr.");
-        return -1;
+        return ERR_ANS_INNER_TASK_ERR;
     }
     Uri enableUri(datashareHelper->GetUnifiedGroupEnableUri());
     bool ret = datashareHelper->Query(enableUri, KEY_UNIFIED_GROUP_ENABLE, enable);
     if (!ret) {
         ANS_LOGE("Query smart aggregation switch failed.");
-        return -1;
+        return ERR_ANS_INNER_TASK_ERR;
     }
 
     return ERR_OK;
@@ -1792,6 +1803,10 @@ void AdvancedNotificationService::CancelWantAgent(const sptr<Notification> &noti
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
     NotificationKey notificationKey, sptr<Notification> &notification, int32_t removeReason, bool isCancel)
 {
+    if (bundleOption == nullptr) {
+        ANS_LOGE("bundleOption is nullptr");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     RemoveFromTriggerNotificationList(bundleOption, notificationKey);
     for (auto record : notificationList_) {
         if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
@@ -1869,6 +1884,10 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
 ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
     const std::string &key, const int32_t &userId, sptr<Notification> &notification, bool removeAll)
 {
+    if (userId < 0) {
+        ANS_LOGE("Invalid userId: %{public}d", userId);
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     RemoveForDeleteAllFromTriggerNotificationList(key, userId);
     for (auto record : notificationList_) {
         if ((record->notification->GetKey() == key) &&
@@ -1928,7 +1947,11 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromNotifica
                 return nullptr;
             }
             int32_t ownerUserId = SUBSCRIBE_USER_INIT;
-            OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), ownerUserId);
+            if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
+                request->GetOwnerUid(), ownerUserId) != ERR_OK) || (ownerUserId <= 0)) {
+                ANS_LOGE("Get valid ownerUserId failed, uid: %{public}d", request->GetOwnerUid());
+                return nullptr;
+            }
             request->SetOwnerUserId(ownerUserId);
         }
         if (item->request->GetOwnerBundleName() == request->GetOwnerBundleName() &&

@@ -1540,6 +1540,52 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, FilterPermissionBundles_
 }
 
 /**
+ * @tc.number    : FilterPermissionBundles_0300
+ * @tc.name      : FilterPermissionBundles
+ * @tc.desc      : Test FilterPermissionBundles returns early (bundles unchanged) when resolved
+ *                 userId is invalid (< 0)
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, FilterPermissionBundles_0300,
+    Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.emplace_back(
+        sptr<NotificationBundleOption>(new NotificationBundleOption("test.bundle", NON_SYSTEM_APP_UID)));
+    std::vector<sptr<NotificationBundleOption>> mismatchedBundles;
+    MockIsVerfyPermisson(true);
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
+    advancedNotificationService_->FilterPermissionBundles(bundles, mismatchedBundles);
+    // early return at line 257: the bundle is neither filtered nor moved to mismatchedBundles
+    EXPECT_EQ(bundles.size(), 1);
+    EXPECT_TRUE(mismatchedBundles.empty());
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
+}
+
+/**
+ * @tc.number    : FilterPermissionBundles_0400
+ * @tc.name      : FilterPermissionBundles
+ * @tc.desc      : Test FilterPermissionBundles with multiple bundles stops at the first invalid
+ *                 userId (remaining bundles are not processed)
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, FilterPermissionBundles_0400,
+    Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.emplace_back(
+        sptr<NotificationBundleOption>(new NotificationBundleOption("test.bundle.first", NON_SYSTEM_APP_UID)));
+    bundles.emplace_back(
+        sptr<NotificationBundleOption>(new NotificationBundleOption("test.bundle.second", NON_SYSTEM_APP_UID)));
+    std::vector<sptr<NotificationBundleOption>> mismatchedBundles;
+    MockIsVerfyPermisson(true);
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId (zero)
+    advancedNotificationService_->FilterPermissionBundles(bundles, mismatchedBundles);
+    // early return: loop aborted at the first bundle, nothing filtered
+    EXPECT_EQ(bundles.size(), 2);
+    EXPECT_TRUE(mismatchedBundles.empty());
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
+}
+
+/**
  * @tc.number    : FilterGrantedBundles_0100
  * @tc.name      : FilterGrantedBundles
  * @tc.desc      : Test FilterGrantedBundles case
@@ -1866,7 +1912,9 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0300,
     MockOsAccountManager::MockGetForegroundOsAccountLocalId(0);
     advancedNotificationService_->HandleBundleUpdate(bundle);
     advancedNotificationService_->SelfClean(false);
-    EXPECT_FALSE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
+    // installedUserId(100) != currentUserId(0): another user's update is skipped, cache stays empty
+    EXPECT_TRUE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(100); // reset to default
     MockIsVerfyPermisson(false);
     MockIsNeedHapModuleInfos(false);
 }
@@ -1900,7 +1948,53 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0500,
     MockIsNeedHapModuleInfos(true);
     advancedNotificationService_->HandleBundleUpdate(bundle);
     advancedNotificationService_->SelfClean(false);
+    // installedUserId(100) == currentUserId(100): valid update is cached in the extension bundle cache
+    EXPECT_FALSE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
+    MockIsVerfyPermisson(false);
+    MockIsNeedHapModuleInfos(false);
+}
+
+/**
+ * @tc.number    : HandleBundleUpdate_0600
+ * @tc.name      : HandleBundleUpdate
+ * @tc.desc      : Test HandleBundleUpdate when GetOsAccountLocalIdFromUid returns invalid userId (< 0)
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0600,
+    Function | SmallTest | Level1)
+{
+    advancedNotificationService_->cacheNotificationExtensionBundles_.clear();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
+    MockIsVerfyPermisson(true);
+    MockIsNeedHapModuleInfos(true);
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1);
+    advancedNotificationService_->HandleBundleUpdate(bundle);
+    advancedNotificationService_->SelfClean(false);
+    // invalid userId triggers early return at line 503 before caching the bundle
     EXPECT_TRUE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
+    MockIsVerfyPermisson(false);
+    MockIsNeedHapModuleInfos(false);
+}
+
+/**
+ * @tc.number    : HandleBundleUpdate_0700
+ * @tc.name      : HandleBundleUpdate
+ * @tc.desc      : Test HandleBundleUpdate when installed user differs from current active user
+ */
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, HandleBundleUpdate_0700,
+    Function | SmallTest | Level1)
+{
+    advancedNotificationService_->cacheNotificationExtensionBundles_.clear();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", NON_SYSTEM_APP_UID);
+    MockIsVerfyPermisson(true);
+    MockIsNeedHapModuleInfos(true);
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(101);
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(100);
+    advancedNotificationService_->HandleBundleUpdate(bundle);
+    advancedNotificationService_->SelfClean(false);
+    // another user's package update is skipped at line 508 before caching the bundle
+    EXPECT_TRUE(advancedNotificationService_->cacheNotificationExtensionBundles_.empty());
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
     MockIsVerfyPermisson(false);
     MockIsNeedHapModuleInfos(false);
 }

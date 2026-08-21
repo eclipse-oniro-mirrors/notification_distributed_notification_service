@@ -15,6 +15,7 @@
 
 #include <optional>
 #include "remove.h"
+#include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
 
@@ -199,6 +200,11 @@ napi_value ParseParametersByRemoveAll(const napi_env &env, const napi_callback_i
         params.bundleAndKeyInfo = bundleandKeyInfo;
     } else if (valuetype == napi_number) {
         NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &params.userId));
+        if (params.userId < 0 || params.userId > OHOS::Notification::MAX_USER_ID) {
+            ANS_LOGE("Invalid userId");
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
+            return nullptr;
+        }
         params.hasUserId = true;
     } else {
         napi_create_reference(env, argv[PARAM0], 1, &params.callback);

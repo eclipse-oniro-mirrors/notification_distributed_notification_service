@@ -216,11 +216,39 @@ bool MessageUser::Marshalling(Parcel &parcel) const
 
 bool MessageUser::ReadFromParcel(Parcel &parcel)
 {
-    key_ = parcel.ReadString();
-    name_ = parcel.ReadString();
-    isMachine_ = parcel.ReadBool();
-    isUserImportant_ = parcel.ReadBool();
+    std::string key;
+    if (!parcel.ReadString(key)) {
+        ANS_LOGE("ReadString failed");
+        return false;
+    }
+    key_ = key;
 
+    std::string name;
+    if (!parcel.ReadString(name)) {
+        ANS_LOGE("ReadString failed");
+        return false;
+    }
+    name_ = name;
+
+    bool isMachine = false;
+    if (!parcel.ReadBool(isMachine)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
+    isMachine_ = isMachine;
+
+    bool isUserImportant = false;
+    if (!parcel.ReadBool(isUserImportant)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
+    isUserImportant_ = isUserImportant;
+
+    return ReadOptionalFromParcel(parcel);
+}
+
+bool MessageUser::ReadOptionalFromParcel(Parcel &parcel)
+{
     int32_t empty = VALUE_NULL;
     if (!parcel.ReadInt32(empty)) {
         ANS_LOGE("Failed to read VALUE");
@@ -228,10 +256,19 @@ bool MessageUser::ReadFromParcel(Parcel &parcel)
     }
 
     if (empty == VALUE_OBJECT) {
-        uri_ = Uri((parcel.ReadString()));
+        std::string uriStr;
+        if (!parcel.ReadString(uriStr)) {
+            ANS_LOGE("ReadString failed");
+            return false;
+        }
+        uri_ = Uri(uriStr);
     }
 
-    bool valid = parcel.ReadBool();
+    bool valid = false;
+    if (!parcel.ReadBool(valid)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
     if (valid) {
         pixelMap_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (!pixelMap_) {

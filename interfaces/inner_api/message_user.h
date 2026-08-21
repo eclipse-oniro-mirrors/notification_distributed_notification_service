@@ -164,6 +164,8 @@ private:
      */
     bool ReadFromParcel(Parcel &parcel);
 
+    bool ReadOptionalFromParcel(Parcel &parcel);
+
 private:
     std::string key_ {};
     std::string name_ {};

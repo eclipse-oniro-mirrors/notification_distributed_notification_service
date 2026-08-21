@@ -540,6 +540,11 @@ void NotificationRequest::SetShowStopwatch(bool isShow)
 
 void NotificationRequest::SetSlotType(NotificationConstant::SlotType slotType)
 {
+    if (static_cast<int32_t>(slotType) < 0 ||
+        static_cast<int32_t>(slotType) >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid SlotType: %{public}d", static_cast<int32_t>(slotType));
+        return;
+    }
     slotType_ = slotType;
 }
 
@@ -647,8 +652,12 @@ void NotificationRequest::SetNotificationUserInputHistory(const std::vector<std:
         return;
     }
 
-    auto vsize = std::min(NotificationRequest::MAX_USER_INPUT_HISTORY, text.size());
-    userInputHistory_.assign(text.begin(), text.begin() + vsize);
+    if (text.size() > NotificationRequest::MAX_USER_INPUT_HISTORY) {
+        ANS_LOGE("userInputHistory size exceeds limit: %{public}zu", text.size());
+        return;
+    }
+
+    userInputHistory_.assign(text.begin(), text.end());
 }
 
 std::vector<std::string> NotificationRequest::GetNotificationUserInputHistory() const
@@ -738,6 +747,10 @@ void NotificationRequest::SetDevicesSupportDisplay(const std::vector<std::string
 
 void NotificationRequest::SetDevicesSupportOperate(const std::vector<std::string> &devices)
 {
+    if (devices.size() > static_cast<size_t>(MAX_PARCELABLE_VECTOR_NUM)) {
+        ANS_LOGE("devices size exceeds limit: %{public}zu", devices.size());
+        return;
+    }
     distributedOptions_.SetDevicesSupportOperate(devices);
 }
 
@@ -753,6 +766,10 @@ void NotificationRequest::SetCreatorUserId(int32_t userId)
 
 int32_t NotificationRequest::GetCreatorUserId() const
 {
+    if (creatorUserId_ < 0) {
+        ANS_LOGE("Invalid creatorUserId: %{public}d", creatorUserId_);
+        return SUBSCRIBE_USER_INIT;
+    }
     return creatorUserId_;
 }
 
@@ -960,12 +977,15 @@ NotificationRequest *NotificationRequest::CollaborationFromJson(const std::strin
         return nullptr;
     }
 
-    const auto &jsonEnd = jsonObject.cend();
-    if (jsonObject.find("extraInfo") != jsonEnd && jsonObject.at("extraInfo").is_string()) {
+    if (jsonObject.contains("extraInfo") && jsonObject.at("extraInfo").is_string()) {
         auto extraInfoStr = jsonObject.at("extraInfo").get<std::string>();
         if (!extraInfoStr.empty()) {
-            AAFwk::WantParams params = NotificationWantParamsHelper::ParseWantParams(extraInfoStr);
-            pRequest->additionalParams_ = std::make_shared<AAFwk::WantParams>(params);
+            if (!nlohmann::json::accept(extraInfoStr)) {
+                ANS_LOGE("extraInfo is not valid JSON, skip ParseWantParams");
+            } else {
+                AAFwk::WantParams params = NotificationWantParamsHelper::ParseWantParams(extraInfoStr);
+                pRequest->additionalParams_ = std::make_shared<AAFwk::WantParams>(params);
+            }
         }
     }
 
@@ -1020,7 +1040,7 @@ bool NotificationRequest::ConvertJsonToTemplate(
         if (templateOptionObj.find("templateData") != templateOptionObj.cend() &&
             templateOptionObj.at("templateData").is_string()) {
             std::string data = templateOptionObj.at("templateData").get<std::string>();
-            if (!data.empty()) {
+            if (!data.empty() && data.size() <= MAX_PARCELABLE_VECTOR_NUM) {
                 AAFwk::WantParams params = NotificationWantParamsHelper::ParseWantParams(data);
                 templatePtr->SetTemplateData(std::make_shared<AAFwk::WantParams>(params));
             }
@@ -2128,6 +2148,10 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Failed to read userInputHistory");
         return false;
     }
+    if (userInputHistory_.size() > NotificationRequest::MAX_USER_INPUT_HISTORY) {
+        ANS_LOGE("userInputHistory size exceeds limit: %{public}zu", userInputHistory_.size());
+        return false;
+    }
 
     auto pOpt = parcel.ReadParcelable<NotificationDistributedOptions>();
     if (pOpt == nullptr) {
@@ -2575,6 +2599,23 @@ bool NotificationRequest::ConvertGroupInfoToJson(nlohmann::json &jsonObject) con
     return true;
 }
 
+namespace {
+template<typename T>
+void ReadIntFromJson(const nlohmann::json &jsonObject, const std::string &key,
+    int64_t minVal, int64_t maxVal, T &out)
+{
+    if (jsonObject.find(key) == jsonObject.cend() || !jsonObject.at(key).is_number_integer()) {
+        return;
+    }
+    int64_t val = jsonObject.at(key).get<int64_t>();
+    if (val >= minVal && val <= maxVal) {
+        out = static_cast<T>(val);
+    } else {
+        ANS_LOGE("%{public}s out of range: %{public}" PRId64, key.c_str(), val);
+    }
+}
+}
+
 void NotificationRequest::ConvertJsonToNumExt(
     NotificationRequest *target, const nlohmann::json &jsonObject)
 {
@@ -2582,38 +2623,14 @@ void NotificationRequest::ConvertJsonToNumExt(
         ANS_LOGE("target is nullptr");
         return;
     }
-    
-    const auto &jsonEnd = jsonObject.cend();
 
-    if (jsonObject.find("updateDeadLine") != jsonEnd && jsonObject.at("updateDeadLine").is_number_integer()) {
-        target->updateDeadLine_ = jsonObject.at("updateDeadLine").get<int64_t>();
-    }
-
-    if (jsonObject.find("finishDeadLine") != jsonEnd && jsonObject.at("finishDeadLine").is_number_integer()) {
-        target->finishDeadLine_ = jsonObject.at("finishDeadLine").get<int64_t>();
-    }
-
-    if (jsonObject.find("triggerDeadLine") != jsonEnd && jsonObject.at("triggerDeadLine").is_number_integer()) {
-        target->triggerDeadLine_ = jsonObject.at("triggerDeadLine").get<int64_t>();
-    }
-
-    if (jsonObject.find("ownerUserId") != jsonEnd && jsonObject.at("ownerUserId").is_number_integer()) {
-        target->ownerUserId_ = jsonObject.at("ownerUserId").get<int32_t>();
-    }
-
-    if (jsonObject.find("ownerUid") != jsonEnd && jsonObject.at("ownerUid").is_number_integer()) {
-        target->ownerUid_ = jsonObject.at("ownerUid").get<int32_t>();
-    }
-
-    if (jsonObject.find("notificationControlFlags") != jsonEnd &&
-        jsonObject.at("notificationControlFlags").is_number_integer()) {
-        target->notificationControlFlags_ = jsonObject.at("notificationControlFlags").get<uint32_t>();
-    }
-
-    if (jsonObject.find("snoozeDelayTime") != jsonEnd &&
-        jsonObject.at("snoozeDelayTime").is_number_integer()) {
-        target->snoozeDelayTime_ = jsonObject.at("snoozeDelayTime").get<int64_t>();
-    }
+    ReadIntFromJson(jsonObject, "updateDeadLine", INT64_MIN, INT64_MAX, target->updateDeadLine_);
+    ReadIntFromJson(jsonObject, "finishDeadLine", INT64_MIN, INT64_MAX, target->finishDeadLine_);
+    ReadIntFromJson(jsonObject, "triggerDeadLine", INT64_MIN, INT64_MAX, target->triggerDeadLine_);
+    ReadIntFromJson(jsonObject, "ownerUserId", INT32_MIN, INT32_MAX, target->ownerUserId_);
+    ReadIntFromJson(jsonObject, "ownerUid", INT32_MIN, INT32_MAX, target->ownerUid_);
+    ReadIntFromJson(jsonObject, "notificationControlFlags", 0, UINT32_MAX, target->notificationControlFlags_);
+    ReadIntFromJson(jsonObject, "snoozeDelayTime", INT64_MIN, INT64_MAX, target->snoozeDelayTime_);
 }
 
 void NotificationRequest::ConvertJsonToNum(NotificationRequest *target, const nlohmann::json &jsonObject)
@@ -2753,7 +2770,11 @@ void NotificationRequest::ConvertJsonToEnum(NotificationRequest *target, const n
 
     if (jsonObject.find("slotType") != jsonEnd && jsonObject.at("slotType").is_number_integer()) {
         auto slotTypeValue  = jsonObject.at("slotType").get<int32_t>();
-        target->slotType_ = static_cast<NotificationConstant::SlotType>(slotTypeValue);
+        if (slotTypeValue < 0 || slotTypeValue >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+            ANS_LOGE("invalid slotType: %{public}d", slotTypeValue);
+        } else {
+            target->slotType_ = static_cast<NotificationConstant::SlotType>(slotTypeValue);
+        }
     }
 
     if (jsonObject.find("badgeIconStyle") != jsonEnd && jsonObject.at("badgeIconStyle").is_number_integer()) {
@@ -2935,6 +2956,10 @@ bool NotificationRequest::ConvertJsonToNotificationActionButton(
 
     if (jsonObject.find("actionButtons") != jsonEnd) {
         auto buttonArr = jsonObject.at("actionButtons");
+        if (!buttonArr.is_array()) {
+            ANS_LOGE("actionButtons is not an array");
+            return false;
+        }
         for (auto &btnObj : buttonArr) {
             auto pBtn = NotificationActionButton::ConvertNotificationActionButton(targetUid, btnObj);
             if (pBtn == nullptr) {
@@ -3063,19 +3088,40 @@ bool NotificationRequest::ConvertJsonToNotificationTrigger(
     }
 
     const auto &jsonEnd = jsonObject.cend();
+    if (jsonObject.find("notificationTrigger") == jsonEnd) {
+        return true;
+    }
 
-    if (jsonObject.find("notificationTrigger") != jsonEnd) {
-        auto triggerObj = jsonObject.at("notificationTrigger");
-        if (!triggerObj.is_null()) {
-            auto *pNotificationTrigger = NotificationJsonConverter::ConvertFromJson<NotificationTrigger>(triggerObj);
-            if (pNotificationTrigger == nullptr) {
-                ANS_LOGE("null pNotificationTrigger");
-                return false;
-            }
+    auto triggerObj = jsonObject.at("notificationTrigger");
+    if (triggerObj.is_null()) {
+        return true;
+    }
 
-            target->notificationTrigger_ = std::shared_ptr<NotificationTrigger>(pNotificationTrigger);
+    if (triggerObj.contains("triggerType") && triggerObj.at("triggerType").is_number_integer()) {
+        auto triggerType = triggerObj.at("triggerType").get<int32_t>();
+        if (triggerType < static_cast<int32_t>(NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE) ||
+            triggerType > static_cast<int32_t>(NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE)) {
+            ANS_LOGE("invalid triggerType: %{public}d", triggerType);
+            return false;
         }
     }
+    if (triggerObj.contains("triggerConfigPath") &&
+        triggerObj.at("triggerConfigPath").is_number_integer()) {
+        auto configPath = triggerObj.at("triggerConfigPath").get<int32_t>();
+        if (configPath < static_cast<int32_t>(NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG) ||
+            configPath > static_cast<int32_t>(NotificationConstant::ConfigPath::CONFIG_PATH_CLOUD_CONFIG)) {
+            ANS_LOGE("invalid triggerConfigPath: %{public}d", configPath);
+            return false;
+        }
+    }
+
+    auto *pNotificationTrigger = NotificationJsonConverter::ConvertFromJson<NotificationTrigger>(triggerObj);
+    if (pNotificationTrigger == nullptr) {
+        ANS_LOGE("null pNotificationTrigger");
+        return false;
+    }
+
+    target->notificationTrigger_ = std::shared_ptr<NotificationTrigger>(pNotificationTrigger);
 
     return true;
 }

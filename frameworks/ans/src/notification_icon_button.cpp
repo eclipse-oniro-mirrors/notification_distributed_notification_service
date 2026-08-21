@@ -249,7 +249,10 @@ bool NotificationIconButton::ReadFromParcel(Parcel &parcel)
     }
 
     bool valid {false};
-    valid = parcel.ReadBool();
+    if (!parcel.ReadBool(valid)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
     if (valid) {
         iconImage_ = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (!iconImage_) {
@@ -258,7 +261,10 @@ bool NotificationIconButton::ReadFromParcel(Parcel &parcel)
         }
     }
 
-    valid = parcel.ReadBool();
+    if (!parcel.ReadBool(valid)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
     if (valid) {
         if (!ReadResourceFromParcel(parcel, iconResource_)) {
             ANS_LOGE("Failed to read button icon resource.");

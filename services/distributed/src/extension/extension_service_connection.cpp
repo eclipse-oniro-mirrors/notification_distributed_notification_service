@@ -396,6 +396,10 @@ void ExtensionServiceConnection::GetPid()
 void ExtensionServiceConnection::DoFreezeUnfreeze(bool isFreeze)
 {
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    if (pid_ <= 0) {
+        ANS_LOGE("invalid pid: %{public}d", pid_);
+        return;
+    }
     if (isFreeze) {
         ANS_LOGD("Do Freeze pid:%{public}d", pid_);
     } else {

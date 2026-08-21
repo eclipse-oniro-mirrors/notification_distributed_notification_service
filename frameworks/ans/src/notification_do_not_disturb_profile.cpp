@@ -63,17 +63,17 @@ std::vector<NotificationBundleOption> NotificationDoNotDisturbProfile::GetProfil
 
 bool NotificationDoNotDisturbProfile::Marshalling(Parcel &parcel) const
 {
+    auto size = trustList_.size();
+    if (size > MAX_PARCELABLE_VECTOR_NUM) {
+        ANS_LOGE("Size exceeds the range.");
+        return false;
+    }
     if (!parcel.WriteInt64(id_)) {
         ANS_LOGE("Failed to write do not disturb id.");
         return false;
     }
     if (!parcel.WriteString(name_)) {
         ANS_LOGE("Failed to write do not disturb name.");
-        return false;
-    }
-    auto size = trustList_.size();
-    if (size > MAX_PARCELABLE_VECTOR_NUM) {
-        ANS_LOGE("Size exceeds the range.");
         return false;
     }
     if (!parcel.WriteInt32(size)) {
@@ -101,9 +101,21 @@ NotificationDoNotDisturbProfile *NotificationDoNotDisturbProfile::Unmarshalling(
 
 bool NotificationDoNotDisturbProfile::ReadFromParcel(Parcel &parcel)
 {
-    id_ = parcel.ReadInt64();
-    name_ = parcel.ReadString();
-    auto size = parcel.ReadUint32();
+    if (!parcel.ReadInt64(id_)) {
+        ANS_LOGE("ReadInt64 failed");
+        return false;
+    }
+    std::string name;
+    if (!parcel.ReadString(name)) {
+        ANS_LOGE("ReadString failed");
+        return false;
+    }
+    name_ = name;
+    uint32_t size = 0;
+    if (!parcel.ReadUint32(size)) {
+        ANS_LOGE("ReadUint32 failed");
+        return false;
+    }
     if (size > MAX_PARCELABLE_VECTOR_NUM) {
         ANS_LOGE("Size exceeds the range.");
         return false;

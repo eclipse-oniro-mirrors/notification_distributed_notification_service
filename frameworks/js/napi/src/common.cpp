@@ -22,7 +22,7 @@
 #include "napi_common_util.h"
 #include "notification_action_button.h"
 #include "notification_capsule.h"
-#include "notification_constant.h"
+#include "ans_const_define.h"
 #include "notification_geofence.h"
 #include "notification_local_live_view_content.h"
 #include "notification_progress.h"
@@ -525,7 +525,6 @@ napi_value Common::GetSubscriberSlotTypes(
 {
     bool hasSlotTypes = false;
     bool isArray = false;
-    napi_valuetype valuetype = napi_undefined;
     uint32_t length = 0;
 
     NAPI_CALL(env, napi_has_named_property(env, value, "slotTypes", &hasSlotTypes));
@@ -543,6 +542,12 @@ napi_value Common::GetSubscriberSlotTypes(
         return nullptr;
     }
     napi_get_array_length(env, nSlotTypes, &length);
+    if (length > MAX_SLOT_SIZE) {
+        ANS_LOGE("The array length exceeds max size.");
+        std::string msg = "The slotTypes array length exceeds max size.";
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
     if (length == 0) {
         ANS_LOGE("The array is empty.");
         std::string msg = "Incorrect parameters are left unspecified. The slotTypes list length is zero.";
@@ -551,25 +556,35 @@ napi_value Common::GetSubscriberSlotTypes(
     }
     for (uint32_t i = 0; i < length; ++i) {
         napi_value nSlotType = nullptr;
-        int32_t slotType = 0;
         napi_get_element(env, nSlotTypes, i, &nSlotType);
-        NAPI_CALL(env, napi_typeof(env, nSlotType, &valuetype));
-        if (valuetype != napi_number) {
-            ANS_LOGE("Wrong argument type. Number expected.");
-            std::string msg = "Incorrect parameter types.The type of slotType must be number.";
-            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
+        if (GetSubscriberSlotTypeElement(env, nSlotType, subscriberInfo) == nullptr) {
             return nullptr;
         }
-        napi_get_value_int32(env, nSlotType, &slotType);
-        NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
-        if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
-            std::string msg = "Incorrect parameter types.slotType name must be in enum.";
-            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        subscriberInfo.slotTypes.emplace_back(outType);
-        subscriberInfo.hasSubscribeInfo = true;
     }
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetSubscriberSlotTypeElement(
+    const napi_env &env, const napi_value &nSlotType, NotificationSubscribeInfo &subscriberInfo)
+{
+    napi_valuetype valuetype = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, nSlotType, &valuetype));
+    if (valuetype != napi_number) {
+        ANS_LOGE("Wrong argument type. Number expected.");
+        std::string msg = "Incorrect parameter types.The type of slotType must be number.";
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    int32_t slotType = 0;
+    napi_get_value_int32(env, nSlotType, &slotType);
+    NotificationConstant::SlotType outType = NotificationConstant::SlotType::OTHER;
+    if (!AnsEnumUtil::SlotTypeJSToC(SlotType(slotType), outType)) {
+        std::string msg = "Incorrect parameter types.slotType name must be in enum.";
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+    subscriberInfo.slotTypes.emplace_back(outType);
+    subscriberInfo.hasSubscribeInfo = true;
     return NapiGetNull(env);
 }
 
@@ -1180,6 +1195,13 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
         }
         napi_get_value_int32(env, nobj, &lockscreenVisibility);
         ANS_LOGD("lockscreenVisibility is: %{public}d", lockscreenVisibility);
+        if (lockscreenVisibility < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
+            lockscreenVisibility >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
+            ANS_LOGE("lockscreenVisibility is out of range.");
+            std::string msg = "Incorrect parameter types. The lockscreenVisibility is out of range.";
+            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
+            return nullptr;
+        }
         slot.SetLockscreenVisibleness(NotificationConstant::VisiblenessType(lockscreenVisibility));
     }
 
@@ -1208,7 +1230,6 @@ napi_value Common::GetNotificationSlotByVibration(const napi_env &env, const nap
     napi_value nobj = nullptr;
     napi_valuetype valuetype = napi_undefined;
     bool hasProperty = false;
-    uint32_t length = 0;
 
     // vibrationEnabled?: boolean
     bool vibrationEnabled = false;
@@ -1232,33 +1253,48 @@ napi_value Common::GetNotificationSlotByVibration(const napi_env &env, const nap
     }
 
     // vibrationValues?: Array<number>
-    NAPI_CALL(env, napi_has_named_property(env, value, "vibrationValues", &hasProperty));
-    if (hasProperty) {
-        bool isArray = false;
-        napi_get_named_property(env, value, "vibrationValues", &nobj);
-        napi_is_array(env, nobj, &isArray);
-        if (!isArray) {
-            ANS_LOGE("Property vibrationValues is expected to be an array.");
-            return nullptr;
-        }
+    return GetVibrationValues(env, value, slot);
+}
 
-        napi_get_array_length(env, nobj, &length);
-        std::vector<int64_t> vibrationValues;
-        for (size_t i = 0; i < length; i++) {
-            napi_value nVibrationValue = nullptr;
-            int64_t vibrationValue = 0;
-            napi_get_element(env, nobj, i, &nVibrationValue);
-            NAPI_CALL(env, napi_typeof(env, nVibrationValue, &valuetype));
-            if (valuetype != napi_number) {
-                ANS_LOGE("Wrong argument type. Number expected.");
-                return nullptr;
-            }
-            napi_get_value_int64(env, nVibrationValue, &vibrationValue);
-            vibrationValues.emplace_back(vibrationValue);
-        }
-        slot.SetVibrationStyle(vibrationValues);
+napi_value Common::GetVibrationValues(const napi_env &env, const napi_value &value, NotificationSlot &slot)
+{
+    bool hasProperty = false;
+    NAPI_CALL(env, napi_has_named_property(env, value, "vibrationValues", &hasProperty));
+    if (!hasProperty) {
+        return NapiGetNull(env);
     }
 
+    napi_value nobj = nullptr;
+    bool isArray = false;
+    napi_get_named_property(env, value, "vibrationValues", &nobj);
+    napi_is_array(env, nobj, &isArray);
+    if (!isArray) {
+        ANS_LOGE("Property vibrationValues is expected to be an array.");
+        return nullptr;
+    }
+
+    uint32_t length = 0;
+    napi_get_array_length(env, nobj, &length);
+    if (length > MAX_VIBRATION_VALUES_SIZE) {
+        ANS_LOGE("The vibrationValues array length exceeds max size.");
+        return nullptr;
+    }
+
+    napi_valuetype valuetype = napi_undefined;
+    std::vector<int64_t> vibrationValues;
+    for (size_t i = 0; i < length; i++) {
+        napi_value nVibrationValue = nullptr;
+        int64_t vibrationValue = 0;
+        napi_get_element(env, nobj, i, &nVibrationValue);
+        NAPI_CALL(env, napi_typeof(env, nVibrationValue, &valuetype));
+        if (valuetype != napi_number) {
+            ANS_LOGE("Wrong argument type. Number expected.");
+            return nullptr;
+        }
+        napi_get_value_int64(env, nVibrationValue, &vibrationValue);
+        vibrationValues.emplace_back(vibrationValue);
+    }
+    slot.SetVibrationStyle(vibrationValues);
     return NapiGetNull(env);
 }
 
@@ -1936,53 +1972,51 @@ napi_value Common::GetRingtoneInfo(
 napi_value Common::GetRingtoneStringInfo(
     const napi_env &env, const napi_value &value, NotificationRingtoneInfo &ringtoneInfo)
 {
-    bool hasProperty {false};
+    if (GetRingtoneStringProperty(env, value, "ringtoneTitle", ringtoneInfo,
+        &NotificationRingtoneInfo::SetRingtoneTitle) == nullptr) {
+        return nullptr;
+    }
+    if (GetRingtoneStringProperty(env, value, "ringtoneFileName", ringtoneInfo,
+        &NotificationRingtoneInfo::SetRingtoneFileName) == nullptr) {
+        return nullptr;
+    }
+    if (GetRingtoneStringProperty(env, value, "ringtoneUri", ringtoneInfo,
+        &NotificationRingtoneInfo::SetRingtoneUri) == nullptr) {
+        return nullptr;
+    }
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetRingtoneStringProperty(const napi_env &env, const napi_value &value,
+    const char *propName, NotificationRingtoneInfo &ringtoneInfo,
+    void (NotificationRingtoneInfo::*setter)(const std::string &))
+{
+    bool hasProperty = false;
+    NAPI_CALL(env, napi_has_named_property(env, value, propName, &hasProperty));
+    if (!hasProperty) {
+        return NapiGetNull(env);
+    }
+
     napi_value result = nullptr;
     napi_valuetype valuetype = napi_undefined;
-    char ringtoneTitle[STR_MAX_SIZE] = {0};
+    NAPI_CALL(env, napi_get_named_property(env, value, propName, &result));
+    NAPI_CALL(env, napi_typeof(env, result, &valuetype));
+    if (valuetype != napi_string) {
+        ANS_LOGE("Wrong argument type. String expected.");
+        std::string msg = "Incorrect parameter types. The type of ";
+        msg.append(propName).append(" must be string.");
+        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
+        return nullptr;
+    }
+
+    char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
-    NAPI_CALL(env, napi_has_named_property(env, value, "ringtoneTitle", &hasProperty));
-    if (hasProperty) {
-        napi_get_named_property(env, value, "ringtoneTitle", &result);
-        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
-        if (valuetype != napi_string) {
-            ANS_LOGE("Wrong argument type. String expected.");
-            std::string msg = "Incorrect parameter types. The type of ringtoneTitle must be string.";
-            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        NAPI_CALL(env, napi_get_value_string_utf8(env, result, ringtoneTitle, STR_MAX_SIZE - 1, &strLen));
-        ringtoneInfo.SetRingtoneTitle(ringtoneTitle);
+    NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
+    if (strLen >= STR_MAX_SIZE) {
+        ANS_LOGE("The %{public}s string length exceeds max size.", propName);
+        return nullptr;
     }
-    char ringtoneFileName[STR_MAX_SIZE] = {0};
-    strLen = 0;
-    NAPI_CALL(env, napi_has_named_property(env, value, "ringtoneFileName", &hasProperty));
-    if (hasProperty) {
-        NAPI_CALL(env, napi_get_named_property(env, value, "ringtoneFileName", &result));
-        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
-        if (valuetype != napi_string) {
-            ANS_LOGE("Wrong argument type. String expected.");
-            std::string msg = "Incorrect parameter types. The type of ringtoneFileName must be string.";
-            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        NAPI_CALL(env, napi_get_value_string_utf8(env, result, ringtoneFileName, STR_MAX_SIZE - 1, &strLen));
-        ringtoneInfo.SetRingtoneFileName(ringtoneFileName);
-    }
-    char ringtoneUri[STR_MAX_SIZE] = {0};
-    strLen = 0;
-    NAPI_CALL(env, napi_has_named_property(env, value, "ringtoneUri", &hasProperty));
-    if (hasProperty) {
-        NAPI_CALL(env, napi_get_named_property(env, value, "ringtoneUri", &result));
-        NAPI_CALL(env, napi_typeof(env, result, &valuetype));
-        if (valuetype != napi_string) {
-            std::string msg = "Incorrect parameter types. The type of ringtoneUri must be string.";
-            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
-        }
-        NAPI_CALL(env, napi_get_value_string_utf8(env, result, ringtoneUri, STR_MAX_SIZE - 1, &strLen));
-        ringtoneInfo.SetRingtoneUri(ringtoneUri);
-    }
+    (ringtoneInfo.*setter)(str);
     return NapiGetNull(env);
 }
 

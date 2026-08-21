@@ -92,6 +92,15 @@ int32_t NtfRdbStoreWrapper::DeleteStatisticsByBundle(const int32_t userId,
         ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
         return NativeRdb::E_ERROR;
     }
+    if (userId < 0) {
+        ANS_LOGE("invalid userId: %{public}d", userId);
+        return NativeRdb::E_ERROR;
+    }
+    if (bundleName.empty() || bundleName.find("..") != std::string::npos ||
+        bundleName.find('/') != std::string::npos) {
+        ANS_LOGE("invalid bundleName");
+        return NativeRdb::E_ERROR;
+    }
     std::string tableName = NOTIFICATION_STATISTICS_TABLENAME + "_" + std::to_string(userId);
 
     NativeRdb::AbsRdbPredicates absRdbPredicates(tableName);

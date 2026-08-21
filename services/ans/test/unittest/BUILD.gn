@@ -3027,7 +3027,10 @@ ohos_unittest("notification_preferences_second_test") {
 
   defines = []
 
-  sources = [ "notification_preferences_second_test.cpp" ]
+  sources = [
+    "notification_preferences_second_test.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
+  ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
@@ -3049,6 +3052,7 @@ ohos_unittest("notification_preferences_second_test") {
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
     "time_service:time_client",
+    "os_account:os_account_innerkits",
   ]
 
   if (player_framework) {
@@ -3245,6 +3249,8 @@ ohos_unittest("bundle_manager_helper_branch_test") {
   sources = [
     "bundle_manager_helper_branch_test/bundle_manager_helper_branch_test.cpp",
     "bundle_manager_helper_branch_test/mock_service_registry.cpp",
+    "mock/mock_bundle_mgr.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
   ]
 
   deps = [
@@ -3283,6 +3289,11 @@ ohos_unittest("bundle_manager_helper_branch_test") {
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
     defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+    include_dirs += [ "${services_path}/distributed/include" ]
   }
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
@@ -3340,6 +3351,9 @@ ohos_unittest("notification_dialog_test") {
   if (player_framework) {
     external_deps += [ "player_framework:media_client" ]
     defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
+  }
+  if (distributed_notification_service_feature_privileged_message) {
+    defines += [ "ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER" ]
   }
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"

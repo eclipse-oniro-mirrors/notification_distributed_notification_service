@@ -263,12 +263,21 @@ napi_value GetBadgeQueryCallBackInfo(const napi_env &env, const napi_value &valu
         Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return nullptr;
     }
-    napi_create_reference(env, value, 1, &(badgeQueryCallbackInfo->ref));
+    if (napi_create_reference(env, value, 1, &(badgeQueryCallbackInfo->ref)) != napi_ok) {
+        ANS_LOGE("Failed to create reference");
+        return nullptr;
+    }
     napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "tsfn", NAPI_AUTO_LENGTH, &resourceName);
+    if (napi_create_string_latin1(env, "tsfn", NAPI_AUTO_LENGTH, &resourceName) != napi_ok) {
+        ANS_LOGE("Failed to create string");
+        return nullptr;
+    }
     napi_threadsafe_function tsfn = nullptr;
-    napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, nullptr, nullptr,
-        nullptr, ThreadSafeBadgeQuery, &tsfn);
+    if (napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, nullptr, nullptr,
+        nullptr, ThreadSafeBadgeQuery, &tsfn) != napi_ok) {
+        ANS_LOGE("Failed to create threadsafe function");
+        return nullptr;
+    }
     {
         std::lock_guard<ffrt::mutex> lock(badgeQueryCallbackInfo->tsfnMutex_);
         badgeQueryCallbackInfo->SetThreadSafeFunction(tsfn);

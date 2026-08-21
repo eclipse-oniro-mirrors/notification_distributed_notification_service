@@ -1797,6 +1797,9 @@ public:
      */
     ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
 
+    ErrCode ResolveAgentUid(const sptr<NotificationBundleOption> &bundleOption, int32_t id,
+        int32_t reason, int32_t &outUid);
+
     /**
      * @brief Init publish process.
      */
@@ -2315,6 +2318,7 @@ private:
 
     void ClearOverTimeRingToneInfo();
     void ClearRingtoneByApplication(int32_t userId, const std::vector<NotificationRingtoneInfo> cloneRingtoneInfos);
+    std::vector<NotificationRingtoneInfo> FilterValidRingtoneUris(const std::vector<NotificationRingtoneInfo> &infos);
     ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);
@@ -2342,6 +2346,7 @@ private:
     void SendLiveViewUploadHiSysEvent(const std::shared_ptr<NotificationRecord> &record, int32_t uploadStatus);
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
+    AnsStatus ResolveCreatorUserId(const sptr<NotificationRequest> &request);
     AnsStatus PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     AnsStatus PrePublishRequest(const sptr<NotificationRequest> &request);
     AnsStatus PublishNotificationBySa(const sptr<NotificationRequest> &request);

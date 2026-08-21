@@ -204,7 +204,10 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
         ANS_LOGE("AdvancedNotificationService instance is null.");
         return;
     }
-    service->GetUnifiedGroupInfoFromDb(enable);
+    if (service->GetUnifiedGroupInfoFromDb(enable) != ERR_OK) {
+        ANS_LOGE("GetUnifiedGroupInfoFromDb failed, skip setting local switch.");
+        return;
+    }
     SetlocalSwitch(enable);
 }
 
@@ -390,6 +393,10 @@ bool ExtensionWrapper::NotificationDialogControl()
 
 bool ExtensionWrapper::NotificationContentControl(const sptr<NotificationRequest> &request, const int32_t &userId)
 {
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return false;
+    }
     if (notificationContentControl_ == nullptr) {
         ANS_LOGE("NotificationContentControl wrapper symbol failed");
         return true;

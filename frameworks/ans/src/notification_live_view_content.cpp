@@ -377,6 +377,46 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
 
     isOnlyLocalUpdate_ = parcel.ReadBool();
 
+    if (!ReadPictureMapFromParcel(parcel)) {
+        return false;
+    }
+
+    valid = parcel.ReadBool();
+    if (valid) {
+        extensionWantAgent_ = std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>(
+            parcel.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>());
+        if (!extensionWantAgent_) {
+            ANS_LOGE("null wantAgent");
+            return false;
+        }
+    }
+    if (!ReadTrailingFieldsFromParcel(parcel)) {
+        return false;
+    }
+    return true;
+}
+
+bool NotificationLiveViewContent::ReadTrailingFieldsFromParcel(Parcel &parcel)
+{
+    uint32_t removeState = 0;
+    if (!parcel.ReadUint32(removeState)) {
+        ANS_LOGE("Failed to read removeOnProcessExitState");
+        return false;
+    }
+    if (removeState > static_cast<uint32_t>(LiveViewRemoveStatus::LIVE_VIEW_NO_REMOVE)) {
+        ANS_LOGE("Invalid removeOnProcessExitState value: %{public}u", removeState);
+        return false;
+    }
+    removeOnProcessExitState_ = static_cast<NotificationLiveViewContent::LiveViewRemoveStatus>(removeState);
+    if (!parcel.ReadInt32(createPid_)) {
+        ANS_LOGE("Failed to read createPid");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationLiveViewContent::ReadPictureMapFromParcel(Parcel &parcel)
+{
     uint64_t len = parcel.ReadUint64();
     if (len > MAX_PARCELABLE_VECTOR_NUM) {
         ANS_LOGE("Size exceeds the range.");
@@ -391,18 +431,6 @@ bool NotificationLiveViewContent::ReadFromParcel(Parcel &parcel)
         }
         pictureMap_[key] = pixelMapVec;
     }
-
-    valid = parcel.ReadBool();
-    if (valid) {
-        extensionWantAgent_ = std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>(
-            parcel.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>());
-        if (!extensionWantAgent_) {
-            ANS_LOGE("null wantAgent");
-            return false;
-        }
-    }
-    removeOnProcessExitState_ = static_cast<NotificationLiveViewContent::LiveViewRemoveStatus>(parcel.ReadUint32());
-    createPid_ = parcel.ReadInt32();
     return true;
 }
 

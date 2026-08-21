@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "accesstoken_kit.h"
 #define private public
 #include "advanced_notification_service.h"
 #include "notification_bundle_option.h"
@@ -21,12 +22,16 @@
 #include "notification_content.h"
 
 using namespace testing::ext;
+using namespace OHOS::Security::AccessToken;
+
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 namespace OHOS {
 namespace Notification {
 
 extern void MockIsSystemApp(bool isSystemApp);
 extern void MockIsVerfyPermisson(bool isVerify);
+extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
 
 class AdvancedNotificationPublishTest : public testing::Test {
 public:
@@ -228,6 +233,45 @@ HWTEST_F(AdvancedNotificationPublishTest, GetUri_NullWantAgent_00001, Function |
     
     auto result = service->GetUri(request);
     EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckNotificationRequest_PublishDelayTimeTooLarge_00001
+ * @tc.desc: Test CheckNotificationRequest with publishDelayTime > MAX_PUBLISH_DELAY_TIME
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest,
+    CheckNotificationRequest_PublishDelayTimeTooLarge_00001, Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    request->SetPublishDelayTime(MAX_PUBLISH_DELAY_TIME + 1);
+
+    auto result = service->CheckNotificationRequest(request);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: PublishContinuousTaskNotification_GetOsAccountFailed_00001
+ * @tc.desc: Test PublishContinuousTaskNotification returns ERR_ANS_INNER_GET_ACTIVE_USER_FAILED
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest,
+    PublishContinuousTaskNotification_GetOsAccountFailed_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockGetOsAccountLocalIdFromUid(false, 1);
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    auto result = service->PublishContinuousTaskNotification(request);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+
+    MockGetOsAccountLocalIdFromUid(true, 0);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
 }
 
 }  // namespace Notification

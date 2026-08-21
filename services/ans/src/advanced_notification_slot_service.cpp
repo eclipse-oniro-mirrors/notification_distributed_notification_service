@@ -46,6 +46,7 @@
 #include "voice_extension_wrapper.h"
 #include "notification_analytics_util.h"
 #include "all_scenarios_extension_wrapper.h"
+#include "ans_const_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -468,6 +469,7 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
     uint32_t &slotFlags)
 {
     ANS_LOGD("called");
+    slotFlags = 0;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_INNER_NON_SYSTEM_APP;
@@ -761,7 +763,11 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
 
     auto slotReminderMode = slot->GetReminderMode();
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), userId) != ERR_OK ||
+        userId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return;
+    }
     uint32_t notificationControlFlags = request->GetNotificationControlFlags();
     if (((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) &&
         !request->GetCreatorBundleName().empty() && request->IsAgentNotification() &&
@@ -1337,6 +1343,10 @@ ErrCode AdvancedNotificationService::SetCheckConfig(int32_t response, const std:
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&, response, requestId, value]() {
         if (response == ERR_OK) {
+            if (value.length() > STR_500K_SIZE) {
+                ANS_LOGE("Invalid value: too long.");
+                return;
+            }
             Infra::ALL_SCENARIOS_EXTENTION_WRAPPER.UpdateLiveViewConfig(value);
             return;
         }
@@ -1442,8 +1452,11 @@ ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundlesInner(
 ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundles(
     std::vector<NotificationBundleOption> &bundleOption)
 {
-    int32_t userId = 100;
-    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if ((OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) || (userId <= 0)) {
+        ANS_LOGE("Failed to get valid active user id!");
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+    }
     return GetAllLiveViewEnabledBundlesInner(bundleOption, userId);
 }
 
@@ -1584,7 +1597,7 @@ ErrCode AdvancedNotificationService::UpdateVoiceUpdate(const std::string &config
 
 ErrCode AdvancedNotificationService::UpdateInnerConfig(const std::string &configKey, const std::string &configValue)
 {
-    ANS_LOGI("UpdateInnerConfig: configKey=%{public}s, configValue=%{public}s", configKey.c_str(), configValue.c_str());
+    ANS_LOGI("UpdateInnerConfig: configKey=%{public}s", configKey.c_str());
 
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem) {

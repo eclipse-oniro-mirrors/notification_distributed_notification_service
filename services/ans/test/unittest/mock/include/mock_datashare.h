@@ -16,7 +16,13 @@
 #ifndef BASE_NOTIFICATION_MOCK_DATASHARE_H
 #define BASE_NOTIFICATION_MOCK_DATASHARE_H
 
+#include <memory>
+#include <string>
+
 namespace OHOS {
+namespace DataShare {
+class DataShareResultSet;
+}
 namespace Notification {
 void MockIsFailedGoToFirstRow(const int GoToFirstRow);
 
@@ -29,6 +35,16 @@ void MockIsFailedToQueryDataShareResultSet(const bool isFailed);
 void MockSetRowCount(const int rowCount);
 
 void MockGoToGetNextRow(const int goToNextRow);
+
+void MockGetColumnIndex(const int ret, const int columnIndex);
+
+void MockGetStringRet(const int ret);
+
+/*
+ * Create a DataShareResultSet mock whose behaviour is controlled by the
+ * MockXxx functions above. The mock class itself is defined in mock_datashare.cpp.
+ */
+std::shared_ptr<DataShare::DataShareResultSet> CreateMockDataShareResultSet();
 } // namespace Notification
 } // namespace OHOS
 

@@ -196,6 +196,8 @@ protected:
 
 private:
     bool PictureToJson(nlohmann::json &jsonObject) const;
+    bool ReadPictureMapFromParcel(Parcel &parcel);
+    bool ReadTrailingFieldsFromParcel(Parcel &parcel);
     LiveViewStatus liveViewStatus_ {};
     uint32_t version_ {MAX_VERSION};
     std::shared_ptr<AAFwk::WantParams> extraInfo_ {};

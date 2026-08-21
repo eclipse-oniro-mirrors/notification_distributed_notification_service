@@ -277,7 +277,8 @@ HWTEST_F(NotificationHelperTest, CancelAsBundle_00002, Function | SmallTest | Le
     bundleOption.SetUid(20);
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.CancelAsBundle(bundleOption, notificationId);
-    EXPECT_EQ(ret, (int)ERR_ANS_PERMISSION_DENIED);
+    // uid 20 is a system uid which maps to an invalid userId, so the service rejects it.
+    EXPECT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
 }
 
 /**
@@ -1116,7 +1117,8 @@ HWTEST_F(NotificationHelperTest, GetNotificationParameters_100, Function | Small
     sptr<NotificationParameters> parameters = nullptr;
     NotificationHelper notificationHelper;
     ErrCode ret = notificationHelper.GetNotificationParameters(notificationId, label, parameters);
-    EXPECT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+    // The calling (native test process) uid maps to an invalid userId, so the service rejects it.
+    EXPECT_EQ(ret, (int)ERR_ANS_GET_ACTIVE_USER_FAILED);
 }
 
 /**

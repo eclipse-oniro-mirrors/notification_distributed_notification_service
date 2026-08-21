@@ -169,7 +169,7 @@ napi_value ParsePriorityParameters(const napi_env &env, const napi_callback_info
     }
     char commonStr[COMMON_TEXT_SIZE] = {0};
     size_t strLen = 0;
-    napi_get_value_string_utf8(env, argv[PARAM1], commonStr, COMMON_TEXT_SIZE - 1, &strLen);
+    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], commonStr, COMMON_TEXT_SIZE - 1, &strLen));
     params.configValue = commonStr;
     return Common::NapiGetNull(env);
 }

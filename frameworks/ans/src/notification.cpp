@@ -295,8 +295,9 @@ bool Notification::MarshallingString(Parcel &parcel) const
         return false;
     }
 
-    if (enableSound_ && sound_ != nullptr) {
-        if (!parcel.WriteString(sound_->ToString())) {
+    if (enableSound_) {
+        std::string soundStr = (sound_ != nullptr) ? sound_->ToString() : "";
+        if (!parcel.WriteString(soundStr)) {
             ANS_LOGE("Can't write sound");
             return false;
         }
@@ -312,6 +313,25 @@ bool Notification::MarshallingString(Parcel &parcel) const
 
 bool Notification::MarshallingInt32(Parcel &parcel) const
 {
+    int32_t visibleness = static_cast<int32_t>(lockscreenVisibleness_);
+    if (visibleness < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
+        visibleness >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid visibleness: %{public}d", visibleness);
+        return false;
+    }
+    int32_t remindType = static_cast<int32_t>(remindType_);
+    if (remindType < static_cast<int32_t>(NotificationConstant::RemindType::NONE) ||
+        remindType > static_cast<int32_t>(NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND)) {
+        ANS_LOGE("Invalid remind type: %{public}d", remindType);
+        return false;
+    }
+    int32_t sourceType = static_cast<int32_t>(sourceType_);
+    if (sourceType < static_cast<int32_t>(NotificationConstant::SourceType::TYPE_NORMAL) ||
+        sourceType > static_cast<int32_t>(NotificationConstant::SourceType::TYPE_TIMER)) {
+        ANS_LOGE("Invalid source type: %{public}d", sourceType);
+        return false;
+    }
+
     if (!parcel.WriteInt32(ledLightColor_)) {
         ANS_LOGE("Can't write ledLightColor");
         return false;
@@ -427,64 +447,127 @@ bool Notification::Marshalling(Parcel &parcel) const
     return true;
 }
 
-void Notification::ReadFromParcelBool(Parcel &parcel)
+bool Notification::ReadFromParcelBool(Parcel &parcel)
 {
-    // Read enableLight_
-    enableLight_ = parcel.ReadBool();
-
-    // Read enableSound_
-    enableSound_ = parcel.ReadBool();
-
-    // Read enableVibration_
-    enableVibration_ = parcel.ReadBool();
-
-    // Read isRemoveAllowed_
-    isRemoveAllowed_ = parcel.ReadBool();
+    if (!parcel.ReadBool(enableLight_)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
+    if (!parcel.ReadBool(enableSound_)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
+    if (!parcel.ReadBool(enableVibration_)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
+    if (!parcel.ReadBool(isRemoveAllowed_)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
+    return true;
 }
 
-void Notification::ReadFromParcelString(Parcel &parcel)
+bool Notification::ReadFromParcelString(Parcel &parcel)
 {
-    // Read key_
-    key_ = parcel.ReadString();
+    std::string key;
+    if (!parcel.ReadString(key)) {
+        ANS_LOGE("ReadString failed");
+        return false;
+    }
+    key_ = key;
 
-    // Read sound_
     if (enableSound_) {
-        sound_ = std::make_shared<Uri>(parcel.ReadString());
+        std::string soundStr;
+        if (!parcel.ReadString(soundStr)) {
+            ANS_LOGE("ReadString failed");
+            return false;
+        }
+        sound_ = std::make_shared<Uri>(soundStr);
     }
 
-    // Read deviceId_
-    deviceId_ = parcel.ReadString();
+    std::string deviceId;
+    if (!parcel.ReadString(deviceId)) {
+        ANS_LOGE("ReadString failed");
+        return false;
+    }
+    deviceId_ = deviceId;
+    return true;
 }
 
-void Notification::ReadFromParcelInt32(Parcel &parcel)
+bool Notification::ReadFromParcelInt32(Parcel &parcel)
 {
-    // Read ledLightColor_
-    ledLightColor_ = parcel.ReadInt32();
+    if (!parcel.ReadInt32(ledLightColor_)) {
+        ANS_LOGE("ReadInt32 failed");
+        return false;
+    }
 
-    // Read lockscreenVisibleness_
-    lockscreenVisibleness_ = static_cast<NotificationConstant::VisiblenessType>(parcel.ReadInt32());
+    int32_t visibleness = 0;
+    if (!parcel.ReadInt32(visibleness)) {
+        ANS_LOGE("ReadInt32 failed");
+        return false;
+    }
+    if (visibleness < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
+        visibleness >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid visibleness: %{public}d", visibleness);
+        return false;
+    }
+    lockscreenVisibleness_ = static_cast<NotificationConstant::VisiblenessType>(visibleness);
 
-    // Read remindType_
-    remindType_ = static_cast<NotificationConstant::RemindType>(parcel.ReadInt32());
+    int32_t remindType = 0;
+    if (!parcel.ReadInt32(remindType)) {
+        ANS_LOGE("ReadInt32 failed");
+        return false;
+    }
+    if (remindType < static_cast<int32_t>(NotificationConstant::RemindType::NONE) ||
+        remindType > static_cast<int32_t>(NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND)) {
+        ANS_LOGE("Invalid remind type: %{public}d", remindType);
+        return false;
+    }
+    remindType_ = static_cast<NotificationConstant::RemindType>(remindType);
 
-    // Read sourceType_
-    sourceType_ = static_cast<NotificationConstant::SourceType>(parcel.ReadInt32());
+    int32_t sourceType = 0;
+    if (!parcel.ReadInt32(sourceType)) {
+        ANS_LOGE("ReadInt32 failed");
+        return false;
+    }
+    if (sourceType < static_cast<int32_t>(NotificationConstant::SourceType::TYPE_NORMAL) ||
+        sourceType > static_cast<int32_t>(NotificationConstant::SourceType::TYPE_TIMER)) {
+        ANS_LOGE("Invalid source type: %{public}d", sourceType);
+        return false;
+    }
+    sourceType_ = static_cast<NotificationConstant::SourceType>(sourceType);
+    return true;
 }
 
-void Notification::ReadFromParcelInt64(Parcel &parcel)
+bool Notification::ReadFromParcelInt64(Parcel &parcel)
 {
-    // Read postTime_
-    postTime_ = parcel.ReadInt64();
-
-    // Read vibrationStyle_
-    parcel.ReadInt64Vector(&vibrationStyle_);
+    if (!parcel.ReadInt64(postTime_)) {
+        ANS_LOGE("ReadInt64 failed");
+        return false;
+    }
+    if (!parcel.ReadInt64Vector(&vibrationStyle_)) {
+        ANS_LOGE("ReadInt64Vector failed");
+        return false;
+    }
+    return true;
 }
 
-void Notification::ReadFromParcelUint64(Parcel &parcel)
+bool Notification::ReadFromParcelUint64(Parcel &parcel)
 {
-    updateTimerId_ = parcel.ReadUint64();
-    finishTimerId_ = parcel.ReadUint64();
-    archiveTimerId_ = parcel.ReadUint64();
+    if (!parcel.ReadUint64(updateTimerId_)) {
+        ANS_LOGE("ReadUint64 failed");
+        return false;
+    }
+    if (!parcel.ReadUint64(finishTimerId_)) {
+        ANS_LOGE("ReadUint64 failed");
+        return false;
+    }
+    if (!parcel.ReadUint64(archiveTimerId_)) {
+        ANS_LOGE("ReadUint64 failed");
+        return false;
+    }
+    return true;
 }
 
 bool Notification::ReadFromParcelParcelable(Parcel &parcel)
@@ -496,7 +579,11 @@ bool Notification::ReadFromParcelParcelable(Parcel &parcel)
     }
 
     // Read voiceContent_
-    bool hasVoiceContent = parcel.ReadBool();
+    bool hasVoiceContent = false;
+    if (!parcel.ReadBool(hasVoiceContent)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
     if (hasVoiceContent) {
         voiceContent_ = std::shared_ptr<NotificationVoiceContent>(parcel.ReadParcelable<NotificationVoiceContent>());
         if (voiceContent_ == nullptr) {
@@ -505,7 +592,11 @@ bool Notification::ReadFromParcelParcelable(Parcel &parcel)
         }
     }
 
-    bool hasNotificationClassification = parcel.ReadBool();
+    bool hasNotificationClassification = false;
+    if (!parcel.ReadBool(hasNotificationClassification)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
     if (hasNotificationClassification) {
         notificationClassification_ = parcel.ReadStrongParcelable<NotificationClassification>();
         if (notificationClassification_ == nullptr) {
@@ -518,11 +609,26 @@ bool Notification::ReadFromParcelParcelable(Parcel &parcel)
 
 bool Notification::ReadFromParcel(Parcel &parcel)
 {
-    ReadFromParcelBool(parcel);
-    ReadFromParcelString(parcel);
-    ReadFromParcelInt32(parcel);
-    ReadFromParcelInt64(parcel);
-    ReadFromParcelUint64(parcel);
+    if (!ReadFromParcelBool(parcel)) {
+        ANS_LOGE("ReadFromParcelBool from parcel error");
+        return false;
+    }
+    if (!ReadFromParcelString(parcel)) {
+        ANS_LOGE("ReadFromParcelString from parcel error");
+        return false;
+    }
+    if (!ReadFromParcelInt32(parcel)) {
+        ANS_LOGE("ReadFromParcelInt32 from parcel error");
+        return false;
+    }
+    if (!ReadFromParcelInt64(parcel)) {
+        ANS_LOGE("ReadFromParcelInt64 from parcel error");
+        return false;
+    }
+    if (!ReadFromParcelUint64(parcel)) {
+        ANS_LOGE("ReadFromParcelUint64 from parcel error");
+        return false;
+    }
     if (!ReadFromParcelParcelable(parcel)) {
         ANS_LOGE("ReadFromParcelParcelable from parcel error");
         return false;
@@ -564,6 +670,12 @@ void Notification::SetLedLightColor(const int32_t &color)
 
 void Notification::SetLockScreenVisbleness(const NotificationConstant::VisiblenessType &visbleness)
 {
+    int32_t type = static_cast<int32_t>(visbleness);
+    if (type < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
+        type >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
+        ANS_LOGE("Invalid visibleness: %{public}d", type);
+        return;
+    }
     lockscreenVisibleness_ = visbleness;
 }
 
@@ -594,6 +706,12 @@ void Notification::SetRemoveAllowed(bool removeAllowed)
 
 void Notification::SetSourceType(NotificationConstant::SourceType sourceType)
 {
+    int32_t type = static_cast<int32_t>(sourceType);
+    if (type < static_cast<int32_t>(NotificationConstant::SourceType::TYPE_NORMAL) ||
+        type > static_cast<int32_t>(NotificationConstant::SourceType::TYPE_TIMER)) {
+        ANS_LOGE("Invalid source type: %{public}d", type);
+        return;
+    }
     sourceType_ = sourceType;
 }
 

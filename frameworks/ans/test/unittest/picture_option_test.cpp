@@ -17,6 +17,8 @@
 
 #define private public
 #define protected public
+#include "ans_const_define.h"
+#include "parcel.h"
 #include "picture_option.h"
 #undef private
 #undef protected
@@ -240,12 +242,7 @@ HWTEST_F(PictureOptionTest, Marshalling_Fail_00001, Function | SmallTest | Level
 {
     PictureOption option({"pic1"});
     Parcel parcel;
-    
-#define private public
-#include "parcel.h"
-#undef private
     parcel.writable_ = false;
-    
     bool result = option.Marshalling(parcel);
     EXPECT_EQ(result, false);
 }
@@ -287,6 +284,25 @@ HWTEST_F(PictureOptionTest, SpecialCharacters_00001, Function | SmallTest | Leve
     EXPECT_EQ(option.GetPreparseLiveViewPicList()[0], "path/to/pic.png");
     EXPECT_EQ(option.GetPreparseLiveViewPicList()[1], "pic_with_underscore.png");
     EXPECT_EQ(option.GetPreparseLiveViewPicList()[2], "pic-with-dash.png");
+}
+
+/**
+ * @tc.name: ReadFromParcel_TooLarge_001
+ * @tc.desc: Test ReadFromParcel fails when pic list exceeds MAX_PARCELABLE_VECTOR_NUM.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PictureOptionTest, ReadFromParcel_TooLarge_001, Function | SmallTest | Level1)
+{
+    std::vector<std::string> picList;
+    for (int32_t i = 0; i < MAX_PARCELABLE_VECTOR_NUM + 1; i++) {
+        picList.push_back("pic");
+    }
+    Parcel parcel;
+    EXPECT_TRUE(parcel.WriteStringVector(picList));
+    parcel.RewindRead(0);
+    PictureOption option;
+    EXPECT_EQ(option.ReadFromParcel(parcel), false);
 }
 
 }  // namespace Notification

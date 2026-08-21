@@ -45,7 +45,6 @@
 #include "notification_local_live_view_content.h"
 #include "notification_action_button.h"
 #include "notification_flags.h"
-#include "notification_constant.h"
 #include "notification_helper.h"
 #include "want_params.h"
 #include "want_params_wrapper.h"

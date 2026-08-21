@@ -582,6 +582,31 @@ HWTEST_F(SubscriberImageUtilTest, ExtractFromStringArray_00005, Function | Small
 }
 
 /**
+ * @tc.name: ExtractFromStringArray_TooLarge_001
+ * @tc.desc: Test ExtractFromStringArray when array size exceeds MAX_PARCELABLE_VECTOR_NUM.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ExtractFromStringArray_TooLarge_001, Function | SmallTest | Level1)
+{
+    class MockArrayTooLarge : public AAFwk::Array {
+    public:
+        MockArrayTooLarge() : AAFwk::Array(2, AAFwk::g_IID_IString) {}
+        ErrCode GetLength(long& size) override
+        {
+            size = static_cast<long>(MAX_PARCELABLE_VECTOR_NUM) + 1;
+            return ERR_OK;
+        }
+    };
+
+    sptr<AAFwk::IArray> array = new MockArrayTooLarge();
+    sptr<AAFwk::IInterface> param = array;
+    std::vector<std::string> picPaths;
+    bool result = SubscriberImageUtil::ExtractFromStringArray(param, picPaths);
+    EXPECT_EQ(result, false);
+}
+
+/**
  * @tc.name: ExtractFromString_00001
  * @tc.desc: Test ExtractFromString when param is not IString.
  * @tc.type: FUNC

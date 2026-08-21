@@ -349,9 +349,17 @@ ErrCode AdvancedNotificationService::CancelAsBundle(const sptr<NotificationBundl
     ANS_LOGD("uid = %{public}d", bundleOption->GetUid());
     int32_t userId = -1;
     if (bundleOption->GetUid() != 0) {
-        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
+            userId <= 0) {
+            ANS_LOGE("Failed to get valid userId from uid");
+            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+        }
     } else {
-        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
+            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId <= 0) {
+            ANS_LOGE("Failed to get valid userId from uid");
+            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+        }
     }
     return CancelAsBundle(bundleOption, notificationId, userId, synchronizer);
 }
@@ -362,9 +370,17 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     ANS_LOGD("uid = %{public}d", bundleOption->GetUid());
     int32_t userId = -1;
     if (bundleOption->GetUid() != 0) {
-        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
+            userId <= 0) {
+            ANS_LOGE("Failed to get valid userId from uid");
+            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+        }
     } else {
-        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
+            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId <= 0) {
+            ANS_LOGE("Failed to get valid userId from uid");
+            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+        }
     }
     return CancelAsBundle(bundleOption, notificationId, userId);
 }
@@ -395,6 +411,45 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     return CancelAsBundle(bundleOption, notificationId, userId);
 }
 
+ErrCode AdvancedNotificationService::ResolveAgentUid(
+    const sptr<NotificationBundleOption> &bundleOption, int32_t id, int32_t reason, int32_t &outUid)
+{
+    int32_t userId = -1;
+    if (bundleOption->GetUid() != 0) {
+        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
+            bundleOption->GetUid(), userId) != ERR_OK || userId <= 0) {
+            ANS_LOGE("Failed to get valid userId from uid");
+            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+        }
+    } else {
+        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
+            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId <= 0) {
+            ANS_LOGE("Failed to get valid userId from uid");
+            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+        }
+    }
+    int32_t uid = -1;
+    if (bundleOption->GetUid() == DEFAULT_UID) {
+        std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+        if (bundleManager != nullptr) {
+            uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(
+                bundleOption->GetBundleName(), userId);
+        }
+    } else {
+        uid = bundleOption->GetUid();
+    }
+    if (uid < 0) {
+        std::string message = "uid error";
+        OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 5)
+            .ErrorCode(ERR_ANS_INNER_INVALID_UID).NotificationId(id);
+        ReportDeleteFailedEventPush(haMetaMessage, reason, message);
+        ANS_LOGE("%{public}s", message.c_str());
+        return ERR_ANS_INNER_INVALID_UID;
+    }
+    outUid = uid;
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption,
     const int32_t id, const sptr<IAnsResultDataSynchronizer> &synchronizer)
 {
@@ -415,29 +470,10 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(const sptr<Notifica
     }
 
     if (IsAgentRelationship(GetClientBundleName(), bundleOption->GetBundleName())) {
-        int32_t userId = -1;
-        if (bundleOption->GetUid() != 0) {
-            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-        } else {
-            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
-        }
         int32_t uid = -1;
-        if (bundleOption->GetUid() == DEFAULT_UID) {
-            std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-            if (bundleManager != nullptr) {
-                uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(
-                    bundleOption->GetBundleName(), userId);
-            }
-        } else {
-            uid = bundleOption->GetUid();
-        }
-        if (uid < 0) {
-            std::string message = "uid error";
-            OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 5)
-                .ErrorCode(ERR_ANS_INNER_INVALID_UID).NotificationId(id);
-            ReportDeleteFailedEventPush(haMetaMessage, reason, message);
-            ANS_LOGE("%{public}s", message.c_str());
-            return ERR_ANS_INNER_INVALID_UID;
+        ErrCode ret = ResolveAgentUid(bundleOption, id, reason, uid);
+        if (ret != ERR_OK) {
+            return ret;
         }
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             bundleOption->GetBundleName(), uid);
@@ -471,29 +507,10 @@ ErrCode AdvancedNotificationService::CancelAsBundleWithAgent(
     }
 
     if (IsAgentRelationship(GetClientBundleName(), bundleOption->GetBundleName())) {
-        int32_t userId = -1;
-        if (bundleOption->GetUid() != 0) {
-            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
-        } else {
-            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
-        }
         int32_t uid = -1;
-        if (bundleOption->GetUid() == DEFAULT_UID) {
-            std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-            if (bundleManager != nullptr) {
-                uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(
-                    bundleOption->GetBundleName(), userId);
-            }
-        } else {
-            uid = bundleOption->GetUid();
-        }
-        if (uid < 0) {
-            std::string message = "uid error";
-            OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(2, 5)
-                .ErrorCode(ERR_ANS_INNER_INVALID_UID).NotificationId(id);
-            ReportDeleteFailedEventPush(haMetaMessage, reason, message);
-            ANS_LOGE("%{public}s", message.c_str());
-            return ERR_ANS_INNER_INVALID_UID;
+        ErrCode ret = ResolveAgentUid(bundleOption, id, reason, uid);
+        if (ret != ERR_OK) {
+            return ret;
         }
         sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption(
             bundleOption->GetBundleName(), uid);
@@ -711,7 +728,7 @@ AnsStatus AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<No
     }
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
-        ExcuteRemoveAllNotificationsInner(bundleOption, bundle, reason);
+        ExcuteRemoveAllNotificationsInner(bundle, bundle, reason);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK,
         return AnsStatus(submitResult, "submit task error", EventSceneId::SCENE_6, EventBranchId::BRANCH_4),

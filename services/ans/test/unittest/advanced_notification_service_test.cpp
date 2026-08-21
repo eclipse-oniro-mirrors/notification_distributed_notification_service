@@ -47,7 +47,6 @@
 #include "os_account_manager_helper.h"
 #include "os_account_manager.h"
 #include "system_event_observer.h"
-#include "notification_constant.h"
 #include "want_agent_info.h"
 #include "want_agent_helper.h"
 #include "want_params.h"
@@ -74,7 +73,6 @@ extern void MockQueryAllCreatedOsAccounts(int32_t userId);
 namespace OHOS {
 namespace Notification {
 namespace {
-constexpr int32_t MAX_USER_ID = 10737;
 constexpr int32_t TEST_RINGTONE_BUNDLE_OPTION_UID = 20010080;
 }
 extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);

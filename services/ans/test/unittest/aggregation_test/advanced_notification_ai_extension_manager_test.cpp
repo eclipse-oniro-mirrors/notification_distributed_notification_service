@@ -28,7 +28,6 @@
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "notification_classification.h"
-#include "notification_constant.h"
 #include "notification_preferences.h"
 #include "notification_request.h"
 #include "nlohmann/json.hpp"

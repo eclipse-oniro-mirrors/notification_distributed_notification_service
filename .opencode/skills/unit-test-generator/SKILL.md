@@ -25,6 +25,27 @@ What do you want to test?
 
 ## Core Workflow
 
+### Step 0: Hard Constraint — Test-Only Changes (强制约束：仅修改测试代码)
+
+When writing TDD, you may **ONLY modify test code**. Production code must not be touched:
+
+**Allowed to modify:**
+- Test files (`*_test.cpp`) under any `test/` directory
+- Test mock files (`mock_*.cpp` / `mock_*.h` under test directories, including `mock/include/`)
+- Test `BUILD.gn` (adding test sources, mocks, or test-target-only config)
+- Test fixtures/helpers located under test directories
+
+**Forbidden to modify:**
+- Production source files (`services/*/src`, `frameworks/*/src`, `interfaces/`, etc.)
+- Production headers (`interfaces/inner_api/`, `services/*/include/`, `frameworks/*/include/`, etc.)
+- Production `BUILD.gn` / `.gni` files
+- IDL files and any generated proxy/stub code
+
+**Rules:**
+- If a branch cannot be covered without changing production code, do NOT change it. Report the limitation instead (e.g., "branch X requires a production-code refactor or a mock of dependency Y").
+- If existing tests fail due to intentional production-code behavior changes, fix the **tests** (update expectations, fix mock setup, reset mock state pollution) — never the production code.
+- Verify before finishing: `git diff --stat` must show changes only under test paths (`test/`, `mock/`).
+
 ### Step 1: Identify Test Scope
 
 Determine testing scope based on user request:
@@ -124,7 +145,28 @@ Add new test file to appropriate BUILD.gn:
 
 See [BUILD_CONFIG.md](references/BUILD_CONFIG.md) for BUILD.gn configuration templates.
 
-### Step 6: Build and Verify
+### Step 6: Post-Generation Checks (新增 TDD 后必检)
+
+**Scope:** These checks apply ONLY to **newly added tests**. Never modify or delete existing test items because of these checks.
+
+After generating each new test (TDD), run the following mandatory checks on the new tests:
+
+1. **Non-tautological assertion:** Every new test MUST contain at least one assertion that can actually fail (non-永真断言).
+   - Valid: `EXPECT_EQ(result, expectedValue)`, `EXPECT_NE(ptr, nullptr)`, `EXPECT_FALSE(result)`
+   - Invalid (永真): `EXPECT_EQ(1, 1)`, `EXPECT_TRUE(true)`, `EXPECT_NE(nullptr, nullptr)`
+   - If a new test contains only tautological assertions, rewrite it with a real verifiable assertion; if none is possible, do not add the test.
+
+2. **Minimum test body length:** Every new test body must be **at least 3 lines**. If fewer than 3 lines, do not add the test.
+
+3. **Line length limit:** Every line of the new tests must be **at most 120 characters**. If a line exceeds 120 characters, wrap it, placing the operator at the **end** of the line:
+   ```cpp
+   EXPECT_EQ(bundleManagerHelper.GetDistributedNotificationEnabled(bundleName, userId),
+       false);
+   ```
+
+4. **Preserve existing tests:** Do NOT delete or rewrite existing test items, even if they violate checks 1–3. These checks govern only newly generated tests; existing tests may only be changed when explicitly requested (e.g., fixing a broken expectation caused by intentional production-code behavior change).
+
+### Step 7: Build and Verify
 
 1. **Build test:**
    ```bash
@@ -221,7 +263,12 @@ HWTEST_F(ClassNameTest, MethodName_00001, Function | SmallTest | Level1)
 
 Before completing test generation, verify:
 
+- [ ] `git diff --stat` shows changes only under test paths (test files, mocks, test BUILD.gn) — no production code touched (Step 0)
 - [ ] Every test has at least one assertion (EXPECT/ASSERT)
+- [ ] Every new test has at least one non-tautological assertion (can actually fail)
+- [ ] Every new test body is at least 3 lines (do not add if fewer)
+- [ ] Every line of the new tests is at most 120 characters; wrapped lines place operators at end of line
+- [ ] No existing test items deleted or rewritten (Step 6.4)
 - [ ] All tests follow naming convention: `FunctionName_ScenarioNumber`
 - [ ] Test documentation includes @tc.name, @tc.desc, @tc.type, @tc.require
 - [ ] Appropriate use_exceptions in BUILD.gn if using EXPECT_THROW/EXPECT_NO_THROW
