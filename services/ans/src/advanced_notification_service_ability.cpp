@@ -121,7 +121,8 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
     if (systemAbilityId == DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID) {
         ANS_LOGW("DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID");
         if (AdvancedDatashareObserver::GetInstance().CheckIfSettingsDataReady()) {
-            if (isDatashaReready_) {
+            bool expected = false;
+            if (!isDatashaReready_.compare_exchange_strong(expected, true)) {
                 return;
             }
 #ifdef ENABLE_ANS_AGGREATION
@@ -129,7 +130,6 @@ void AdvancedNotificationServiceAbility::OnAddSystemAbility(int32_t systemAbilit
 #endif
             AdvancedDatashareHelper::SetIsDataShareReady(true);
             DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->Init();
-            isDatashaReready_ = true;
         }
     } else if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
         if (!SubscribeCommonEvent()) {
@@ -162,12 +162,12 @@ void AdvancedNotificationServiceAbility::OnReceiveEvent(const EventFwk::CommonEv
     std::string action = data.GetWant().GetAction();
     ANS_LOGI("receive %{public}s", action.c_str());
     if (action == "usual.event.DATA_SHARE_READY") {
-        if (isDatashaReready_) {
+        bool expected = false;
+        if (!isDatashaReready_.compare_exchange_strong(expected, true)) {
             return;
         }
         AdvancedDatashareHelper::SetIsDataShareReady(true);
         DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->Init();
-        isDatashaReready_ = true;
 #ifdef ENABLE_ANS_AGGREATION
         EXTENTION_WRAPPER->CheckIfSetlocalSwitch();
 #endif

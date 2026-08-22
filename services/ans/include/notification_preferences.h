@@ -22,6 +22,7 @@
 #include "notification_bundle_option.h"
 #include "notification_do_not_disturb_date.h"
 #include "notification_preferences_database.h"
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include "notification_clone_bundle_info.h"
@@ -899,9 +900,9 @@ private:
     std::shared_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
     bool isCachedMirrorNotificationEnabledStatus_ = false;
     std::vector<std::string> mirrorNotificationEnabledStatus_ = {};
-    bool isKioskMode_ = false;
-    bool isKioskTrustListUpdate_ = false;
-    bool isRestrictedTrustListUpdate_ = false;
+    std::atomic<bool> isKioskMode_ = false;
+    std::atomic<bool> isKioskTrustListUpdate_ = false;
+    std::atomic<bool> isRestrictedTrustListUpdate_ = false;
 
     // Collaboration block list cache (multi-user support)
     // Key: userId, Value: set of (bundleName, appIndex) pairs

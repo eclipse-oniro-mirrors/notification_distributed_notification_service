@@ -259,6 +259,7 @@ private:
     ffrt::mutex tsfnMutex_;
     napi_threadsafe_function tsfn_ = nullptr;
     napi_env env_ = nullptr;
+    ffrt::mutex callbackMutex_;
     CallbackInfo canceCallbackInfo_;
     CallbackInfo consumeCallbackInfo_;
     CallbackInfo updateCallbackInfo_;

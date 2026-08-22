@@ -108,7 +108,7 @@ private:
         const std::string &policy, const std::string &profileId,
         const std::string isSupportIntelligentScene, int32_t userId = -1);
 private:
-    static bool isDataShareReady_;
+    static std::atomic<bool> isDataShareReady_;
     ffrt::mutex datashareHelperMutex_;
     ffrt::mutex datashareInitMutex_;
     ffrt::mutex dataShareItemMutex_;

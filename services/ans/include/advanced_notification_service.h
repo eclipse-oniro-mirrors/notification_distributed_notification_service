@@ -18,6 +18,7 @@
 
 #include <ctime>
 #include "nocopyable.h"
+#include <atomic>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -2726,7 +2727,7 @@ private:
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     DistributedKv::DistributedKvDataManager dataManager_;
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
-    bool localScreenOn_ = true;
+    std::atomic<bool> localScreenOn_ = true;
 #endif
     std::shared_ptr<SoundPermissionInfo> soundPermissionInfo_ = nullptr;
     std::shared_ptr<PermissionFilter> permissonFilter_ = nullptr;

@@ -222,9 +222,14 @@ ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::strin
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED));
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
+    ErrCode result = ERR_OK;
     std::shared_ptr<NotificationRecord> record = nullptr;
     PublishNotificationParameter parameter;
-    auto result = GetDelayedNotificationParameterByTriggerKey(triggerKey, parameter, record);
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = GetDelayedNotificationParameterByTriggerKey(triggerKey, parameter, record);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Publish delayed notification.");
     if (result != ERR_OK) {
         ANS_LOGE("GetDelayedNotificationParameterByTriggerKey failed, errCode=%{public}d", result);
         return result;

@@ -14,6 +14,8 @@
  */
 
 #include "napi_open_settings.h"
+#include <memory>
+#include <mutex>
 #include <uv.h>
 #include "napi_base_context.h"
 #include "ans_inner_errors.h"
@@ -26,8 +28,9 @@ namespace NotificationNapi {
 using OHOS::Notification::AnsNotification;
 const int OPEN_NOTIFICATION_SETTINGS_MAX_PARA = 1;
 static napi_env env_ = nullptr;
-static AsyncCallbackInfoOpenSettings* callbackInfo_ = nullptr;
+static std::unique_ptr<AsyncCallbackInfoOpenSettings> callbackInfo_ = nullptr;
 static JsAnsCallbackComplete* complete_ = nullptr;
+static std::mutex openSettingsMutex_;
 static std::atomic<bool> isExist = false;
 
 napi_value NapiNotificationSettingResult(napi_env env, void *data)
@@ -363,8 +366,9 @@ bool Init(napi_env env, AsyncCallbackInfoOpenSettings* callbackInfo,
         ANS_LOGE("invalid data");
         return false;
     }
+    std::lock_guard<std::mutex> lock(openSettingsMutex_);
     env_ = env;
-    callbackInfo_ = callbackInfo;
+    callbackInfo_.reset(callbackInfo);
     complete_ = complete;
     return true;
 }
@@ -372,31 +376,41 @@ bool Init(napi_env env, AsyncCallbackInfoOpenSettings* callbackInfo,
 void ProcessStatusChanged(int32_t code)
 {
     ANS_LOGD("called");
-    std::unique_ptr<AsyncCallbackInfoOpenSettings> callbackInfo(callbackInfo_);
-    if (env_ == nullptr || callbackInfo == nullptr || complete_ == nullptr) {
+    AsyncCallbackInfoOpenSettings* callbackInfo = nullptr;
+    napi_env env = nullptr;
+    JsAnsCallbackComplete* complete = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(openSettingsMutex_);
+        env = env_;
+        complete = complete_;
+        callbackInfo = callbackInfo_.release();
+    }
+    if (env == nullptr || callbackInfo == nullptr || complete == nullptr) {
         ANS_LOGE("invalid data");
+        delete callbackInfo;
         return;
     }
 
     callbackInfo->info.errorCode = code;
 
     uv_loop_s* loop = nullptr;
-    napi_get_uv_event_loop(env_, &loop);
+    napi_get_uv_event_loop(env, &loop);
     if (loop == nullptr) {
         ANS_LOGE("null loop");
+        delete callbackInfo;
         return;
     }
 
     auto work = std::make_unique<uv_work_t>();
     struct WorkData {
-        decltype(env_) env = nullptr;
-        decltype(callbackInfo_) callbackInfo = nullptr;
-        decltype(complete_) complete = nullptr;
+        napi_env env = nullptr;
+        std::unique_ptr<AsyncCallbackInfoOpenSettings> callbackInfo = nullptr;
+        JsAnsCallbackComplete* complete = nullptr;
     };
     auto workData = std::make_unique<WorkData>();
-    workData->env = env_;
-    workData->callbackInfo = callbackInfo_;
-    workData->complete = complete_;
+    workData->env = env;
+    workData->callbackInfo.reset(callbackInfo);
+    workData->complete = complete;
 
     work->data = static_cast<void*>(workData.get());
     auto jsCb = [](uv_work_t* work, int status) {
@@ -408,13 +422,13 @@ void ProcessStatusChanged(int32_t code)
         }
         auto* data = static_cast<WorkData*>(work->data);
         std::unique_ptr<WorkData> dataSP(data);
-        std::unique_ptr<AsyncCallbackInfoOpenSettings> callbackInfoSP(data->callbackInfo);
-        if (data->env == nullptr ||
-            data->callbackInfo == nullptr ||
-            data->complete == nullptr) {
+        if (data->env == nullptr || data->complete == nullptr) {
             return;
         }
-        auto* callbackInfoPtr = callbackInfoSP.release();
+        AsyncCallbackInfoOpenSettings* callbackInfoPtr = data->callbackInfo.release();
+        if (callbackInfoPtr == nullptr) {
+            return;
+        }
         data->complete(data->env, static_cast<void*>(callbackInfoPtr));
     };
 
@@ -427,7 +441,6 @@ void ProcessStatusChanged(int32_t code)
         ANS_LOGE("uv_queue_work failed");
         return;
     }
-    callbackInfo.release();
     workData.release();
     work.release();
 }

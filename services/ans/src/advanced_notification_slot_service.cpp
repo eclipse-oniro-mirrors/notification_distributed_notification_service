@@ -1280,9 +1280,15 @@ void AdvancedNotificationService::InvockLiveViewSwitchCheck(
         return;
     }
 
-    notificationSvrQueue_.Submit(std::bind([&, bundles, userId, index]() {
-        InvockLiveViewSwitchCheck(bundles, userId, index);
-    }),
+    wptr<AdvancedNotificationService> wThis = this;
+    notificationSvrQueue_.Submit([wThis, bundles, userId, index]() {
+        sptr<AdvancedNotificationService> sThis = wThis.promote();
+        if (sThis == nullptr) {
+            ANS_LOGW("Service is null, skip live view switch check.");
+            return;
+        }
+        sThis->InvockLiveViewSwitchCheck(bundles, userId, index);
+    },
         INTERVAL_CHECK_LIVEVIEW, "doTriggerLiveView");
 }
 
@@ -1293,11 +1299,15 @@ void AdvancedNotificationService::TriggerLiveViewSwitchCheck(int32_t userId)
     }
 
     ANS_LOGD("Trigger live view start.");
-    notificationSvrQueue_.Submit(std::bind([&, userId]() {
+    wptr<AdvancedNotificationService> wThis = this;
+    notificationSvrQueue_.Submit([wThis, userId]() {
+        sptr<AdvancedNotificationService> sThis = wThis.promote();
+        if (sThis == nullptr) {
+            ANS_LOGW("Service is null, skip trigger live view switch check.");
+            return;
+        }
         std::map<std::string, sptr<NotificationBundleOption>> bundleOptions;
         if (BundleManagerHelper::GetInstance()->GetAllBundleInfo(bundleOptions, userId) != ERR_OK) {
-            NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
-                NotificationLiveViewUtils::ERASE_FLAG_INIT);
             NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
                 NotificationLiveViewUtils::ERASE_FLAG_INIT);
             return;
@@ -1317,8 +1327,8 @@ void AdvancedNotificationService::TriggerLiveViewSwitchCheck(int32_t userId)
         }
         ANS_LOGI("trigger liveview %{public}zu %{public}zu %{public}zu.", bundleOptions.size(), checkBundles.size(),
             bundlesMap.size());
-        InvockLiveViewSwitchCheck(checkBundles, userId, 0);
-    }),
+        sThis->InvockLiveViewSwitchCheck(checkBundles, userId, 0);
+    },
         DELAY_TIME_TRIGGER_LIVEVIEW, "triggerLiveView");
 }
 

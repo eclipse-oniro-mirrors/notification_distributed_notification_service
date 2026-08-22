@@ -72,6 +72,8 @@ NotificationSubscriberManager::NotificationSubscriberManager()
 NotificationSubscriberManager::~NotificationSubscriberManager()
 {
     ANS_LOGD("called");
+    ResetFfrtQueue();
+    std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
     subscriberRecordList_.clear();
 }
 
@@ -721,8 +723,13 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
             std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
             subscriberRecordList_.push_back(record);
         }
-        if (subscribeInfo->GetNeedSilentReplayOnSubscribe() && onSubscriberAddCallback_ != nullptr) {
-            onSubscriberAddCallback_(record);
+        std::function<void(const std::shared_ptr<SubscriberRecord> &)> onSubscriberAddCallback = nullptr;
+        {
+            std::lock_guard<ffrt::mutex> lock(onSubscriberAddCallbackMutex_);
+            onSubscriberAddCallback = onSubscriberAddCallback_;
+        }
+        if (subscribeInfo->GetNeedSilentReplayOnSubscribe() && onSubscriberAddCallback != nullptr) {
+            onSubscriberAddCallback(record);
         }
         if (subscribeInfo->GetSubscribedFlags() &
             NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABL_WATCH_CHANGED) {
@@ -1398,6 +1405,9 @@ void NotificationSubscriberManager::ClearLiveViewContent(sptr<Notification> &not
         return;
     }
     auto requestContent = notification->GetNotificationRequest().GetContent();
+    if (requestContent == nullptr) {
+        return;
+    }
     if (notification->GetNotificationRequest().IsCommonLiveView() &&
         requestContent->GetNotificationContent() != nullptr) {
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
@@ -1424,6 +1434,9 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
 
     std::string notificationKeys = "";
     for (auto notification : notifications) {
+        if (notification == nullptr) {
+            continue;
+        }
         notificationKeys.append(notification->GetKey()).append("-");
         if (notification->GetNotificationRequestPoint() != nullptr) {
             bool liveView = notification->GetNotificationRequestPoint()->IsCommonLiveView();
@@ -1470,7 +1483,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         if (!currNotifications.empty()) {
             ANS_LOGD("onCanceledList currNotifications size = <%{public}zu>", currNotifications.size());
             if (record->subscriber == nullptr) {
-                return;
+                continue;
             }
             if (notificationMap != nullptr) {
                 record->subscriber->OnCanceledList(currNotifications, notificationMap, deleteReason);
@@ -1479,7 +1492,6 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             }
         }
     }
-
     RemoveConsumedHashCodes(notifications);
 }
 
@@ -1740,11 +1752,13 @@ void NotificationSubscriberManager::RegisterOnSubscriberAddCallback(
         return;
     }
 
+    std::lock_guard<ffrt::mutex> lock(onSubscriberAddCallbackMutex_);
     onSubscriberAddCallback_ = callback;
 }
 
 void NotificationSubscriberManager::UnRegisterOnSubscriberAddCallback()
 {
+    std::lock_guard<ffrt::mutex> lock(onSubscriberAddCallbackMutex_);
     onSubscriberAddCallback_ = nullptr;
 }
 
@@ -1783,6 +1797,7 @@ void NotificationSubscriberManager::NotifyApplicationInfochangedInner(
 using SubscriberRecordPtr = std::shared_ptr<NotificationSubscriberManager::SubscriberRecord>;
 std::list<SubscriberRecordPtr> NotificationSubscriberManager::GetSubscriberRecords()
 {
+    std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
     return subscriberRecordList_;
 }
 
