@@ -153,7 +153,6 @@ ohos_source_set("ans_service_sources") {
     "src/notification_preferences.cpp",
     "src/notification_preferences_database.cpp",
     "src/notification_preferences_info.cpp",
-    "src/notification_rdb_data_mgr.cpp",
     "src/notification_slot_filter.cpp",
     "src/notification_smart_reminder/reminder_affected.cpp",
     "src/notification_smart_reminder/smart_reminder_center.cpp",

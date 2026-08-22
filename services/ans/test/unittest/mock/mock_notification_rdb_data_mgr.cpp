@@ -18,7 +18,6 @@
 #include <map>
 #include <utility>
 
-#include "notification_rdb_data_mgr.h"
 #include "notification_rdb_mgr.h"
 #include "rdb_errno.h"
 #include "rdb_store_wrapper.h"
@@ -139,88 +138,6 @@ void MockDeleteStatisticsByBundle(bool mockRet)
 void MockClearStatisticsState()
 {
     g_statisticsState.clear();
-}
-
-int32_t NotificationDataMgr::Init()
-{
-    if (g_mockInitRet == false) {
-        return NativeRdb::E_ERROR;
-    }
-    return NativeRdb::E_OK;
-}
-
-int32_t NotificationDataMgr::Destroy()
-{
-    if (g_mockInitRet == false) {
-        return NativeRdb::E_ERROR;
-    }
-    return NativeRdb::E_OK;
-}
-
-int32_t NotificationDataMgr::QueryData(const std::string &key, std::string &value, const int32_t &userId)
-{
-    value = g_mockDataValue;
-    return g_mockQueryDataRet;
-}
-
-int32_t NotificationDataMgr::InsertData(const std::string &key, const std::string &value, const int32_t &userId)
-{
-    if (g_mockInsertDataRet == false) {
-        return NativeRdb::E_ERROR;
-    }
-    return NativeRdb::E_OK;
-}
-
-int32_t NotificationDataMgr::InsertBatchData(const std::unordered_map<std::string, std::string> &values,
-    const int32_t &userId)
-{
-    if (g_mockInsertBatchDataRet == false) {
-        return NativeRdb::E_ERROR;
-    }
-    return NativeRdb::E_OK;
-}
-
-int32_t NotificationDataMgr::QueryDataBeginWithKey(
-    const std::string &key, std::unordered_map<std::string, std::string> &values, const int32_t &userId)
-{
-    if (g_mockQueryDataBeginWithKeyRet == false) {
-        return NativeRdb::E_ERROR;
-    }
-    values = g_mockDataValues;
-    return NativeRdb::E_OK;
-}
-
-int32_t NotificationDataMgr::DeleteBatchData(const std::vector<std::string> &keys, const int32_t &userId)
-{
-    if (g_mockDeleteBatchDataRet == false) {
-        return NativeRdb::E_ERROR;
-    }
-    return NativeRdb::E_OK;
-}
-
-int32_t NotificationDataMgr::DeleteData(const std::string &key, const int32_t &userId)
-{
-    if (g_mockDeleteDataRet == false) {
-        return NativeRdb::E_ERROR;
-    }
-    return NativeRdb::E_OK;
-}
-
-int32_t NotificationDataMgr::QueryAllData(std::unordered_map<std::string, std::string> &values, const int32_t &userId)
-{
-    if (g_mockQueryAllData == false) {
-        return NativeRdb::E_ERROR;
-    }
-    values = g_mockDataValues;
-    return NativeRdb::E_OK;
-}
-
-int32_t NotificationDataMgr::DropUserTable(const int32_t userId)
-{
-    if (g_mockDropTable == false) {
-        return NativeRdb::E_ERROR;
-    }
-    return NativeRdb::E_OK;
 }
 
 namespace Infra {
