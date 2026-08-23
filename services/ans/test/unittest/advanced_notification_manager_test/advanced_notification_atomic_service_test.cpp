@@ -141,7 +141,7 @@ HWTEST_F(AdvancedNotificationAtomicServiceTest,
 
 /**
  * @tc.name: SetCreatorInfoWithAtomicService_GetOsAccountFailed_00001
- * @tc.desc: Test SetCreatorInfoWithAtomicService when GetOsAccountLocalIdFromUid fails
+ * @tc.desc: Test SetCreatorInfoWithAtomicService proceeds when GetOsAccountLocalIdFromUid fails
  * @tc.type: FUNC
  * @tc.require: I00001
  */
@@ -150,15 +150,16 @@ HWTEST_F(AdvancedNotificationAtomicServiceTest,
 {
     sptr<NotificationRequest> request = new NotificationRequest();
 
-    MockGetOsAccountLocalIdFromUid(false, 0);
+    MockGetOsAccountLocalIdFromUid(false, 0); // resolution fails, mock out id is 100
     auto result = advancedNotificationService_->SetCreatorInfoWithAtomicService(request);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(result, ERR_OK); // resolution failure is tolerated, publish continues
+    EXPECT_EQ(request->GetCreatorUserId(), 100); // creatorUserId takes the resolved out value
     MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**
  * @tc.name: SetCreatorInfoWithAtomicService_InvalidUserId_00001
- * @tc.desc: Test SetCreatorInfoWithAtomicService when userId is invalid (<= 0)
+ * @tc.desc: Test SetCreatorInfoWithAtomicService proceeds when userId is invalid (<= 0)
  * @tc.type: FUNC
  * @tc.require: I00001
  */
@@ -169,7 +170,8 @@ HWTEST_F(AdvancedNotificationAtomicServiceTest,
 
     MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
     auto result = advancedNotificationService_->SetCreatorInfoWithAtomicService(request);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(result, ERR_OK); // invalid resolved userId is not rejected
+    EXPECT_EQ(request->GetCreatorUserId(), -2); // creatorUserId keeps the raw resolved value
     MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 

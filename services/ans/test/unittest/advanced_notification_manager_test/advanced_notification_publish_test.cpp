@@ -255,7 +255,7 @@ HWTEST_F(AdvancedNotificationPublishTest,
 
 /**
  * @tc.name: PublishContinuousTaskNotification_GetOsAccountFailed_00001
- * @tc.desc: Test PublishContinuousTaskNotification returns ERR_ANS_INNER_GET_ACTIVE_USER_FAILED
+ * @tc.desc: Test PublishContinuousTaskNotification proceeds when GetOsAccountLocalIdFromUid fails
  * @tc.type: FUNC
  * @tc.require: I00001
  */
@@ -263,12 +263,13 @@ HWTEST_F(AdvancedNotificationPublishTest,
     PublishContinuousTaskNotification_GetOsAccountFailed_00001, Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
-    MockGetOsAccountLocalIdFromUid(false, 1);
+    MockGetOsAccountLocalIdFromUid(false, 1); // resolution fails, mock out id is -2
     auto service = GetService();
     sptr<NotificationRequest> request = new NotificationRequest();
 
     auto result = service->PublishContinuousTaskNotification(request);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(result, ERR_OK); // resolution failure is tolerated, publish continues
+    EXPECT_EQ(request->GetCreatorUserId(), -2); // creatorUserId takes the resolved out value
 
     MockGetOsAccountLocalIdFromUid(true, 0);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);

@@ -1620,7 +1620,7 @@ void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
     int32_t userId = SUBSCRIBE_USER_INIT;
     int32_t uid = callbackData->GetUid();
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId <= 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
         return;
     }
     NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGEENABLE_CHANGED,
@@ -1642,7 +1642,8 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId) != ERR_OK ||
         userId <= 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, callbackData->GetUid());
         return;
     }
     std::string bundle = callbackData->GetBundle();
@@ -1660,7 +1661,7 @@ void NotificationSubscriberManager::NotifyEnabledSilentReminderChangedInner(
     int32_t userId = SUBSCRIBE_USER_INIT;
     int32_t uid = callbackData->GetUid();
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId <= 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
         return;
     }
     NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEDSILENTREMINDER_CHANGED,
@@ -1747,7 +1748,7 @@ void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbac
         int32_t uid = badgeData->GetUid();
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK ||
             userId <= 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
             return;
         }
         NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGE_CHANGED,

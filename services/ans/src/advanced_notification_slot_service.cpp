@@ -765,7 +765,8 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), userId) != ERR_OK ||
         userId <= 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, request->GetOwnerUid());
         return;
     }
     uint32_t notificationControlFlags = request->GetNotificationControlFlags();

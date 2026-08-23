@@ -228,7 +228,7 @@ bool NotificationSubscribeInfo::ReadVoiceContentOptionFromParcel(Parcel &parcel)
 {
     bool hasVoiceContentOption = false;
     if (!parcel.ReadBool(hasVoiceContentOption)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "hasVoiceContentOption");
         return false;
     }
     if (hasVoiceContentOption) {
@@ -245,7 +245,7 @@ bool NotificationSubscribeInfo::ReadPictureOptionFromParcel(Parcel &parcel)
 {
     bool hasPictureOption = false;
     if (!parcel.ReadBool(hasPictureOption)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "hasPictureOption");
         return false;
     }
     if (hasPictureOption) {
@@ -385,7 +385,7 @@ int32_t NotificationSubscribeInfo::GetSubscriberUid() const
 void NotificationSubscribeInfo::SetSubscriberBundleName(const std::string &bundleName)
 {
     if (bundleName.empty() || bundleName.length() > STR_MAX_SIZE) {
-        ANS_LOGE("invalid bundleName");
+        ANS_LOGE("invalid bundleName, function: %{public}s", __FUNCTION__);
         return;
     }
     subscriberBundleName_ = bundleName;

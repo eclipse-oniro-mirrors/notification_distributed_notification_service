@@ -520,7 +520,7 @@ std::string AdvancedDatashareHelper::GetFocusModeRepeatCallUri(const int32_t &us
 std::string AdvancedDatashareHelper::GetIntelligentData(const std::string &uri, const std::string &key)
 {
     if (uri.empty() || uri.find("..") != std::string::npos || uri[0] == '/') {
-        ANS_LOGE("Invalid uri for path traversal.");
+        ANS_LOGE("Invalid uri for path traversal, function: %{public}s", __FUNCTION__);
         return "";
     }
     std::string value;
@@ -543,11 +543,11 @@ std::string AdvancedDatashareHelper::GetIntelligentData(
     const std::string &uri, const std::string &key, const int32_t userId)
 {
     if (userId < 0 || userId > MAX_USER_ID) {
-        ANS_LOGE("Invalid userId: %{public}d", userId);
+        ANS_LOGE("Invalid userId: %{public}d, function: %{public}s", userId, __FUNCTION__);
         return "";
     }
     if (uri.empty() || uri.find("..") != std::string::npos || uri[0] == '/') {
-        ANS_LOGE("Invalid uri for path traversal.");
+        ANS_LOGE("Invalid uri for path traversal, function: %{public}s", __FUNCTION__);
         return "";
     }
     std::string value;

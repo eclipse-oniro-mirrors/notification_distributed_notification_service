@@ -316,19 +316,19 @@ bool Notification::MarshallingInt32(Parcel &parcel) const
     int32_t visibleness = static_cast<int32_t>(lockscreenVisibleness_);
     if (visibleness < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
         visibleness >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid visibleness: %{public}d", visibleness);
+        ANS_LOGE("Invalid visibleness: %{public}d, function: %{public}s", visibleness, __FUNCTION__);
         return false;
     }
     int32_t remindType = static_cast<int32_t>(remindType_);
     if (remindType < static_cast<int32_t>(NotificationConstant::RemindType::NONE) ||
         remindType > static_cast<int32_t>(NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND)) {
-        ANS_LOGE("Invalid remind type: %{public}d", remindType);
+        ANS_LOGE("Invalid remind type: %{public}d, function: %{public}s", remindType, __FUNCTION__);
         return false;
     }
     int32_t sourceType = static_cast<int32_t>(sourceType_);
     if (sourceType < static_cast<int32_t>(NotificationConstant::SourceType::TYPE_NORMAL) ||
         sourceType > static_cast<int32_t>(NotificationConstant::SourceType::TYPE_TIMER)) {
-        ANS_LOGE("Invalid source type: %{public}d", sourceType);
+        ANS_LOGE("Invalid source type: %{public}d, function: %{public}s", sourceType, __FUNCTION__);
         return false;
     }
 
@@ -450,19 +450,19 @@ bool Notification::Marshalling(Parcel &parcel) const
 bool Notification::ReadFromParcelBool(Parcel &parcel)
 {
     if (!parcel.ReadBool(enableLight_)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "enableLight_");
         return false;
     }
     if (!parcel.ReadBool(enableSound_)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "enableSound_");
         return false;
     }
     if (!parcel.ReadBool(enableVibration_)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "enableVibration_");
         return false;
     }
     if (!parcel.ReadBool(isRemoveAllowed_)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "isRemoveAllowed_");
         return false;
     }
     return true;
@@ -472,7 +472,7 @@ bool Notification::ReadFromParcelString(Parcel &parcel)
 {
     std::string key;
     if (!parcel.ReadString(key)) {
-        ANS_LOGE("ReadString failed");
+        ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "key");
         return false;
     }
     key_ = key;
@@ -480,7 +480,7 @@ bool Notification::ReadFromParcelString(Parcel &parcel)
     if (enableSound_) {
         std::string soundStr;
         if (!parcel.ReadString(soundStr)) {
-            ANS_LOGE("ReadString failed");
+            ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "soundStr");
             return false;
         }
         sound_ = std::make_shared<Uri>(soundStr);
@@ -488,7 +488,7 @@ bool Notification::ReadFromParcelString(Parcel &parcel)
 
     std::string deviceId;
     if (!parcel.ReadString(deviceId)) {
-        ANS_LOGE("ReadString failed");
+        ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "deviceId");
         return false;
     }
     deviceId_ = deviceId;
@@ -498,42 +498,42 @@ bool Notification::ReadFromParcelString(Parcel &parcel)
 bool Notification::ReadFromParcelInt32(Parcel &parcel)
 {
     if (!parcel.ReadInt32(ledLightColor_)) {
-        ANS_LOGE("ReadInt32 failed");
+        ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "ledLightColor_");
         return false;
     }
 
     int32_t visibleness = 0;
     if (!parcel.ReadInt32(visibleness)) {
-        ANS_LOGE("ReadInt32 failed");
+        ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "visibleness");
         return false;
     }
     if (visibleness < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
         visibleness >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid visibleness: %{public}d", visibleness);
+        ANS_LOGE("Invalid visibleness: %{public}d, function: %{public}s", visibleness, __FUNCTION__);
         return false;
     }
     lockscreenVisibleness_ = static_cast<NotificationConstant::VisiblenessType>(visibleness);
 
     int32_t remindType = 0;
     if (!parcel.ReadInt32(remindType)) {
-        ANS_LOGE("ReadInt32 failed");
+        ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "remindType");
         return false;
     }
     if (remindType < static_cast<int32_t>(NotificationConstant::RemindType::NONE) ||
         remindType > static_cast<int32_t>(NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND)) {
-        ANS_LOGE("Invalid remind type: %{public}d", remindType);
+        ANS_LOGE("Invalid remind type: %{public}d, function: %{public}s", remindType, __FUNCTION__);
         return false;
     }
     remindType_ = static_cast<NotificationConstant::RemindType>(remindType);
 
     int32_t sourceType = 0;
     if (!parcel.ReadInt32(sourceType)) {
-        ANS_LOGE("ReadInt32 failed");
+        ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "sourceType");
         return false;
     }
     if (sourceType < static_cast<int32_t>(NotificationConstant::SourceType::TYPE_NORMAL) ||
         sourceType > static_cast<int32_t>(NotificationConstant::SourceType::TYPE_TIMER)) {
-        ANS_LOGE("Invalid source type: %{public}d", sourceType);
+        ANS_LOGE("Invalid source type: %{public}d, function: %{public}s", sourceType, __FUNCTION__);
         return false;
     }
     sourceType_ = static_cast<NotificationConstant::SourceType>(sourceType);
@@ -543,11 +543,11 @@ bool Notification::ReadFromParcelInt32(Parcel &parcel)
 bool Notification::ReadFromParcelInt64(Parcel &parcel)
 {
     if (!parcel.ReadInt64(postTime_)) {
-        ANS_LOGE("ReadInt64 failed");
+        ANS_LOGE("ReadInt64 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "postTime_");
         return false;
     }
     if (!parcel.ReadInt64Vector(&vibrationStyle_)) {
-        ANS_LOGE("ReadInt64Vector failed");
+        ANS_LOGE("ReadInt64Vector failed, function: %{public}s, field: %{public}s", __FUNCTION__, "vibrationStyle_");
         return false;
     }
     return true;
@@ -556,15 +556,15 @@ bool Notification::ReadFromParcelInt64(Parcel &parcel)
 bool Notification::ReadFromParcelUint64(Parcel &parcel)
 {
     if (!parcel.ReadUint64(updateTimerId_)) {
-        ANS_LOGE("ReadUint64 failed");
+        ANS_LOGE("ReadUint64 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "updateTimerId_");
         return false;
     }
     if (!parcel.ReadUint64(finishTimerId_)) {
-        ANS_LOGE("ReadUint64 failed");
+        ANS_LOGE("ReadUint64 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "finishTimerId_");
         return false;
     }
     if (!parcel.ReadUint64(archiveTimerId_)) {
-        ANS_LOGE("ReadUint64 failed");
+        ANS_LOGE("ReadUint64 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "archiveTimerId_");
         return false;
     }
     return true;
@@ -581,7 +581,7 @@ bool Notification::ReadFromParcelParcelable(Parcel &parcel)
     // Read voiceContent_
     bool hasVoiceContent = false;
     if (!parcel.ReadBool(hasVoiceContent)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "hasVoiceContent");
         return false;
     }
     if (hasVoiceContent) {
@@ -594,7 +594,8 @@ bool Notification::ReadFromParcelParcelable(Parcel &parcel)
 
     bool hasNotificationClassification = false;
     if (!parcel.ReadBool(hasNotificationClassification)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "hasNotificationClassification");
         return false;
     }
     if (hasNotificationClassification) {
@@ -673,7 +674,7 @@ void Notification::SetLockScreenVisbleness(const NotificationConstant::Visiblene
     int32_t type = static_cast<int32_t>(visbleness);
     if (type < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
         type >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid visibleness: %{public}d", type);
+        ANS_LOGE("Invalid visibleness: %{public}d, function: %{public}s", type, __FUNCTION__);
         return;
     }
     lockscreenVisibleness_ = visbleness;
@@ -709,7 +710,7 @@ void Notification::SetSourceType(NotificationConstant::SourceType sourceType)
     int32_t type = static_cast<int32_t>(sourceType);
     if (type < static_cast<int32_t>(NotificationConstant::SourceType::TYPE_NORMAL) ||
         type > static_cast<int32_t>(NotificationConstant::SourceType::TYPE_TIMER)) {
-        ANS_LOGE("Invalid source type: %{public}d", type);
+        ANS_LOGE("Invalid source type: %{public}d, function: %{public}s", type, __FUNCTION__);
         return;
     }
     sourceType_ = sourceType;

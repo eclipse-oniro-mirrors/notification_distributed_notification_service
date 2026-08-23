@@ -102,18 +102,18 @@ NotificationDoNotDisturbProfile *NotificationDoNotDisturbProfile::Unmarshalling(
 bool NotificationDoNotDisturbProfile::ReadFromParcel(Parcel &parcel)
 {
     if (!parcel.ReadInt64(id_)) {
-        ANS_LOGE("ReadInt64 failed");
+        ANS_LOGE("ReadInt64 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "id_");
         return false;
     }
     std::string name;
     if (!parcel.ReadString(name)) {
-        ANS_LOGE("ReadString failed");
+        ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "name");
         return false;
     }
     name_ = name;
     uint32_t size = 0;
     if (!parcel.ReadUint32(size)) {
-        ANS_LOGE("ReadUint32 failed");
+        ANS_LOGE("ReadUint32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "size");
         return false;
     }
     if (size > MAX_PARCELABLE_VECTOR_NUM) {

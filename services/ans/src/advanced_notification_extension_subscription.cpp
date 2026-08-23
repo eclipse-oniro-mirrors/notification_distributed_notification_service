@@ -254,7 +254,8 @@ void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<Notif
         int32_t userId = -1;
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid((*it)->GetUid(), userId) != ERR_OK ||
             userId < 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, (*it)->GetUid());
             return;
         }
         int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -500,7 +501,8 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
         int32_t currentUserId = -1;
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
             bundleOption->GetUid(), installedUserId) != ERR_OK || installedUserId < 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, bundleOption->GetUid());
             return;
         }
         OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId);

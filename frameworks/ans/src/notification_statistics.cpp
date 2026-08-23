@@ -148,14 +148,14 @@ bool NotificationStatistics::ReadFromParcel(Parcel &parcel)
 
     int64_t lastTime = 0;
     if (!parcel.ReadInt64(lastTime)) {
-        ANS_LOGE("ReadInt64 failed");
+        ANS_LOGE("ReadInt64 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "lastTime");
         return false;
     }
     lastTime_ = lastTime;
 
     int32_t recentCount = 0;
     if (!parcel.ReadInt32(recentCount)) {
-        ANS_LOGE("ReadInt32 failed");
+        ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "recentCount");
         return false;
     }
     recentCount_ = recentCount;

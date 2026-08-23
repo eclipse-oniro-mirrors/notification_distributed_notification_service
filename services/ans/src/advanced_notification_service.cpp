@@ -258,11 +258,7 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK ||
-        userId <= 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
-        return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
-    }
+    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
     request->SetCreatorUserId(userId);
     request->SetCreatorBundleName(bundle);
     if (request->GetOwnerBundleName().empty()) {
@@ -274,7 +270,8 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
             request->GetOwnerUid(), ownerUserId) != ERR_OK || ownerUserId <= 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, request->GetOwnerUid());
             return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
         }
         request->SetOwnerUserId(ownerUserId);
@@ -1244,7 +1241,8 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
             record->bundleOption->GetUid(), userId) != ERR_OK || userId <= 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, record->bundleOption->GetUid());
             return;
         }
 #else
@@ -1902,7 +1900,7 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
     const std::string &key, const int32_t &userId, sptr<Notification> &notification, bool removeAll)
 {
     if (userId < 0) {
-        ANS_LOGE("Invalid userId: %{public}d", userId);
+        ANS_LOGE("Invalid userId: %{public}d, function: %{public}s", userId, __FUNCTION__);
         return ERR_ANS_INNER_INVALID_PARAM;
     }
     RemoveForDeleteAllFromTriggerNotificationList(key, userId);

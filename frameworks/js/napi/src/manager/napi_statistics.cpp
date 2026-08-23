@@ -36,7 +36,8 @@ static napi_value ParseBundleElement(const napi_env &env, napi_value array, uint
     napi_valuetype valueType = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, nBundle, &valueType));
     if (valueType != napi_object) {
-        ANS_LOGE("Wrong argument type. Object expected.");
+        ANS_LOGE("Wrong argument type. Object expected, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "bundle");
         std::string msg = "Incorrect parameter types.The type of param must be object.";
         Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
@@ -75,7 +76,8 @@ static napi_value ParseBundlesParameters(const napi_env &env, const napi_callbac
     uint32_t len = 0;
     NAPI_CALL(env, napi_get_array_length(env, argv[PARAM0], &len));
     if (len > static_cast<uint32_t>(MAX_BUNDLE_LIST_SIZE)) {
-        ANS_LOGE("The array length exceeds limit.");
+        ANS_LOGE("The array length exceeds limit, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "bundleOptions");
         std::string msg = "The array length cannot exceed 1000.";
         Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
