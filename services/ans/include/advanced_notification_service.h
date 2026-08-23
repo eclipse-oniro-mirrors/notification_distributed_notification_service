@@ -2346,7 +2346,7 @@ private:
     void SendLiveViewUploadHiSysEvent(const std::shared_ptr<NotificationRecord> &record, int32_t uploadStatus);
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
-    AnsStatus ResolveCreatorUserId(const sptr<NotificationRequest> &request);
+    void ResolveCreatorUserId(const sptr<NotificationRequest> &request);
     AnsStatus PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     AnsStatus PrePublishRequest(const sptr<NotificationRequest> &request);
     AnsStatus PublishNotificationBySa(const sptr<NotificationRequest> &request);

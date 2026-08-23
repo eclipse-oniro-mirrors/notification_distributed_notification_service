@@ -1079,7 +1079,8 @@ void AdvancedNotificationService::SetDialogPoppedUnEnableTime(const sptr<Notific
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
         userId <= 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, bundleOption->GetUid());
         return;
     }
     EXTENTION_WRAPPER->SetDialogOpenSuccessTimeStamp(bundleOption, userId);

@@ -767,10 +767,6 @@ void NotificationRequest::SetCreatorUserId(int32_t userId)
 
 int32_t NotificationRequest::GetCreatorUserId() const
 {
-    if (creatorUserId_ < 0) {
-        ANS_LOGE("Invalid creatorUserId: %{public}d", creatorUserId_);
-        return SUBSCRIBE_USER_INIT;
-    }
     return creatorUserId_;
 }
 

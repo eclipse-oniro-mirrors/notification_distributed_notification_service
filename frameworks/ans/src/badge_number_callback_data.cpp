@@ -137,35 +137,35 @@ bool BadgeNumberCallbackData::ReadFromParcel(Parcel &parcel)
 {
     std::u16string bundle16;
     if (!parcel.ReadString16(bundle16)) {
-        ANS_LOGE("ReadString16 failed");
+        ANS_LOGE("ReadString16 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "bundle16");
         return false;
     }
     bundle_ = Str16ToStr8(bundle16);
 
     std::string appInstanceKey;
     if (!parcel.ReadString(appInstanceKey)) {
-        ANS_LOGE("ReadString failed");
+        ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "appInstanceKey");
         return false;
     }
     appInstanceKey_ = appInstanceKey;
 
     int32_t uid = 0;
     if (!parcel.ReadInt32(uid)) {
-        ANS_LOGE("ReadInt32 failed");
+        ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "uid");
         return false;
     }
     uid_ = uid;
 
     int32_t badgeNumber = 0;
     if (!parcel.ReadInt32(badgeNumber)) {
-        ANS_LOGE("ReadInt32 failed");
+        ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "badgeNumber");
         return false;
     }
     badgeNumber_ = badgeNumber;
 
     int32_t instanceKey = 0;
     if (!parcel.ReadInt32(instanceKey)) {
-        ANS_LOGE("ReadInt32 failed");
+        ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "instanceKey");
         return false;
     }
     instanceKey_ = instanceKey;

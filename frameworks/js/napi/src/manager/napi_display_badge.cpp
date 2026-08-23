@@ -481,7 +481,8 @@ napi_value ParseParametersForGetBadges(const napi_env& env, const napi_callback_
     uint32_t length = 0;
     NAPI_CALL(env, napi_get_array_length(env, argv[PARAM0], &length));
     if (length > static_cast<uint32_t>(MAX_BUNDLE_LIST_SIZE)) {
-        ANS_LOGE("The array length exceeds max size.");
+        ANS_LOGE("The array length exceeds max size, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "bundleOptions");
         std::string msg = "The array length exceeds max size.";
         Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;

@@ -250,7 +250,7 @@ bool NotificationIconButton::ReadFromParcel(Parcel &parcel)
 
     bool valid {false};
     if (!parcel.ReadBool(valid)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "valid");
         return false;
     }
     if (valid) {
@@ -262,7 +262,7 @@ bool NotificationIconButton::ReadFromParcel(Parcel &parcel)
     }
 
     if (!parcel.ReadBool(valid)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "valid");
         return false;
     }
     if (valid) {

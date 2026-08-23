@@ -543,7 +543,8 @@ napi_value Common::GetSubscriberSlotTypes(
     }
     napi_get_array_length(env, nSlotTypes, &length);
     if (length > MAX_SLOT_SIZE) {
-        ANS_LOGE("The array length exceeds max size.");
+        ANS_LOGE("The array length exceeds max size, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "slotTypes");
         std::string msg = "The slotTypes array length exceeds max size.";
         Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -570,7 +571,8 @@ napi_value Common::GetSubscriberSlotTypeElement(
     napi_valuetype valuetype = napi_undefined;
     NAPI_CALL(env, napi_typeof(env, nSlotType, &valuetype));
     if (valuetype != napi_number) {
-        ANS_LOGE("Wrong argument type. Number expected.");
+        ANS_LOGE("Wrong argument type. Number expected, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "slotType");
         std::string msg = "Incorrect parameter types.The type of slotType must be number.";
         Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return nullptr;
@@ -1288,7 +1290,8 @@ napi_value Common::GetVibrationValues(const napi_env &env, const napi_value &val
         napi_get_element(env, nobj, i, &nVibrationValue);
         NAPI_CALL(env, napi_typeof(env, nVibrationValue, &valuetype));
         if (valuetype != napi_number) {
-            ANS_LOGE("Wrong argument type. Number expected.");
+            ANS_LOGE("Wrong argument type. Number expected, function: %{public}s, field: %{public}s",
+                __FUNCTION__, "vibrationStyle");
             return nullptr;
         }
         napi_get_value_int64(env, nVibrationValue, &vibrationValue);
@@ -2002,7 +2005,8 @@ napi_value Common::GetRingtoneStringProperty(const napi_env &env, const napi_val
     NAPI_CALL(env, napi_get_named_property(env, value, propName, &result));
     NAPI_CALL(env, napi_typeof(env, result, &valuetype));
     if (valuetype != napi_string) {
-        ANS_LOGE("Wrong argument type. String expected.");
+        ANS_LOGE("Wrong argument type. String expected, function: %{public}s, field: %{public}s",
+            __FUNCTION__, propName);
         std::string msg = "Incorrect parameter types. The type of ";
         msg.append(propName).append(" must be string.");
         Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);

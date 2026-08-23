@@ -2282,7 +2282,7 @@ HWTEST_F(NotificationRequestTest, SetDevicesSupportOperate_TooLarge_001, Functio
 
 /**
  * @tc.name: GetCreatorUserId_Invalid_001
- * @tc.desc: Test GetCreatorUserId returns SUBSCRIBE_USER_INIT when creatorUserId_ < 0.
+ * @tc.desc: Test GetCreatorUserId returns the raw creatorUserId_ value when it is negative.
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -2290,7 +2290,7 @@ HWTEST_F(NotificationRequestTest, GetCreatorUserId_Invalid_001, Function | Small
 {
     NotificationRequest notificationRequest(10);
     notificationRequest.creatorUserId_ = -100;
-    EXPECT_EQ(notificationRequest.GetCreatorUserId(), SUBSCRIBE_USER_INIT);
+    EXPECT_EQ(notificationRequest.GetCreatorUserId(), -100);
 }
 
 /**

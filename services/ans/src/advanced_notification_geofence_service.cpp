@@ -59,7 +59,7 @@ ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
         if (!enabled) {
             int32_t userId = SUBSCRIBE_USER_INIT;
             if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK || userId <= 0) {
-                ANS_LOGE("Failed to get active user id!");
+                ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
                 result = ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
                 return;
             }

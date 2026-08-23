@@ -61,7 +61,8 @@ int32_t NotificationPreferences::ResolveStatisticsTableUserId(const Notification
     int32_t userId = INVALID_USER_ID;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundle.GetUid(), userId) != ERR_OK ||
         userId < 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, bundle.GetUid());
         return INVALID_USER_ID;
     }
     bool isAncoApp = BundleManagerHelper::GetInstance()->IsAncoApp(bundle.GetBundleName(), bundle.GetUid());
@@ -2095,7 +2096,7 @@ bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::se
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId) != ERR_OK) ||
         (userId <= 0)) {
-        ANS_LOGE("Get valid userId failed");
+        ANS_LOGE("Get valid userId failed, function: %{public}s, userId: %{public}d", __FUNCTION__, userId);
         return false;
     }
     if (GetKvFromDb(RING_TRUST_PKG_KEY, value, userId) != ERR_OK) {
@@ -2563,7 +2564,7 @@ bool NotificationPreferences::UpdateClonePriorityInfos(
     const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos)
 {
     if (userId <= SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Invalid userId: %{public}d", userId);
+        ANS_LOGE("Invalid userId: %{public}d, function: %{public}s", userId, __FUNCTION__);
         return false;
     }
     if (preferncesDB_ == nullptr) {
@@ -2677,7 +2678,7 @@ bool NotificationPreferences::GetDisableNotificationInfo(NotificationDisable &no
 bool NotificationPreferences::GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable)
 {
     if (userId <= SUBSCRIBE_USER_INIT) {
-        ANS_LOGE("Invalid userId: %{public}d", userId);
+        ANS_LOGE("Invalid userId: %{public}d, function: %{public}s", userId, __FUNCTION__);
         return false;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
@@ -2784,7 +2785,7 @@ bool NotificationPreferences::IsExistRestrictedModeTrustList(const std::string &
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     if (bundleName.empty()) {
-        ANS_LOGE("bundleName is empty");
+        ANS_LOGE("bundleName is empty, function: %{public}s", __FUNCTION__);
         return false;
     }
     std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;

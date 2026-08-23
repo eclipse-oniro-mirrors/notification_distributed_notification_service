@@ -182,7 +182,7 @@ bool __attribute__((weak)) BundleManagerHelper::CheckApiCompatibility(
     int32_t callingUserId;
     if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, callingUserId) != ERR_OK ||
         callingUserId <= 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
         return false;
     }
     if (!GetBundleInfoByBundleName(bundleName, callingUserId, bundleInfo)) {
@@ -276,7 +276,7 @@ bool __attribute__((weak)) BundleManagerHelper::GetDistributedNotificationEnable
     const std::string &bundleName, const int32_t userId)
 {
     if (bundleName.empty()) {
-        ANS_LOGE("bundleName is empty");
+        ANS_LOGE("bundleName is empty, function: %{public}s", __FUNCTION__);
         return false;
     }
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
@@ -347,7 +347,7 @@ int32_t __attribute__((weak)) BundleManagerHelper::GetAppIndexByUid(const int32_
     ErrCode ret = bundleMgr_->GetNameAndIndexForUid(uid, bundleName, appIndex);
     IPCSkeleton::SetCallingIdentity(identity);
     if (ret != ERR_OK) {
-        ANS_LOGE("GetNameAndIndexForUid failed, uid = %{public}d, ret = %{public}d", uid, ret);
+        ANS_LOGW("GetNameAndIndexForUid failed, uid = %{public}d, ret = %{public}d", uid, ret);
         return 0;
     }
     return appIndex;
@@ -483,7 +483,8 @@ bool __attribute__((weak)) BundleManagerHelper::CheckBundleImplExtensionAbility(
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
         userId <= 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, bundleOption->GetUid());
         return false;
     }
     auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)
@@ -532,7 +533,7 @@ bool __attribute__((weak)) BundleManagerHelper::IsAncoApp(const std::string &bun
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK ||
         userId == -1 || userId >= DEFAULT_USER_ID) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
         return false;
     }
 

@@ -218,28 +218,28 @@ bool MessageUser::ReadFromParcel(Parcel &parcel)
 {
     std::string key;
     if (!parcel.ReadString(key)) {
-        ANS_LOGE("ReadString failed");
+        ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "key");
         return false;
     }
     key_ = key;
 
     std::string name;
     if (!parcel.ReadString(name)) {
-        ANS_LOGE("ReadString failed");
+        ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "name");
         return false;
     }
     name_ = name;
 
     bool isMachine = false;
     if (!parcel.ReadBool(isMachine)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "isMachine");
         return false;
     }
     isMachine_ = isMachine;
 
     bool isUserImportant = false;
     if (!parcel.ReadBool(isUserImportant)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "isUserImportant");
         return false;
     }
     isUserImportant_ = isUserImportant;
@@ -258,7 +258,7 @@ bool MessageUser::ReadOptionalFromParcel(Parcel &parcel)
     if (empty == VALUE_OBJECT) {
         std::string uriStr;
         if (!parcel.ReadString(uriStr)) {
-            ANS_LOGE("ReadString failed");
+            ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "uriStr");
             return false;
         }
         uri_ = Uri(uriStr);
@@ -266,7 +266,7 @@ bool MessageUser::ReadOptionalFromParcel(Parcel &parcel)
 
     bool valid = false;
     if (!parcel.ReadBool(valid)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "valid");
         return false;
     }
     if (valid) {

@@ -156,7 +156,7 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
         if (bundleManager != nullptr) {
             int32_t activeUserId = -1;
             if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
-                ANS_LOGE("Failed to get active user id!");
+                ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
                 return validBundleOption;
             }
             int32_t uid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
@@ -805,7 +805,7 @@ void AdvancedNotificationService::OnDistributedPublish(
     ANS_LOGD("%{public}s", __FUNCTION__);
     int32_t activeUserId = -1;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
-        ANS_LOGE("Failed to get active user id!");
+        ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
         return;
     }
 
@@ -888,7 +888,7 @@ void AdvancedNotificationService::OnDistributedUpdate(
     ANS_LOGD("%{public}s", __FUNCTION__);
     int32_t activeUserId = -1;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
-        ANS_LOGE("Failed to get active user id!");
+        ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
         return;
     }
 
@@ -973,7 +973,7 @@ void AdvancedNotificationService::OnDistributedDelete(
         ANS_LOGD("ffrt enter!");
         int32_t activeUserId = -1;
         if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
-            ANS_LOGE("Failed to get active user id!");
+            ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
             return;
         }
         int32_t uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, activeUserId);
@@ -1024,7 +1024,8 @@ ErrCode __attribute__((weak)) AdvancedNotificationService::GetDistributedEnableI
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
         userId < 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, bundleOption->GetUid());
         return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
 
@@ -1583,27 +1584,19 @@ ErrCode AdvancedNotificationService::SetRequestBundleInfo(const sptr<Notificatio
     return ERR_OK;
 }
 
-AnsStatus AdvancedNotificationService::ResolveCreatorUserId(const sptr<NotificationRequest> &request)
+void AdvancedNotificationService::ResolveCreatorUserId(const sptr<NotificationRequest> &request)
 {
-    if (request->GetCreatorUserId() != SUBSCRIBE_USER_INIT) {
-        return AnsStatus();
-    }
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (request->GetCreatorUid() != 0) {
-        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            request->GetCreatorUid(), userId) != ERR_OK || userId <= 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
-            return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
+    if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
+        if (request->GetCreatorUid() != 0) {
+            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetCreatorUid(), userId);
+        } else {
+            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
         }
+        request->SetCreatorUserId(userId);
     } else {
-        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId <= 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
-            return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
-        }
+        userId = request->GetCreatorUserId();
     }
-    request->SetCreatorUserId(userId);
-    return AnsStatus();
 }
 
 AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<NotificationRequest> &request,
@@ -1621,16 +1614,13 @@ AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Not
     }
 
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
-    AnsStatus ansStatus = ResolveCreatorUserId(request);
-    if (!ansStatus.Ok()) {
-        return ansStatus;
-    }
-
+    ResolveCreatorUserId(request);
     if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT && request->GetOwnerUid() != DEFAULT_UID) {
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
             request->GetOwnerUid(), ownerUserId) != ERR_OK || ownerUserId <= 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, IPCSkeleton::GetCallingUid());
             return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
         }
         request->SetOwnerUserId(ownerUserId);
@@ -1639,7 +1629,7 @@ AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Not
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
-    ansStatus = CheckPictureSize(request);
+    AnsStatus ansStatus = CheckPictureSize(request);
     if (!ansStatus.Ok()) {
         ansStatus.AppendSceneBranch(EventSceneId::SCENE_4, EventBranchId::BRANCH_2, "Failed to check picture size");
         return ansStatus;
@@ -1687,7 +1677,8 @@ AnsStatus AdvancedNotificationService::PrePublishRequest(const sptr<Notification
     if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetCreatorUid(), userId) != ERR_OK ||
             userId <= 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, request->GetCreatorUid());
             return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
         }
         request->SetCreatorUserId(userId);
@@ -1890,7 +1881,8 @@ bool AdvancedNotificationService::GetBundleInfoByNotificationBundleOption(
     int32_t callingUserId = -1;
     if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), callingUserId) != ERR_OK ||
         callingUserId < 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, bundleOption->GetUid());
         return false;
     }
     auto bundleMgr = BundleManagerHelper::GetInstance();
@@ -1973,7 +1965,7 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
 
     int32_t activeUserId = -1;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
-        ANS_LOGE("Failed to get active user id!");
+        ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
         return nullptr;
     }
 
@@ -2014,7 +2006,7 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
     if (validBundle == nullptr) {
         int32_t activeUserId = -1;
         if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
-            ANS_LOGE("Failed to get active user id!");
+            ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
             return nullptr;
         }
         int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
@@ -2047,7 +2039,7 @@ ErrCode AdvancedNotificationService::GetBundleVersionCode(
     versionCode = 0;
     int32_t activeUserId = -1;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
-        ANS_LOGE("Failed to get active user id!");
+        ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
         return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
@@ -2073,7 +2065,7 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateCloneValidBu
 
     int32_t activeUserId = -1;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(activeUserId) != ERR_OK) {
-        ANS_LOGE("Failed to get active user id!");
+        ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
         return nullptr;
     }
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
@@ -2139,7 +2131,7 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK || userId <= 0) {
-        ANS_LOGE("Failed to get active user id!");
+        ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
         return;
     }
     record->notification->SetEnableLight(false);
@@ -2409,7 +2401,8 @@ void AdvancedNotificationService::DelNormalCloneBundleForExtensionSubscription(
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(processBundle->GetUid(), userId) != ERR_OK ||
         userId < 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, processBundle->GetUid());
         return;
     }
     if (!OsAccountManagerHelper::IsSystemAccount(userId)) {

@@ -252,7 +252,7 @@ bool BundleResourceHelper::IsAncoApp(const std::string &bundleName, int32_t uid,
 {
     int32_t userId = ZERO_USERID;
     if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
-        ANS_LOGE("Failed to get valid userId from uid");
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
         return false;
     }
     if (userId >= DEFAULT_USER_ID) {

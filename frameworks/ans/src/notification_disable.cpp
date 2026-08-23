@@ -91,14 +91,14 @@ bool NotificationDisable::ReadFromParcel(Parcel &parcel)
 {
     bool disabled = false;
     if (!parcel.ReadBool(disabled)) {
-        ANS_LOGE("ReadBool failed");
+        ANS_LOGE("ReadBool failed, function: %{public}s, field: %{public}s", __FUNCTION__, "disabled");
         return false;
     }
     disabled_ = disabled;
 
     uint32_t size = 0;
     if (!parcel.ReadUint32(size)) {
-        ANS_LOGE("ReadUint32 failed");
+        ANS_LOGE("ReadUint32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "size");
         return false;
     }
     if (size > MAX_NOTIFICATION_DISABLE_NUM) {
@@ -115,7 +115,7 @@ bool NotificationDisable::ReadFromParcel(Parcel &parcel)
 
     int32_t userId = 0;
     if (!parcel.ReadInt32(userId)) {
-        ANS_LOGE("ReadInt32 failed");
+        ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "userId");
         return false;
     }
     userId_ = userId;

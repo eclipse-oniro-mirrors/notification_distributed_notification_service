@@ -47,7 +47,8 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         return nullptr;
     }
     if (napi_get_value_bool(env, argv[PARAM0], &enabled) != napi_ok) {
-        ANS_LOGE("Failed to parse the parameter as boolean.");
+        ANS_LOGE("Failed to parse the parameter as boolean, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "enabled");
         return nullptr;
     }
     return Common::NapiGetNull(env);

@@ -828,7 +828,8 @@ ErrCode NotificationPreferencesInfo::GetAllLiveViewEnabledBundles(const int32_t 
         if (bundleUserId == SUBSCRIBE_USER_INIT) {
             if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
                 info.GetBundleUid(), bundleUserId) != ERR_OK || bundleUserId <= 0) {
-                ANS_LOGE("Failed to get valid userId from uid");
+                ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                    __FUNCTION__, info.GetBundleUid());
                 return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
             }
         }

@@ -149,7 +149,8 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         int32_t userId = -1;
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
             bundleOption->GetUid(), userId) != ERR_OK || userId <= 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, bundleOption->GetUid());
             return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
         }
         ANS_LOGD("GetOsAccountLocalIdFromUid PRI, %{public}d, %{public}d", bundleOption->GetUid(), userId);
@@ -382,7 +383,8 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
         int32_t userId = -1;
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
             bundleOption->GetUid(), userId) != ERR_OK || userId <= 0) {
-            ANS_LOGE("Failed to get valid userId from uid");
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, bundleOption->GetUid());
             return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
         }
         ANS_LOGD("GetOsAccountLocalIdFromUid PRI, %{public}d, %{public}d", bundleOption->GetUid(), userId);

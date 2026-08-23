@@ -131,33 +131,33 @@ bool NotificationRingtoneInfo::ReadFromParcel(Parcel &parcel)
 {
     int32_t ringtoneType = 0;
     if (!parcel.ReadInt32(ringtoneType)) {
-        ANS_LOGE("ReadInt32 failed");
+        ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "ringtoneType");
         return false;
     }
     if (ringtoneType < static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM) ||
         ringtoneType >= static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT)) {
-        ANS_LOGE("Invalid ringtone type: %{public}d", ringtoneType);
+        ANS_LOGE("Invalid ringtone type: %{public}d, function: %{public}s", ringtoneType, __FUNCTION__);
         return false;
     }
     ringtoneType_ = static_cast<NotificationConstant::RingtoneType>(ringtoneType);
 
     std::string ringtoneTitle;
     if (!parcel.ReadString(ringtoneTitle)) {
-        ANS_LOGE("ReadString failed");
+        ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "ringtoneTitle");
         return false;
     }
     ringtoneTitle_ = ringtoneTitle;
 
     std::string ringtoneFileName;
     if (!parcel.ReadString(ringtoneFileName)) {
-        ANS_LOGE("ReadString failed");
+        ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "ringtoneFileName");
         return false;
     }
     ringtoneFileName_ = ringtoneFileName;
 
     std::string ringtoneUri;
     if (!parcel.ReadString(ringtoneUri)) {
-        ANS_LOGE("ReadString failed");
+        ANS_LOGE("ReadString failed, function: %{public}s, field: %{public}s", __FUNCTION__, "ringtoneUri");
         return false;
     }
     ringtoneUri_ = ringtoneUri;
@@ -189,7 +189,7 @@ void NotificationRingtoneInfo::FromJson(const std::string &jsonObj)
         int32_t ringtoneType = jsonObject.at(RINGTONE_INFO_RINGTONE_TYPE).get<int32_t>();
         if (ringtoneType < static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_SYSTEM) ||
             ringtoneType >= static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_BUTT)) {
-            ANS_LOGE("Invalid ringtone type: %{public}d", ringtoneType);
+            ANS_LOGE("Invalid ringtone type: %{public}d, function: %{public}s", ringtoneType, __FUNCTION__);
         } else {
             ringtoneType_ = static_cast<NotificationConstant::RingtoneType>(ringtoneType);
         }

@@ -139,7 +139,7 @@ void AdvancedNotificationService::ClearRingtoneByApplication(int32_t userId,
                 continue;
             }
             if (item.GetRingtoneUri().find("..") != std::string::npos) {
-                ANS_LOGE("invalid ringtoneUri contains ..");
+                ANS_LOGE("invalid ringtoneUri contains .., function: %{public}s", __FUNCTION__);
                 continue;
             }
             delRingtoneInfos.push_back(item);
@@ -157,7 +157,7 @@ std::vector<NotificationRingtoneInfo> AdvancedNotificationService::FilterValidRi
             continue;
         }
         if (item.GetRingtoneUri().find("..") != std::string::npos) {
-            ANS_LOGE("invalid ringtoneUri contains ..");
+            ANS_LOGE("invalid ringtoneUri contains .., function: %{public}s", __FUNCTION__);
             continue;
         }
         validRingtoneInfos.push_back(item);
@@ -175,7 +175,7 @@ void AdvancedNotificationService::ClearOverTimeRingToneInfo()
         notificationSvrQueue_.Submit([this]() {
             int32_t userId = -1;
             if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-                ANS_LOGE("Failed to get active user id!");
+                ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
                 return;
             }
             std::vector<NotificationRingtoneInfo> cloneRingtoneInfos;
