@@ -229,6 +229,7 @@ public:
 
 private:
     bool ReadFromParcel(Parcel &parcel);
+    bool ReadSlotTypesFromParcel(Parcel &parcel);
     bool ReadVoiceContentOptionFromParcel(Parcel &parcel);
     bool ReadPictureOptionFromParcel(Parcel &parcel);
     bool MarshallingVoiceContentOption(Parcel &parcel) const;

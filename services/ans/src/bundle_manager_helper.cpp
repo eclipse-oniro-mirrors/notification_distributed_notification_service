@@ -180,7 +180,11 @@ bool __attribute__((weak)) BundleManagerHelper::CheckApiCompatibility(
 #endif
     AppExecFwk::BundleInfo bundleInfo;
     int32_t callingUserId;
-    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, callingUserId);
+    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, callingUserId) != ERR_OK ||
+        callingUserId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return false;
+    }
     if (!GetBundleInfoByBundleName(bundleName, callingUserId, bundleInfo)) {
         ANS_LOGE("Failed to GetBundleInfoByBundleName, bundlename = %{public}s",
             bundleName.c_str());
@@ -198,6 +202,10 @@ bool __attribute__((weak)) BundleManagerHelper::CheckApiCompatibility(
 bool __attribute__((weak)) BundleManagerHelper::GetBundleInfoByBundleName(
     const std::string bundle, const int32_t userId, AppExecFwk::BundleInfo &bundleInfo)
 {
+    if (bundle.empty()) {
+        ANS_LOGE("bundle is empty");
+        return false;
+    }
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
     Connect();
 
@@ -267,6 +275,10 @@ int32_t __attribute__((weak)) BundleManagerHelper::GetDefaultUidByBundleName(
 bool __attribute__((weak)) BundleManagerHelper::GetDistributedNotificationEnabled(
     const std::string &bundleName, const int32_t userId)
 {
+    if (bundleName.empty()) {
+        ANS_LOGE("bundleName is empty");
+        return false;
+    }
     std::lock_guard<ffrt::mutex> lock(connectionMutex_);
 
     Connect();
@@ -295,8 +307,11 @@ bool __attribute__((weak)) BundleManagerHelper::GetBundleInfo(const std::string 
     if (bundleMgr_ == nullptr) {
         return false;
     }
-    int32_t callingUserId;
-    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(userId, callingUserId);
+    int32_t callingUserId = -1;
+    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(userId, callingUserId) != ERR_OK) {
+        ANS_LOGE("Failed to get os account local id from uid.");
+        return false;
+    }
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     bool ret = bundleMgr_->GetBundleInfo(bundleName, flag, bundleInfo, callingUserId);
     IPCSkeleton::SetCallingIdentity(identity);
@@ -329,8 +344,12 @@ int32_t __attribute__((weak)) BundleManagerHelper::GetAppIndexByUid(const int32_
     }
     std::string bundleName;
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    bundleMgr_->GetNameAndIndexForUid(uid, bundleName, appIndex);
+    ErrCode ret = bundleMgr_->GetNameAndIndexForUid(uid, bundleName, appIndex);
     IPCSkeleton::SetCallingIdentity(identity);
+    if (ret != ERR_OK) {
+        ANS_LOGE("GetNameAndIndexForUid failed, uid = %{public}d, ret = %{public}d", uid, ret);
+        return 0;
+    }
     return appIndex;
 }
 
@@ -397,7 +416,10 @@ ErrCode __attribute__((weak)) BundleManagerHelper::GetApplicationInfo(
 bool __attribute__((weak)) BundleManagerHelper::CheckSystemApp(const std::string& bundleName, int32_t userId)
 {
     if (userId == SUBSCRIBE_USER_INIT) {
-        OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+        if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+            ANS_LOGE("GetCurrentActiveUserId failed.");
+            return false;
+        }
     }
     AppExecFwk::BundleInfo bundleInfo;
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -445,9 +467,13 @@ bool __attribute__((weak)) BundleManagerHelper::QueryExtensionInfos(
         return false;
     }
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    bundleMgr_->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER,
+    bool ret = bundleMgr_->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER,
         userId, extensionInfos);
     IPCSkeleton::SetCallingIdentity(identity);
+    if (!ret) {
+        ANS_LOGE("QueryExtensionAbilityInfos failed, userId = %{public}d", userId);
+        return false;
+    }
     return true;
 }
 
@@ -455,7 +481,11 @@ bool __attribute__((weak)) BundleManagerHelper::CheckBundleImplExtensionAbility(
     const sptr<NotificationBundleOption> &bundleOption)
 {
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
+        userId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return false;
+    }
     auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION)
         | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE)
         | static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY)
@@ -500,8 +530,9 @@ bool __attribute__((weak)) BundleManagerHelper::CheckCurrentUserIdApp(
 bool __attribute__((weak)) BundleManagerHelper::IsAncoApp(const std::string &bundleName, int32_t uid)
 {
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
-    if (userId == -1 || userId >= DEFAULT_USER_ID) {
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK ||
+        userId == -1 || userId >= DEFAULT_USER_ID) {
+        ANS_LOGE("Failed to get valid userId from uid");
         return false;
     }
 
@@ -566,6 +597,11 @@ std::string __attribute__((weak)) BundleManagerHelper::GetBundleLabel(const std:
 {
     AppExecFwk::BundleResourceInfo bundleResourceInfo = {};
     int32_t result = GetBundleResourceInfo(bundleName, bundleResourceInfo, 0);
+    if (result != ERR_OK) {
+        ANS_LOGE("GetBundleResourceInfo failed, bundleName = %{public}s, result = %{public}d",
+            bundleName.c_str(), result);
+        return "";
+    }
     return bundleResourceInfo.label;
 }
 
@@ -575,8 +611,8 @@ bool __attribute__((weak)) BundleManagerHelper::IsAtomicServiceByBundle(
     auto flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
     AppExecFwk::BundleInfo bundleInfo;
     if (!GetBundleInfoV9(bundleName, flags, bundleInfo, userId)) {
-        ANS_LOGE("GetBundleInfoV9 error, bundleName = %{public}s uid = %{public}d", bundleInfo.name.c_str(),
-            bundleInfo.uid);
+        ANS_LOGE("GetBundleInfoV9 error, bundleName = %{public}s uid = %{public}d", bundleName.c_str(), userId);
+        return false;
     }
     return bundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::ATOMIC_SERVICE;
 }

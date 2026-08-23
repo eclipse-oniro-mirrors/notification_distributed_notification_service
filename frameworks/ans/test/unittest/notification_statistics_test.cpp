@@ -17,7 +17,11 @@
 #include <memory>
 #include <string>
 #include "int_wrapper.h"
+#define private public
+#define protected public
 #include "notification_statistics.h"
+#undef private
+#undef protected
 
 using namespace testing::ext;
 namespace OHOS {
@@ -228,6 +232,37 @@ HWTEST_F(NotificationStatisticsTest, Marshalling_00002, Function | SmallTest | L
     Parcel parcel;
     auto ptr = statistics.Unmarshalling(parcel);
     EXPECT_EQ(ptr, nullptr);
+}
+
+/**
+ * @tc.name: ReadFromParcel_ReadInt64Fail_001
+ * @tc.desc: Test ReadFromParcel when ReadInt64 fails after a valid bundleOption.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationStatisticsTest, ReadFromParcel_ReadInt64Fail_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption();
+    parcel.WriteParcelable(bundle);
+    NotificationStatistics statistics;
+    EXPECT_EQ(statistics.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_ReadInt32Fail_001
+ * @tc.desc: Test ReadFromParcel when ReadInt32 fails after a valid bundleOption and lastTime.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationStatisticsTest, ReadFromParcel_ReadInt32Fail_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationBundleOption> bundle = new (std::nothrow) NotificationBundleOption();
+    parcel.WriteParcelable(bundle);
+    parcel.WriteInt64(1000);
+    NotificationStatistics statistics;
+    EXPECT_EQ(statistics.ReadFromParcel(parcel), false);
 }
 }
 }

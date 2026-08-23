@@ -247,6 +247,7 @@ private:
      * @return Returns true if read success; returns false otherwise.
      */
     bool ReadFromParcel(Parcel &parcel);
+    bool ReadContentFromParcel(Parcel &parcel);
 
     /**
      * @brief Convert JSON object to NotificationContent object.

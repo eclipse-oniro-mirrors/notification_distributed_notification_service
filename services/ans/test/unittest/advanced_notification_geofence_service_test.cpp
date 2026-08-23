@@ -34,6 +34,8 @@ using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 using namespace OHOS::Media;
 
+extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase = 0);
+
 namespace OHOS {
 namespace Notification {
 namespace {
@@ -422,6 +424,58 @@ HWTEST_F(AnsGeofenceServiceTest, SetGeofenceEnabled_00001, Function | SmallTest 
 
     auto result = advancedNotificationService_->SetGeofenceEnabled(true);
     EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.number    : SetGeofenceEnabled_00002
+ * @tc.name      : SetGeofenceEnabled(false) with GetCurrentActiveUserId failed
+ * @tc.desc      : Test SetGeofenceEnabled returns ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED
+ *                 when disabling geofence and GetCurrentActiveUserId fails, because the preference
+ *                 store resolves the active user first and fails before the userId check.
+ */
+HWTEST_F(AnsGeofenceServiceTest, SetGeofenceEnabled_00002, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+
+    MockQueryForgroundOsAccountId(false, 0);
+    auto result = advancedNotificationService_->SetGeofenceEnabled(false);
+    EXPECT_EQ(result, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.number    : SetGeofenceEnabled_00003
+ * @tc.name      : SetGeofenceEnabled(false) with invalid active user id
+ * @tc.desc      : Test SetGeofenceEnabled returns ERR_ANS_INNER_GET_ACTIVE_USER_FAILED when
+ *                 disabling geofence and active user id is invalid (<= 0).
+ */
+HWTEST_F(AnsGeofenceServiceTest, SetGeofenceEnabled_00003, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+
+    MockQueryForgroundOsAccountId(true, 2); // mock invalid id (0)
+    auto result = advancedNotificationService_->SetGeofenceEnabled(false);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.number    : RecoverGeofenceLiveViewFromDb_00001
+ * @tc.name      : RecoverGeofenceLiveViewFromDb with empty db
+ * @tc.desc      : Test RecoverGeofenceLiveViewFromDb with an empty trigger db: the batch query on
+ *                 the real rdb returns an RDB sqlite-layer error (27394048, 0x1A20000) which is
+ *                 propagated to the caller, and no record is added to the trigger list.
+ */
+HWTEST_F(AnsGeofenceServiceTest, RecoverGeofenceLiveViewFromDb_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+
+    // Empty db: the batch query returns an RDB layer error (observed 27394048 = 0x1A20000),
+    // which is returned directly and the recover loop body is skipped
+    auto result = advancedNotificationService_->RecoverGeofenceLiveViewFromDb(TEST_VALID_ID);
+    EXPECT_EQ(result, 27394048); // RDB sqlite-layer error code
+    EXPECT_TRUE(advancedNotificationService_->triggerNotificationList_.empty());
 }
 
 /**

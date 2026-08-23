@@ -37,6 +37,7 @@
 #include "ans_ut_constant.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "notification_analytics_util.h"
 #include "iremote_object.h"
 #include "mock_ipc_skeleton.h"
 #include "notification_preferences.h"
@@ -45,7 +46,6 @@
 #include "mock_push_callback_stub.h"
 #include "os_account_manager_helper.h"
 #include "system_event_observer.h"
-#include "notification_constant.h"
 #include "want_agent_info.h"
 #include "want_agent_helper.h"
 #include "want_params.h"
@@ -253,6 +253,128 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, GetRingtoneInfoByBundle_00004,
     sptr<NotificationRingtoneInfo> getRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
     ASSERT_NE(getRingtoneInfo, nullptr);
     ASSERT_EQ(advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, getRingtoneInfo), ERR_OK);
+}
+
+/**
+ * @tc.number    : FilterValidRingtoneUris_00001
+ * @tc.name      : FilterValidRingtoneUris
+ * @tc.desc      : Test FilterValidRingtoneUris skips ringtone with empty uri.
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, FilterValidRingtoneUris_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    NotificationRingtoneInfo info;
+    info.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    info.SetRingtoneUri("");
+    std::vector<NotificationRingtoneInfo> infos = { info };
+
+    auto result = advancedNotificationService_->FilterValidRingtoneUris(infos);
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.number    : FilterValidRingtoneUris_00002
+ * @tc.name      : FilterValidRingtoneUris
+ * @tc.desc      : Test FilterValidRingtoneUris skips ringtone uri containing path traversal ".."
+ *                 (equivalent guard branch of ClearRingtoneByApplication line 142).
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, FilterValidRingtoneUris_00002, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    NotificationRingtoneInfo info;
+    info.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    info.SetRingtoneUri("../data/uri");
+    std::vector<NotificationRingtoneInfo> infos = { info };
+
+    auto result = advancedNotificationService_->FilterValidRingtoneUris(infos);
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.number    : FilterValidRingtoneUris_00003
+ * @tc.name      : FilterValidRingtoneUris
+ * @tc.desc      : Test FilterValidRingtoneUris keeps valid ringtone uri.
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, FilterValidRingtoneUris_00003, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    NotificationRingtoneInfo info;
+    info.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    info.SetRingtoneUri("/data/valid/uri");
+    std::vector<NotificationRingtoneInfo> infos = { info };
+
+    auto result = advancedNotificationService_->FilterValidRingtoneUris(infos);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0].GetRingtoneUri(), "/data/valid/uri");
+}
+
+/**
+ * @tc.number    : FilterValidRingtoneUris_00004
+ * @tc.name      : FilterValidRingtoneUris
+ * @tc.desc      : Test FilterValidRingtoneUris filters mixed uris and keeps only valid ones.
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, FilterValidRingtoneUris_00004, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    NotificationRingtoneInfo emptyInfo;
+    emptyInfo.SetRingtoneUri("");
+    NotificationRingtoneInfo traversalInfo;
+    traversalInfo.SetRingtoneUri("../etc/uri");
+    NotificationRingtoneInfo validInfo;
+    validInfo.SetRingtoneUri("/data/service/el2/100/uri");
+    std::vector<NotificationRingtoneInfo> infos = { emptyInfo, traversalInfo, validInfo };
+
+    auto result = advancedNotificationService_->FilterValidRingtoneUris(infos);
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0].GetRingtoneUri(), "/data/service/el2/100/uri");
+}
+
+/**
+ * @tc.number    : ClearRingtoneByApplication_00001
+ * @tc.name      : ClearRingtoneByApplication
+ * @tc.desc      : Test ClearRingtoneByApplication returns early with empty cloneRingtoneInfos.
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, ClearRingtoneByApplication_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    std::vector<NotificationRingtoneInfo> emptyInfos;
+
+    advancedNotificationService_->ClearRingtoneByApplication(100, emptyInfos);
+    EXPECT_TRUE(emptyInfos.empty());
+}
+
+/**
+ * @tc.number    : ClearOverTimeRingToneInfo_00001
+ * @tc.name      : ClearOverTimeRingToneInfo
+ * @tc.desc      : Test ClearOverTimeRingToneInfo skips everything when clone time is zero (never cloned).
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, ClearOverTimeRingToneInfo_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    // default state: no clone timestamp seeded, :172 condition is false, nothing runs
+    advancedNotificationService_->ClearOverTimeRingToneInfo();
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetCloneTimeStamp(), 0);
+}
+
+/**
+ * @tc.number    : ClearOverTimeRingToneInfo_00002
+ * @tc.name      : ClearOverTimeRingToneInfo
+ * @tc.desc      : Test ClearOverTimeRingToneInfo clears the seeded overtime clone timestamp:
+ *                 the async task resets the timestamp to 0 after running the clear flow.
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, ClearOverTimeRingToneInfo_00002, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    // seed a timestamp older than MAX_CLONE_TIME (7 days) for the mocked foreground user (100)
+    constexpr int64_t OVERTIME_MS = 8 * 24 * 60 * 60 * 1000; // 8 days in milliseconds
+    int64_t overtimeStamp = NotificationAnalyticsUtil::GetCurrentTime() - OVERTIME_MS;
+    NotificationPreferences::GetInstance()->SetCloneTimeStamp(100, overtimeStamp);
+    ASSERT_NE(NotificationPreferences::GetInstance()->GetCloneTimeStamp(), 0);
+
+    advancedNotificationService_->ClearOverTimeRingToneInfo();
+    // wait for the async ffrt task; it resets the timestamp to 0 at the end (:192)
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetCloneTimeStamp(), 0);
 }
 }  // namespace Notification
 }  // namespace OHOS

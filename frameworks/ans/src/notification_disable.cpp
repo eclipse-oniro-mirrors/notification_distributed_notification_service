@@ -14,6 +14,8 @@
  */
 #include "notification_disable.h"
 
+#include <cinttypes>
+
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 #include "nlohmann/json.hpp"
@@ -87,8 +89,18 @@ bool NotificationDisable::Marshalling(Parcel &parcel) const
 
 bool NotificationDisable::ReadFromParcel(Parcel &parcel)
 {
-    disabled_ = parcel.ReadBool();
-    auto size = parcel.ReadUint32();
+    bool disabled = false;
+    if (!parcel.ReadBool(disabled)) {
+        ANS_LOGE("ReadBool failed");
+        return false;
+    }
+    disabled_ = disabled;
+
+    uint32_t size = 0;
+    if (!parcel.ReadUint32(size)) {
+        ANS_LOGE("ReadUint32 failed");
+        return false;
+    }
     if (size > MAX_NOTIFICATION_DISABLE_NUM) {
         ANS_LOGE("Size exceeds the range");
         return false;
@@ -100,7 +112,13 @@ bool NotificationDisable::ReadFromParcel(Parcel &parcel)
             return false;
         }
     }
-    userId_ = parcel.ReadInt32();
+
+    int32_t userId = 0;
+    if (!parcel.ReadInt32(userId)) {
+        ANS_LOGE("ReadInt32 failed");
+        return false;
+    }
+    userId_ = userId;
     return true;
 }
 
@@ -144,6 +162,10 @@ void NotificationDisable::FromJson(const std::string &jsonObj)
     }
     if (jsonObject.find(BUNDLELIST) != jsonEnd && jsonObject.at(BUNDLELIST).is_array()) {
         auto bundleListJson = jsonObject.at(BUNDLELIST);
+        if (bundleListJson.size() > MAX_NOTIFICATION_DISABLE_NUM) {
+            ANS_LOGE("bundleList size exceeds limit: %{public}zu", bundleListJson.size());
+            return;
+        }
         for (const auto &bundle : bundleListJson) {
             if (bundle.is_string()) {
                 bundleList_.push_back(bundle.get<std::string>());
@@ -151,7 +173,12 @@ void NotificationDisable::FromJson(const std::string &jsonObj)
         }
     }
     if (jsonObject.find(USERID) != jsonEnd && jsonObject.at(USERID).is_number_integer()) {
-        userId_ = jsonObject.at(USERID).get<int32_t>();
+        int64_t val = jsonObject.at(USERID).get<int64_t>();
+        if (val < INT32_MIN || val > INT32_MAX) {
+            ANS_LOGE("userId out of range: %{public}" PRId64, val);
+        } else {
+            userId_ = static_cast<int32_t>(val);
+        }
     }
 }
 }

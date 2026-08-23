@@ -525,7 +525,9 @@ HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0100, TestSize.
     ASSERT_NE(ringtoneInfo, nullptr);
     ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
     ringtoneInfo->SetRingtoneFileName("fileName");
-    ringtoneInfo->SetRingtoneUri("uri");
+    // empty uri keeps SystemSoundHelper::RemoveCustomizedTone on its empty-uri guard branch,
+    // avoiding the delayed async dlopen/dlclose task in NotificationLoadUtils destructor
+    ringtoneInfo->SetRingtoneUri("");
     auto ret = notificationPreferences.SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
     ASSERT_EQ(ret, ERR_OK);
 
@@ -565,7 +567,9 @@ HWTEST_F(NotificationPreferencesTest, RemoveRingtoneInfoByBundle_0300, TestSize.
     ASSERT_NE(ringtoneInfo, nullptr);
     ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_ONLINE);
     ringtoneInfo->SetRingtoneFileName("fileName");
-    ringtoneInfo->SetRingtoneUri("uri");
+    // empty uri keeps SystemSoundHelper::RemoveCustomizedTone on its empty-uri guard branch,
+    // avoiding the delayed async dlopen/dlclose task in NotificationLoadUtils destructor
+    ringtoneInfo->SetRingtoneUri("");
     auto ret = notificationPreferences.SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
     ASSERT_EQ(ret, ERR_OK);
 

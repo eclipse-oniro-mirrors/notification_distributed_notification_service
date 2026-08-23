@@ -21,6 +21,7 @@
 #include "sts_bundle_option.h"
 #include "sts_slot.h"
 #include "notification_slot.h"
+#include "ans_const_define.h"
 #include "sts_notification_manager.h"
 
 namespace OHOS {
@@ -28,7 +29,6 @@ namespace NotificationManagerSts {
 using namespace arkts::concurrency_helpers;
 using namespace OHOS::Notification;
 using OHOS::Notification::AnsNotification;
-constexpr int32_t MAX_BUNDLE_OPTIONS_NUM = 1000;
 void DeleteCallBackInfoWithoutPromise(ani_env* env, AsyncCallbackSlotInfo* asyncCallbackInfo)
 {
     ANS_LOGD("Delete AsyncCallbackSlotInfo Without Promise");
@@ -1165,7 +1165,7 @@ bool ParseSlotBundleParams(ani_env *env, ani_object bundlesObj, ani_enum_item ty
     if (env->Array_GetLength(static_cast<ani_array>(bundlesObj), &bundleArrayLen) != ANI_OK) {
         return false;
     }
-    if (bundleArrayLen > static_cast<ani_size>(MAX_BUNDLE_OPTIONS_NUM)) {
+    if (bundleArrayLen > static_cast<ani_size>(MAX_BUNDLE_LIST_SIZE)) {
         return false;
     }
     if (!NotificationSts::UnwrapArrayBundleOption(env,

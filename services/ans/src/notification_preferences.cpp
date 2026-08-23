@@ -53,13 +53,15 @@ constexpr static const char* KEY_PRIORITY_CONFIG_FOR_BUNDLE = "priorityConfigFor
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE_V2 = "priorityNotificationSwitchForBundleV2";
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_STRATEGY_FOR_BUNDLE = "priorityStrategyForBundle";
 const static std::string KEY_UNDER_LINE = "_";
+constexpr size_t MAX_TEMPLATE_FILE_SIZE = 1024 * 1024;
 }
 
 int32_t NotificationPreferences::ResolveStatisticsTableUserId(const NotificationBundleOption &bundle)
 {
     int32_t userId = INVALID_USER_ID;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundle.GetUid(), userId);
-    if (userId < 0) {
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundle.GetUid(), userId) != ERR_OK ||
+        userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
         return INVALID_USER_ID;
     }
     bool isAncoApp = BundleManagerHelper::GetInstance()->IsAncoApp(bundle.GetBundleName(), bundle.GetUid());
@@ -970,6 +972,12 @@ bool NotificationPreferences::BuildCloneSlotInfo(const NotificationCloneBundleIn
     std::vector<sptr<NotificationSlot>>& slots)
 {
     for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
+        int32_t slotTypeInt = static_cast<int32_t>(cloneSlot.slotType_);
+        if (slotTypeInt < 0 ||
+            slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+            ANS_LOGE("Invalid slot type: %{public}d", slotTypeInt);
+            continue;
+        }
         sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
         if (slotInfo == nullptr) {
             return false;
@@ -1588,13 +1596,24 @@ ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templat
         ANS_LOGE("template name is null.");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
+    if (templateName.size() > static_cast<size_t>(STR_MAX_SIZE)) {
+        ANS_LOGE("template name too long: %{public}zu", templateName.size());
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
 
     std::ifstream inFile;
-    inFile.open(DEFAULT_TEMPLATE_PATH.c_str(), std::ios::in);
+    inFile.open(DEFAULT_TEMPLATE_PATH.c_str(), std::ios::in | std::ios::ate);
     if (!inFile.is_open()) {
         ANS_LOGE("read template config error.");
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
     }
+    std::streampos fileSize = inFile.tellg();
+    if (fileSize < 0 || static_cast<size_t>(fileSize) > MAX_TEMPLATE_FILE_SIZE) {
+        ANS_LOGE("template file size invalid: %{public}lld", static_cast<long long>(fileSize));
+        inFile.close();
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
+    }
+    inFile.seekg(0, std::ios::beg);
 
     std::string fileContent((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
     inFile.close();
@@ -2074,7 +2093,11 @@ bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::se
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::string value = "";
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
+    if ((OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId) != ERR_OK) ||
+        (userId <= 0)) {
+        ANS_LOGE("Get valid userId failed");
+        return false;
+    }
     if (GetKvFromDb(RING_TRUST_PKG_KEY, value, userId) != ERR_OK) {
         ANS_LOGD("Get bundle sound permission failed.");
         return false;
@@ -2539,6 +2562,10 @@ bool NotificationPreferences::DelClonePriorityInfo(
 bool NotificationPreferences::UpdateClonePriorityInfos(
     const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos)
 {
+    if (userId <= SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Invalid userId: %{public}d", userId);
+        return false;
+    }
     if (preferncesDB_ == nullptr) {
         return false;
     }
@@ -2649,6 +2676,10 @@ bool NotificationPreferences::GetDisableNotificationInfo(NotificationDisable &no
 
 bool NotificationPreferences::GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable)
 {
+    if (userId <= SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Invalid userId: %{public}d", userId);
+        return false;
+    }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferencesInfo_.GetUserDisableNotificationInfo(userId, notificationDisable)) {
         ANS_LOGD("info get disable notification success");
@@ -2701,6 +2732,10 @@ bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kio
             kioskAppTrustList.push_back(item.get<std::string>());
         }
     }
+    if (kioskAppTrustList.size() > MAX_BUNDLE_LIST_SIZE) {
+        ANS_LOGE("kiosk app trust list size too large: %{public}zu", kioskAppTrustList.size());
+        return false;
+    }
     preferencesInfo_.SetkioskAppTrustList(kioskAppTrustList);
     isKioskTrustListUpdate_ = false;
     return true;
@@ -2748,6 +2783,10 @@ bool NotificationPreferences::GetRestrictedModeTrustList(std::unordered_map<int3
 bool NotificationPreferences::IsExistRestrictedModeTrustList(const std::string &bundleName, const int32_t &userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleName.empty()) {
+        ANS_LOGE("bundleName is empty");
+        return false;
+    }
     std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;
     if (NotificationPreferences::GetInstance()->GetRestrictedModeTrustList(restrictedModeTrustList)) {
         auto it = restrictedModeTrustList.find(userId);
@@ -2786,7 +2825,7 @@ bool NotificationPreferences::SetRestrictedModeTrustList(const std::string &valu
             ANS_LOGE("Missing or invalid 'userId' field");
             return false;
         }
-        int32_t userId = item["userId"];
+        int32_t userId = item["userId"].get<int32_t>();
         if (!item.contains("trustList") || !item["trustList"].is_array()) {
             ANS_LOGE("Missing or invalid 'trustList' field");
             return false;
@@ -2807,10 +2846,22 @@ ErrCode NotificationPreferences::SetDistributedDevicelist(std::vector<std::strin
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-    bool storeDBResult = true;
-    nlohmann::json deviceTypesJson = deviceTypes;
-    std::string deviceTypesjsonString = deviceTypesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
-    storeDBResult = preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
+    }
+    std::string deviceTypesjsonString;
+    if (deviceTypes.size() > MAX_PARCELABLE_VECTOR_NUM) {
+        ANS_LOGE("deviceTypes size exceeds limit: %{public}zu", deviceTypes.size());
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    nlohmann::json deviceTypesJson = nlohmann::json(deviceTypes);
+    if (deviceTypesJson.is_null() || !deviceTypesJson.is_array()) {
+        ANS_LOGE("Failed to create deviceTypes json array");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    deviceTypesjsonString = deviceTypesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+    bool storeDBResult = preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
     return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 

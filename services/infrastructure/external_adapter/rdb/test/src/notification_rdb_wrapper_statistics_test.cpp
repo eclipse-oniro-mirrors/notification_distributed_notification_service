@@ -1103,4 +1103,69 @@ HWTEST_F(NtfRdbStoreWrapperStatisticsTest, CleanLegacyStatisticsTables_007, Func
     EXPECT_NE(tableNames.find("notification_statistics_abc"), tableNames.end());
     EXPECT_NE(tableNames.find("notification_preferences"), tableNames.end());
 }
+
+/**
+ * @tc.name: DeleteStatisticsByBundle_Statistics_500
+ * @tc.desc: Verify DeleteStatisticsByBundle returns E_ERROR when userId is invalid (-1)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, DeleteStatisticsByBundle_Statistics_500, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"testValue"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    int32_t ret = rdbWrapper.Init();
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+
+    ret = rdbWrapper.DeleteStatisticsByBundle(-1, "com.example.myapplication", 20010044);
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name: DeleteStatisticsByBundle_Statistics_600
+ * @tc.desc: Verify DeleteStatisticsByBundle returns E_ERROR when bundleName is empty or contains path traversal
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, DeleteStatisticsByBundle_Statistics_600, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"testValue"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    int32_t ret = rdbWrapper.Init();
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+
+    int32_t nonSystemUserId = 100;
+    ret = rdbWrapper.DeleteStatisticsByBundle(nonSystemUserId, "", 20010044);
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+
+    ret = rdbWrapper.DeleteStatisticsByBundle(nonSystemUserId, "../malicious", 20010044);
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+
+    ret = rdbWrapper.DeleteStatisticsByBundle(nonSystemUserId, "bundle/with/slash", 20010044);
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+}
 } // OHOS::Notification::Infra

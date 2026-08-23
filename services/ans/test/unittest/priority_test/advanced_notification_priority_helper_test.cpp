@@ -23,7 +23,6 @@
 #undef protected
 #include "ans_const_define.h"
 #include "notification_ai_extension_wrapper.h"
-#include "notification_constant.h"
 #include "notification_preferences.h"
 
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase);

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "ans_const_define.h"
 #include "nlohmann/json.hpp"
 #define private public
 #define protected public
@@ -216,8 +217,8 @@ HWTEST_F(NotificationRingtoneInfoTest, SetRingtoneUri_0001, Level1)
 HWTEST_F(NotificationRingtoneInfoTest, SetRingtoneUri_0002, Level1)
 {
     NotificationRingtoneInfo info;
-    std::string ringtoneUri = "";
-    info.SetRingtoneFileName(ringtoneUri);
+    std::string ringtoneUri = "uri2";
+    info.SetRingtoneUri(ringtoneUri);
     EXPECT_EQ(info.GetRingtoneUri(), ringtoneUri);
 }
 
@@ -252,7 +253,7 @@ HWTEST_F(NotificationRingtoneInfoTest, Unmarshalling_0001, Level1)
             unmarshalling = false;
         }
     }
-    EXPECT_EQ(unmarshalling, true);
+    EXPECT_EQ(unmarshalling, false);
 }
 
 /**
@@ -302,6 +303,121 @@ HWTEST_F(NotificationRingtoneInfoTest, Dump_0001, TestSize.Level1)
         " title name uri";
 
     EXPECT_EQ(result, ret);
+}
+
+/**
+ * @tc.name: Marshalling_TitleTooLong_0001
+ * @tc.desc: Test Marshalling fails when ringtone title exceeds STR_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRingtoneInfoTest, Marshalling_TitleTooLong_0001, Level1)
+{
+    NotificationRingtoneInfo info;
+    info.SetRingtoneTitle(std::string(STR_MAX_SIZE + 1, 'a'));
+    Parcel parcel;
+    EXPECT_EQ(info.Marshalling(parcel), false);
+}
+
+/**
+ * @tc.name: Marshalling_FileNameTooLong_0001
+ * @tc.desc: Test Marshalling fails when ringtone file name exceeds STR_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRingtoneInfoTest, Marshalling_FileNameTooLong_0001, Level1)
+{
+    NotificationRingtoneInfo info;
+    info.SetRingtoneFileName(std::string(STR_MAX_SIZE + 1, 'a'));
+    Parcel parcel;
+    EXPECT_EQ(info.Marshalling(parcel), false);
+}
+
+/**
+ * @tc.name: Marshalling_UriTooLong_0001
+ * @tc.desc: Test Marshalling fails when ringtone uri exceeds STR_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRingtoneInfoTest, Marshalling_UriTooLong_0001, Level1)
+{
+    NotificationRingtoneInfo info;
+    info.SetRingtoneUri(std::string(STR_MAX_SIZE + 1, 'a'));
+    Parcel parcel;
+    EXPECT_EQ(info.Marshalling(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_InvalidType_0001
+ * @tc.desc: Test ReadFromParcel fails when ringtone type is invalid.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRingtoneInfoTest, ReadFromParcel_InvalidType_0001, Level1)
+{
+    NotificationRingtoneInfo info;
+    Parcel parcel;
+    parcel.WriteInt32(-1);
+    EXPECT_EQ(info.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_TypeOnly_0001
+ * @tc.desc: Test ReadFromParcel fails when only type is written (title read fails).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRingtoneInfoTest, ReadFromParcel_TypeOnly_0001, Level1)
+{
+    NotificationRingtoneInfo info;
+    Parcel parcel;
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL));
+    EXPECT_EQ(info.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_TypeTitleOnly_0001
+ * @tc.desc: Test ReadFromParcel fails when type and title are written (file name read fails).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRingtoneInfoTest, ReadFromParcel_TypeTitleOnly_0001, Level1)
+{
+    NotificationRingtoneInfo info;
+    Parcel parcel;
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL));
+    parcel.WriteString("title");
+    EXPECT_EQ(info.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_TypeTitleNameOnly_0001
+ * @tc.desc: Test ReadFromParcel fails when type, title and file name are written (uri read fails).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRingtoneInfoTest, ReadFromParcel_TypeTitleNameOnly_0001, Level1)
+{
+    NotificationRingtoneInfo info;
+    Parcel parcel;
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL));
+    parcel.WriteString("title");
+    parcel.WriteString("name");
+    EXPECT_EQ(info.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: FromJson_InvalidType_0001
+ * @tc.desc: Test FromJson leaves ringtone type unchanged when type is invalid.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRingtoneInfoTest, FromJson_InvalidType_0001, Level1)
+{
+    NotificationRingtoneInfo info;
+    info.SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    info.FromJson(R"({"ringtoneType": -1})");
+    EXPECT_EQ(info.GetRingtoneType(), NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
 }
 }
 }

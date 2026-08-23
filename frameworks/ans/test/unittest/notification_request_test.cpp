@@ -27,6 +27,7 @@
 #include "notification_normal_content.h"
 #include "notification_picture_content.h"
 #include "notification_request.h"
+#include "notification_trigger.h"
 #include "pixel_map.h"
 #undef private
 #undef protected
@@ -2232,6 +2233,575 @@ HWTEST_F(NotificationRequestTest, IncrementalUpdateLiveview_NullOldRequest_0001,
     notificationRequest.SetContent(content);
     notificationRequest.IncrementalUpdateLiveview(nullptr);
     EXPECT_NE(notificationRequest.GetContent(), nullptr);
+}
+
+/**
+ * @tc.name: SetSlotType_Invalid_001
+ * @tc.desc: Test SetSlotType with invalid slot type does not set.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetSlotType_Invalid_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    auto before = notificationRequest.GetSlotType();
+    notificationRequest.SetSlotType(static_cast<NotificationConstant::SlotType>(-1));
+    EXPECT_EQ(notificationRequest.GetSlotType(), before);
+    notificationRequest.SetSlotType(static_cast<NotificationConstant::SlotType>(100));
+    EXPECT_EQ(notificationRequest.GetSlotType(), before);
+}
+
+/**
+ * @tc.name: SetNotificationUserInputHistory_TooLarge_001
+ * @tc.desc: Test SetNotificationUserInputHistory rejects vector exceeding MAX_USER_INPUT_HISTORY.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetNotificationUserInputHistory_TooLarge_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    std::vector<std::string> text(NotificationRequest::MAX_USER_INPUT_HISTORY + 1, "input");
+    notificationRequest.SetNotificationUserInputHistory(text);
+    EXPECT_EQ(notificationRequest.GetNotificationUserInputHistory().size(), 0);
+}
+
+/**
+ * @tc.name: SetDevicesSupportOperate_TooLarge_001
+ * @tc.desc: Test SetDevicesSupportOperate rejects vector exceeding MAX_PARCELABLE_VECTOR_NUM.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetDevicesSupportOperate_TooLarge_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    std::vector<std::string> devices(static_cast<size_t>(MAX_PARCELABLE_VECTOR_NUM) + 1, "device");
+    notificationRequest.SetDevicesSupportOperate(devices);
+    auto opts = notificationRequest.GetNotificationDistributedOptions();
+    EXPECT_EQ(opts.GetDevicesSupportOperate().size(), 0);
+}
+
+/**
+ * @tc.name: GetCreatorUserId_Invalid_001
+ * @tc.desc: Test GetCreatorUserId returns SUBSCRIBE_USER_INIT when creatorUserId_ < 0.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, GetCreatorUserId_Invalid_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    notificationRequest.creatorUserId_ = -100;
+    EXPECT_EQ(notificationRequest.GetCreatorUserId(), SUBSCRIBE_USER_INIT);
+}
+
+/**
+ * @tc.name: CollaborationFromJson_InvalidExtraInfo_001
+ * @tc.desc: Test CollaborationFromJson skips ParseWantParams when extraInfo is invalid JSON.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CollaborationFromJson_InvalidExtraInfo_001, Function | SmallTest | Level1)
+{
+    std::string jsonStr = R"({"extraInfo": "not_json{"})";
+    auto *result = NotificationRequest::CollaborationFromJson(jsonStr);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->additionalParams_, nullptr);
+    delete result;
+}
+
+/**
+ * @tc.name: ConvertJsonToTemplate_TooLarge_001
+ * @tc.desc: Test ConvertJsonToTemplate skips templateData when size exceeds MAX_PARCELABLE_VECTOR_NUM.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToTemplate_TooLarge_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    std::string largeData(static_cast<size_t>(MAX_PARCELABLE_VECTOR_NUM) + 1, 'a');
+    nlohmann::json jsonObject = nlohmann::json{
+        {"template", {{"templateName", "test"}, {"templateData", largeData}}}
+    };
+    notificationRequest.ConvertJsonToTemplate(&notificationRequest, jsonObject);
+    ASSERT_NE(notificationRequest.notificationTemplate_, nullptr);
+    EXPECT_EQ(notificationRequest.notificationTemplate_->GetTemplateData(), nullptr);
+}
+
+/**
+ * @tc.name: ReadFromParcel_UserInputHistoryTooLarge_001
+ * @tc.desc: Test ReadFromParcel returns false when userInputHistory size exceeds MAX_USER_INPUT_HISTORY.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ReadFromParcel_UserInputHistoryTooLarge_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    notificationRequest.userInputHistory_.resize(NotificationRequest::MAX_USER_INPUT_HISTORY + 1, "test");
+    Parcel parcel;
+    ASSERT_TRUE(notificationRequest.Marshalling(parcel));
+    parcel.RewindRead(0);
+    NotificationRequest result(10);
+    EXPECT_EQ(result.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ConvertJsonToNumExt_OwnerUserIdOutOfRange_001
+ * @tc.desc: Test ConvertJsonToNumExt skips ownerUserId when out of int32 range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNumExt_OwnerUserIdOutOfRange_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    int32_t defaultVal = notificationRequest.GetOwnerUserId();
+    nlohmann::json jsonObject = nlohmann::json{{"ownerUserId", 2147483648LL}};
+    notificationRequest.ConvertJsonToNumExt(&notificationRequest, jsonObject);
+    EXPECT_EQ(notificationRequest.GetOwnerUserId(), defaultVal);
+}
+
+/**
+ * @tc.name: ConvertJsonToNumExt_OwnerUidOutOfRange_001
+ * @tc.desc: Test ConvertJsonToNumExt skips ownerUid when out of int32 range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNumExt_OwnerUidOutOfRange_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    int32_t defaultVal = notificationRequest.GetOwnerUid();
+    nlohmann::json jsonObject = nlohmann::json{{"ownerUid", 2147483648LL}};
+    notificationRequest.ConvertJsonToNumExt(&notificationRequest, jsonObject);
+    EXPECT_EQ(notificationRequest.GetOwnerUid(), defaultVal);
+}
+
+/**
+ * @tc.name: ConvertJsonToNumExt_NotificationControlFlagsOutOfRange_001
+ * @tc.desc: Test ConvertJsonToNumExt skips notificationControlFlags when out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNumExt_NotificationControlFlagsOutOfRange_001,
+    Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    uint32_t defaultVal = notificationRequest.GetNotificationControlFlags();
+    nlohmann::json jsonObject = nlohmann::json{{"notificationControlFlags", -1}};
+    notificationRequest.ConvertJsonToNumExt(&notificationRequest, jsonObject);
+    EXPECT_EQ(notificationRequest.GetNotificationControlFlags(), defaultVal);
+}
+
+/**
+ * @tc.name: ConvertJsonToEnum_InvalidSlotType_001
+ * @tc.desc: Test ConvertJsonToEnum skips slotType when invalid.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToEnum_InvalidSlotType_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    auto before = notificationRequest.GetSlotType();
+    nlohmann::json jsonObject = nlohmann::json{{"slotType", -1}};
+    notificationRequest.ConvertJsonToEnum(&notificationRequest, jsonObject);
+    EXPECT_EQ(notificationRequest.GetSlotType(), before);
+    nlohmann::json jsonObject2 = nlohmann::json{{"slotType", 100}};
+    notificationRequest.ConvertJsonToEnum(&notificationRequest, jsonObject2);
+    EXPECT_EQ(notificationRequest.GetSlotType(), before);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationActionButton_NotArray_001
+ * @tc.desc: Test ConvertJsonToNotificationActionButton returns false when actionButtons is not an array.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationActionButton_NotArray_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{{"actionButtons", "not_array"}};
+    bool result = notificationRequest.ConvertJsonToNotificationActionButton(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationTrigger_InvalidTriggerType_001
+ * @tc.desc: Test ConvertJsonToNotificationTrigger returns false when triggerType is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_InvalidTriggerType_001,
+    Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"notificationTrigger", {{"triggerType", 0}}}
+    };
+    bool result = notificationRequest.ConvertJsonToNotificationTrigger(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationTrigger_InvalidConfigPath_001
+ * @tc.desc: Test ConvertJsonToNotificationTrigger returns false when triggerConfigPath is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_InvalidConfigPath_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"notificationTrigger", {{"triggerConfigPath", 0}}}
+    };
+    bool result = notificationRequest.ConvertJsonToNotificationTrigger(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: NotificationTrigger_FromJson_InvalidTriggerType_001
+ * @tc.desc: Test NotificationTrigger::FromJson skips type_ when triggerType is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, NotificationTrigger_FromJson_InvalidTriggerType_001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{{"triggerType", 0}};
+    auto *trigger = NotificationTrigger::FromJson(jsonObject);
+    ASSERT_NE(trigger, nullptr);
+    EXPECT_NE(trigger->GetTriggerType(), NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE);
+    delete trigger;
+}
+
+/**
+ * @tc.name: NotificationTrigger_FromJson_InvalidConfigPath_001
+ * @tc.desc: Test NotificationTrigger::FromJson skips configPath_ when triggerConfigPath is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, NotificationTrigger_FromJson_InvalidConfigPath_001, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{{"triggerConfigPath", 0}};
+    auto *trigger = NotificationTrigger::FromJson(jsonObject);
+    ASSERT_NE(trigger, nullptr);
+    EXPECT_EQ(trigger->GetConfigPath(), NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG);
+    delete trigger;
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationTrigger_NoTriggerKey_001
+ * @tc.desc: Test ConvertJsonToNotificationTrigger returns true when notificationTrigger key is absent.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_NoTriggerKey_001,
+    Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{{"id", 1}};
+    bool result = notificationRequest.ConvertJsonToNotificationTrigger(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(notificationRequest.GetNotificationTrigger(), nullptr);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationTrigger_NullTrigger_001
+ * @tc.desc: Test ConvertJsonToNotificationTrigger returns true when notificationTrigger is null.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_NullTrigger_001,
+    Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{{"notificationTrigger", nullptr}};
+    bool result = notificationRequest.ConvertJsonToNotificationTrigger(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(notificationRequest.GetNotificationTrigger(), nullptr);
+}
+
+/**
+ * @tc.name: SetNotificationUserInputHistory_Valid_001
+ * @tc.desc: Test SetNotificationUserInputHistory assigns all elements when size is within limit.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetNotificationUserInputHistory_Valid_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    std::vector<std::string> text {"input1", "input2", "input3"};
+    notificationRequest.SetNotificationUserInputHistory(text);
+    auto result = notificationRequest.GetNotificationUserInputHistory();
+    EXPECT_EQ(result.size(), 3);
+    EXPECT_EQ(result[0], "input1");
+    EXPECT_EQ(result[1], "input2");
+    EXPECT_EQ(result[2], "input3");
+
+    std::vector<std::string> boundary(NotificationRequest::MAX_USER_INPUT_HISTORY, "input");
+    notificationRequest.SetNotificationUserInputHistory(boundary);
+    EXPECT_EQ(
+        notificationRequest.GetNotificationUserInputHistory().size(), NotificationRequest::MAX_USER_INPUT_HISTORY);
+}
+
+/**
+ * @tc.name: ConvertJsonToEnum_ValidSlotType_001
+ * @tc.desc: Test ConvertJsonToEnum sets slotType when value is valid.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToEnum_ValidSlotType_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{{"slotType", 5}};
+    notificationRequest.ConvertJsonToEnum(&notificationRequest, jsonObject);
+    EXPECT_EQ(notificationRequest.GetSlotType(), NotificationConstant::SlotType::LIVE_VIEW);
+}
+
+/**
+ * @tc.name: CollaborationFromJson_NoExtraInfo_001
+ * @tc.desc: Test CollaborationFromJson works when extraInfo key is absent.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CollaborationFromJson_NoExtraInfo_001, Function | SmallTest | Level1)
+{
+    std::string jsonStr = R"({"id": 1})";
+    auto *result = NotificationRequest::CollaborationFromJson(jsonStr);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->additionalParams_, nullptr);
+    delete result;
+}
+
+/**
+ * @tc.name: CollaborationFromJson_ExtraInfoNotString_001
+ * @tc.desc: Test CollaborationFromJson skips extraInfo when it is not a string.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CollaborationFromJson_ExtraInfoNotString_001, Function | SmallTest | Level1)
+{
+    std::string jsonStr = R"({"extraInfo": 123})";
+    auto *result = NotificationRequest::CollaborationFromJson(jsonStr);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->additionalParams_, nullptr);
+    delete result;
+}
+
+/**
+ * @tc.name: CollaborationFromJson_ExtraInfoEmpty_001
+ * @tc.desc: Test CollaborationFromJson skips extraInfo when it is an empty string.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, CollaborationFromJson_ExtraInfoEmpty_001, Function | SmallTest | Level1)
+{
+    std::string jsonStr = R"({"extraInfo": ""})";
+    auto *result = NotificationRequest::CollaborationFromJson(jsonStr);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->additionalParams_, nullptr);
+    delete result;
+}
+
+/**
+ * @tc.name: ConvertJsonToNumExt_ValidValues_001
+ * @tc.desc: Test ConvertJsonToNumExt assigns all fields when values are in range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNumExt_ValidValues_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"updateDeadLine", 111},
+        {"finishDeadLine", 222},
+        {"triggerDeadLine", 333},
+        {"ownerUserId", 10},
+        {"ownerUid", 20},
+        {"notificationControlFlags", 30},
+        {"snoozeDelayTime", 444}
+    };
+    notificationRequest.ConvertJsonToNumExt(&notificationRequest, jsonObject);
+    EXPECT_EQ(notificationRequest.GetUpdateDeadLine(), 111);
+    EXPECT_EQ(notificationRequest.GetFinishDeadLine(), 222);
+    EXPECT_EQ(notificationRequest.GetGeofenceTriggerDeadLine(), 333);
+    EXPECT_EQ(notificationRequest.GetOwnerUserId(), 10);
+    EXPECT_EQ(notificationRequest.GetOwnerUid(), 20);
+    EXPECT_EQ(notificationRequest.GetNotificationControlFlags(), 30U);
+    EXPECT_EQ(notificationRequest.GetSnoozeDelayTime(), 444);
+}
+
+/**
+ * @tc.name: ConvertJsonToNumExt_NonIntegerValues_001
+ * @tc.desc: Test ConvertJsonToNumExt skips fields when values are not integers.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNumExt_NonIntegerValues_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    int64_t defaultUpdateDeadLine = notificationRequest.GetUpdateDeadLine();
+    int64_t defaultFinishDeadLine = notificationRequest.GetFinishDeadLine();
+    int64_t defaultTriggerDeadLine = notificationRequest.GetGeofenceTriggerDeadLine();
+    int32_t defaultOwnerUserId = notificationRequest.GetOwnerUserId();
+    int32_t defaultOwnerUid = notificationRequest.GetOwnerUid();
+    uint32_t defaultFlags = notificationRequest.GetNotificationControlFlags();
+    int64_t defaultSnoozeDelayTime = notificationRequest.GetSnoozeDelayTime();
+
+    nlohmann::json jsonObject = nlohmann::json{
+        {"updateDeadLine", "abc"},
+        {"finishDeadLine", "abc"},
+        {"triggerDeadLine", "abc"},
+        {"ownerUserId", "abc"},
+        {"ownerUid", "abc"},
+        {"notificationControlFlags", "abc"},
+        {"snoozeDelayTime", "abc"}
+    };
+    notificationRequest.ConvertJsonToNumExt(&notificationRequest, jsonObject);
+    EXPECT_EQ(notificationRequest.GetUpdateDeadLine(), defaultUpdateDeadLine);
+    EXPECT_EQ(notificationRequest.GetFinishDeadLine(), defaultFinishDeadLine);
+    EXPECT_EQ(notificationRequest.GetGeofenceTriggerDeadLine(), defaultTriggerDeadLine);
+    EXPECT_EQ(notificationRequest.GetOwnerUserId(), defaultOwnerUserId);
+    EXPECT_EQ(notificationRequest.GetOwnerUid(), defaultOwnerUid);
+    EXPECT_EQ(notificationRequest.GetNotificationControlFlags(), defaultFlags);
+    EXPECT_EQ(notificationRequest.GetSnoozeDelayTime(), defaultSnoozeDelayTime);
+}
+
+/**
+ * @tc.name: ConvertJsonToNumExt_BoundaryValues_001
+ * @tc.desc: Test ConvertJsonToNumExt assigns fields at boundary values.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNumExt_BoundaryValues_001, Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"updateDeadLine", INT64_MIN},
+        {"finishDeadLine", INT64_MAX},
+        {"triggerDeadLine", -1},
+        {"ownerUserId", INT32_MIN},
+        {"ownerUid", INT32_MAX},
+        {"notificationControlFlags", 4294967295LL},
+        {"snoozeDelayTime", 0}
+    };
+    notificationRequest.ConvertJsonToNumExt(&notificationRequest, jsonObject);
+    EXPECT_EQ(notificationRequest.GetUpdateDeadLine(), INT64_MIN);
+    EXPECT_EQ(notificationRequest.GetFinishDeadLine(), INT64_MAX);
+    EXPECT_EQ(notificationRequest.GetGeofenceTriggerDeadLine(), -1);
+    EXPECT_EQ(notificationRequest.GetOwnerUserId(), INT32_MIN);
+    EXPECT_EQ(notificationRequest.GetOwnerUid(), INT32_MAX);
+    EXPECT_EQ(notificationRequest.GetNotificationControlFlags(), 4294967295U);
+    EXPECT_EQ(notificationRequest.GetSnoozeDelayTime(), 0);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationTrigger_ValidTrigger_001
+ * @tc.desc: Test ConvertJsonToNotificationTrigger succeeds with valid triggerType and triggerConfigPath.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_ValidTrigger_001,
+    Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"notificationTrigger", {{"triggerType", 1}, {"triggerConfigPath", 2}, {"triggerDisplayTime", 100}}}
+    };
+    bool result = notificationRequest.ConvertJsonToNotificationTrigger(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, true);
+    auto trigger = notificationRequest.GetNotificationTrigger();
+    ASSERT_NE(trigger, nullptr);
+    EXPECT_EQ(trigger->GetTriggerType(), NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE);
+    EXPECT_EQ(trigger->GetConfigPath(), NotificationConstant::ConfigPath::CONFIG_PATH_CLOUD_CONFIG);
+    EXPECT_EQ(trigger->GetDisplayTime(), 100);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationTrigger_TriggerTypeTooLarge_001
+ * @tc.desc: Test ConvertJsonToNotificationTrigger returns false when triggerType is greater than range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_TriggerTypeTooLarge_001,
+    Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"notificationTrigger", {{"triggerType", 2}}}
+    };
+    bool result = notificationRequest.ConvertJsonToNotificationTrigger(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(notificationRequest.GetNotificationTrigger(), nullptr);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationTrigger_ConfigPathTooLarge_001
+ * @tc.desc: Test ConvertJsonToNotificationTrigger returns false when triggerConfigPath is greater than range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_ConfigPathTooLarge_001,
+    Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"notificationTrigger", {{"triggerConfigPath", 3}}}
+    };
+    bool result = notificationRequest.ConvertJsonToNotificationTrigger(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(notificationRequest.GetNotificationTrigger(), nullptr);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationTrigger_NonIntegerValues_001
+ * @tc.desc: Test ConvertJsonToNotificationTrigger skips validation when values are not integers.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_NonIntegerValues_001,
+    Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"notificationTrigger", {{"triggerType", "abc"}, {"triggerConfigPath", "xyz"}}}
+    };
+    bool result = notificationRequest.ConvertJsonToNotificationTrigger(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, true);
+    auto trigger = notificationRequest.GetNotificationTrigger();
+    ASSERT_NE(trigger, nullptr);
+    EXPECT_EQ(trigger->GetConfigPath(), NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationTrigger_NoTypeAndConfigKeys_001
+ * @tc.desc: Test ConvertJsonToNotificationTrigger succeeds when triggerType and triggerConfigPath keys are absent.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_NoTypeAndConfigKeys_001,
+    Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"notificationTrigger", {{"triggerDisplayTime", 50}}}
+    };
+    bool result = notificationRequest.ConvertJsonToNotificationTrigger(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, true);
+    auto trigger = notificationRequest.GetNotificationTrigger();
+    ASSERT_NE(trigger, nullptr);
+    EXPECT_EQ(trigger->GetDisplayTime(), 50);
+}
+
+/**
+ * @tc.name: ConvertJsonToNotificationTrigger_NotObject_001
+ * @tc.desc: Test ConvertJsonToNotificationTrigger returns false when notificationTrigger is not an object.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_NotObject_001,
+    Function | SmallTest | Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{{"notificationTrigger", 123}};
+    bool result = notificationRequest.ConvertJsonToNotificationTrigger(&notificationRequest, jsonObject);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(notificationRequest.GetNotificationTrigger(), nullptr);
 }
 } // namespace Notification
 } // namespace OHOS

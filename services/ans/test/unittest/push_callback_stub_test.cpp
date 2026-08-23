@@ -96,7 +96,7 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00400, Function | SmallTest 
     PushCallBackProxy pushCallBackProxy(impl);
 
     int ret = pushCallBackProxy.OnCheckNotification("", nullptr);
-    ASSERT_EQ(ret, false);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -111,7 +111,7 @@ HWTEST_F(PushCallBackStubTest, PushCallBackStubTest_00600, Function | SmallTest 
 
     std::string notificationData = "this is notificationData";
     int ret = pushCallBackProxy.OnCheckNotification(notificationData, nullptr);
-    ASSERT_EQ(ret, false);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**

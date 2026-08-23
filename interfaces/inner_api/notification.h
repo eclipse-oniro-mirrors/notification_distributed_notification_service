@@ -380,11 +380,11 @@ private:
     void SetRemoveAllowed(bool removeAllowed);
     void SetSourceType(NotificationConstant::SourceType sourceType);
     bool ReadFromParcel(Parcel &parcel);
-    void ReadFromParcelBool(Parcel &parcel);
-    void ReadFromParcelString(Parcel &parcel);
-    void ReadFromParcelInt32(Parcel &parcel);
-    void ReadFromParcelInt64(Parcel &parcel);
-    void ReadFromParcelUint64(Parcel &parcel);
+    bool ReadFromParcelBool(Parcel &parcel);
+    bool ReadFromParcelString(Parcel &parcel);
+    bool ReadFromParcelInt32(Parcel &parcel);
+    bool ReadFromParcelInt64(Parcel &parcel);
+    bool ReadFromParcelUint64(Parcel &parcel);
     bool ReadFromParcelParcelable(Parcel &parcel);
     bool MarshallingBool(Parcel &parcel) const;
     bool MarshallingString(Parcel &parcel) const;

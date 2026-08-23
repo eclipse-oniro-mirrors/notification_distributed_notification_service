@@ -34,8 +34,8 @@
 #include "want_agent_helper.h"
 #include "want_params.h"
 #include "mock_ipc_skeleton.h"
+#include "notification_flags.h"
 #include "notification_preferences.h"
-#include "notification_constant.h"
 #include "notification_record.h"
 #include "notification_subscriber.h"
 #include "os_account_manager.h"
@@ -44,6 +44,7 @@
 extern void MockGetDistributedEnableInApplicationInfo(bool mockRet, uint8_t mockCase = 0);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 extern void MockIsOsAccountExists(bool mockRet);
+extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase = 0);
 
 using namespace testing::ext;
 using namespace OHOS::Media;
@@ -1470,6 +1471,25 @@ HWTEST_F(AnsBranchTest, IsNeedSilentInDoNotDisturbMode_3000, Function | SmallTes
 }
 
 /**
+ * @tc.number  : IsNeedSilentInDoNotDisturbMode_3100
+ * @tc.name : IsNeedSilentInDoNotDisturbMode
+ * @tc.desc : Test IsNeedSilentInDoNotDisturbMode with empty phoneNumber,
+ *            expect ERR_ANS_INNER_INVALID_PARAM.
+ */
+HWTEST_F(AnsBranchTest, IsNeedSilentInDoNotDisturbMode_3100, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    std::string phoneNumber = "";
+    int32_t callerType = 0;
+    int32_t userId = 100;
+    ASSERT_EQ(advancedNotificationService_->IsNeedSilentInDoNotDisturbMode(
+        phoneNumber, callerType, userId), (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
  * @tc.number  : IsNeedSilentInDoNotDisturbMode_4000
  * @tc.name : IsNeedSilentInDoNotDisturbMode
  * @tc.desc : Test IsNeedSilentInDoNotDisturbMode.
@@ -1543,6 +1563,24 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286001, Function | SmallTest | Level1)
     advancedNotificationService_->notificationSvrQueue_.Reset();
     result = advancedNotificationService_->SetCheckConfig(8, requestId, key, value);
     ASSERT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_286008
+ * @tc.name      : SetCheckConfigTooLongValue
+ * @tc.desc      : Test SetCheckConfig with response ERR_OK and value longer than STR_500K_SIZE:
+ *                 the oversized value is rejected inside the sync task (line 1347).
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_286008, Function | SmallTest | Level1)
+{
+    int32_t response = 0;
+    std::string requestId = "id";
+    std::string key = "APP_LIVEVIEW_CONFIG";
+    std::string value(STR_500K_SIZE + 1, 'a');
+    MockIsVerfyPermisson(true);
+    int32_t result = advancedNotificationService_->SetCheckConfig(response, requestId, key, value);
+    ASSERT_EQ(result, ERR_OK);
+    MockIsVerfyPermisson(false);
 }
 
 /**
@@ -3363,5 +3401,116 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_CloseAlert_NullRequest, Function | SmallTe
     advancedNotificationService_->CloseAlert(record);
     EXPECT_EQ(record->request, nullptr);
 }
+
+/**
+ * @tc.number    : CloseAlert_GetActiveUserFailed_0001
+ * @tc.name      : CloseAlert with GetCurrentActiveUserId failed
+ * @tc.desc      : Test CloseAlert returns early when GetCurrentActiveUserId fails (line 2137).
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_CloseAlert_GetActiveUserFailed, Function | SmallTest | Level1)
+{
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = new NotificationRequest();
+    record->notification = new Notification(record->request);
+
+    MockQueryForgroundOsAccountId(false, 0);
+    advancedNotificationService_->CloseAlert(record);
+    // early return at line 2137: light/sound/vibration flags are not touched
+    EXPECT_EQ(record->notification->EnableLight(), false);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.number    : CloseAlert_InvalidActiveUserId_0001
+ * @tc.name      : CloseAlert with invalid active user id
+ * @tc.desc      : Test CloseAlert returns early when active user id is invalid (<= 0).
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_CloseAlert_InvalidActiveUserId, Function | SmallTest | Level1)
+{
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = new NotificationRequest();
+    record->notification = new Notification(record->request);
+
+    MockQueryForgroundOsAccountId(true, 2); // mock invalid id (0)
+    advancedNotificationService_->CloseAlert(record);
+    EXPECT_EQ(record->notification->EnableLight(), false);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.number    : CloseAlert_Valid_0001
+ * @tc.name      : CloseAlert with valid active user
+ * @tc.desc      : Test CloseAlert disables light/sound/vibration for a valid record and user.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_CloseAlert_Valid, Function | SmallTest | Level1)
+{
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = new NotificationRequest();
+    record->notification = new Notification(record->request);
+    record->notification->SetEnableLight(true); // pre-enable to observe the close effect
+    // CloseAlert logs GetFlags()->GetReminderFlags() on the valid path, so flags must be preset
+    // to avoid a null shared_ptr dereference with a default-constructed NotificationRequest.
+    record->request->SetFlags(std::make_shared<NotificationFlags>());
+
+    advancedNotificationService_->CloseAlert(record);
+    EXPECT_EQ(record->notification->EnableLight(), false);
+    EXPECT_EQ(record->notification->EnableSound(), false);
+    EXPECT_EQ(record->notification->enableVibration_, false);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_RemoveFromNotificationList_NullBundleOption
+ * @tc.name      : RemoveFromNotificationList_NullBundleOption
+ * @tc.desc      : Test RemoveFromNotificationList with nullptr bundleOption returns ERR_ANS_INNER_INVALID_PARAM.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_RemoveFromNotificationList_NullBundleOption, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    NotificationKey notificationKey;
+    notificationKey.label = "label";
+    notificationKey.id = 1;
+    sptr<Notification> notification = nullptr;
+    ASSERT_EQ(advancedNotificationService_->RemoveFromNotificationList(
+        bundleOption, notificationKey, notification, 0, true), (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_RemoveFromNotificationListForDeleteAll_InvalidUserId
+ * @tc.name      : RemoveFromNotificationListForDeleteAll_InvalidUserId
+ * @tc.desc      : Test RemoveFromNotificationListForDeleteAll with userId=-1 returns ERR_ANS_INNER_INVALID_PARAM.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_RemoveFromNotificationListForDeleteAll_InvalidUserId,
+    Function | SmallTest | Level1)
+{
+    std::string key = "testKey";
+    sptr<Notification> notification = nullptr;
+    ASSERT_EQ(advancedNotificationService_->RemoveFromNotificationListForDeleteAll(
+        key, -1, notification, false), (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : AnsBranchTest_PrepareNotificationRequest_GetOsAccountFailed
+ * @tc.name      : PrepareNotificationRequest_GetOsAccountFailed
+ * @tc.desc      : Test PrepareNotificationRequest returns ERR_ANS_INNER_GET_ACTIVE_USER_FAILED
+ *                 when GetOsAccountLocalIdFromUid fails.
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_PrepareNotificationRequest_GetOsAccountFailed,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockIsNonBundleName(false);
+    MockGetOsAccountLocalIdFromUid(false, 1);
+
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req).GetErrCode(),
+        (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+
+    MockGetOsAccountLocalIdFromUid(true, 0);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

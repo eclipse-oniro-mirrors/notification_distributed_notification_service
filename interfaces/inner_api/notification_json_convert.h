@@ -90,7 +90,12 @@ public:
             return nullptr;
         }
 
-        return T::FromJson(jsonObject);
+        T *result = T::FromJson(jsonObject);
+        if (result == nullptr) {
+            ANS_LOGE("ConvertFromJson returned null");
+            return nullptr;
+        }
+        return result;
     }
 
     /**

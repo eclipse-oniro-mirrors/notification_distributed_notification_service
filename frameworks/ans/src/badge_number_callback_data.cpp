@@ -135,11 +135,40 @@ BadgeNumberCallbackData *BadgeNumberCallbackData::Unmarshalling(Parcel &parcel)
 
 bool BadgeNumberCallbackData::ReadFromParcel(Parcel &parcel)
 {
-    bundle_ = Str16ToStr8(parcel.ReadString16());
-    appInstanceKey_ = parcel.ReadString();
-    uid_ = parcel.ReadInt32();
-    badgeNumber_ = parcel.ReadInt32();
-    instanceKey_ = parcel.ReadInt32();
+    std::u16string bundle16;
+    if (!parcel.ReadString16(bundle16)) {
+        ANS_LOGE("ReadString16 failed");
+        return false;
+    }
+    bundle_ = Str16ToStr8(bundle16);
+
+    std::string appInstanceKey;
+    if (!parcel.ReadString(appInstanceKey)) {
+        ANS_LOGE("ReadString failed");
+        return false;
+    }
+    appInstanceKey_ = appInstanceKey;
+
+    int32_t uid = 0;
+    if (!parcel.ReadInt32(uid)) {
+        ANS_LOGE("ReadInt32 failed");
+        return false;
+    }
+    uid_ = uid;
+
+    int32_t badgeNumber = 0;
+    if (!parcel.ReadInt32(badgeNumber)) {
+        ANS_LOGE("ReadInt32 failed");
+        return false;
+    }
+    badgeNumber_ = badgeNumber;
+
+    int32_t instanceKey = 0;
+    if (!parcel.ReadInt32(instanceKey)) {
+        ANS_LOGE("ReadInt32 failed");
+        return false;
+    }
+    instanceKey_ = instanceKey;
 
     return true;
 }

@@ -58,7 +58,11 @@ ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
         }
         if (!enabled) {
             int32_t userId = SUBSCRIBE_USER_INIT;
-            OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+            if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK || userId <= 0) {
+                ANS_LOGE("Failed to get active user id!");
+                result = ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+                return;
+            }
             result = ClearAllGeofenceNotificationRequests(userId);
             if (result != ERR_OK) {
                 ANS_LOGW("ClearAllGeofenceNotificationRequests failed, errCode=%{public}d", result);
@@ -583,6 +587,10 @@ ErrCode AdvancedNotificationService::RecoverGeofenceLiveViewFromDb(int32_t userI
     ANS_LOGD("The number of live views to recover: %{public}zu.", requestsDb.size());
     std::vector<std::string> keys;
     for (const auto &requestObj : requestsDb) {
+        if (requestObj.request == nullptr || requestObj.bundleOption == nullptr) {
+            ANS_LOGE("Invalid request or bundleOption from db.");
+            continue;
+        }
         auto record = MakeNotificationRecord(requestObj.request, requestObj.bundleOption);
         if (record == nullptr) {
             ANS_LOGE("Make notification record failed.");

@@ -42,7 +42,6 @@
 #include "iremote_object.h"
 #include "mock_ipc_skeleton.h"
 #include "notification_classification.h"
-#include "notification_constant.h"
 #include "notification_preferences.h"
 #include "notification_subscriber.h"
 #include "notification_subscriber_manager.h"
@@ -71,10 +70,6 @@ using namespace OHOS::Media;
 
 namespace OHOS {
 namespace Notification {
-namespace {
-constexpr int32_t MAX_USER_ID = 10737;
-}
-
 extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
 extern void MockIsNonBundleName(bool isNonBundleName);

@@ -21,6 +21,7 @@
 #include "notification_request.h"
 
 using namespace testing::ext;
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 namespace OHOS {
 namespace Notification {
@@ -136,6 +137,40 @@ HWTEST_F(AdvancedNotificationAtomicServiceTest,
     
     auto result = advancedNotificationService_->SetCreatorInfoWithAtomicService(request);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: SetCreatorInfoWithAtomicService_GetOsAccountFailed_00001
+ * @tc.desc: Test SetCreatorInfoWithAtomicService when GetOsAccountLocalIdFromUid fails
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationAtomicServiceTest,
+    SetCreatorInfoWithAtomicService_GetOsAccountFailed_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    MockGetOsAccountLocalIdFromUid(false, 0);
+    auto result = advancedNotificationService_->SetCreatorInfoWithAtomicService(request);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: SetCreatorInfoWithAtomicService_InvalidUserId_00001
+ * @tc.desc: Test SetCreatorInfoWithAtomicService when userId is invalid (<= 0)
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationAtomicServiceTest,
+    SetCreatorInfoWithAtomicService_InvalidUserId_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto result = advancedNotificationService_->SetCreatorInfoWithAtomicService(request);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**

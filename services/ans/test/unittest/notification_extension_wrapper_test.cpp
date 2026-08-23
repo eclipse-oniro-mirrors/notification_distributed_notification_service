@@ -145,11 +145,10 @@ HWTEST_F(NotificationExtensionWrapperTest, UpdateByCancel_NullUpdateByCancel, Te
     ExtensionWrapper wrapper;
     std::vector<sptr<Notification>> notifications;
     int deleteReason = 1;
-    int expectedReason = 0;
 
     wrapper.UpdateByCancel(notifications, deleteReason);
 
-    EXPECT_NE(expectedReason, deleteReason);
+    EXPECT_EQ(deleteReason, 1);
 }
 
 HWTEST_F(NotificationExtensionWrapperTest, UpdateByCancel_Normal_Test, TestSize.Level0) {
@@ -540,6 +539,23 @@ HWTEST_F(NotificationExtensionWrapperTest, BannerControlFromProfile_00004, TestS
     // Assert
     EXPECT_EQ(result, -1);
     EXPECT_FALSE(enabled);
+}
+
+/**
+ * @tc.name: NotificationContentControl_NullRequest_00001
+ * @tc.desc: Test NotificationContentControl with nullptr request returns false
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationExtensionWrapperTest, NotificationContentControl_NullRequest_00001, TestSize.Level0)
+{
+    ExtensionWrapper wrapper;
+    wrapper.notificationContentControl_ = nullptr;
+    sptr<NotificationRequest> nullRequest = nullptr;
+
+    bool result = wrapper.NotificationContentControl(nullRequest, 100);
+
+    EXPECT_FALSE(result);
 }
 }   //namespace Notification
 }   //namespace OHOS

@@ -40,6 +40,8 @@ using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 
 extern void MockIsOsAccountExists(bool mockRet);
+extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase = 0);
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 namespace OHOS {
 namespace Notification {
@@ -415,6 +417,46 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00001, Function | Smal
 }
 
 /**
+ * @tc.name: GetAllLiveViewEnabledBundles_00003
+ * @tc.desc: Test GetAllLiveViewEnabledBundles when GetCurrentActiveUserId fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00003, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::vector<NotificationBundleOption> bundleOptions;
+    NotificationBundleOption bundleOption("GetAllLiveViewEnabledBundles_00003", 999);
+    bundleOptions.push_back(bundleOption);
+
+    MockQueryForgroundOsAccountId(false, 0);
+    auto ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GetAllLiveViewEnabledBundles_00004
+ * @tc.desc: Test GetAllLiveViewEnabledBundles when active user id is invalid (<= 0)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00004, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::vector<NotificationBundleOption> bundleOptions;
+    NotificationBundleOption bundleOption("GetAllLiveViewEnabledBundles_00004", 999);
+    bundleOptions.push_back(bundleOption);
+
+    MockQueryForgroundOsAccountId(true, 2); // mock invalid id (0)
+    auto ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
+}
+
+/**
  * @tc.name: GetAllLiveViewEnabledBundles_00002
  * @tc.desc: Test GetAllLiveViewEnabledBundles_00002
  * @tc.type: FUNC
@@ -654,6 +696,43 @@ HWTEST_F(AnsSlotServiceTest, SetRequestBySlotType_00001, Function | SmallTest | 
     sptr<NotificationBundleOption> bundle = nullptr;
     advancedNotificationService_->SetRequestBySlotType(request, bundle);
     EXPECT_NE(request->GetFlags(), nullptr);
+}
+
+/**
+ * @tc.name: SetRequestBySlotType_00004
+ * @tc.desc: Test SetRequestBySlotType returns early when GetOsAccountLocalIdFromUid fails
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, SetRequestBySlotType_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::CUSTOMER_SERVICE);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    MockGetOsAccountLocalIdFromUid(false, 0);
+    advancedNotificationService_->SetRequestBySlotType(request, bundle);
+    // early return at line 768: sound flag keeps the default NONE (never opened)
+    EXPECT_EQ(request->GetFlags()->IsSoundEnabled(), NotificationConstant::FlagStatus::NONE);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: SetRequestBySlotType_00005
+ * @tc.desc: Test SetRequestBySlotType returns early when resolved userId is invalid (<= 0)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, SetRequestBySlotType_00005, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::CUSTOMER_SERVICE);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    advancedNotificationService_->SetRequestBySlotType(request, bundle);
+    EXPECT_EQ(request->GetFlags()->IsSoundEnabled(), NotificationConstant::FlagStatus::NONE);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**

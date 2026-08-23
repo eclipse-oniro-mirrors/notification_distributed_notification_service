@@ -1536,6 +1536,10 @@ napi_value Common::GetNotificationAppMessageId(
     }
 
     std::string appMessageId = AppExecFwk::UnwrapStringFromJS(env, appMessageIdValue);
+    if (appMessageId.length() > STR_MAX_SIZE) {
+        ANS_LOGE("The appMessageId string length exceeds max size.");
+        return nullptr;
+    }
     request.SetAppMessageId(appMessageId);
     return NapiGetNull(env);
 }
@@ -2108,7 +2112,7 @@ napi_value Common::GetNotificationBadgeNumber(
             return nullptr;
         }
 
-        napi_get_value_int32(env, result, &badgeNumber);
+        NAPI_CALL(env, napi_get_value_int32(env, result, &badgeNumber));
         if (badgeNumber < 0) {
             ANS_LOGE("Wrong badge number.");
             return nullptr;
@@ -2137,36 +2141,26 @@ napi_value Common::GetNotificationUnifiedGroupInfo(
         return nullptr;
     }
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo = std::make_shared<NotificationUnifiedGroupInfo>();
-    // key?: string
-    auto jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "key", napi_string);
-    if (jsValue != nullptr) {
-        std::string key = AppExecFwk::UnwrapStringFromJS(env, jsValue);
-        unifiedGroupInfo->SetKey(key);
-    }
 
-    // title?: string
-    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "title", napi_string);
-    if (jsValue != nullptr) {
-        std::string title = AppExecFwk::UnwrapStringFromJS(env, jsValue);
-        unifiedGroupInfo->SetTitle(title);
+    if (GetUnifiedGroupStringProperty(env, info, "key", unifiedGroupInfo,
+        &NotificationUnifiedGroupInfo::SetKey) == nullptr) {
+        return nullptr;
     }
-
-    // content?: string
-    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "content", napi_string);
-    if (jsValue != nullptr) {
-        std::string content = AppExecFwk::UnwrapStringFromJS(env, jsValue);
-        unifiedGroupInfo->SetContent(content);
+    if (GetUnifiedGroupStringProperty(env, info, "title", unifiedGroupInfo,
+        &NotificationUnifiedGroupInfo::SetTitle) == nullptr) {
+        return nullptr;
     }
-
-    // sceneName?: string
-    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "sceneName", napi_string);
-    if (jsValue != nullptr) {
-        std::string sceneName = AppExecFwk::UnwrapStringFromJS(env, jsValue);
-        unifiedGroupInfo->SetSceneName(sceneName);
+    if (GetUnifiedGroupStringProperty(env, info, "content", unifiedGroupInfo,
+        &NotificationUnifiedGroupInfo::SetContent) == nullptr) {
+        return nullptr;
+    }
+    if (GetUnifiedGroupStringProperty(env, info, "sceneName", unifiedGroupInfo,
+        &NotificationUnifiedGroupInfo::SetSceneName) == nullptr) {
+        return nullptr;
     }
 
     // extraInfo?: {[key:string] : any}
-    jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "extraInfo", napi_object);
+    auto jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, "extraInfo", napi_object);
     if (jsValue != nullptr) {
         std::shared_ptr<AAFwk::WantParams> extras = std::make_shared<AAFwk::WantParams>();
         if (!OHOS::AppExecFwk::UnwrapWantParams(env, jsValue, *extras)) {
@@ -2176,6 +2170,23 @@ napi_value Common::GetNotificationUnifiedGroupInfo(
     }
 
     request.SetUnifiedGroupInfo(unifiedGroupInfo);
+    return NapiGetNull(env);
+}
+
+napi_value Common::GetUnifiedGroupStringProperty(const napi_env &env, const napi_value &info,
+    const char *propName, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo,
+    void (NotificationUnifiedGroupInfo::*setter)(const std::string &))
+{
+    auto jsValue = AppExecFwk::GetPropertyValueByPropertyName(env, info, propName, napi_string);
+    if (jsValue == nullptr) {
+        return NapiGetNull(env);
+    }
+    std::string strValue = AppExecFwk::UnwrapStringFromJS(env, jsValue);
+    if (strValue.length() > STR_MAX_SIZE) {
+        ANS_LOGE("The %{public}s string length exceeds max size.", propName);
+        return nullptr;
+    }
+    ((*groupInfo).*setter)(strValue);
     return NapiGetNull(env);
 }
 

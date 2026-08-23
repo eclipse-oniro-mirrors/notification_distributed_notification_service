@@ -153,6 +153,7 @@ private:
     FlowControlService();
     void InitGlobalFlowControl();
     void InitCallerFlowControl();
+    void InitDefaultThresholdIfNeeded();
     std::pair<FlowControlSceneType, FlowControlSceneType> GetSceneTypePair(
         const std::shared_ptr<NotificationRecord> record, bool isNotificationExists);
 

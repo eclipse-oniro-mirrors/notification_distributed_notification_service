@@ -602,7 +602,10 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
 
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+    }
     request->SetCreatorUserId(userId);
     ANS_LOGD("%{public}s, uid=%{public}d userId=%{public}d", __FUNCTION__, uid, userId);
 
@@ -675,6 +678,10 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
 {
     if (!request) {
         ANSR_LOGE("null request");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    if (request->GetPublishDelayTime() > MAX_PUBLISH_DELAY_TIME) {
+        ANSR_LOGE("Invalid publishDelayTime: %{public}u", request->GetPublishDelayTime());
         return ERR_ANS_INNER_INVALID_PARAM;
     }
     auto tokenCaller = IPCSkeleton::GetCallingTokenID();

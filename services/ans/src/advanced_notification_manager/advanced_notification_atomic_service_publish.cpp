@@ -88,7 +88,10 @@ ErrCode AdvancedNotificationService::SetCreatorInfoWithAtomicService(const sptr<
     request->SetCreatorUid(uid);
     request->SetCreatorPid(pid);
     int userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId <= 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+    }
     request->SetCreatorUserId(userId);
     request->SetCreatorBundleName(agentBundleName);
     return ERR_OK;

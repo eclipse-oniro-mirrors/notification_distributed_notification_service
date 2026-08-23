@@ -44,7 +44,6 @@
 #include "notification_subscriber_manager.h"
 #include "mock_push_callback_stub.h"
 #include "system_event_observer.h"
-#include "notification_constant.h"
 #include "want_agent_info.h"
 #include "want_agent_helper.h"
 #include "want_params.h"

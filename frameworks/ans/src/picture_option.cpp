@@ -18,6 +18,7 @@
 #include <new>
 
 #include "ans_log_wrapper.h"
+#include "ans_const_define.h"
 #include "parcel.h"
 
 namespace OHOS {
@@ -67,6 +68,10 @@ bool PictureOption::ReadFromParcel(Parcel &parcel)
 {
     if (!parcel.ReadStringVector(&preparseLiveViewPicList_)) {
         ANS_LOGE("Failed to read preparseLiveViewPicList_");
+        return false;
+    }
+    if (preparseLiveViewPicList_.size() > MAX_PARCELABLE_VECTOR_NUM) {
+        ANS_LOGE("size exceeds limit");
         return false;
     }
     return true;

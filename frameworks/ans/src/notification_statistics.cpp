@@ -146,8 +146,19 @@ bool NotificationStatistics::ReadFromParcel(Parcel &parcel)
     delete pBundle;
     pBundle = nullptr;
 
-    lastTime_ = parcel.ReadInt64();
-    recentCount_ = parcel.ReadInt32();
+    int64_t lastTime = 0;
+    if (!parcel.ReadInt64(lastTime)) {
+        ANS_LOGE("ReadInt64 failed");
+        return false;
+    }
+    lastTime_ = lastTime;
+
+    int32_t recentCount = 0;
+    if (!parcel.ReadInt32(recentCount)) {
+        ANS_LOGE("ReadInt32 failed");
+        return false;
+    }
+    recentCount_ = recentCount;
 
     return true;
 }

@@ -14,13 +14,13 @@
  */
 
 #include "disable_notification.h"
+#include "ans_const_define.h"
 #include "ans_inner_errors.h"
 
 namespace OHOS {
 namespace NotificationNapi {
 constexpr int8_t DISABLE_MAX_PARA = 3;
 constexpr int8_t DISABLE_MIN_PARA = 2;
-constexpr int32_t MAX_USER_ID = 10736;
 
 bool ParseDisabledParameters(const napi_env &env, const napi_value &value, bool &disabled)
 {
@@ -33,7 +33,10 @@ bool ParseDisabledParameters(const napi_env &env, const napi_value &value, bool 
         Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
-    napi_get_value_bool(env, value, &disabled);
+    if (napi_get_value_bool(env, value, &disabled) != napi_ok) {
+        ANS_LOGE("Failed to parse the parameter as boolean.");
+        return false;
+    }
     return true;
 }
 
@@ -90,9 +93,10 @@ bool ParseUserIdParameters(const napi_env &env, const napi_value &value, int32_t
         Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }
-    if (userId < 0 || userId > MAX_USER_ID) {
+    if (userId < 0 || userId > OHOS::Notification::MAX_USER_ID) {
         ANS_LOGE("Invalid userId");
-        std::string msg = "UserId must be a non-negative integer and less than " + std::to_string(MAX_USER_ID);
+        std::string msg = "UserId must be a non-negative integer and less than " +
+            std::to_string(OHOS::Notification::MAX_USER_ID);
         Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
         return false;
     }

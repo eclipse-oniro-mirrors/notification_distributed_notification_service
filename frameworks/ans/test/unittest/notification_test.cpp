@@ -885,5 +885,950 @@ HWTEST_F(NotificationTest, Dump_00003, Function | SmallTest | Level1)
     EXPECT_NE(dump.find("DEAL"), std::string::npos);
     EXPECT_NE(dump.find("LOGISTICS"), std::string::npos);
 }
+
+/**
+ * @tc.name: SetLockScreenVisbleness_Invalid_001
+ * @tc.desc: Test SetLockScreenVisbleness with invalid visibleness does not set.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, SetLockScreenVisbleness_Invalid_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    auto before = rrc->GetLockscreenVisibleness();
+    rrc->SetLockScreenVisbleness(NotificationConstant::VisiblenessType::ILLEGAL_TYPE);
+    EXPECT_EQ(rrc->GetLockscreenVisibleness(), before);
+}
+
+/**
+ * @tc.name: SetSourceType_Invalid_001
+ * @tc.desc: Test SetSourceType with invalid source type does not set.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, SetSourceType_Invalid_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    auto before = rrc->GetSourceType();
+    rrc->SetSourceType(static_cast<NotificationConstant::SourceType>(100));
+    EXPECT_EQ(rrc->GetSourceType(), before);
+}
+
+/**
+ * @tc.name: MarshallingInt32_InvalidVisibleness_001
+ * @tc.desc: Test MarshallingInt32 returns false when visibleness is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, MarshallingInt32_InvalidVisibleness_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->lockscreenVisibleness_ = static_cast<NotificationConstant::VisiblenessType>(100);
+    EXPECT_EQ(rrc->MarshallingInt32(parcel), false);
+}
+
+/**
+ * @tc.name: MarshallingInt32_InvalidRemindType_001
+ * @tc.desc: Test MarshallingInt32 returns false when remindType is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, MarshallingInt32_InvalidRemindType_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->remindType_ = static_cast<NotificationConstant::RemindType>(100);
+    EXPECT_EQ(rrc->MarshallingInt32(parcel), false);
+}
+
+/**
+ * @tc.name: MarshallingInt32_InvalidSourceType_001
+ * @tc.desc: Test MarshallingInt32 returns false when sourceType is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, MarshallingInt32_InvalidSourceType_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->sourceType_ = static_cast<NotificationConstant::SourceType>(100);
+    EXPECT_EQ(rrc->MarshallingInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelBool_001
+ * @tc.desc: Test ReadFromParcelBool when ReadBool(enableLight_) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelBool_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    EXPECT_EQ(rrc->ReadFromParcelBool(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelBool_002
+ * @tc.desc: Test ReadFromParcelBool when ReadBool(enableSound_) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelBool_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    EXPECT_EQ(rrc->ReadFromParcelBool(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelBool_003
+ * @tc.desc: Test ReadFromParcelBool when ReadBool(enableVibration_) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelBool_003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    EXPECT_EQ(rrc->ReadFromParcelBool(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelBool_004
+ * @tc.desc: Test ReadFromParcelBool when ReadBool(isRemoveAllowed_) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelBool_004, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    EXPECT_EQ(rrc->ReadFromParcelBool(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelString_001
+ * @tc.desc: Test ReadFromParcelString when ReadString(key) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelString_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelString(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelString_002
+ * @tc.desc: Test ReadFromParcelString when ReadString(soundStr) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelString_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(true);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelString(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelString_003
+ * @tc.desc: Test ReadFromParcelString when ReadString(deviceId) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelString_003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(true);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("sound");
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelString(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt32_001
+ * @tc.desc: Test ReadFromParcelInt32 when ReadInt32(ledLightColor_) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt32_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt32_002
+ * @tc.desc: Test ReadFromParcelInt32 when ReadInt32(visibleness) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt32_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt32_003
+ * @tc.desc: Test ReadFromParcelInt32 when visibleness is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt32_003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(100);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt32_004
+ * @tc.desc: Test ReadFromParcelInt32 when ReadInt32(remindType) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt32_004, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt32_005
+ * @tc.desc: Test ReadFromParcelInt32 when remindType is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt32_005, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(100);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt32_006
+ * @tc.desc: Test ReadFromParcelInt32 when ReadInt32(sourceType) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt32_006, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RemindType::NONE));
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt32_007
+ * @tc.desc: Test ReadFromParcelInt32 when sourceType is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt32_007, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RemindType::NONE));
+    parcel.WriteInt32(100);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt64_001
+ * @tc.desc: Test ReadFromParcelInt64 when ReadInt64(postTime_) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt64_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RemindType::NONE));
+    parcel.WriteInt32(0);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelInt32(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt64(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelUint64_001
+ * @tc.desc: Test ReadFromParcelUint64 when ReadUint64(updateTimerId_) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelUint64_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RemindType::NONE));
+    parcel.WriteInt32(0);
+    parcel.WriteInt64(0);
+    parcel.WriteInt64Vector({});
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelInt32(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelInt64(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelUint64(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelParcelable_001
+ * @tc.desc: Test ReadFromParcelParcelable when ReadBool(hasVoiceContent) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelParcelable_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    parcel.WriteStrongParcelable(request);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> nullRequest = nullptr;
+    auto rrc = std::make_shared<Notification>(nullRequest);
+    EXPECT_EQ(rrc->ReadFromParcelParcelable(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelParcelable_002
+ * @tc.desc: Test ReadFromParcelParcelable when ReadBool(hasNotificationClassification) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelParcelable_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationRequest> request = new NotificationRequest();
+    parcel.WriteStrongParcelable(request);
+    parcel.WriteBool(false);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> nullRequest = nullptr;
+    auto rrc = std::make_shared<Notification>(nullRequest);
+    EXPECT_EQ(rrc->ReadFromParcelParcelable(parcel), false);
+}
+
+/**
+ * @tc.name: MarshallingString_SoundNull_001
+ * @tc.desc: Test MarshallingString succeeds when enableSound_ is true but sound_ is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, MarshallingString_SoundNull_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->SetEnableSound(true);
+    Parcel parcel;
+    EXPECT_EQ(rrc->MarshallingString(parcel), true);
+}
+
+/**
+ * @tc.name: ReadFromParcelUint64_002
+ * @tc.desc: Test ReadFromParcelUint64 when ReadUint64(finishTimerId_) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelUint64_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RemindType::NONE));
+    parcel.WriteInt32(0);
+    parcel.WriteInt64(0);
+    parcel.WriteInt64Vector({});
+    parcel.WriteUint64(1);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelInt32(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelInt64(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelUint64(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelUint64_003
+ * @tc.desc: Test ReadFromParcelUint64 when ReadUint64(archiveTimerId_) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelUint64_003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RemindType::NONE));
+    parcel.WriteInt32(0);
+    parcel.WriteInt64(0);
+    parcel.WriteInt64Vector({});
+    parcel.WriteUint64(1);
+    parcel.WriteUint64(2);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelInt32(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelInt64(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelUint64(parcel), false);
+}
+
+/**
+ * @tc.name: MarshallingInt32_InvalidVisibleness_002
+ * @tc.desc: Test MarshallingInt32 returns false when visibleness is below range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, MarshallingInt32_InvalidVisibleness_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->lockscreenVisibleness_ = static_cast<NotificationConstant::VisiblenessType>(-1);
+    EXPECT_EQ(rrc->MarshallingInt32(parcel), false);
+}
+
+/**
+ * @tc.name: MarshallingInt32_InvalidRemindType_002
+ * @tc.desc: Test MarshallingInt32 returns false when remindType is below range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, MarshallingInt32_InvalidRemindType_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->remindType_ = static_cast<NotificationConstant::RemindType>(-2);
+    EXPECT_EQ(rrc->MarshallingInt32(parcel), false);
+}
+
+/**
+ * @tc.name: MarshallingInt32_InvalidSourceType_002
+ * @tc.desc: Test MarshallingInt32 returns false when sourceType is below range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, MarshallingInt32_InvalidSourceType_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    rrc->sourceType_ = static_cast<NotificationConstant::SourceType>(-1);
+    EXPECT_EQ(rrc->MarshallingInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt32_008
+ * @tc.desc: Test ReadFromParcelInt32 when visibleness is below range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt32_008, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(-1);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt32_009
+ * @tc.desc: Test ReadFromParcelInt32 when remindType is below range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt32_009, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(-2);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt32_010
+ * @tc.desc: Test ReadFromParcelInt32 when sourceType is below range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt32_010, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RemindType::NONE));
+    parcel.WriteInt32(-1);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcelInt64_002
+ * @tc.desc: Test ReadFromParcelInt64 when vibrationStyle vector data is absent: Parcel treats the
+ *           absent vector as empty and returns true (only postTime_ is read).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcelInt64_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RemindType::NONE));
+    parcel.WriteInt32(0);
+    parcel.WriteInt64(0);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
+    ASSERT_TRUE(rrc->ReadFromParcelInt32(parcel));
+    EXPECT_EQ(rrc->ReadFromParcelInt64(parcel), true);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00002
+ * @tc.desc: Test ReadFromParcel when ReadFromParcelBool fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcel_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00003
+ * @tc.desc: Test ReadFromParcel when ReadFromParcelString fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcel_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00004
+ * @tc.desc: Test ReadFromParcel when ReadFromParcelInt32 fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcel_00004, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00005
+ * @tc.desc: Test ReadFromParcel when ReadFromParcelInt64 fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcel_00005, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RemindType::NONE));
+    parcel.WriteInt32(0);
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00006
+ * @tc.desc: Test ReadFromParcel when ReadFromParcelUint64 fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcel_00006, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteString("key");
+    parcel.WriteString("deviceId");
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::RemindType::NONE));
+    parcel.WriteInt32(0);
+    parcel.WriteInt64(0);
+    parcel.WriteInt64Vector({});
+    parcel.RewindRead(0);
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00007
+ * @tc.desc: Test ReadFromParcel succeeds with complete valid parcel data.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, ReadFromParcel_00007, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetContent(content);
+    auto notification = std::make_shared<Notification>(request);
+    ASSERT_EQ(notification->Marshalling(parcel), true);
+
+    auto result = std::make_shared<Notification>();
+    EXPECT_EQ(result->ReadFromParcel(parcel), true);
+    EXPECT_EQ(result->GetDeviceId(), notification->GetDeviceId());
+}
+
+/**
+ * @tc.name: SetLockScreenVisbleness_Invalid_002
+ * @tc.desc: Test SetLockScreenVisbleness with negative visibleness does not set.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, SetLockScreenVisbleness_Invalid_002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    auto before = rrc->GetLockscreenVisibleness();
+    rrc->SetLockScreenVisbleness(static_cast<NotificationConstant::VisiblenessType>(-1));
+    EXPECT_EQ(rrc->GetLockscreenVisibleness(), before);
+}
+
+/**
+ * @tc.name: SetLockScreenVisbleness_Boundary_001
+ * @tc.desc: Test SetLockScreenVisbleness with max valid visibleness takes effect.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, SetLockScreenVisbleness_Boundary_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    NotificationConstant::VisiblenessType visbleness = NotificationConstant::VisiblenessType::SECRET;
+    rrc->SetLockScreenVisbleness(visbleness);
+    EXPECT_EQ(rrc->GetLockscreenVisibleness(), visbleness);
+}
+
+/**
+ * @tc.name: SetSourceType_Invalid_002
+ * @tc.desc: Test SetSourceType with negative source type does not set.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, SetSourceType_Invalid_002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    auto before = rrc->GetSourceType();
+    rrc->SetSourceType(static_cast<NotificationConstant::SourceType>(-1));
+    EXPECT_EQ(rrc->GetSourceType(), before);
+}
+
+/**
+ * @tc.name: SetSourceType_Boundary_001
+ * @tc.desc: Test SetSourceType with max valid source type takes effect.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, SetSourceType_Boundary_001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    auto rrc = std::make_shared<Notification>(request);
+    NotificationConstant::SourceType sourceType = NotificationConstant::SourceType::TYPE_TIMER;
+    rrc->SetSourceType(sourceType);
+    EXPECT_EQ(rrc->GetSourceType(), sourceType);
+}
+
+/**
+ * @tc.name: Marshalling_EnableSoundRoundTrip_001
+ * @tc.desc: Test Marshalling and Unmarshalling roundtrip when enableSound is true and sound is set.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, Marshalling_EnableSoundRoundTrip_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetContent(content);
+    auto notification = std::make_shared<Notification>(request);
+    Uri sound("sound");
+    notification->SetSound(sound);
+    notification->SetEnableSound(true);
+
+    EXPECT_EQ(notification->Marshalling(parcel), true);
+
+    auto result = Notification::Unmarshalling(parcel);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetSound(), sound);
+}
+
+/**
+ * @tc.name: Marshalling_EnableSoundNullRoundTrip_001
+ * @tc.desc: Test Marshalling and Unmarshalling roundtrip when enableSound is true but sound is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationTest, Marshalling_EnableSoundNullRoundTrip_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetContent(content);
+    auto notification = std::make_shared<Notification>(request);
+    notification->SetEnableSound(true);
+
+    EXPECT_EQ(notification->Marshalling(parcel), true);
+
+    auto result = Notification::Unmarshalling(parcel);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->GetSound(), Uri(""));
+    EXPECT_EQ(result->GetDeviceId(), notification->GetDeviceId());
+}
 } // namespace Notification
 } // namespace OHOS

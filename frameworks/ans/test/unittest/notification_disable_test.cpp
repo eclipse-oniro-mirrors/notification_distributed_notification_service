@@ -17,6 +17,10 @@
 
 #include "notification_disable.h"
 
+namespace {
+constexpr int32_t MAX_NOTIFICATION_DISABLE_NUM = 1000;
+}
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
@@ -79,32 +83,68 @@ HWTEST_F(NotificationDisableTest, Marshalling_0100, Function | SmallTest | Level
 
 /**
  * @tc.name: ReadFromParcel_0100
- * @tc.desc: Test ReadFromParcel.
+ * @tc.desc: Test ReadFromParcel with empty parcel (ReadBool fails).
  * @tc.type: FUNC
  */
 HWTEST_F(NotificationDisableTest, ReadFromParcel_0100, Function | SmallTest | Level1)
 {
     Parcel parcel;
     auto rrc = std::make_shared<NotificationDisable>();
-    EXPECT_TRUE(rrc->ReadFromParcel(parcel));
+    EXPECT_FALSE(rrc->ReadFromParcel(parcel));
+}
+
+/**
+ * @tc.name: ReadFromParcel_0200
+ * @tc.desc: Test ReadFromParcel when ReadUint32 fails (only bool written).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDisableTest, ReadFromParcel_0200, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    auto rrc = std::make_shared<NotificationDisable>();
+    EXPECT_FALSE(rrc->ReadFromParcel(parcel));
+}
+
+/**
+ * @tc.name: ReadFromParcel_0300
+ * @tc.desc: Test ReadFromParcel when ReadString fails in bundle loop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDisableTest, ReadFromParcel_0300, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteUint32(1);
+    auto rrc = std::make_shared<NotificationDisable>();
+    EXPECT_FALSE(rrc->ReadFromParcel(parcel));
+}
+
+/**
+ * @tc.name: ReadFromParcel_0400
+ * @tc.desc: Test ReadFromParcel when ReadInt32(userId) fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDisableTest, ReadFromParcel_0400, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteBool(false);
+    parcel.WriteUint32(0);
+    auto rrc = std::make_shared<NotificationDisable>();
+    EXPECT_FALSE(rrc->ReadFromParcel(parcel));
 }
 
 /**
  * @tc.name: Unmarshalling_0100
- * @tc.desc: Test Unmarshalling.
+ * @tc.desc: Test Unmarshalling with empty parcel returns nullptr.
  * @tc.type: FUNC
  */
 HWTEST_F(NotificationDisableTest, Unmarshalling_0100, Function | SmallTest | Level1)
 {
-    bool unmarshalling = true;
     Parcel parcel;
     auto rrc = std::make_shared<NotificationDisable>();
-    if (nullptr != rrc) {
-        if (nullptr == rrc->Unmarshalling(parcel)) {
-            unmarshalling = false;
-        }
-    }
-    EXPECT_TRUE(unmarshalling);
+    ASSERT_NE(nullptr, rrc);
+    EXPECT_EQ(nullptr, rrc->Unmarshalling(parcel));
 }
 
 /**
@@ -191,6 +231,40 @@ HWTEST_F(NotificationDisableTest, FromJson_0400, Function | SmallTest | Level1)
     std::string jsonObjString = "[1, 2, 3]";
     notificationDisable.FromJson(jsonObjString);
     EXPECT_FALSE(notificationDisable.GetDisabled());
+}
+
+/**
+ * @tc.name: FromJson_0500
+ * @tc.desc: Test FromJson with bundleList exceeding MAX_NOTIFICATION_DISABLE_NUM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDisableTest, FromJson_0500, Function | SmallTest | Level1)
+{
+    NotificationDisable notificationDisable;
+    std::string bundleArray = "[";
+    for (int32_t i = 0; i <= MAX_NOTIFICATION_DISABLE_NUM; ++i) {
+        bundleArray += "\"bundle\",";
+    }
+    if (!bundleArray.empty()) {
+        bundleArray.pop_back();
+    }
+    bundleArray += "]";
+    std::string jsonObjString = "{\"disabled\": true, \"bundleList\": " + bundleArray + "}";
+    notificationDisable.FromJson(jsonObjString);
+    EXPECT_TRUE(notificationDisable.GetBundleList().empty());
+}
+
+/**
+ * @tc.name: FromJson_0600
+ * @tc.desc: Test FromJson with userId out of int32 range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDisableTest, FromJson_0600, Function | SmallTest | Level1)
+{
+    NotificationDisable notificationDisable;
+    std::string jsonObjString = "{\"userId\": 2147483648}";
+    notificationDisable.FromJson(jsonObjString);
+    EXPECT_EQ(notificationDisable.GetUserId(), -1);
 }
 }
 }

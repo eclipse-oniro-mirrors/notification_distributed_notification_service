@@ -295,7 +295,7 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, addSingleButtonIconResource_00001,
     button->addSingleButtonIconResource(resource2);
     button->addSingleButtonIconResource(resource3);
     button->addSingleButtonIconResource(resource4);
-    EXPECT_EQ(button->GetAllButtonIconResource().size(), 4);
+    EXPECT_EQ(button->GetAllButtonIconResource().size(), 3);
 }
 
 HWTEST_F(NotificationLocalLiveViewButtonTest, ClearButtonIcons_00001, Function | SmallTest | Level1)

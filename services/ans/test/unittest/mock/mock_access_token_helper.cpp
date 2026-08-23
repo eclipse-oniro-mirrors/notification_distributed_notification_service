@@ -17,12 +17,21 @@
 #include "ans_ut_constant.h"
 #include "ipc_skeleton.h"
 
+namespace {
+bool g_mockVerifyCallerPermission = true;
+}
+
 namespace OHOS {
 namespace Notification {
+void MockVerifyCallerPermission(bool isVerify)
+{
+    g_mockVerifyCallerPermission = isVerify;
+}
+
 bool AccessTokenHelper::VerifyCallerPermission(
     const Security::AccessToken::AccessTokenID &tokenCaller, const std::string &permission)
 {
-    return true;
+    return g_mockVerifyCallerPermission;
 }
 
 bool AccessTokenHelper::VerifyNativeToken(const Security::AccessToken::AccessTokenID &callerToken)

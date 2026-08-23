@@ -1106,7 +1106,8 @@ ohos_unittest("distributed_helper_test") {
     "/${services_path}/distributed/src/tlv_box/state_box.cpp",
     "/${services_path}/distributed/src/tlv_box/tlv_box.cpp",
     "distributed_helper_test/distributed_notification_analytics_util_test.cpp",
-    "distributed_helper_test/bundle_resource_helper_test.cpp"
+    "distributed_helper_test/bundle_resource_helper_test.cpp",
+    "distributed_helper_test/mock_os_account_manager_annex.cpp"
   ]
 
   configs = [

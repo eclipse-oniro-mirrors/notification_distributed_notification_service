@@ -237,9 +237,17 @@ bool AdvancedDatashareHelper::QueryByDataShare(Uri &uri, const std::string &key,
         AddDataShareItems(uri, key, value);
         return false;
     }
-    int32_t columnIndex;
-    result->GetColumnIndex(ADVANCED_DATA_COLUMN_VALUE, columnIndex);
-    result->GetString(columnIndex, value);
+    int32_t columnIndex = -1;
+    if (result->GetColumnIndex(ADVANCED_DATA_COLUMN_VALUE, columnIndex) != DataShare::E_OK || columnIndex < 0) {
+        ANS_LOGE("GetColumnIndex failed for key:%{public}s", key.c_str());
+        result->Close();
+        return false;
+    }
+    if (result->GetString(columnIndex, value) != DataShare::E_OK) {
+        ANS_LOGE("GetString failed for key:%{public}s", key.c_str());
+        result->Close();
+        return false;
+    }
     result->Close();
     ANS_LOGI("Query success key:%{public}s,value:%{public}s", key.c_str(), value.c_str());
     AddDataShareItems(uri, key, value);
@@ -262,6 +270,11 @@ void AdvancedDatashareHelper::AddDataShareItems(Uri &uri, const std::string &key
 ErrCode AdvancedDatashareHelper::QueryContactInner(Uri &uri, const std::string &phoneNumber, const std::string &policy,
     const std::string &profileId, const std::string isSupportIntelligentScene, const int32_t userId)
 {
+    if (phoneNumber.empty() ||
+        phoneNumber.length() > static_cast<size_t>(STR_MAX_SIZE)) {
+        ANS_LOGE("Invalid phoneNumber.");
+        return ERROR_QUERY_INFO_FAILED;
+    }
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     std::shared_ptr<DataShare::DataShareResultSet> resultSet = nullptr;
     if (userId == SUBSCRIBE_USER_INIT) {
@@ -300,6 +313,12 @@ ErrCode AdvancedDatashareHelper::QueryContactInner(Uri &uri, const std::string &
 ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy,
     const std::string &profileId, const std::string isSupportIntelligentScene)
 {
+    if (phoneNumber.empty() || phoneNumber.length() > static_cast<size_t>(STR_MAX_SIZE) ||
+        policy.length() > static_cast<size_t>(STR_MAX_SIZE) ||
+        profileId.length() > static_cast<size_t>(STR_MAX_SIZE)) {
+        ANS_LOGE("Invalid string input length.");
+        return ERROR_QUERY_INFO_FAILED;
+    }
     return QueryContactInner(uri, phoneNumber, policy, profileId, isSupportIntelligentScene);
 }
 
@@ -379,13 +398,16 @@ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::D
     const std::string &policy)
 {
     bool isNoNeedSilent = false;
-    int32_t columnIndex;
+    int32_t columnIndex = -1;
     int32_t favorite;
     std::string focus_mode_list;
     switch (atoi(policy.c_str())) {
         case ContactPolicy::ALLOW_FAVORITE_CONTACTS:
             do {
-                resultSet->GetColumnIndex(FAVORITE, columnIndex);
+                if (resultSet->GetColumnIndex(FAVORITE, columnIndex) != DataShare::E_OK || columnIndex < 0) {
+                    ANS_LOGE("GetColumnIndex FAVORITE failed.");
+                    break;
+                }
                 resultSet->GetInt(columnIndex, favorite);
                 isNoNeedSilent = favorite == 1;
                 if (isNoNeedSilent) {
@@ -398,16 +420,18 @@ bool AdvancedDatashareHelper::dealWithContactResult(std::shared_ptr<DataShare::D
         case ContactPolicy::FORBID_SPECIFIED_CONTACTS:
             {
                 do {
-                    resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex);
-                    resultSet->GetString(columnIndex, focus_mode_list);
-                    if (focus_mode_list.empty() || focus_mode_list.c_str()[0] == '0') {
-                        isNoNeedSilent = false;
-                    }
-                    if (focus_mode_list.c_str()[0] == '1') {
-                        isNoNeedSilent = true;
+                    if (resultSet->GetColumnIndex(FOCUS_MODE_LIST, columnIndex) != DataShare::E_OK ||
+                        columnIndex < 0) {
+                        ANS_LOGE("GetColumnIndex FOCUS_MODE_LIST failed.");
                         break;
                     }
-                    if (focus_mode_list.c_str()[0] == '2') {
+                    resultSet->GetString(columnIndex, focus_mode_list);
+                    if (focus_mode_list.empty() || focus_mode_list[0] == '0') {
+                        isNoNeedSilent = false;
+                    } else if (focus_mode_list[0] == '1') {
+                        isNoNeedSilent = true;
+                        break;
+                    } else if (focus_mode_list[0] == '2') {
                         isNoNeedSilent = false;
                         break;
                     }
@@ -495,9 +519,13 @@ std::string AdvancedDatashareHelper::GetFocusModeRepeatCallUri(const int32_t &us
 
 std::string AdvancedDatashareHelper::GetIntelligentData(const std::string &uri, const std::string &key)
 {
+    if (uri.empty() || uri.find("..") != std::string::npos || uri[0] == '/') {
+        ANS_LOGE("Invalid uri for path traversal.");
+        return "";
+    }
     std::string value;
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK || userId < 0) {
         ANS_LOGD("GetActiveUserId is false");
         return "";
     }
@@ -514,6 +542,14 @@ std::string AdvancedDatashareHelper::GetIntelligentData(const std::string &uri, 
 std::string AdvancedDatashareHelper::GetIntelligentData(
     const std::string &uri, const std::string &key, const int32_t userId)
 {
+    if (userId < 0 || userId > MAX_USER_ID) {
+        ANS_LOGE("Invalid userId: %{public}d", userId);
+        return "";
+    }
+    if (uri.empty() || uri.find("..") != std::string::npos || uri[0] == '/') {
+        ANS_LOGE("Invalid uri for path traversal.");
+        return "";
+    }
     std::string value;
     Uri tempUri(USER_SETTINGS_DATA_SECURE_URI + std::to_string(userId) + uri);
     bool ret = Query(tempUri, key, value);

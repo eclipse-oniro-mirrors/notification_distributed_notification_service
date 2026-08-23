@@ -251,7 +251,10 @@ int32_t BundleResourceHelper::GetAppIndexByUid(const int32_t uid)
 bool BundleResourceHelper::IsAncoApp(const std::string &bundleName, int32_t uid, bool& isAnco)
 {
     int32_t userId = ZERO_USERID;
-    AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid");
+        return false;
+    }
     if (userId >= DEFAULT_USER_ID) {
         isAnco = false;
         return true;

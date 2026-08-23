@@ -270,6 +270,7 @@ napi_value NapiIsNotificationEnabledSelf(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
                     ANS_LOGE("Not allowed to query another application");
+                    asynccallbackinfo->info.errorCode = ERR_ANS_INNER_INVALID_PARAM;
                 } else {
                     asynccallbackinfo->info.errorCode =
                         AnsNotification::GetInstance()->IsAllowedNotifySelf(

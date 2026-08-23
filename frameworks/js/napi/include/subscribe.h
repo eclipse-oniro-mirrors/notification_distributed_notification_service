@@ -298,7 +298,7 @@ struct OperationInfo {
     int32_t operationType = NotificationConstant::DISTRIBUTE_JUMP_INVALID;
     std::string actionName;
     std::string userInput;
-    int32_t btnIndex;
+    int32_t btnIndex = 0;
 };
 
 struct AsyncOperationCallbackInfo {

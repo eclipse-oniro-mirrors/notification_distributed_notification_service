@@ -26,6 +26,8 @@ namespace OHOS {
 namespace Notification {
 using TimePoint = std::chrono::system_clock::time_point;
 constexpr int32_t TIME_GAP_FOR_SECOND = 1;
+constexpr uint32_t FLOW_CTRL_THRESHOLD_MIN = 1;
+constexpr uint32_t FLOW_CTRL_THRESHOLD_MAX = 10000;
 
 void RemoveExpiredTimestamp(std::list<TimePoint> &list, const TimePoint &now)
 {
@@ -110,8 +112,25 @@ FlowControlService::FlowControlService()
     InitCallerFlowControl();
 }
 
+void FlowControlService::InitDefaultThresholdIfNeeded()
+{
+    auto clampThreshold = [](uint32_t &value, uint32_t defaultValue, const char *name) {
+        if (value < FLOW_CTRL_THRESHOLD_MIN || value > FLOW_CTRL_THRESHOLD_MAX) {
+            ANS_LOGW("%{public}s is invalid value %{public}u from CCM, using default", name, value);
+            value = defaultValue;
+        }
+    };
+    clampThreshold(threshold_.maxCreateNumPerSecond, MAX_CREATE_NUM_PERSECOND, "maxCreateNumPerSecond");
+    clampThreshold(threshold_.maxUpdateNumPerSecond, MAX_UPDATE_NUM_PERSECOND, "maxUpdateNumPerSecond");
+    clampThreshold(threshold_.maxCreateNumPerSecondPerApp, MAX_CREATE_NUM_PERSECOND_PERAPP,
+        "maxCreateNumPerSecondPerApp");
+    clampThreshold(threshold_.maxUpdateNumPerSecondPerApp, MAX_UPDATE_NUM_PERSECOND_PERAPP,
+        "maxUpdateNumPerSecondPerApp");
+}
+
 void FlowControlService::InitGlobalFlowControl()
 {
+    InitDefaultThresholdIfNeeded();
     std::vector<std::tuple<FlowControlSceneType, uint32_t, FlowControlErrMsg>> configs = {
         {
             FlowControlSceneType::GLOBAL_SYSTEM_NORMAL_CREATE,
