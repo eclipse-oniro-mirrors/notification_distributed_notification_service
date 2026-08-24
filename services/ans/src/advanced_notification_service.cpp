@@ -390,6 +390,10 @@ AdvancedNotificationService::~AdvancedNotificationService()
 
 void AdvancedNotificationService::SelfClean(bool resetQueues)
 {
+    // ~SystemEventObserver unsubscribes from CES: no event-driven work is
+    // dispatched to CES workers during/after cleanup, nor destroyed later by
+    // static destruction racing in-flight deliveries (issue #4344).
+    systemEventObserver_ = nullptr;
     if (resetQueues) {
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         DistributedNotificationManager::GetInstance()->RegisterCallback({});
