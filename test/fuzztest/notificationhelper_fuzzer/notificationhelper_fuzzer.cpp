@@ -136,7 +136,10 @@ public:
 
     bool TestSubscriptionOperations(FuzzedDataProvider* fdp, NotificationHelper& notificationHelper)
     {
-        FuzzNotificationSubscriber fuzzNotificationSub;
+        // By-reference subscribe APIs make SubscriberImpl hold a raw reference to the subscriber,
+        // and in-flight IPC callbacks may fire on the binder thread after this function returns.
+        // The subscriber must therefore outlive the stack frame (issue #4350 ASAN overflow).
+        static FuzzNotificationSubscriber fuzzNotificationSub;
         std::shared_ptr<NotificationSubscriber> fuzzNotificationSubSptr =
             std::make_shared<FuzzNotificationSubscriber>();
         std::shared_ptr<NotificationSubscriber> fuzzNotificationSubSptr2 =
@@ -155,6 +158,7 @@ public:
         
         notificationHelper.UnSubscribeNotification(fuzzNotificationSub);
         notificationHelper.UnSubscribeNotification(fuzzNotificationSubSptr);
+        notificationHelper.UnSubscribeNotification(fuzzNotificationSubSptr3);
         notificationHelper.UnSubscribeNotification(fuzzNotificationSubSptr2, fuzzNotificationSubInfoSptr);
         return true;
     }
