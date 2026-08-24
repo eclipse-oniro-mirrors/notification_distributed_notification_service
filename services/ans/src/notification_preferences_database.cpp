@@ -424,7 +424,7 @@ bool NotificationPreferencesDatabase::PutSlotsToDisturbeDB(
     }
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid %{public}d", bundleUid);
         return false;
     }
@@ -462,7 +462,7 @@ bool NotificationPreferencesDatabase::QueryStatisticsByBundle(
         ANS_LOGE("null RdbStore");
         return false;
     }
-    if (tableUserId <= 0) {
+    if (tableUserId < 0) {
         ANS_LOGE("invalid tableUserId: %{public}d", tableUserId);
         return false;
     }
@@ -555,7 +555,7 @@ bool NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
     std::string bundleKeyStr = KEY_BUNDLE_LABEL + GenerateBundleLablel(bundleInfo);
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
-        bundleInfo.GetBundleUid(), userId) != ERR_OK) || (userId <= 0)) {
+        bundleInfo.GetBundleUid(), userId) != ERR_OK) || (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, bundleUid: %{public}d",
             __FUNCTION__, bundleInfo.GetBundleUid());
         NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_1));
@@ -589,7 +589,7 @@ bool NotificationPreferencesDatabase::IsNotificationSlotFlagsExists(const sptr<N
     std::string value;
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleOption->GetUid());
         return false;
@@ -906,7 +906,7 @@ bool NotificationPreferencesDatabase::CheckBundle(const std::string &bundleName,
     bool result = true;
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId) != ERR_OK) ||
-        (userId <= 0)) {
+        (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, bundleUid: %{public}d", __FUNCTION__, bundleUid);
         return false;
     }
@@ -967,7 +967,7 @@ bool NotificationPreferencesDatabase::PutBundlePropertyValueToDisturbeDB(
     }
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
-        bundleInfo.GetBundleUid(), userId) != ERR_OK) || (userId <= 0)) {
+        bundleInfo.GetBundleUid(), userId) != ERR_OK) || (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, bundleUid: %{public}d",
             __FUNCTION__, bundleInfo.GetBundleUid());
         return false;
@@ -1018,7 +1018,7 @@ bool NotificationPreferencesDatabase::GetBundleInfo(const sptr<NotificationBundl
         std::to_string(bundleOption->GetUid());
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleOption->GetUid());
         return false;
@@ -1075,7 +1075,7 @@ bool NotificationPreferencesDatabase::RemoveBundleFromDisturbeDB(
     }
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, bundleUid);
         return false;
     }
@@ -1111,7 +1111,7 @@ bool NotificationPreferencesDatabase::RemoveSlotFromDisturbeDB(
     ANS_LOGD("called");
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId) != ERR_OK) ||
-        (userId <= 0)) {
+        (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, bundleUid: %{public}d", __FUNCTION__, bundleUid);
         return false;
     }
@@ -1172,7 +1172,7 @@ bool NotificationPreferencesDatabase::GetAllNotificationEnabledBundles(
 {
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) ||
-        (userId <= 0)) {
+        (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, userId: %{public}d", __FUNCTION__, userId);
         return false;
     }
@@ -1318,7 +1318,7 @@ bool NotificationPreferencesDatabase::RemoveAllSlotsFromDisturbeDB(
     ANS_LOGD("called");
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, bundleUid);
         return false;
     }
@@ -1386,7 +1386,7 @@ int32_t NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
     }
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId) != ERR_OK) ||
-        (userId <= 0)) {
+        (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, bundleUid: %{public}d", __FUNCTION__, bundleUid);
         return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
@@ -1404,7 +1404,7 @@ bool NotificationPreferencesDatabase::PutBundleToDisturbeDB(
     }
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
-        bundleInfo.GetBundleUid(), userId) != ERR_OK) || (userId <= 0)) {
+        bundleInfo.GetBundleUid(), userId) != ERR_OK) || (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, bundleUid: %{public}d",
             __FUNCTION__, bundleInfo.GetBundleUid());
         return false;
@@ -2430,7 +2430,7 @@ bool NotificationPreferencesDatabase::RemoveAnsBundleDbInfo(std::string bundleNa
     std::string key = KEY_BUNDLE_LABEL + bundleName + std::to_string(uid);
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) ||
-        (userId <= 0)) {
+        (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
         return false;
     }
@@ -2454,7 +2454,7 @@ bool NotificationPreferencesDatabase::RemoveSilentEnabledDbByBundle(std::string 
     std::string key = GenerateSilentReminderKey(
         {bundleName, uid, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF});
     int32_t userId = -1;
-    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId <= 0) {
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
         return false;
     }
@@ -2499,7 +2499,7 @@ bool NotificationPreferencesDatabase::RemoveEnabledDbByBundleName(std::string bu
     }
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleUid, userId) != ERR_OK) ||
-        (userId <= 0)) {
+        (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, bundleUid: %{public}d", __FUNCTION__, bundleUid);
         return false;
     }
@@ -2930,7 +2930,7 @@ bool NotificationPreferencesDatabase::GetPriorityEnabledForBundle(
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleOption->GetUid());
         return false;
@@ -2967,7 +2967,7 @@ bool NotificationPreferencesDatabase::SetBundlePriorityConfig(
     ANS_LOGD("%{public}s", __FUNCTION__);
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleOption->GetUid());
         return false;
@@ -2984,7 +2984,7 @@ bool NotificationPreferencesDatabase::GetBundlePriorityConfig(
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleOption->GetUid());
         return false;
@@ -3165,7 +3165,7 @@ bool NotificationPreferencesDatabase::GetPriorityEnabledByBundleV2(
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleOption->GetUid());
         return false;
@@ -3226,7 +3226,7 @@ bool NotificationPreferencesDatabase::GetPriorityStrategyByBundle(
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleOption->GetUid());
         return false;
@@ -3357,7 +3357,7 @@ bool NotificationPreferencesDatabase::SetSilentReminderEnabled(
     }
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(silentReminderInfo.uid, userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, silentReminderInfo.uid);
         return false;
@@ -3493,7 +3493,7 @@ bool NotificationPreferencesDatabase::SetLiveViewRebuildFlag(int32_t userId)
 
 bool NotificationPreferencesDatabase::RemoveLiveViewRebuildFlag(int32_t userId)
 {
-    if (userId <= 0) {
+    if (userId < 0) {
         ANS_LOGE("invalid userId: %{public}d, function: %{public}s", userId, __FUNCTION__);
         return false;
     }
@@ -3518,7 +3518,7 @@ bool NotificationPreferencesDatabase::IsSilentReminderEnabled(
     bool result = false;
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(silentReminderInfo.uid, userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, silentReminderInfo.uid);
         return false;
@@ -3733,7 +3733,7 @@ bool NotificationPreferencesDatabase::PutExtensionSubscriptionInfos(
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleInfo.GetBundleUid());
         return false;
@@ -3803,7 +3803,7 @@ bool NotificationPreferencesDatabase::PutExtensionSubscriptionBundles(
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
-        bundleInfo.GetBundleUid(), userId) != ERR_OK) || (userId <= 0)) {
+        bundleInfo.GetBundleUid(), userId) != ERR_OK) || (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, bundleUid: %{public}d",
             __FUNCTION__, bundleInfo.GetBundleUid());
         return false;
@@ -4629,7 +4629,7 @@ bool NotificationPreferencesDatabase::IsDistributedEnabledEmptyForBundle(
     bool result = true;
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleInfo.GetBundleUid());
         return false;
@@ -4910,7 +4910,7 @@ bool NotificationPreferencesDatabase::SetRingtoneInfoByBundle(const Notification
     std::string value = ringtoneInfo->ToJson();
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleInfo.GetBundleUid());
         return false;
@@ -4962,7 +4962,7 @@ bool NotificationPreferencesDatabase::GetRingtoneInfoByBundle(const Notification
     std::string value;
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleInfo.GetBundleUid());
         return false;
@@ -4993,7 +4993,7 @@ bool NotificationPreferencesDatabase::RemoveRingtoneInfoByBundle(
     std::string bundleKey = GenerateBundleKey(GenerateBundleLablel(bundleInfo), KEY_BUNDLE_RINGTONE_NOTIFICATION);
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleInfo.GetBundleUid());
         return false;

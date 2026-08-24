@@ -2095,7 +2095,7 @@ bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::se
     std::string value = "";
     int32_t userId = -1;
     if ((OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId) != ERR_OK) ||
-        (userId <= 0)) {
+        (userId < 0)) {
         ANS_LOGE("Get valid userId failed, function: %{public}s, userId: %{public}d", __FUNCTION__, userId);
         return false;
     }

@@ -2741,7 +2741,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0700, Function | 
  */
 HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0800, Function | SmallTest | Level1)
 {
-    MockQueryForgroundOsAccountId(true, 2);
+    MockQueryForgroundOsAccountId(true, 3);
     AdvancedNotificationService advancedNotificationService;
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
@@ -2763,7 +2763,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0800, Function | 
  */
 HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0900, Function | SmallTest | Level1)
 {
-    MockQueryForgroundOsAccountId(true, 2);
+    MockQueryForgroundOsAccountId(true, 3);
     AdvancedNotificationService advancedNotificationService;
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
@@ -2785,7 +2785,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_0900, Function | 
  */
 HWTEST_F(AdvancedNotificationServiceTest, OnDistributedPublish_1000, Function | SmallTest | Level1)
 {
-    MockQueryForgroundOsAccountId(true, 2);
+    MockQueryForgroundOsAccountId(true, 3);
     AdvancedNotificationService advancedNotificationService;
     std::string deviceId = "DeviceId";
     std::string bundleName = "BundleName";
@@ -2855,7 +2855,7 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedUpdate_0300, Function | S
     advancedNotificationService_->OnDistributedUpdate(deviceId, bundleName, request1);
     SleepForFC();
 
-    MockQueryForgroundOsAccountId(true, 2);
+    MockQueryForgroundOsAccountId(true, 3);
     advancedNotificationService_->OnDistributedUpdate(deviceId, bundleName, request1);
     SleepForFC();
     MockQueryForgroundOsAccountId(true, 0);

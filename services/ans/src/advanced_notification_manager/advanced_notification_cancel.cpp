@@ -350,14 +350,14 @@ ErrCode AdvancedNotificationService::CancelAsBundle(const sptr<NotificationBundl
     int32_t userId = -1;
     if (bundleOption->GetUid() != 0) {
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-            userId <= 0) {
+            userId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
                 __FUNCTION__, bundleOption->GetUid());
             return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
         }
     } else {
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId <= 0) {
+            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
                 __FUNCTION__, bundleOption->GetUid());
             return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
@@ -373,14 +373,14 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     int32_t userId = -1;
     if (bundleOption->GetUid() != 0) {
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-            userId <= 0) {
+            userId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
                 __FUNCTION__, bundleOption->GetUid());
             return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
         }
     } else {
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId <= 0) {
+            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
                 __FUNCTION__, bundleOption->GetUid());
             return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
@@ -421,14 +421,14 @@ ErrCode AdvancedNotificationService::ResolveAgentUid(
     int32_t userId = -1;
     if (bundleOption->GetUid() != 0) {
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            bundleOption->GetUid(), userId) != ERR_OK || userId <= 0) {
+            bundleOption->GetUid(), userId) != ERR_OK || userId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
                 __FUNCTION__, bundleOption->GetUid());
             return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
         }
     } else {
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId <= 0) {
+            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
                 __FUNCTION__, bundleOption->GetUid());
             return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
