@@ -196,7 +196,7 @@ struct PermissionDialog {
                 Scroll() {
                   Column() {
                     Row() {
-                      Flex({ justifyContent: FlexAlign.Center }) {
+                      Flex({ justifyContent: FlexAlign.Center, direction: FlexDirection.Column }) {
                         Text() {
                           if (this.dialog.easyAbroad) {
                             Span($r('app.string.reason_cjy'))
