@@ -111,6 +111,7 @@ ohos_unittest("reminder_request_test") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
@@ -146,12 +147,14 @@ ohos_unittest("reminder_request_branch_test") {
   ]
 
   external_deps = [
+    "ability_runtime:wantagent_innerkits",
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "hilog:libhilog",
+    "image_framework:image_native",
     "relational_store:native_rdb",
   ]
   cflags = [
@@ -185,6 +188,7 @@ ohos_unittest("reminder_agent_idl_test") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:wantagent_innerkits",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "googletest:gmock_main",

@@ -88,6 +88,7 @@ ohos_unittest("advanced_notification_extension_subscription_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "image_framework:image_native",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
