@@ -181,7 +181,7 @@ bool __attribute__((weak)) BundleManagerHelper::CheckApiCompatibility(
     AppExecFwk::BundleInfo bundleInfo;
     int32_t callingUserId;
     if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, callingUserId) != ERR_OK ||
-        callingUserId <= 0) {
+        callingUserId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
         return false;
     }
@@ -482,7 +482,7 @@ bool __attribute__((weak)) BundleManagerHelper::CheckBundleImplExtensionAbility(
 {
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleOption->GetUid());
         return false;

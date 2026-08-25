@@ -3423,7 +3423,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_CloseAlert_GetActiveUserFailed, Function |
 /**
  * @tc.number    : CloseAlert_InvalidActiveUserId_0001
  * @tc.name      : CloseAlert with invalid active user id
- * @tc.desc      : Test CloseAlert returns early when active user id is invalid (<= 0).
+ * @tc.desc      : Test CloseAlert returns early when active user id is invalid (< 0).
  */
 HWTEST_F(AnsBranchTest, AnsBranchTest_CloseAlert_InvalidActiveUserId, Function | SmallTest | Level1)
 {
@@ -3431,7 +3431,7 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_CloseAlert_InvalidActiveUserId, Function |
     record->request = new NotificationRequest();
     record->notification = new Notification(record->request);
 
-    MockQueryForgroundOsAccountId(true, 2); // mock invalid id (0)
+    MockQueryForgroundOsAccountId(true, 3); // mock invalid id (-1)
     advancedNotificationService_->CloseAlert(record);
     EXPECT_EQ(record->notification->EnableLight(), false);
     MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests

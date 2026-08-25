@@ -1618,7 +1618,7 @@ AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Not
     if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT && request->GetOwnerUid() != DEFAULT_UID) {
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
-            request->GetOwnerUid(), ownerUserId) != ERR_OK || ownerUserId <= 0) {
+            request->GetOwnerUid(), ownerUserId) != ERR_OK || ownerUserId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
                 __FUNCTION__, IPCSkeleton::GetCallingUid());
             return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
@@ -1676,7 +1676,7 @@ AnsStatus AdvancedNotificationService::PrePublishRequest(const sptr<Notification
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetCreatorUid(), userId) != ERR_OK ||
-            userId <= 0) {
+            userId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
                 __FUNCTION__, request->GetCreatorUid());
             return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
@@ -2130,7 +2130,7 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
         return;
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK || userId <= 0) {
+    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK || userId < 0) {
         ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
         return;
     }

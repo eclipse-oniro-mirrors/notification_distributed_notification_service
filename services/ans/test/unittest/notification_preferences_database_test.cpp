@@ -506,7 +506,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyValueToDisturbeDB
     NotificationPreferencesInfo::BundleInfo info;
     info.SetBundleName(bundleName_);
     info.SetBundleUid(bundleUid_);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId (<= 0)
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId (< 0)
     EXPECT_EQ(false, preferncesDB_->PutBundlePropertyValueToDisturbeDB(info));
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default for subsequent tests
 }
@@ -1332,12 +1332,12 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_0
 /**
  * @tc.name      : GetAllNotificationEnabledBundles_00500
  * @tc.number    : GetAllNotificationEnabledBundles
- * @tc.desc      : Check func GetAllNotificationEnabledBundles, return false when active userId is invalid (<= 0)
+ * @tc.desc      : Check func GetAllNotificationEnabledBundles, return false when active userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetAllNotificationEnabledBundles_00500, Function | SmallTest | Level1)
 {
     std::vector<NotificationBundleOption> bundleOption;
-    MockOsAccountManager::MockGetForegroundOsAccountLocalId(0); // invalid active userId
+    MockOsAccountManager::MockGetForegroundOsAccountLocalId(-1); // invalid active userId
     EXPECT_EQ(false, preferncesDB_->GetAllNotificationEnabledBundles(bundleOption));
     MockOsAccountManager::MockGetForegroundOsAccountLocalId(100); // reset to default for subsequent tests
 }
@@ -3953,12 +3953,12 @@ HWTEST_F(NotificationPreferencesDatabaseTest, HandleDataBaseMapInner_DigitEnding
 
 /**
  * @tc.name      : RemoveAllSlotsFromDisturbeDB_00300
- * @tc.desc      : Test RemoveAllSlotsFromDisturbeDB returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test RemoveAllSlotsFromDisturbeDB returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00300, Function | SmallTest | Level1)
 {
     std::string bundleKey = "BundleKey";
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->RemoveAllSlotsFromDisturbeDB(bundleKey, -1), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
@@ -3966,11 +3966,11 @@ HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAllSlotsFromDisturbeDB_00300
 /**
  * @tc.name      : PutBundlePropertyToDisturbeDB_00300
  * @tc.desc      : Test int overload PutBundlePropertyToDisturbeDB returns GET_ACTIVE_USER_FAILED
- *                 when resolved userId is invalid (<= 0)
+ *                 when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_00300, Function | SmallTest | Level1)
 {
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     auto ret = preferncesDB_->PutBundlePropertyToDisturbeDB("bundleKey",
         BundleType::BUNDLE_IMPORTANCE_TYPE, 1, bundleUid_);
     EXPECT_EQ(ret, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
@@ -3979,14 +3979,14 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_0030
 
 /**
  * @tc.name      : PutBundleToDisturbeDB_00100
- * @tc.desc      : Test PutBundleToDisturbeDB returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test PutBundleToDisturbeDB returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, PutBundleToDisturbeDB_00100, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->PutBundleToDisturbeDB("bundleKey", bundleInfo), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
@@ -4085,34 +4085,34 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseSlotFlags_0100, Function | Sm
 
 /**
  * @tc.name      : RemoveAnsBundleDbInfo_00300
- * @tc.desc      : Test RemoveAnsBundleDbInfo returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test RemoveAnsBundleDbInfo returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveAnsBundleDbInfo_00300, Function | SmallTest | Level1)
 {
     std::string bundleName = "bundleName";
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->RemoveAnsBundleDbInfo(bundleName, 1), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
 
 /**
  * @tc.name      : RemoveSilentEnabledDbByBundle_0200
- * @tc.desc      : Test RemoveSilentEnabledDbByBundle returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test RemoveSilentEnabledDbByBundle returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveSilentEnabledDbByBundle_0200, Function | SmallTest | Level1)
 {
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->RemoveSilentEnabledDbByBundle("", 59), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
 
 /**
  * @tc.name      : RemoveEnabledDbByBundleName_00300
- * @tc.desc      : Test RemoveEnabledDbByBundleName returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test RemoveEnabledDbByBundleName returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveEnabledDbByBundleName_00300, Function | SmallTest | Level1)
 {
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->RemoveEnabledDbByBundleName(bundleName_, bundleUid_), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
@@ -4152,38 +4152,38 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutPriorityEnabledForBundle_0200, 
 
 /**
  * @tc.name      : GetPriorityEnabledForBundle_0100
- * @tc.desc      : Test GetPriorityEnabledForBundle returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test GetPriorityEnabledForBundle returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabledForBundle_0100, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption("testBundle", 10000));
     NotificationConstant::PriorityEnableStatus enableStatus = NotificationConstant::PriorityEnableStatus::ENABLE;
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->GetPriorityEnabledForBundle(bundle, enableStatus), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
 
 /**
  * @tc.name      : SetBundlePriorityConfig_0100
- * @tc.desc      : Test SetBundlePriorityConfig returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test SetBundlePriorityConfig returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, SetBundlePriorityConfig_0100, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption("testBundle", 10000));
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->SetBundlePriorityConfig(bundle, "configValue"), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
 
 /**
  * @tc.name      : GetBundlePriorityConfig_0100
- * @tc.desc      : Test GetBundlePriorityConfig returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test GetBundlePriorityConfig returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetBundlePriorityConfig_0100, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption("testBundle", 10000));
     std::string configValue;
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->GetBundlePriorityConfig(bundle, configValue), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
@@ -4203,13 +4203,13 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutPriorityEnabledByBundleV2_0200,
 
 /**
  * @tc.name      : GetPriorityEnabledByBundleV2_0200
- * @tc.desc      : Test GetPriorityEnabledByBundleV2 returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test GetPriorityEnabledByBundleV2 returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityEnabledByBundleV2_0200, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption("testBundle", 10000));
     NotificationConstant::SWITCH_STATE status = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->GetPriorityEnabledByBundleV2(bundle, status), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
@@ -4228,27 +4228,27 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutPriorityStrategyByBundle_0200, 
 
 /**
  * @tc.name      : GetPriorityStrategyByBundle_0200
- * @tc.desc      : Test GetPriorityStrategyByBundle returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test GetPriorityStrategyByBundle returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetPriorityStrategyByBundle_0200, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption("testBundle", 10000));
     int64_t strategy = 0;
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->GetPriorityStrategyByBundle(bundle, strategy), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
 
 /**
  * @tc.name      : SetSilentReminderEnabled_0100
- * @tc.desc      : Test SetSilentReminderEnabled returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test SetSilentReminderEnabled returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, SetSilentReminderEnabled_0100, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::SilentReminderInfo info;
     info.bundleName = "bundleName";
     info.uid = bundleUid_;
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->SetSilentReminderEnabled(info), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
@@ -4267,51 +4267,51 @@ HWTEST_F(NotificationPreferencesDatabaseTest, SetSilentReminderEnabled_0200, Fun
 
 /**
  * @tc.name      : RemoveLiveViewRebuildFlag_0300
- * @tc.desc      : Test RemoveLiveViewRebuildFlag returns false when userId is invalid (<= 0)
+ * @tc.desc      : Test RemoveLiveViewRebuildFlag returns false when userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveLiveViewRebuildFlag_0300, Function | SmallTest | Level1)
 {
-    EXPECT_EQ(preferncesDB_->RemoveLiveViewRebuildFlag(0), false);
+    EXPECT_EQ(preferncesDB_->RemoveLiveViewRebuildFlag(-1), false);
 }
 
 /**
  * @tc.name      : IsSilentReminderEnabled_0100
- * @tc.desc      : Test IsSilentReminderEnabled returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test IsSilentReminderEnabled returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, IsSilentReminderEnabled_0100, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::SilentReminderInfo info;
     info.bundleName = "bundleName";
     info.uid = bundleUid_;
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->IsSilentReminderEnabled(info), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
 
 /**
  * @tc.name      : PutExtensionSubscriptionInfos_0300
- * @tc.desc      : Test PutExtensionSubscriptionInfos returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test PutExtensionSubscriptionInfos returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionInfos_0300, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName("testBundle");
     bundleInfo.SetBundleUid(bundleUid_);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->PutExtensionSubscriptionInfos(bundleInfo), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
 
 /**
  * @tc.name      : PutExtensionSubscriptionBundles_0300
- * @tc.desc      : Test PutExtensionSubscriptionBundles returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test PutExtensionSubscriptionBundles returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, PutExtensionSubscriptionBundles_0300, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName("testBundle");
     bundleInfo.SetBundleUid(bundleUid_);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->PutExtensionSubscriptionBundles(bundleInfo), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
@@ -4335,14 +4335,14 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetClonePriorityInfos_0100, Functi
 
 /**
  * @tc.name      : IsDistributedEnabledEmptyForBundle_0200
- * @tc.desc      : Test IsDistributedEnabledEmptyForBundle returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test IsDistributedEnabledEmptyForBundle returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, IsDistributedEnabledEmptyForBundle_0200, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName("testBundle");
     bundleInfo.SetBundleUid(bundleUid_);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->IsDistributedEnabledEmptyForBundle("tablet", bundleInfo), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
@@ -4360,7 +4360,7 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetHashCodeRule_0300, Function | S
 
 /**
  * @tc.name      : SetRingtoneInfoByBundle_0400
- * @tc.desc      : Test SetRingtoneInfoByBundle returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test SetRingtoneInfoByBundle returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, SetRingtoneInfoByBundle_0400, Function | SmallTest | Level1)
 {
@@ -4370,14 +4370,14 @@ HWTEST_F(NotificationPreferencesDatabaseTest, SetRingtoneInfoByBundle_0400, Func
     sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
     ASSERT_NE(ringtoneInfo, nullptr);
     ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->SetRingtoneInfoByBundle(bundleInfo, ringtoneInfo), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
 
 /**
  * @tc.name      : GetRingtoneInfoByBundle_0400
- * @tc.desc      : Test GetRingtoneInfoByBundle returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test GetRingtoneInfoByBundle returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetRingtoneInfoByBundle_0400, Function | SmallTest | Level1)
 {
@@ -4386,75 +4386,74 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetRingtoneInfoByBundle_0400, Func
     bundleInfo.SetBundleUid(bundleUid_);
     sptr<NotificationRingtoneInfo> ringtoneInfo = new NotificationRingtoneInfo();
     ASSERT_NE(ringtoneInfo, nullptr);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, ringtoneInfo), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
 
 /**
  * @tc.name      : RemoveRingtoneInfoByBundle_0100
- * @tc.desc      : Test RemoveRingtoneInfoByBundle returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test RemoveRingtoneInfoByBundle returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveRingtoneInfoByBundle_0100, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName("bundle");
     bundleInfo.SetBundleUid(bundleUid_);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     EXPECT_EQ(preferncesDB_->RemoveRingtoneInfoByBundle(bundleInfo), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default
 }
 
 /**
  * @tc.name      : PutSlotsToDisturbeDB_00400
- * @tc.desc      : Test PutSlotsToDisturbeDB returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test PutSlotsToDisturbeDB returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, PutSlotsToDisturbeDB_00400, Function | SmallTest | Level1)
 {
     std::vector<sptr<NotificationSlot>> slots;
     sptr<NotificationSlot> slot1 = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     slots.push_back(slot1);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId (<= 0)
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId (< 0)
     EXPECT_EQ(preferncesDB_->PutSlotsToDisturbeDB(bundleName_, bundleUid_, slots), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default for subsequent tests
 }
 
 /**
  * @tc.name      : QueryStatisticsByBundle_00200
- * @tc.desc      : Test QueryStatisticsByBundle returns false when tableUserId is invalid (<= 0)
+ * @tc.desc      : Test QueryStatisticsByBundle returns false when tableUserId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, QueryStatisticsByBundle_00200, Function | SmallTest | Level1)
 {
     EXPECT_EQ(preferncesDB_->CheckRdbStore(), true);
     int32_t recentCount = 0;
     int64_t lastTime = 0;
-    EXPECT_EQ(preferncesDB_->QueryStatisticsByBundle(100, 0, recentCount, lastTime), false);
     EXPECT_EQ(preferncesDB_->QueryStatisticsByBundle(100, -1, recentCount, lastTime), false);
 }
 
 /**
  * @tc.name      : PutBundlePropertyToDisturbeDB_00500
  * @tc.desc      : Test bool overload PutBundlePropertyToDisturbeDB returns false
- *                 when resolved userId is invalid (<= 0)
+ *                 when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, PutBundlePropertyToDisturbeDB_00500, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::BundleInfo bundleInfo;
     bundleInfo.SetBundleName(bundleName_);
     bundleInfo.SetBundleUid(bundleUid_);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId (<= 0)
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId (< 0)
     EXPECT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleInfo), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default for subsequent tests
 }
 
 /**
  * @tc.name      : IsNotificationSlotFlagsExists_0200
- * @tc.desc      : Test IsNotificationSlotFlagsExists returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test IsNotificationSlotFlagsExists returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, IsNotificationSlotFlagsExists_0200, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName_, bundleUid_);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId (<= 0)
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId (< 0)
     EXPECT_EQ(preferncesDB_->IsNotificationSlotFlagsExists(bundleOption), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default for subsequent tests
 }
@@ -4487,11 +4486,11 @@ HWTEST_F(NotificationPreferencesDatabaseTest, PutTotalBadgeNums_00300, Function 
 
 /**
  * @tc.name      : CheckBundle_00200
- * @tc.desc      : Test CheckBundle returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test CheckBundle returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, CheckBundle_00200, Function | SmallTest | Level1)
 {
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId (<= 0)
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId (< 0)
     EXPECT_EQ(preferncesDB_->CheckBundle(bundleName_, bundleUid_), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default for subsequent tests
 }
@@ -4521,13 +4520,13 @@ HWTEST_F(NotificationPreferencesDatabaseTest, ParseFromDisturbeDB_0300, Function
 
 /**
  * @tc.name      : GetBundleInfo_00100
- * @tc.desc      : Test GetBundleInfo returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test GetBundleInfo returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, GetBundleInfo_00100, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName_, bundleUid_);
     NotificationPreferencesInfo::BundleInfo bundleInfo;
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId (<= 0)
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId (< 0)
     EXPECT_EQ(preferncesDB_->GetBundleInfo(bundleOption, bundleInfo), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default for subsequent tests
 }
@@ -4550,22 +4549,22 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetBundleInfo_00200, Function | Sm
 
 /**
  * @tc.name      : RemoveBundleFromDisturbeDB_00300
- * @tc.desc      : Test RemoveBundleFromDisturbeDB returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test RemoveBundleFromDisturbeDB returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveBundleFromDisturbeDB_00300, Function | SmallTest | Level1)
 {
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId (<= 0)
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId (< 0)
     EXPECT_EQ(preferncesDB_->RemoveBundleFromDisturbeDB(bundleName_, bundleUid_), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default for subsequent tests
 }
 
 /**
  * @tc.name      : RemoveSlotFromDisturbeDB_00300
- * @tc.desc      : Test RemoveSlotFromDisturbeDB returns false when resolved userId is invalid (<= 0)
+ * @tc.desc      : Test RemoveSlotFromDisturbeDB returns false when resolved userId is invalid (< 0)
  */
 HWTEST_F(NotificationPreferencesDatabaseTest, RemoveSlotFromDisturbeDB_00300, Function | SmallTest | Level1)
 {
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId (<= 0)
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId (< 0)
     EXPECT_EQ(preferncesDB_->RemoveSlotFromDisturbeDB(bundleName_ + std::to_string(bundleUid_),
         NotificationConstant::SlotType::SOCIAL_COMMUNICATION, bundleUid_), false);
     MockOsAccountManager::MockGetOsAccountLocalIdFromUid(100); // reset to default for subsequent tests

@@ -764,7 +764,7 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
     auto slotReminderMode = slot->GetReminderMode();
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, request->GetOwnerUid());
         return;
@@ -1464,7 +1464,7 @@ ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundles(
     std::vector<NotificationBundleOption> &bundleOption)
 {
     int32_t userId = SUBSCRIBE_USER_INIT;
-    if ((OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) || (userId <= 0)) {
+    if ((OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) || (userId < 0)) {
         ANS_LOGE("Failed to get valid active user id!");
         return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }

@@ -269,7 +269,7 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
     if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT) {
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
-            request->GetOwnerUid(), ownerUserId) != ERR_OK || ownerUserId <= 0) {
+            request->GetOwnerUid(), ownerUserId) != ERR_OK || ownerUserId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
                 __FUNCTION__, request->GetOwnerUid());
             return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
@@ -1244,7 +1244,7 @@ void AdvancedNotificationService::CheckDoNotDisturbProfile(const std::shared_ptr
     if (userId == FIRST_USERID) {
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            record->bundleOption->GetUid(), userId) != ERR_OK || userId <= 0) {
+            record->bundleOption->GetUid(), userId) != ERR_OK || userId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
                 __FUNCTION__, record->bundleOption->GetUid());
             return;
@@ -1967,7 +1967,7 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromNotifica
             }
             int32_t ownerUserId = SUBSCRIBE_USER_INIT;
             if ((OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
-                request->GetOwnerUid(), ownerUserId) != ERR_OK) || (ownerUserId <= 0)) {
+                request->GetOwnerUid(), ownerUserId) != ERR_OK) || (ownerUserId < 0)) {
                 ANS_LOGE("Get valid ownerUserId failed, uid: %{public}d", request->GetOwnerUid());
                 return nullptr;
             }

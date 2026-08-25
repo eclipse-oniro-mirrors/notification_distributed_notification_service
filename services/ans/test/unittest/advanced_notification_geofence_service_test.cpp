@@ -447,15 +447,15 @@ HWTEST_F(AnsGeofenceServiceTest, SetGeofenceEnabled_00002, Function | SmallTest 
  * @tc.number    : SetGeofenceEnabled_00003
  * @tc.name      : SetGeofenceEnabled(false) with invalid active user id
  * @tc.desc      : Test SetGeofenceEnabled returns ERR_ANS_INNER_GET_ACTIVE_USER_FAILED when
- *                 disabling geofence and active user id is invalid (<= 0).
+ *                 disabling geofence and active user id is invalid (< 0).
  */
 HWTEST_F(AnsGeofenceServiceTest, SetGeofenceEnabled_00003, Function | SmallTest | Level1)
 {
     ASSERT_NE(advancedNotificationService_, nullptr);
 
-    MockQueryForgroundOsAccountId(true, 2); // mock invalid id (0)
+    MockQueryForgroundOsAccountId(true, 3); // mock invalid id (-1)
     auto result = advancedNotificationService_->SetGeofenceEnabled(false);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(result, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
     MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
 }
 

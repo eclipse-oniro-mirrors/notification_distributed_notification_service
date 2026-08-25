@@ -358,7 +358,7 @@ ErrCode AdvancedNotificationService::QueryNotificationParameters(
 
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-        userId <= 0) {
+        userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
             __FUNCTION__, bundleOption->GetUid());
         return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;

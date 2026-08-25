@@ -438,7 +438,7 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00003, Function | Smal
 
 /**
  * @tc.name: GetAllLiveViewEnabledBundles_00004
- * @tc.desc: Test GetAllLiveViewEnabledBundles when active user id is invalid (<= 0)
+ * @tc.desc: Test GetAllLiveViewEnabledBundles when active user id is invalid (< 0)
  * @tc.type: FUNC
  */
 HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00004, Function | SmallTest | Level1)
@@ -450,7 +450,7 @@ HWTEST_F(AnsSlotServiceTest, GetAllLiveViewEnabledBundles_00004, Function | Smal
     NotificationBundleOption bundleOption("GetAllLiveViewEnabledBundles_00004", 999);
     bundleOptions.push_back(bundleOption);
 
-    MockQueryForgroundOsAccountId(true, 2); // mock invalid id (0)
+    MockQueryForgroundOsAccountId(true, 3); // mock invalid id (-1)
     auto ret = advancedNotificationService_->GetAllLiveViewEnabledBundles(bundleOptions);
     EXPECT_EQ(ret, (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
     MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
@@ -719,7 +719,7 @@ HWTEST_F(AnsSlotServiceTest, SetRequestBySlotType_00004, Function | SmallTest | 
 
 /**
  * @tc.name: SetRequestBySlotType_00005
- * @tc.desc: Test SetRequestBySlotType returns early when resolved userId is invalid (<= 0)
+ * @tc.desc: Test SetRequestBySlotType returns early when resolved userId is invalid (< 0)
  * @tc.type: FUNC
  * @tc.require: issue
  */

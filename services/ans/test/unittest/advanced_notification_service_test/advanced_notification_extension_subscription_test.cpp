@@ -1577,7 +1577,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, FilterPermissionBundles_
         sptr<NotificationBundleOption>(new NotificationBundleOption("test.bundle.second", NON_SYSTEM_APP_UID)));
     std::vector<sptr<NotificationBundleOption>> mismatchedBundles;
     MockIsVerfyPermisson(true);
-    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(0); // invalid userId (zero)
+    MockOsAccountManager::MockGetOsAccountLocalIdFromUid(-1); // invalid userId
     advancedNotificationService_->FilterPermissionBundles(bundles, mismatchedBundles);
     // early return: loop aborted at the first bundle, nothing filtered
     EXPECT_EQ(bundles.size(), 2);
