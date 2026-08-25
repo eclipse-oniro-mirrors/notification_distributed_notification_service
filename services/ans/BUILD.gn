@@ -519,6 +519,8 @@ ohos_shared_library("libans_dynamic") {
   }
   visibility = [ ":*" ]
   branch_protector_ret = "pac_ret"
+  version_script = "libans_dynamic.map"
+
   cflags = [
     "-fvisibility=hidden",
     "-fno-math-errno",
