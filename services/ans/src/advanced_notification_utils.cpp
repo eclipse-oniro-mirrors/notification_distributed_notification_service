@@ -174,6 +174,22 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
     return validBundleOption;
 }
 
+std::vector<sptr<NotificationBundleOption>> AdvancedNotificationService::ResolveBundleOptionUids(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions)
+{
+    std::vector<sptr<NotificationBundleOption>> resolvedBundles;
+    resolvedBundles.reserve(bundleOptions.size());
+    for (const auto &option : bundleOptions) {
+        sptr<NotificationBundleOption> validBundle = GenerateValidBundleOption(option);
+        if (validBundle == nullptr) {
+            ANS_LOGE("Invalid or unresolvable bundle option, skipped.");
+            continue;
+        }
+        resolvedBundles.push_back(validBundle);
+    }
+    return resolvedBundles;
+}
+
 sptr<NotificationSortingMap> AdvancedNotificationService::GenerateSortingMap()
 {
     std::vector<NotificationSorting> sortingList;

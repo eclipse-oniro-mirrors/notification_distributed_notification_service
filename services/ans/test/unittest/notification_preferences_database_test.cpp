@@ -3778,6 +3778,122 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetEnabledForBundleSlots_00400, Fu
 }
 
 /**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00100
+ * @tc.number    : GetShowBadgeEnabledForBundles_00100
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles with empty bundleOptions, return false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetShowBadgeEnabledForBundles_00100, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    EXPECT_FALSE(preferncesDB_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable, 0));
+    EXPECT_EQ(0u, bundleEnable.size());
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00200
+ * @tc.number    : GetShowBadgeEnabledForBundles_00200
+ * @tc.desc      : Test with null bundle option in vector, skipped and returns true.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetShowBadgeEnabledForBundles_00200, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(nullptr);
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    EXPECT_TRUE(preferncesDB_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable, 0));
+    EXPECT_EQ(0u, bundleEnable.size());
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00300
+ * @tc.number    : GetShowBadgeEnabledForBundles_00300
+ * @tc.desc      : Test with null rdbDataManager, return false.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetShowBadgeEnabledForBundles_00300, Function | SmallTest | Level1)
+{
+    preferncesDB_->rdbDataManager_ = nullptr;
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption("badgeBatchBundleNullRdb", 1001));
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    EXPECT_FALSE(preferncesDB_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable, 0));
+    EXPECT_EQ(0u, bundleEnable.size());
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00400
+ * @tc.number    : GetShowBadgeEnabledForBundles_00400
+ * @tc.desc      : Test end-to-end: explicit true/false records returned, no-record bundle excluded,
+ *                 duplicate bundle sptr keeps a single map entry (map dedup by pointer).
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetShowBadgeEnabledForBundles_00400, Function | SmallTest | Level1)
+{
+    const std::string bundleNameEnabled = "badgeBatchEnabled";
+    const int32_t bundleUidEnabled = 1001;
+    const std::string bundleNameDisabled = "badgeBatchDisabled";
+    const int32_t bundleUidDisabled = 1002;
+    const std::string bundleNameMissing = "badgeBatchMissing";
+    const int32_t bundleUidMissing = 1003;
+    const int32_t userId = 0;
+    const std::string KEY_SHOW_BADGE = "showBadgeEnable";
+    std::string keyEnabled = preferncesDB_->GenerateBundleKey(
+        bundleNameEnabled + std::to_string(bundleUidEnabled), KEY_SHOW_BADGE);
+    std::string keyDisabled = preferncesDB_->GenerateBundleKey(
+        bundleNameDisabled + std::to_string(bundleUidDisabled), KEY_SHOW_BADGE);
+    EXPECT_EQ(NativeRdb::E_OK, preferncesDB_->SetKvToDb(keyEnabled, "1", userId));
+    EXPECT_EQ(NativeRdb::E_OK, preferncesDB_->SetKvToDb(keyDisabled, "0", userId));
+    sptr<NotificationBundleOption> optionEnabled = new NotificationBundleOption(bundleNameEnabled, bundleUidEnabled);
+    sptr<NotificationBundleOption> optionDisabled =
+        new NotificationBundleOption(bundleNameDisabled, bundleUidDisabled);
+    sptr<NotificationBundleOption> optionMissing = new NotificationBundleOption(bundleNameMissing, bundleUidMissing);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(optionEnabled);
+    bundleOptions.push_back(optionDisabled);
+    bundleOptions.push_back(optionMissing);
+    bundleOptions.push_back(optionEnabled);
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    EXPECT_TRUE(preferncesDB_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable, userId));
+    EXPECT_EQ(2u, bundleEnable.size());
+    EXPECT_NE(bundleEnable.end(), bundleEnable.find(optionEnabled));
+    EXPECT_TRUE(bundleEnable[optionEnabled]);
+    EXPECT_NE(bundleEnable.end(), bundleEnable.find(optionDisabled));
+    EXPECT_FALSE(bundleEnable[optionDisabled]);
+    EXPECT_EQ(bundleEnable.end(), bundleEnable.find(optionMissing));
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00500
+ * @tc.number    : GetShowBadgeEnabledForBundles_00500
+ * @tc.desc      : Test with mixed input: null option is skipped, recorded bundle is returned,
+ *                 unrecorded bundle is excluded from the result map.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetShowBadgeEnabledForBundles_00500, Function | SmallTest | Level1)
+{
+    const std::string bundleNameRecorded = "badgeBatchMixedRecorded";
+    const int32_t bundleUidRecorded = 1004;
+    const std::string bundleNameMissing = "badgeBatchMixedMissing";
+    const int32_t bundleUidMissing = 1005;
+    const int32_t userId = 0;
+    const std::string KEY_SHOW_BADGE = "showBadgeEnable";
+    std::string keyRecorded = preferncesDB_->GenerateBundleKey(
+        bundleNameRecorded + std::to_string(bundleUidRecorded), KEY_SHOW_BADGE);
+    EXPECT_EQ(NativeRdb::E_OK, preferncesDB_->SetKvToDb(keyRecorded, "1", userId));
+    sptr<NotificationBundleOption> optionRecorded =
+        new NotificationBundleOption(bundleNameRecorded, bundleUidRecorded);
+    sptr<NotificationBundleOption> optionMissing =
+        new NotificationBundleOption(bundleNameMissing, bundleUidMissing);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(nullptr);
+    bundleOptions.push_back(optionRecorded);
+    bundleOptions.push_back(optionMissing);
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    EXPECT_TRUE(preferncesDB_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable, userId));
+    EXPECT_EQ(1u, bundleEnable.size());
+    EXPECT_NE(bundleEnable.end(), bundleEnable.find(optionRecorded));
+    EXPECT_TRUE(bundleEnable[optionRecorded]);
+    EXPECT_EQ(bundleEnable.end(), bundleEnable.find(optionMissing));
+}
+
+/**
  * @tc.name      : GetAllNotificationEnabledBundles_Optimization_00100
  * @tc.number    : GetAllNotificationEnabledBundles_Optimization_00100
  * @tc.desc      : Test getAllNotificationEnabledBundles optimization: enabledNotification=1/3 are included,

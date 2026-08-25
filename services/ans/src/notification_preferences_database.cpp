@@ -1205,18 +1205,12 @@ bool NotificationPreferencesDatabase::GetEnabledForBundleSlots(
     }
 
     std::vector<std::string> keys;
-    keys.reserve(bundleOptions.size());
     std::unordered_map<std::string, size_t> keyToIndex;
-    for (size_t i = 0; i < bundleOptions.size(); ++i) {
-        if (bundleOptions[i] == nullptr) {
-            continue;
-        }
-        std::string bundleKey = bundleOptions[i]->GetBundleName() + std::to_string(bundleOptions[i]->GetUid());
-        std::string slotKey = GenerateSlotKey(bundleKey, std::to_string(slotType), KEY_SLOT_ENABLED);
-        keys.push_back(slotKey);
-        keyToIndex[slotKey] = i;
-    }
-    if (keys.empty()) {
+    if (!GenerateBundleQueryKeyIndex(bundleOptions,
+        [this, slotType](const std::string &bundleKey) {
+            return GenerateSlotKey(bundleKey, std::to_string(slotType), KEY_SLOT_ENABLED);
+        },
+        keys, keyToIndex)) {
         return true;
     }
 
@@ -1232,6 +1226,43 @@ bool NotificationPreferencesDatabase::GetEnabledForBundleSlots(
         }
         bool enabled = static_cast<bool>(AnsCommonUtils::StringToInt(entry.second));
         slotEnabled[bundleOptions[it->second]] = enabled;
+    }
+    return true;
+}
+
+bool NotificationPreferencesDatabase::GetShowBadgeEnabledForBundles(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    std::map<sptr<NotificationBundleOption>, bool> &bundleEnable,
+    int32_t userId)
+{
+    ANS_LOGD("called");
+    if (!CheckRdbStore()) {
+        return false;
+    }
+    if (bundleOptions.empty()) {
+        return false;
+    }
+
+    std::vector<std::string> keys;
+    std::unordered_map<std::string, size_t> keyToIndex;
+    if (!GenerateBundleQueryKeyIndex(bundleOptions,
+        [this](const std::string &bundleKey) { return GenerateBundleKey(bundleKey, KEY_BUNDLE_SHOW_BADGE); },
+        keys, keyToIndex)) {
+        return true;
+    }
+
+    std::unordered_map<std::string, std::string> results;
+    if (rdbDataManager_->QueryDataInKeys(keys, results, userId) != NativeRdb::E_OK) {
+        return false;
+    }
+
+    for (const auto &entry : results) {
+        auto it = keyToIndex.find(entry.first);
+        if (it == keyToIndex.end()) {
+            continue;
+        }
+        bool enabled = static_cast<bool>(AnsCommonUtils::StringToInt(entry.second));
+        bundleEnable[bundleOptions[it->second]] = enabled;
     }
     return true;
 }
@@ -1962,6 +1993,25 @@ std::string NotificationPreferencesDatabase::GenerateBundleKey(
     }
     ANS_LOGD("Bundle key : %{public}s.", key.c_str());
     return key;
+}
+
+bool NotificationPreferencesDatabase::GenerateBundleQueryKeyIndex(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    const std::function<std::string(const std::string &)> &generateKey,
+    std::vector<std::string> &keys,
+    std::unordered_map<std::string, size_t> &keyToIndex) const
+{
+    keys.reserve(bundleOptions.size());
+    for (size_t i = 0; i < bundleOptions.size(); ++i) {
+        if (bundleOptions[i] == nullptr) {
+            continue;
+        }
+        std::string bundleKey = bundleOptions[i]->GetBundleName() + std::to_string(bundleOptions[i]->GetUid());
+        std::string queryKey = generateKey(bundleKey);
+        keys.push_back(queryKey);
+        keyToIndex[queryKey] = i;
+    }
+    return !keys.empty();
 }
 
 int32_t NotificationPreferencesDatabase::GetUidFromGenerate(const std::string &generateBundleKey) const

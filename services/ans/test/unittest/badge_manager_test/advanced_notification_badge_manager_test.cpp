@@ -178,7 +178,7 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, GetShowBadgeEnabledForBundles_010
     std::vector<sptr<NotificationBundleOption>> bundleOptions;
     std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
     auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**

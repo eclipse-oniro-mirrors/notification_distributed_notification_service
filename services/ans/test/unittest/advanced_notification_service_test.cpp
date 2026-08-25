@@ -69,6 +69,7 @@ using namespace OHOS::Media;
 
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 extern void MockQueryAllCreatedOsAccounts(int32_t userId);
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 namespace OHOS {
 namespace Notification {
@@ -6333,7 +6334,265 @@ HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_100, Fun
     std::vector<sptr<NotificationBundleOption>> bundleOptions;
     std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
     auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00001
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles normal scenario: permission OK + batch query
+ *                 returns the persisted show badge values.
+ * @tc.type      : FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockGetOsAccountLocalIdFromUid(true);
+    sptr<NotificationBundleOption> bundleOn =
+        new NotificationBundleOption("BadgeEnabledBundle_00001", 21001);
+    sptr<NotificationBundleOption> bundleOff =
+        new NotificationBundleOption("BadgeDisabledBundle_00001", 21002);
+    std::map<sptr<NotificationBundleOption>, bool> setOptions;
+    setOptions[bundleOn] = true;
+    setOptions[bundleOff] = false;
+    ASSERT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundles(setOptions), (int)ERR_OK);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(bundleOn);
+    bundleOptions.push_back(bundleOff);
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(bundleEnable.size(), 2u);
+    EXPECT_NE(bundleEnable.end(), bundleEnable.find(bundleOn));
+    EXPECT_TRUE(bundleEnable[bundleOn]);
+    EXPECT_NE(bundleEnable.end(), bundleEnable.find(bundleOff));
+    EXPECT_FALSE(bundleEnable[bundleOff]);
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00002
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles permission denied: non-system app returns
+ *                 ERR_ANS_INNER_NON_SYSTEM_APP.
+ * @tc.type      : FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_00002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption("BadgeNonSystemApp_00002", 22001));
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
+    EXPECT_EQ(bundleEnable.size(), 0u);
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00003
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles permission denied: missing
+ *                 NOTIFICATION_CONTROLLER returns ERR_ANS_INNER_PERMISSION_DENIED.
+ * @tc.type      : FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_00003, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption("BadgeNoPermission_00003", 23001));
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
+    EXPECT_EQ(bundleEnable.size(), 0u);
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00004
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles invalid param: empty bundleOptions returns
+ *                 ERR_ANS_INNER_INVALID_PARAM.
+ * @tc.type      : FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_00004, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+    EXPECT_EQ(bundleEnable.size(), 0u);
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00005
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles with all null bundle options: uid resolution
+ *                 skips them, returns ERR_OK with empty map.
+ * @tc.type      : FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_00005, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(nullptr);
+    bundleOptions.push_back(nullptr);
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(bundleEnable.size(), 0u);
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00006
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles with bundle option whose uid is not filled
+ *                 (uid<=0). The bundle is resolved to NON_SYSTEM_APP_UID by mock bundle manager,
+ *                 and the no-record bundle is filled with default enabled true.
+ * @tc.type      : FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_00006, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(true, 0);
+    MockGetOsAccountLocalIdFromUid(true);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption("BadgeUidNotFilled_00006", 0));
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(bundleEnable.size(), 1u);
+    const auto &entry = *bundleEnable.begin();
+    EXPECT_EQ(entry.first->GetBundleName(), "BadgeUidNotFilled_00006");
+    EXPECT_EQ(entry.first->GetUid(), 1000); // NON_SYSTEM_APP_UID returned by mock_bundle_manager_helper
+    EXPECT_TRUE(entry.second);
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00007
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles with recorded bundle + uid-not-filled bundle +
+ *                 null: recorded value returned, resolved bundle filled with default true, null skipped.
+ * @tc.type      : FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_00007, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(true, 0);
+    MockGetOsAccountLocalIdFromUid(true);
+    sptr<NotificationBundleOption> bundleRecorded =
+        new NotificationBundleOption("BadgeMixedRecorded_00007", 24001);
+    std::map<sptr<NotificationBundleOption>, bool> setOptions;
+    setOptions[bundleRecorded] = false;
+    ASSERT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundles(setOptions), (int)ERR_OK);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(bundleRecorded);
+    bundleOptions.push_back(new NotificationBundleOption("BadgeMixedUidNotFilled_00007", 0));
+    bundleOptions.push_back(nullptr);
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(bundleEnable.size(), 2u);
+    EXPECT_NE(bundleEnable.end(), bundleEnable.find(bundleRecorded));
+    EXPECT_FALSE(bundleEnable[bundleRecorded]);
+    bool foundResolved = false;
+    for (const auto &entry : bundleEnable) {
+        if (entry.first != nullptr && entry.first->GetBundleName() == "BadgeMixedUidNotFilled_00007") {
+            EXPECT_EQ(entry.first->GetUid(), 1000); // resolved uid from mock_bundle_manager_helper
+            EXPECT_TRUE(entry.second);
+            foundResolved = true;
+        }
+    }
+    EXPECT_TRUE(foundResolved);
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00008
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles when preferences database is null, returns
+ *                 ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
+ * @tc.type      : FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_00008, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    auto preferences = NotificationPreferences::GetInstance();
+    auto originalDB = preferences->preferncesDB_;
+    preferences->preferncesDB_ = nullptr;
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption("BadgeNullDB_00008", 25001));
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    preferences->preferncesDB_ = originalDB;
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_EQ(bundleEnable.size(), 0u);
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00009
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles with valid bundle options when
+ *                 notificationSvrQueue_ submit fails, returns ERR_ANS_INNER_INVALID_PARAM.
+ * @tc.type      : FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_00009, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption("BadgeQueueReset_00009", 26001));
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    advancedNotificationService_->notificationSvrQueue_.Reset();
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+    EXPECT_EQ(bundleEnable.size(), 0u);
+}
+
+/**
+ * @tc.name      : GetShowBadgeEnabledForBundles_00010
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles when GetCurrentCallingUserId fails:
+ *                 userId is invalid, only the shared table is queried: the shared-table
+ *                 record is returned, the user-table record is invisible and the
+ *                 missing bundle is filled with the default enabled true.
+ * @tc.type      : FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceTest, GetShowBadgeEnabledForBundles_00010, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockGetOsAccountLocalIdFromUid(true, 0);
+    MockGetOsAccountLocalIdFromUid(true, 2);
+    sptr<NotificationBundleOption> bundleShared =
+        new NotificationBundleOption("BadgeSharedTable_00010", 27001);
+    std::map<sptr<NotificationBundleOption>, bool> setShared;
+    setShared[bundleShared] = false;
+    ASSERT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundles(setShared), (int)ERR_OK);
+    MockGetOsAccountLocalIdFromUid(true, 0);
+    sptr<NotificationBundleOption> bundleUserTable =
+        new NotificationBundleOption("BadgeUserTable_00010", 27002);
+    std::map<sptr<NotificationBundleOption>, bool> setUserTable;
+    setUserTable[bundleUserTable] = false;
+    ASSERT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundles(setUserTable), (int)ERR_OK);
+    MockGetOsAccountLocalIdFromUid(false, 1);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(bundleShared);
+    bundleOptions.push_back(bundleUserTable);
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable);
+    MockGetOsAccountLocalIdFromUid(true, 0);
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(bundleEnable.size(), 2u);
+    EXPECT_NE(bundleEnable.end(), bundleEnable.find(bundleShared));
+    EXPECT_FALSE(bundleEnable[bundleShared]);
+    EXPECT_NE(bundleEnable.end(), bundleEnable.find(bundleUserTable));
+    EXPECT_TRUE(bundleEnable[bundleUserTable]);
 }
 
 /**

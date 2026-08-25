@@ -443,6 +443,17 @@ public:
         std::map<sptr<NotificationBundleOption>, bool> &slotEnabled,
         int32_t userId);
 
+     /**
+     * @brief Batch query show badge enabled state for multiple bundles.
+     *
+     * @param bundleOptions Indicates the bundle options to query.
+     * @param bundleEnable Indicates the output map from bundle option to badge enabled state.
+     * @param userId Indicates the user id for table routing.
+     * @return Return true on success, false on failure.
+     */
+    bool GetShowBadgeEnabledForBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        std::map<sptr<NotificationBundleOption>, bool> &bundleEnable, int32_t userId);
+
     /**
      * @brief Delete all slots in the of bundle from disturbe DB.
      *
@@ -684,6 +695,10 @@ private:
     std::string GenerateSlotKey(
         const std::string &bundleKey, const std::string &type = "", const std::string &subType = "") const;
     std::string GenerateBundleKey(const std::string &bundleKey, const std::string &type = "") const;
+    bool GenerateBundleQueryKeyIndex(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        const std::function<std::string(const std::string &)> &generateKey,
+        std::vector<std::string> &keys,
+        std::unordered_map<std::string, size_t> &keyToIndex) const;
     int32_t GetUidFromGenerate(const std::string &generateBundleKey) const;
 
     void ParseSlotFromDisturbeDB(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &bundleKey,

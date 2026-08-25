@@ -104,23 +104,6 @@ namespace {
         VOICE_BROADCAST_CONFIG_RULE_KEY,
         LIVE_VIEW_SHARE_FUNC_SWITCH_KEY,
     };
-
-    std::vector<sptr<NotificationBundleOption>> ResolveBundleOptionUids(
-        const std::vector<sptr<NotificationBundleOption>> &bundleOptions)
-    {
-        std::vector<sptr<NotificationBundleOption>> resolvedBundles;
-        resolvedBundles.reserve(bundleOptions.size());
-        for (const auto &option : bundleOptions) {
-            sptr<NotificationBundleOption> validBundle =
-                AdvancedNotificationService::GenerateValidBundleOption(option);
-            if (validBundle == nullptr) {
-                ANS_LOGE("Invalid or unresolvable bundle option, skipped.");
-                continue;
-            }
-            resolvedBundles.push_back(validBundle);
-        }
-        return resolvedBundles;
-    }
 }
 
 ErrCode AdvancedNotificationService::AddSlots(const std::vector<sptr<NotificationSlot>> &slots)
