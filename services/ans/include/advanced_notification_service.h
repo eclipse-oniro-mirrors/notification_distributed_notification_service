@@ -114,6 +114,15 @@ public:
 
     static std::map<std::string, uint32_t>& GetDefaultSlotConfig();
 
+    /**
+     * @brief Clean up service state for test/fuzz processes.
+     *
+     * Destroys the system event observer (one-way, not re-created) to stop
+     * common-event dispatch, then drains or resets the internal FFRT queues.
+     * Only test/fuzz code calls this; production never does.
+     *
+     * @param resetQueues True to reset queues entirely, false to drain only.
+     */
     void SelfClean(bool resetQueues = false);
 
     /**
