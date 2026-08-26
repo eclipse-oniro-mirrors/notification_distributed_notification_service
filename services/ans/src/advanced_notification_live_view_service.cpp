@@ -229,7 +229,7 @@ void AdvancedNotificationService::ProcessRecoveryEntry(const std::vector<Notific
             return;
         }
     }
-    if (AssignToNotificationList(record) != ERR_OK) {
+    if (AssignToNotificationList(record, true) != ERR_OK) {
         ANS_LOGE("Add notification to record list failed.");
         DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
             requestObj.request->GetSecureKey(), requestObj.request->GetReceiverUserId());

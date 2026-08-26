@@ -2188,7 +2188,7 @@ private:
     ErrCode CheckCommonLiveViewRights(const sptr<NotificationRequest> &request);
     ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
     ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
         NotificationKey notificationKey, sptr<Notification> &notification, int32_t removeReason,
         bool isCancel = false);

@@ -515,6 +515,67 @@ HWTEST_F(AdvancedNotificationServiceUnitTest,
 }
 
 /**
+ * @tc.name: AssignToNotificationList_RecoverPreserveCreateTime_00001
+ * @tc.desc: Test AssignToNotificationList with isRecover=true resets request createTime to
+ *           current time but preserves createTime in extendInfo restored from db.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    AssignToNotificationList_RecoverPreserveCreateTime_00001, Function | SmallTest | Level1)
+{
+    const int64_t fixedCreateTime = 1718000000000;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetNotificationId(2);
+    request->SetCreateTime(fixedCreateTime);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam(EXTENDINFO_CREATE_TIME, AAFwk::Long::Box(static_cast<long>(fixedCreateTime)));
+    request->SetExtendInfo(extendInfo);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->AssignToNotificationList(record, true);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+    // request createTime keeps the original reset logic
+    EXPECT_GT(request->GetCreateTime(), fixedCreateTime);
+    // createTime in extendInfo is preserved from db
+    auto newExtendInfo = request->GetExtendInfo();
+    ASSERT_NE(newExtendInfo, nullptr);
+    EXPECT_TRUE(newExtendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    auto param = newExtendInfo->GetParam(EXTENDINFO_CREATE_TIME);
+    AAFwk::ILong* iLong = AAFwk::ILong::Query(param);
+    ASSERT_NE(iLong, nullptr);
+    EXPECT_EQ(AAFwk::Long::Unbox(iLong), fixedCreateTime);
+}
+
+/**
+ * @tc.name: AssignToNotificationList_RecoverNoExtendInfoCreateTime_00002
+ * @tc.desc: Test AssignToNotificationList with isRecover=true leaves extendInfo untouched
+ *           when restored extendInfo has no createTime param.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    AssignToNotificationList_RecoverNoExtendInfoCreateTime_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetNotificationId(3);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("otherParam", AAFwk::String::Box("value"));
+    request->SetExtendInfo(extendInfo);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->AssignToNotificationList(record, true);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+    EXPECT_GT(request->GetCreateTime(), 0);
+    auto newExtendInfo = request->GetExtendInfo();
+    ASSERT_NE(newExtendInfo, nullptr);
+    EXPECT_FALSE(newExtendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    EXPECT_TRUE(newExtendInfo->HasParam("otherParam"));
+}
+
+/**
  * @tc.name: FillMissingParameters_PreserveCreateTime_00001
  * @tc.desc: Test FillMissingParameters preserves createTime from old request on update.
  * @tc.type: FUNC
