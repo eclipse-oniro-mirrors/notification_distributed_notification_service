@@ -373,10 +373,12 @@ AdvancedNotificationService::AdvancedNotificationService()
     systemEventObserver_ = std::make_shared<SystemEventObserver>(iSystemEvent);
     DelayedSingleton<NotificationConfigParse>::GetInstance()->GetReportTrustListConfig();
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-    distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
-        std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
-    dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
-    InitDistributeCallBack();
+    notificationSvrQueue_.Submit([this]() {
+        distributedKvStoreDeathRecipient_ = std::make_shared<DistributedKvStoreDeathRecipient>(
+            std::bind(&AdvancedNotificationService::OnDistributedKvStoreDeathRecipient, this));
+        dataManager_.RegisterKvStoreServiceDeathRecipient(distributedKvStoreDeathRecipient_);
+        InitDistributeCallBack();
+    });
 #endif
 #ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
     NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute();
