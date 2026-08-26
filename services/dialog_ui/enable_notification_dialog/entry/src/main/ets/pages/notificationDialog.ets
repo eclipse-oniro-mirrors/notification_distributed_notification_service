@@ -31,7 +31,6 @@ import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSessi
 import { MeasureOptions } from '@ohos.measure';
 import { MeasureUtils } from '@ohos.arkui.UIContext';
 import common from '@ohos.app.ability.common';
-import uiMaterial from '@ohos.arkui.uiMaterial';
 
 const TAG = 'NotificationDialog_Service ';
 const mainWindowId = 'mainWindow';
@@ -41,7 +40,6 @@ const permission: Record<string, Resource> = {
   'reason': $r('app.string.reason'),
 };
 const bottomPopoverTypes = ['default', 'phone'];
-const defaultUiMaterial = new uiMaterial.ImmersiveMaterial({style: uiMaterial.ImmersiveStyle.ULTRA_THICK});
 const reasonHeightDifference = 150;
 const minReasonHeight = 10;
 
@@ -89,11 +87,8 @@ struct NotificationDialogPage {
     builder: PermissionDialog({ isUpdate: $isUpdate }),
     autoCancel: false,
     alignment: DialogAlignment.Center,
-    customStyle: false,
+    customStyle: true,
     maskColor: $r('app.color.mask_thin'),
-    systemMaterial: defaultUiMaterial,
-    edgeLightMode: EdgeLightMode.EDGELIGHT_AUTO,
-    distortionMode: DistortionMode.DISTORTION_AUTO,
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
     }
@@ -317,6 +312,8 @@ struct PermissionDialog {
             }
           }
         }
+        .borderRadius(Constants.DIALOG_PRIVACY_BORDER_RADIUS)
+        .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
         .width(Constants.FULL_WIDTH)
         .clip(true)
         .id(mainWindowId)
@@ -325,6 +322,11 @@ struct PermissionDialog {
         })
       }
     }
+    .margin({
+      left: this.isBottomPopover ? Constants.DIALOG_MARGIN_VERTICAL : Constants.DIALOG_MARGIN, 
+      right: this.isBottomPopover ? Constants.DIALOG_MARGIN_VERTICAL : Constants.DIALOG_MARGIN, 
+      bottom: this.isBottomPopover ? this.naviHeight : 0 
+    })
     .constraintSize({ 
       maxHeight: '90%',
       maxWidth: Constants.MAX_DIALOG_WIDTH
