@@ -417,7 +417,8 @@ void AdvancedNotificationService::SelfClean(bool resetQueues)
     }
 }
 
-ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record)
+ErrCode AdvancedNotificationService::AssignToNotificationList(
+    const std::shared_ptr<NotificationRecord> &record, bool isRecover)
 {
     ErrCode result = ERR_OK;
     if (!IsNotificationExists(record->notification->GetKey())) {
@@ -426,7 +427,9 @@ ErrCode AdvancedNotificationService::AssignToNotificationList(const std::shared_
             return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
         }
         record->request->SetCreateTime(GetCurrentTime());
-        SetCreateTimeToExtendInfo(record->request, record->request->GetCreateTime());
+        if (!isRecover) {
+            SetCreateTimeToExtendInfo(record->request, record->request->GetCreateTime());
+        }
         if (record->request->GetLiveViewStatus() != NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END) {
             result = PublishInNotificationList(record);
         }
