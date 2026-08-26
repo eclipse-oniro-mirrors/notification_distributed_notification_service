@@ -39,11 +39,11 @@ ani_status UnwrapNotificationTemplate(ani_env *env, ani_object aniObj, Notificat
         return status;
     }
     std::string nameStr = "";
-    if (ANI_OK != (status = GetStringByAniString(env, static_cast<ani_string>(nameRef), nameStr,
-        NotificationSts::STR_MAX_SIZE))) {
+    if (ANI_OK != (status = GetStringByAniString(env, static_cast<ani_string>(nameRef), nameStr))) {
         ANS_LOGE("GetStringByAniString faild. status %{public}d", status);
         return status;
     }
+    nameStr = GetResizeStr(nameStr, NotificationSts::STR_MAX_SIZE);
     ani_ref dataRef;
     if (ANI_OK != (status = env->Object_GetPropertyByName_Ref(aniObj, "data", &dataRef))) {
         ANS_LOGE("Object_GetPropertyByName_Ref 'data' faild. status %{public}d", status);

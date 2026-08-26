@@ -19,6 +19,7 @@
 #include "os_account_constants.h"
 #include "os_account_info.h"
 #include "os_account_manager.h"
+#include <limits>
 
 namespace OHOS {
 namespace NotificationSts {
@@ -107,7 +108,7 @@ ani_status GetAniStringByString(ani_env* env, const std::string str, ani_string&
     return status;
 }
 
-ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res, ani_size maxLen)
+ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res)
 {
     if (str == nullptr || env == nullptr) {
         ANS_LOGE("GetStringByAniString fail, has nullptr");
@@ -120,11 +121,11 @@ ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res, 
         ANS_LOGE("status : %{public}d", status);
         return status;
     }
-    if (maxLen > 0 && sz > maxLen) {
-        ANS_LOGE("str size %{public}zu exceeds maxLen %{public}zu, truncated", sz, maxLen);
+    if (sz >= std::numeric_limits<ani_size>::max()) {
+        ANS_LOGE("str size %{public}zu exceeds ani_size max, resize would overflow", sz);
         return ANI_INVALID_ARGS;
     }
-    res.resize(sz + 1);
+    res.resize(static_cast<size_t>(sz) + 1);
     if ((status = env->String_GetUTF8SubString(str, 0, sz, res.data(), res.size(), &sz)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
         return status;

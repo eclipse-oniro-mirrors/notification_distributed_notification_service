@@ -1134,11 +1134,11 @@ sptr<StsNotificationOperationInfo> GetOperationInfoForDistributeOperation(
 {
     std::string hashCodeStd;
     sptr<StsNotificationOperationInfo> info = new (std::nothrow) StsNotificationOperationInfo();
-    if (info == nullptr || ANI_OK != GetStringByAniString(env, hashcode, hashCodeStd,
-        LONG_STR_MAX_SIZE)) {
+    if (info == nullptr || ANI_OK != GetStringByAniString(env, hashcode, hashCodeStd)) {
         ANS_LOGD("hashCode is valid");
         return nullptr;
     }
+    hashCodeStd = GetResizeStr(hashCodeStd, STR_MAX_SIZE);
     if (hashCodeStd.empty()) {
         ANS_LOGD("hashCode is empty");
         return nullptr;
