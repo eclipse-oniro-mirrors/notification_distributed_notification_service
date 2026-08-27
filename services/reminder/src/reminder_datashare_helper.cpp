@@ -276,7 +276,7 @@ void ReminderDataShareHelper::UpdateCalendarUid()
     }
     for (const auto& moduleInfo : bundleInfo.hapModuleInfos) {
         for (const auto& metaData : moduleInfo.metadata) {
-            if (metaData.name != "hmos.calendardata.reminderDbVersion") {
+            if (metaData.name != "ohos.calendardata.reminderDbVersion") {
                 continue;
             }
             ANSR_LOGI("calendar rdb is new version.");

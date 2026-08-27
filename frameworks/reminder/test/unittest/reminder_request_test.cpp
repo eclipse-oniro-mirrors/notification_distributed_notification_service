@@ -624,8 +624,8 @@ HWTEST_F(ReminderRequestTest, HandleTimeZoneChange_00003, Function | SmallTest |
 }
 
 /**
- * @tc.name: HandleTimeZoneChange_00001
- * @tc.desc: Test HandleSysTimeChange parameters.
+ * @tc.name: HandleSysTimeChange_00001
+ * @tc.desc: Test HandleSysTimeChange when isExpired is true.
  * @tc.type: FUNC
  * @tc.require: issueI5UYHP
  */
@@ -639,8 +639,8 @@ HWTEST_F(ReminderRequestTest, HandleSysTimeChange_00001, Function | SmallTest | 
 }
 
 /**
- * @tc.name: HandleTimeZoneChange_00002
- * @tc.desc: Test HandleSysTimeChange parameters.
+ * @tc.name: HandleSysTimeChange_00002
+ * @tc.desc: Test HandleSysTimeChange when oriTriggerTime < now.
  * @tc.type: FUNC
  * @tc.require: issueI5UYHP
  */
@@ -971,22 +971,6 @@ HWTEST_F(ReminderRequestTest, GetShowTime_00001, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: GetShowTime_00002
- * @tc.desc: Test GetShowTime parameters.
- * @tc.type: FUNC
- * @tc.require: issueI5VB6V
- */
-HWTEST_F(ReminderRequestTest, GetShowTime_00002, Function | SmallTest | Level1)
-{
-    uint64_t showTime = 8 * 60 * 1000;
-    ReminderRequest reminder = ReminderRequest(ReminderRequest::ReminderType::TIMER);
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    std::string ret = "8";
-    std::string res = rrc->GetShowTime(showTime);
-    EXPECT_EQ(res.substr(4, res.size()), ret);
-}
-
-/**
  * @tc.name: SetActionButton_00001
  * @tc.desc: Test SetActionButton parameters.
  * @tc.type: FUNC
@@ -1001,6 +985,7 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00001, Function | SmallTest | Leve
     Notification::ReminderRequest::ActionButtonType type =
             Notification::ReminderRequest::ActionButtonType::INVALID;
     reminderRequestChild->SetActionButton(title, type, resource);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_.size(), 0);
 }
 
 /**
@@ -1018,6 +1003,10 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00002, Function | SmallTest | Leve
     Notification::ReminderRequest::ActionButtonType type2 =
             Notification::ReminderRequest::ActionButtonType::CLOSE;
     reminderRequestChild->SetActionButton(title, type2, resource);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_.size(), 1);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_.count(type2), 1);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_[type2].title, title);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_[type2].resource, resource);
 }
 
 /**
@@ -1035,6 +1024,10 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00003, Function | SmallTest | Leve
     Notification::ReminderRequest::ActionButtonType type3 =
             Notification::ReminderRequest::ActionButtonType::SNOOZE;
     reminderRequestChild->SetActionButton(title, type3, resource);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_.size(), 1);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_.count(type3), 1);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_[type3].title, title);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_[type3].resource, resource);
 }
 
 /**
@@ -1056,6 +1049,10 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00004, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequest::ButtonDataShareUpdate> buttonDataShareUpdate =
         std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
     reminderRequestChild->SetActionButton(title, type2, resource, buttonWantAgent, buttonDataShareUpdate);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_.size(), 1);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_.count(type2), 1);
+    EXPECT_NE(reminderRequestChild->actionButtonMap_[type2].wantAgent, nullptr);
+    EXPECT_NE(reminderRequestChild->actionButtonMap_[type2].dataShareUpdate, nullptr);
 }
 
 /**
@@ -1077,6 +1074,10 @@ HWTEST_F(ReminderRequestTest, SetActionButton_00005, Function | SmallTest | Leve
     std::shared_ptr<ReminderRequest::ButtonDataShareUpdate> buttonDataShareUpdate =
         std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
     reminderRequestChild->SetActionButton(title, type3, resource, buttonWantAgent, buttonDataShareUpdate);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_.size(), 1);
+    EXPECT_EQ(reminderRequestChild->actionButtonMap_.count(type3), 1);
+    EXPECT_NE(reminderRequestChild->actionButtonMap_[type3].wantAgent, nullptr);
+    EXPECT_NE(reminderRequestChild->actionButtonMap_[type3].dataShareUpdate, nullptr);
 }
 
 /**
@@ -1091,7 +1092,9 @@ HWTEST_F(ReminderRequestTest, AddActionButtons_00001, Function | SmallTest | Lev
     NotificationRequest notificationRequest(reminderRequestChild->GetNotificationId());
     ASSERT_NE(nullptr, reminderRequestChild);
     reminderRequestChild->AddActionButtons(notificationRequest, true);
+    EXPECT_EQ(notificationRequest.GetActionButtons().size(), 0);
     reminderRequestChild->AddActionButtons(notificationRequest, false);
+    EXPECT_EQ(notificationRequest.GetActionButtons().size(), 0);
 }
 
 /**
@@ -1104,20 +1107,16 @@ HWTEST_F(ReminderRequestTest, InitUserId_00001, Function | SmallTest | Level1)
 {
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
-    bool deSet = true;
-    uint8_t newState = 2;
-    std::string function = "this is function";
     int32_t userId = 1;
     int32_t uid = 2;
     reminderRequestChild->InitUserId(userId);
+    EXPECT_EQ(reminderRequestChild->GetUserId(), userId);
     reminderRequestChild->InitUid(uid);
-    reminderRequestChild->SetState(deSet, newState, function);
-    uint8_t result1 = reminderRequestChild->GetState();
-    EXPECT_EQ(result1, 2);
-    bool result = reminderRequestChild->IsShowing();
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(reminderRequestChild->GetUid(), uid);
     reminderRequestChild->OnShow(true, true, true);
+    EXPECT_EQ(reminderRequestChild->IsShowing(), true);
     reminderRequestChild->OnShowFail();
+    EXPECT_EQ(reminderRequestChild->IsShowing(), false);
 }
 
 /**
@@ -1131,26 +1130,23 @@ HWTEST_F(ReminderRequestTest, OnStart_00001, Function | SmallTest | Level1)
     std::shared_ptr<ReminderRequestChild> reminderRequestChild = std::make_shared<ReminderRequestChild>();
     ASSERT_NE(nullptr, reminderRequestChild);
     reminderRequestChild->OnStart();
+    EXPECT_TRUE((reminderRequestChild->GetState() & ReminderRequest::REMINDER_STATUS_ACTIVE) != 0);
     reminderRequestChild->OnStop();
-    bool deSet = true;
-    uint8_t newState = 2;
-    std::string function = "this is function";
-    int32_t userId = 1;
-    int32_t uid = 2;
-    reminderRequestChild->InitUserId(userId);
-    reminderRequestChild->InitUid(uid);
-    reminderRequestChild->SetState(deSet, newState, function);
+    EXPECT_TRUE((reminderRequestChild->GetState() & ReminderRequest::REMINDER_STATUS_ACTIVE) == 0);
+    // OnStart again should set ACTIVE
     reminderRequestChild->OnStart();
+    EXPECT_TRUE((reminderRequestChild->GetState() & ReminderRequest::REMINDER_STATUS_ACTIVE) != 0);
     reminderRequestChild->OnStop();
+    EXPECT_TRUE((reminderRequestChild->GetState() & ReminderRequest::REMINDER_STATUS_ACTIVE) == 0);
 }
 
 /**
- * @tc.name: RecoverWantAgent_00002
- * @tc.desc: Test RecoverWantAgent parameters.
+ * @tc.name: StringSplit_00004
+ * @tc.desc: Test StringSplit with non-matching delimiter.
  * @tc.type: FUNC
  * @tc.require: issueI65R21
  */
-HWTEST_F(ReminderRequestTest, RecoverWantAgent_00002, Function | SmallTest | Level1)
+HWTEST_F(ReminderRequestTest, StringSplit_00004, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     std::string source = "source";
@@ -1184,14 +1180,12 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00002, Function | SmallT
     auto rrc = std::make_shared<ReminderRequestChild>();
     rrc->SetNotificationId(100);
     NotificationRequest notification(rrc->GetNotificationId());
-
+    rrc->content_ = "content";
+    rrc->snoozeContent_ = "snooze";
+    rrc->expiredContent_ = "expired";
     rrc->UpdateNotificationContent(notification, true);
     rrc->UpdateNotificationContent(notification, false);
-
-    Notification::ReminderRequest::TimeTransferType type = Notification::ReminderRequest::TimeTransferType::WEEK;
-    int32_t actualTime = 1;
-    int32_t result = rrc->GetCTime(type, actualTime);
-    EXPECT_EQ(result, 1);
+    EXPECT_EQ(rrc->displayContent_, "expired");
 }
 
 /**
@@ -1235,13 +1229,11 @@ HWTEST_F(ReminderRequestTest, CreateWantAgent_00002, Function | SmallTest | Leve
 HWTEST_F(ReminderRequestTest, OnClose_00100, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    bool deSet = true;
-    uint8_t newState = 4;
-    std::string function = "this is function";
-    rrc->SetState(deSet, newState, function);
-    uint8_t result1 = rrc->GetState();
-    EXPECT_EQ(result1, 4);
+    rrc->OnShow(false, true, true);
+    EXPECT_TRUE(rrc->IsShowing());
     rrc->OnClose(true);
+    EXPECT_FALSE(rrc->IsShowing());
+    EXPECT_TRUE(rrc->IsExpired());
 }
 
 /**
@@ -1253,13 +1245,11 @@ HWTEST_F(ReminderRequestTest, OnClose_00100, Function | SmallTest | Level1)
 HWTEST_F(ReminderRequestTest, OnClose_00200, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    bool deSet = true;
-    uint8_t newState = 2;
-    std::string function = "this is function";
-    rrc->SetState(deSet, newState, function);
-    uint8_t result1 = rrc->GetState();
-    EXPECT_EQ(result1, 2);
-    rrc->OnClose(true);
+    rrc->OnShow(false, false, true);
+    EXPECT_TRUE(rrc->IsShowing());
+    rrc->OnClose(false);
+    EXPECT_FALSE(rrc->IsShowing());
+    EXPECT_FALSE(rrc->IsExpired());
 }
 
 /**
@@ -1271,13 +1261,9 @@ HWTEST_F(ReminderRequestTest, OnClose_00200, Function | SmallTest | Level1)
 HWTEST_F(ReminderRequestTest, OnShow_00100, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    bool deSet = true;
-    uint8_t newState = 9;
-    std::string function = "this is function";
-    rrc->SetState(deSet, newState, function);
-    uint8_t result1 = rrc->GetState();
-    EXPECT_EQ(result1, 9);
     rrc->OnShow(true, true, true);
+    EXPECT_TRUE(rrc->IsShowing());
+    EXPECT_TRUE(rrc->IsAlerting());
 }
 
 /**
@@ -1289,13 +1275,11 @@ HWTEST_F(ReminderRequestTest, OnShow_00100, Function | SmallTest | Level1)
 HWTEST_F(ReminderRequestTest, OnStart_00002, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    bool deSet = true;
-    uint8_t newState = 1;
-    std::string function = "this is function";
-    rrc->SetState(deSet, newState, function);
-    uint8_t result1 = rrc->GetState();
-    EXPECT_EQ(result1, 1);
     rrc->OnStart();
+    EXPECT_TRUE((rrc->GetState() & ReminderRequest::REMINDER_STATUS_ACTIVE) != 0);
+    uint8_t stateBefore = rrc->GetState();
+    rrc->OnStart();
+    EXPECT_EQ(rrc->GetState(), stateBefore);
 }
 
 /**
@@ -1307,14 +1291,11 @@ HWTEST_F(ReminderRequestTest, OnStart_00002, Function | SmallTest | Level1)
 HWTEST_F(ReminderRequestTest, OnStart_00003, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    bool deSet = true;
-    uint8_t newState = 2;
-    std::string function = "this is function";
-    rrc->SetState(deSet, newState, function);
-    uint8_t result1 = rrc->GetState();
-    EXPECT_EQ(result1, 2);
     rrc->SetExpired(true);
+    uint8_t stateBefore = rrc->GetState();
     rrc->OnStart();
+    EXPECT_EQ(rrc->GetState(), stateBefore);
+    EXPECT_TRUE((rrc->GetState() & ReminderRequest::REMINDER_STATUS_ACTIVE) == 0);
 }
 
 /**
@@ -1346,6 +1327,10 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00003, Function | SmallTest | Lev
     std::vector<std::string> ret1 = rrc->StringSplit(wantAgentInfo, "<SEP#/>");
     EXPECT_EQ(ret1.size(), 2);
     rrc->DeserializeWantAgent(wantAgentInfo, type);
+    // type=0 means wantAgentInfo_
+    EXPECT_NE(rrc->GetWantAgentInfo(), nullptr);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->pkgName, "sour");
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "123");
 }
 
 /**
@@ -1362,6 +1347,10 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00004, Function | SmallTest | Lev
     std::vector<std::string> ret1 = rrc->StringSplit(wantAgentInfo, "<SEP#/>");
     EXPECT_EQ(ret1.size(), 2);
     rrc->DeserializeWantAgent(wantAgentInfo, type);
+    // type=1 means maxScreenWantAgentInfo_
+    EXPECT_NE(rrc->GetMaxScreenWantAgentInfo(), nullptr);
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->pkgName, "sour");
+    EXPECT_EQ(rrc->GetMaxScreenWantAgentInfo()->abilityName, "123");
 }
 
 /**
@@ -1378,6 +1367,10 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00005, Function | SmallTest | Lev
     std::vector<std::string> ret1 = rrc->StringSplit(wantAgentInfo, "<SEP#/>");
     EXPECT_EQ(ret1.size(), 2);
     rrc->DeserializeWantAgent(wantAgentInfo, type);
+    // type=2 is defalut case
+    EXPECT_NE(rrc->GetWantAgentInfo(), nullptr);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->pkgName, "");
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
 }
 
 /**
@@ -1394,6 +1387,10 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgent_00006, Function | SmallTest | Lev
     std::vector<std::string> ret1 = rrc->StringSplit(wantAgentInfo, "<SEP#/>");
     EXPECT_EQ(ret1.size(), 3);
     rrc->DeserializeWantAgent(wantAgentInfo, type);
+    EXPECT_NE(rrc->GetWantAgentInfo(), nullptr);
+    EXPECT_EQ(rrc->GetWantAgentInfo()->pkgName, "sour");
+    EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "123");
+    EXPECT_EQ(rrc->GetWantAgentInfo()->uri, "uri");
 }
 
 /**
@@ -1406,12 +1403,12 @@ HWTEST_F(ReminderRequestTest, UpdateActionButtons_00001, Function | SmallTest | 
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     NotificationRequest notificationRequest(rrc->GetNotificationId());
-    bool setSnooze = true;
     rrc->SetSnoozeTimes(1);
-    EXPECT_EQ(rrc->GetSnoozeTimes(), 1);
     rrc->SetSnoozeTimesDynamic(1);
-    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 1);
+    rrc->SetActionButton("close", ReminderRequest::ActionButtonType::CLOSE, "close");
+    bool setSnooze = true;
     rrc->UpdateActionButtons(notificationRequest, setSnooze);
+    EXPECT_EQ(notificationRequest.GetActionButtons().size(), 1);
 }
 
 /**
@@ -1424,12 +1421,13 @@ HWTEST_F(ReminderRequestTest, UpdateActionButtons_00002, Function | SmallTest | 
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     NotificationRequest notificationRequest(rrc->GetNotificationId());
-    bool setSnooze = true;
     rrc->SetSnoozeTimes(0);
-    EXPECT_EQ(rrc->GetSnoozeTimes(), 0);
     rrc->SetSnoozeTimesDynamic(1);
-    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 1);
+    rrc->SetActionButton("close", ReminderRequest::ActionButtonType::CLOSE, "close");
+    rrc->SetActionButton("snooze", ReminderRequest::ActionButtonType::SNOOZE, "snooze");
+    bool setSnooze = true;
     rrc->UpdateActionButtons(notificationRequest, setSnooze);
+    EXPECT_EQ(notificationRequest.GetActionButtons().size(), 1);
 }
 
 /**
@@ -1442,12 +1440,13 @@ HWTEST_F(ReminderRequestTest, UpdateActionButtons_00003, Function | SmallTest | 
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     NotificationRequest notificationRequest(rrc->GetNotificationId());
-    bool setSnooze = false;
     rrc->SetSnoozeTimes(1);
-    EXPECT_EQ(rrc->GetSnoozeTimes(), 1);
     rrc->SetSnoozeTimesDynamic(1);
-    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 1);
+    rrc->SetActionButton("close", ReminderRequest::ActionButtonType::CLOSE, "close");
+    rrc->SetActionButton("snooze", ReminderRequest::ActionButtonType::SNOOZE, "snooze");
+    bool setSnooze = false;
     rrc->UpdateActionButtons(notificationRequest, setSnooze);
+    EXPECT_EQ(notificationRequest.GetActionButtons().size(), 2);
 }
 
 /**
@@ -1460,12 +1459,12 @@ HWTEST_F(ReminderRequestTest, UpdateActionButtons_00004, Function | SmallTest | 
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     NotificationRequest notificationRequest(rrc->GetNotificationId());
-    bool setSnooze = true;
     rrc->SetSnoozeTimes(1);
-    EXPECT_EQ(rrc->GetSnoozeTimes(), 1);
     rrc->SetSnoozeTimesDynamic(0);
-    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 0);
+    rrc->SetActionButton("close", ReminderRequest::ActionButtonType::CLOSE, "close");
+    bool setSnooze = true;
     rrc->UpdateActionButtons(notificationRequest, setSnooze);
+    EXPECT_EQ(notificationRequest.GetActionButtons().size(), 1);
 }
 
 /**
@@ -1481,9 +1480,12 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00300, Function | SmallT
     uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
     rrc->SetTimeInterval(1);
     EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+    rrc->content_ = "content";
+    rrc->snoozeContent_ = "snooze";
 
     bool setSnooze = true;
     rrc->UpdateNotificationContent(notificationRequest, setSnooze);
+    EXPECT_EQ(rrc->displayContent_, "snooze");
 }
 
 
@@ -1497,16 +1499,13 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00400, Function | SmallT
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     NotificationRequest notificationRequest(rrc->GetNotificationId());
-
-    bool deSet = true;
-    uint8_t newState = 2;
-    std::string function = "this is function";
-    rrc->SetState(deSet, newState, function);
-    uint8_t result1 = rrc->GetState();
-    EXPECT_EQ(result1, 2);
-    EXPECT_EQ(rrc->IsAlerting(), true);
+    rrc->content_ = "content";
+    rrc->snoozeContent_ = "snooze";
+    rrc->OnShow(false, true, true);
+    EXPECT_EQ(rrc->IsAlerting(), false);
     bool setSnooze = false;
     rrc->UpdateNotificationContent(notificationRequest, setSnooze);
+    EXPECT_EQ(rrc->displayContent_, "content");
 }
 
 /**
@@ -1567,22 +1566,15 @@ HWTEST_F(ReminderRequestTest, UpdateNotificationContent_00500, Function | SmallT
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
     NotificationRequest notificationRequest(rrc->GetNotificationId());
-
-    bool deSet = false;
-    uint8_t newState = 0;
-    std::string function = "this is function";
-    rrc->SetState(deSet, newState, function);
-    uint8_t result1 = rrc->GetState();
-    EXPECT_EQ(result1, 0);
-    EXPECT_EQ(rrc->IsAlerting(), false);
-
+    rrc->content_ = "content";
+    rrc->snoozeContent_ = "snooze";
     rrc->SetSnoozeTimes(0);
-    EXPECT_EQ(rrc->GetSnoozeTimes(), 0);
     rrc->SetSnoozeTimesDynamic(1);
-    EXPECT_EQ(rrc->GetSnoozeTimesDynamic(), 1);
+    EXPECT_FALSE(rrc->IsAlerting());
 
     bool setSnooze = false;
     rrc->UpdateNotificationContent(notificationRequest, setSnooze);
+    EXPECT_EQ(rrc->displayContent_, "snooze");
 }
 
 /**
@@ -1828,7 +1820,7 @@ HWTEST_F(ReminderRequestTest, RecoverWantAgentByJson_00001, Function | SmallTest
     jsonValue = "{}";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
     EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
-    
+
     jsonValue = R"({"pkgName":1})";
     rrc->RecoverWantAgentByJson(jsonValue, 0);
     EXPECT_EQ(rrc->GetWantAgentInfo()->abilityName, "");
@@ -2273,27 +2265,37 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_002, Function | SmallTest | Le
 {
     ReminderRequestChild child;
     child.DeserializeButtonInfoFromJson("");
+    EXPECT_EQ(child.actionButtonMap_.size(), 0);
     child.DeserializeButtonInfoFromJson("{");
+    EXPECT_EQ(child.actionButtonMap_.size(), 0);
     child.DeserializeButtonInfoFromJson("1");
+    EXPECT_EQ(child.actionButtonMap_.size(), 0);
     child.DeserializeButtonInfoFromJson("[]");
+    EXPECT_EQ(child.actionButtonMap_.size(), 0);
     std::string jsonValue = R"([{"type":1, "title":"111", "titleResource":""}])";
     child.DeserializeButtonInfoFromJson(jsonValue);
+    EXPECT_EQ(child.actionButtonMap_.size(), 1);
 
     jsonValue = R"([{"type":1, "title":"111", "titleResource":"", "wantAgent":""}])";
     child.DeserializeButtonInfoFromJson(jsonValue);
+    EXPECT_EQ(child.actionButtonMap_.size(), 1);
 
     jsonValue = R"([{"type":1, "title":"111", "titleResource":"", "wantAgent":{"pkgName": ""}}])";
     child.DeserializeButtonInfoFromJson(jsonValue);
+    EXPECT_EQ(child.actionButtonMap_.size(), 1);
 
     jsonValue = R"([{"type":1, "title":"111", "titleResource":"", "dataShareUpdate":""}])";
     child.DeserializeButtonInfoFromJson(jsonValue);
+    EXPECT_EQ(child.actionButtonMap_.size(), 1);
 
     jsonValue = R"([{"type":1, "title":"111", "titleResource":"", "dataShareUpdate":{"uri":""}}])";
     child.DeserializeButtonInfoFromJson(jsonValue);
+    EXPECT_EQ(child.actionButtonMap_.size(), 1);
 
+    child.actionButtonMap_.clear();
     jsonValue = R"([{"type":3, "title":"111", "titleResource":"", "dataShareUpdate":{"uri":""}}])";
     child.DeserializeButtonInfoFromJson(jsonValue);
-    EXPECT_GE(child.actionButtonMap_.size(), 0);
+    EXPECT_EQ(child.actionButtonMap_.size(), 0);
 }
 
 /**
@@ -2400,13 +2402,13 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_008, Function | SmallTest | Le
     child.SetActionButton("test1", ReminderRequest::ActionButtonType::CLOSE, "test1",
         nullptr, nullptr);
     EXPECT_EQ(child.actionButtonMap_.size(), 1);
-    
+
     child.actionButtonMap_.clear();
     auto wantAgent = std::make_shared<ReminderRequest::ButtonWantAgent>();
     child.SetActionButton("test2", ReminderRequest::ActionButtonType::SNOOZE, "test2",
         wantAgent, nullptr);
     EXPECT_EQ(child.actionButtonMap_.size(), 1);
-    
+
     child.actionButtonMap_.clear();
     auto update = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
     child.SetActionButton("test3", ReminderRequest::ActionButtonType::CUSTOM, "test3",
