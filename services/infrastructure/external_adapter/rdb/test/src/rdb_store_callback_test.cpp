@@ -17,6 +17,7 @@
 #include <memory>
 #include <string>
 #include "rdb_store_callback.h"
+#include "mock_abs_shared_result_set.h"
 #include "mock_rdb_event_handler.h"
 #include "mock_rdb_store.h"
 
@@ -84,5 +85,130 @@ HWTEST_F(RdbStoreCallbackTest, OnCorruption_EmptyFile, TestSize.Level1)
     RdbStoreCallback cb(config, hookMgr, eventHandlerTypes);
     int32_t ret = cb.onCorruption("");
     EXPECT_EQ(ret, NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name: OnUpgrade_NoResidualMark_100
+ * @tc.desc: Verify OnUpgrade runs migration directly when no residual mark exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbStoreCallbackTest, OnUpgrade_NoResidualMark_100, TestSize.Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    const std::set<RdbEventHandlerType> eventHandlerTypes = {
+        RdbEventHandlerType::ON_UPGRADE_LIVE_VIEW_MIGRATION
+    };
+    RdbStoreCallback cb(config, hookMgr, eventHandlerTypes);
+    MockRdbStore store;
+    // Mark read: no row → no cleanup
+    SetMockQueryResults({nullptr});
+    SetMockQuerySqlResults({nullptr});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    EXPECT_EQ(cb.OnUpgrade(store, 1, 2), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name: OnUpgrade_ResidualMark_100
+ * @tc.desc: Verify OnUpgrade cleans data when residual crash count reaches threshold (2).
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbStoreCallbackTest, OnUpgrade_ResidualMark_100, TestSize.Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    const std::set<RdbEventHandlerType> eventHandlerTypes = {
+        RdbEventHandlerType::ON_UPGRADE_LIVE_VIEW_MIGRATION
+    };
+    RdbStoreCallback cb(config, hookMgr, eventHandlerTypes);
+    MockRdbStore store;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    // Mark read: "2" ≥ threshold → cleanup
+    SetMockQueryResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"2"}, {NativeRdb::E_OK});
+    SetMockQuerySqlResults({nullptr, nullptr});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    EXPECT_EQ(cb.OnUpgrade(store, 1, 2), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name: OnUpgrade_PerBusinessIsolation_100
+ * @tc.desc: Verify only the crashed business gets cleaned; healthy business keeps its data.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbStoreCallbackTest, OnUpgrade_PerBusinessIsolation_100, TestSize.Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    const std::set<RdbEventHandlerType> eventHandlerTypes = {
+        RdbEventHandlerType::ON_UPGRADE_LIVE_VIEW_MIGRATION,
+        RdbEventHandlerType::ON_UPGRADE_PRIORITY_INFO_MIGRATION
+    };
+    RdbStoreCallback cb(config, hookMgr, eventHandlerTypes);
+    MockRdbStore store;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    // Mark reads: live-view "2" ≥ threshold → cleaned; priority no row → not cleaned
+    SetMockQueryResults({mockResultSet, nullptr});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK, NativeRdb::E_ERROR});
+    SetMockGetStringValuesAndErrCodes({"2"}, {NativeRdb::E_OK});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK, NativeRdb::E_OK,
+        NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    SetMockQuerySqlResults({nullptr, nullptr});
+    EXPECT_EQ(cb.OnUpgrade(store, 1, 2), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name: OnUpgrade_EmptyMarkResult_100
+ * @tc.desc: Verify OnUpgrade handles empty mark result (GoToFirstRow fails) without crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbStoreCallbackTest, OnUpgrade_EmptyMarkResult_100, TestSize.Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    const std::set<RdbEventHandlerType> eventHandlerTypes = {
+        RdbEventHandlerType::ON_UPGRADE_LIVE_VIEW_MIGRATION
+    };
+    RdbStoreCallback cb(config, hookMgr, eventHandlerTypes);
+    MockRdbStore store;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    // Mark read: GoToFirstRow fails → no residual mark
+    SetMockQueryResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_ERROR});
+    SetMockQuerySqlResults({nullptr});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    EXPECT_EQ(cb.OnUpgrade(store, 1, 2), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name: OnUpgrade_NullMarkResult_100
+ * @tc.desc: Verify OnUpgrade handles null Query result (mark read) without crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbStoreCallbackTest, OnUpgrade_NullMarkResult_100, TestSize.Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    const std::set<RdbEventHandlerType> eventHandlerTypes = {
+        RdbEventHandlerType::ON_UPGRADE_LIVE_VIEW_MIGRATION
+    };
+    RdbStoreCallback cb(config, hookMgr, eventHandlerTypes);
+    MockRdbStore store;
+    // Mark read: null result → no residual mark
+    SetMockQueryResults({nullptr});
+    SetMockQuerySqlResults({nullptr});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    EXPECT_EQ(cb.OnUpgrade(store, 1, 2), NativeRdb::E_OK);
 }
 } // namespace OHOS::Notification::Infra

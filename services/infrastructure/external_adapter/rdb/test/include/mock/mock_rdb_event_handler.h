@@ -28,13 +28,19 @@ public:
     int32_t OnDowngrade(NativeRdb::RdbStore &, int32_t, int32_t) override;
     int32_t OnOpen(NativeRdb::RdbStore &) override;
     int32_t OnCorruption(const std::string &) override;
+    void OnUpgradeFailure(NativeRdb::RdbStore &) override;
+    std::string GetMigrationMarkKey() const override;
     std::string GetHandlerName() const override;
     bool IsEnabled() const override;
     void SetEnabled(bool enabled) override;
     void SetReturnCode(int32_t ret);
+    void SetMigrationMarkKey(const std::string &key);
+    int32_t GetUpgradeFailureCallCount() const;
 private:
     std::string name_;
     int32_t ret_;
+    int32_t upgradeFailureCallCount_ = 0;
+    std::string migrationMarkKey_;
 };
 } // namespace OHOS::Notification::Infra
 

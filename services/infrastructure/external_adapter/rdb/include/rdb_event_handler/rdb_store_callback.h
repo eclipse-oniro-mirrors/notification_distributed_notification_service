@@ -75,6 +75,8 @@ public:
         const std::set<RdbEventHandlerType> &eventHandlerTypes);
 
 private:
+    std::shared_ptr<NtfRdbHookMgr> hookMgr_{nullptr};
+
     /** Manages and executes handler lists for each event. */
     RdbEventHandlerManager handlerManager_;
 };

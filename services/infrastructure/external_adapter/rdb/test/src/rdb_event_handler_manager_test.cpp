@@ -17,6 +17,7 @@
 #include <memory>
 #include <string>
 #include "rdb_event_handler_manager.h"
+#include "mock_abs_shared_result_set.h"
 #include "mock_rdb_event_handler.h"
 #include "mock_rdb_store.h"
 
@@ -224,5 +225,117 @@ HWTEST_F(RdbEventHandlerManagerTest, ExecuteOnCreate_400, TestSize.Level1)
     RdbEventHandlerManager mgr;
     MockRdbStore store;
     EXPECT_EQ(mgr.ExecuteOnCreate(store), 0);
+}
+
+/**
+ * @tc.name: ExecuteOnUpgradeWithCrashRecovery_100
+ * @tc.desc: Verify first crash-interruption only retries; cleanup happens on second interruption.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbEventHandlerManagerTest, ExecuteOnUpgradeWithCrashRecovery_100, TestSize.Level1)
+{
+    RdbEventHandlerManager mgr;
+    auto crashedOnce = std::make_shared<MockRdbEventHandler>("crashed_once_h", 0);
+    crashedOnce->SetMigrationMarkKey("upgrade_migration_mark_crashed_once");
+    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, crashedOnce);
+    MockRdbStore store;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    // Mark read: residual count "1" < threshold → no cleanup
+    SetMockQueryResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"1"}, {NativeRdb::E_OK});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    int32_t ret = mgr.ExecuteOnUpgradeWithCrashRecovery(store, 1, 2);
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(crashedOnce->GetUpgradeFailureCallCount(), 0);
+}
+
+/**
+ * @tc.name: ExecuteOnUpgradeWithCrashRecovery_200
+ * @tc.desc: Verify cleanup runs when residual crash count reaches threshold (2).
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbEventHandlerManagerTest, ExecuteOnUpgradeWithCrashRecovery_200, TestSize.Level1)
+{
+    RdbEventHandlerManager mgr;
+    auto crashedTwice = std::make_shared<MockRdbEventHandler>("crashed_twice_h", 0);
+    crashedTwice->SetMigrationMarkKey("upgrade_migration_mark_crashed_twice");
+    auto healthy = std::make_shared<MockRdbEventHandler>("healthy_h", 0);
+    healthy->SetMigrationMarkKey("upgrade_migration_mark_healthy");
+    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, crashedTwice);
+    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, healthy);
+    MockRdbStore store;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    // Mark reads: crashed_twice "2" ≥ threshold → cleanup; healthy no row → no cleanup
+    SetMockQueryResults({mockResultSet, nullptr});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK, NativeRdb::E_ERROR});
+    SetMockGetStringValuesAndErrCodes({"2"}, {NativeRdb::E_OK});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK, NativeRdb::E_OK,
+        NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    int32_t ret = mgr.ExecuteOnUpgradeWithCrashRecovery(store, 1, 2);
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(crashedTwice->GetUpgradeFailureCallCount(), 1);
+    EXPECT_EQ(healthy->GetUpgradeFailureCallCount(), 0);
+}
+
+/**
+ * @tc.name: ExecuteOnUpgradeWithCrashRecovery_300
+ * @tc.desc: Verify no short-circuit: a failing handler does not block subsequent handlers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbEventHandlerManagerTest, ExecuteOnUpgradeWithCrashRecovery_300, TestSize.Level1)
+{
+    RdbEventHandlerManager mgr;
+    auto failing = std::make_shared<MockRdbEventHandler>("failing_h", -1);
+    failing->SetMigrationMarkKey("upgrade_migration_mark_failing");
+    auto healthy = std::make_shared<MockRdbEventHandler>("healthy_h", 0);
+    healthy->SetMigrationMarkKey("upgrade_migration_mark_healthy");
+    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, failing);
+    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, healthy);
+    MockRdbStore store;
+    SetMockQueryResults({nullptr, nullptr});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK, NativeRdb::E_OK,
+        NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    int32_t ret = mgr.ExecuteOnUpgradeWithCrashRecovery(store, 1, 2);
+    EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: ExecuteOnUpgradeWithCrashRecovery_400
+ * @tc.desc: Verify handler with empty mark key skips crash recovery and runs directly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbEventHandlerManagerTest, ExecuteOnUpgradeWithCrashRecovery_400, TestSize.Level1)
+{
+    RdbEventHandlerManager mgr;
+    auto optOut = std::make_shared<MockRdbEventHandler>("opt_out_h", 0);
+    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, optOut);
+    MockRdbStore store;
+    int32_t ret = mgr.ExecuteOnUpgradeWithCrashRecovery(store, 1, 2);
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(optOut->GetUpgradeFailureCallCount(), 0);
+}
+
+/**
+ * @tc.name: ExecuteOnUpgradeWithCrashRecovery_500
+ * @tc.desc: Verify business failure keeps data: no cleanup runs and mark is cleared.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbEventHandlerManagerTest, ExecuteOnUpgradeWithCrashRecovery_500, TestSize.Level1)
+{
+    RdbEventHandlerManager mgr;
+    auto failing = std::make_shared<MockRdbEventHandler>("failing_h", -1);
+    failing->SetMigrationMarkKey("upgrade_migration_mark_failing");
+    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, failing);
+    MockRdbStore store;
+    SetMockQueryResults({nullptr});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    int32_t ret = mgr.ExecuteOnUpgradeWithCrashRecovery(store, 1, 2);
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(failing->GetUpgradeFailureCallCount(), 0);
 }
 } // namespace

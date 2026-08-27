@@ -33,6 +33,7 @@ namespace NativeRdb {
 class RdbStore;
 class AbsSharedResultSet;
 class AbsRdbPredicates;
+class RdbStoreConfig;
 } // namespace NativeRdb
 namespace Notification::Infra {
 

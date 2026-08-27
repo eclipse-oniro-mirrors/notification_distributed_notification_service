@@ -301,4 +301,68 @@ HWTEST_F(PriorityInfoMigrationHandlerTest, GetHandlerName_100, Function | SmallT
     std::string name = handler.GetHandlerName();
     EXPECT_EQ(name, "PriorityInfoMigrationHandler");
 }
+
+/**
+ * @tc.name: OnUpgradeFailure_100
+ * @tc.desc: Verify OnUpgradeFailure handles empty table set without crash when QuerySql returns null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_100, Function | SmallTest | Level1)
+{
+    PriorityInfoMigrationHandler handler;
+    MockRdbStore rdbStore;
+    SetMockQuerySqlResults({nullptr});
+    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+}
+
+/**
+ * @tc.name: OnUpgradeFailure_200
+ * @tc.desc: Verify OnUpgradeFailure handles empty result set when GoToFirstRow fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_200, Function | SmallTest | Level1)
+{
+    PriorityInfoMigrationHandler handler;
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_ERROR});
+    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+}
+
+/**
+ * @tc.name: OnUpgradeFailure_300
+ * @tc.desc: Verify OnUpgradeFailure executes DELETE SQL for each table when tables exist and ExecuteSql succeeds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_300, Function | SmallTest | Level1)
+{
+    PriorityInfoMigrationHandler handler;
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"notification_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+}
+
+/**
+ * @tc.name: OnUpgradeFailure_400
+ * @tc.desc: Verify OnUpgradeFailure rolls back the transaction when Delete fails on a table.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_400, Function | SmallTest | Level1)
+{
+    PriorityInfoMigrationHandler handler;
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"table1"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    SetMockDeleteErrCodes({NativeRdb::E_ERROR});
+    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+}
 } // namespace OHOS::Notification::Infra

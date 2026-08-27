@@ -42,6 +42,16 @@ int32_t IRdbEventHandler::OnCorruption(const std::string &databaseFile)
     return NativeRdb::E_OK;
 }
 
+void IRdbEventHandler::OnUpgradeFailure(NativeRdb::RdbStore &rdbStore)
+{
+    (void)rdbStore;
+}
+
+std::string IRdbEventHandler::GetMigrationMarkKey() const
+{
+    return "";
+}
+
 bool IRdbEventHandler::IsEnabled() const
 {
     return enabled_;
