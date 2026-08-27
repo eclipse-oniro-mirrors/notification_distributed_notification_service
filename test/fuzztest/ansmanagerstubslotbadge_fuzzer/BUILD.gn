@@ -47,6 +47,7 @@ ohos_fuzztest("AnsManagerStubSlotBadgeFuzzTest") {
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",

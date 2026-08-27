@@ -49,6 +49,7 @@ ohos_fuzztest("NotificationServiceFuzzTest") {
     "ability_runtime:dataobs_manager",
     "ability_base:want",
     "ability_base:zuri",
+    "ability_runtime:wantagent_innerkits",
     "c_utils:utils",
     "hilog:libhilog",
     "image_framework:image_native",
