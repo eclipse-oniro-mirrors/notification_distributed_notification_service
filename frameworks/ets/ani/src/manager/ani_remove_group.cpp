@@ -120,8 +120,7 @@ ani_object AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_str
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, groupName, asyncCallbackInfo->groupNameStr,
-        NotificationSts::STR_MAX_SIZE) !=  ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, groupName, asyncCallbackInfo->groupNameStr) !=  ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse groupName failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;

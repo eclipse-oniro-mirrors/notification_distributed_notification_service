@@ -232,12 +232,12 @@ ani_object AniPublishAsBundle(ani_env *env, ani_object request, ani_string repre
         return nullptr;
     }
     std::string bundleStr;
-    if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr,
-        NotificationSts::STR_MAX_SIZE)) {
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, representativeBundle, bundleStr)) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse representativeBundle failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    bundleStr = NotificationSts::GetResizeStr(bundleStr, NotificationSts::STR_MAX_SIZE);
     asyncCallbackInfo->notificationRequest->SetOwnerUserId(userId);
     asyncCallbackInfo->notificationRequest->SetOwnerBundleName(bundleStr);
     asyncCallbackInfo->notificationRequest->SetIsAgentNotification(true);

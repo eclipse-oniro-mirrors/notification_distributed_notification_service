@@ -134,8 +134,7 @@ ani_object AniIsSupportTemplate(ani_env* env, ani_string templateName, ani_objec
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is nullptr");
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, templateName, asyncCallbackInfo->templateNameStr,
-        NotificationSts::STR_MAX_SIZE) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, templateName, asyncCallbackInfo->templateNameStr) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "templateName parse failed!");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;

@@ -185,7 +185,7 @@ ani_object AniSetBundlePriorityConfig(ani_env* env, ani_object obj, ani_string v
         NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
         return nullptr;
     }
-    if (NotificationSts::GetStringByAniString(env, value, asyncCallbackInfo->valueStr, MAX_TEXT_SIZE) != ANI_OK) {
+    if (NotificationSts::GetStringByAniString(env, value, asyncCallbackInfo->valueStr) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "Parse valueStr failed.");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;

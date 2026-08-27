@@ -383,15 +383,15 @@ ani_object AniGetActiveNotification(ani_env *env, ani_string hashCode)
         return nullptr;
     }
     std::string hashCodeStr;
-    ani_status status = NotificationSts::GetStringByAniString(env, hashCode, hashCodeStr,
-        NotificationSts::LONG_STR_MAX_SIZE);
+    ani_status status = NotificationSts::GetStringByAniString(env, hashCode, hashCodeStr);
     if (status != ANI_OK) {
         ANS_LOGE("GetStringByAniString failed, status: %{public}d", status);
         NotificationSts::ThrowInternerErrorWithLogE(env, "GetStringByAniString failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    asyncCallbackInfo->hashCode = hashCodeStr;
+    asyncCallbackInfo->hashCode =
+        NotificationSts::GetResizeStr(hashCodeStr, NotificationSts::LONG_STR_MAX_SIZE);
 
     ani_ref callbackRef = nullptr;
     ani_object promise;

@@ -71,7 +71,7 @@ void AniRemoveForHashCode(ani_env *env, ani_string hashCode, ani_object reasonEn
     ANS_LOGD("AniRemoveForHashCode enter");
     int32_t reasonType = -1;
     std::string tempStr;
-    if (ANI_OK != NotificationSts::GetStringByAniString(env, hashCode, tempStr, NotificationSts::LONG_STR_MAX_SIZE)) {
+    if (ANI_OK != NotificationSts::GetStringByAniString(env, hashCode, tempStr)) {
         ANS_LOGE("hashCode is valid");
         std::string msg = "hashCode is valid";
         OHOS::NotificationSts::ThrowError(env, ERR_ANS_INNER_INVALID_PARAM, msg);

@@ -141,8 +141,7 @@ bool StsPushCallBack::WarpFunctionResult(ani_env *env, ani_object obj, ResultPar
         ANS_LOGE("WarpFunctionResult. message faild. status %{public}d", status);
         return false;
     }
-    if (ANI_OK != (status = GetStringByAniString(env, static_cast<ani_string>(msg), message,
-        NotificationSts::STRUCTURED_TEXT_SIZE))) {
+    if (ANI_OK != (status = GetStringByAniString(env, static_cast<ani_string>(msg), message))) {
         ANS_LOGE("GetStringByAniString faild. status %{public}d", status);
         return false;
     }
