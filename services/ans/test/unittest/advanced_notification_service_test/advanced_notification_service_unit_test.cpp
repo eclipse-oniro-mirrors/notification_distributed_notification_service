@@ -50,6 +50,7 @@
 #include "want.h"
 
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
+extern void MockIsOsAccountExists(bool mockRet);
 extern void MockEncrypt(bool mockRet);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
@@ -415,6 +416,80 @@ HWTEST_F(AdvancedNotificationServiceUnitTest,
     ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
     ASSERT_EQ(req->GetOwnerUid(), DEFAULT_UID);
     MockQueryForgroundOsAccountId(true, 0);
+}
+
+/**
+ * @tc.name: PrepareNotificationRequest_SharedLiveView_OwnerUserIdNotExists_1500
+ * @tc.desc: Test PrepareNotificationRequest when isShared live view with ownerUserId set but user not exists.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    PrepareNotificationRequest_SharedLiveView_OwnerUserIdNotExists_1500, Function | SmallTest | Level1)
+{
+    MockIsNonBundleName(false);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetIsAgentNotification(true);
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    req->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    req->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(req->IsSharedThirdpartyLiveView());
+    constexpr int32_t testOwnerUserId = 101;
+    req->SetOwnerUserId(testOwnerUserId);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    MockQueryForgroundOsAccountId(true, 0);
+    MockIsOsAccountExists(false);
+
+    auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
+
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_PARAM);
+    ASSERT_EQ(req->GetOwnerUid(), DEFAULT_UID);
+    ASSERT_EQ(req->GetOwnerUserId(), testOwnerUserId);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.name: PrepareNotificationRequest_SharedLiveView_ValidOwnerUserId_1600
+ * @tc.desc: Test PrepareNotificationRequest when isShared live view with valid ownerUserId, userId should be kept.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    PrepareNotificationRequest_SharedLiveView_ValidOwnerUserId_1600, Function | SmallTest | Level1)
+{
+    MockIsNonBundleName(false);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetIsAgentNotification(true);
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    req->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    req->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(req->IsSharedThirdpartyLiveView());
+    constexpr int32_t testOwnerUserId = 101;
+    req->SetOwnerUserId(testOwnerUserId);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    MockQueryForgroundOsAccountId(true, 0);
+    MockIsOsAccountExists(true);
+
+    auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
+
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
+    ASSERT_EQ(req->GetOwnerUid(), DEFAULT_UID);
+    ASSERT_EQ(req->GetOwnerUserId(), testOwnerUserId);
+    MockIsOsAccountExists(true);
 }
 
 /**

@@ -157,12 +157,20 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
         ANS_LOGI("isShared = %{public}d", isShared);
         if (isShared) {
             request->SetOwnerUid(DEFAULT_UID);
-            int32_t userId = SUBSCRIBE_USER_INIT;
-            if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId)!= ERR_OK) {
-                ANS_LOGE("GetActiveUserId is false");
-                return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "ERR_ANS_INNER_GET_ACTIVE_USER_FAILED");
+            int32_t userId = request->GetOwnerUserId();
+            if (userId == SUBSCRIBE_USER_INIT) {
+                if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
+                    ANS_LOGE("GetActiveUserId is false");
+                    return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "ERR_ANS_INNER_GET_ACTIVE_USER_FAILED");
+                }
+                request->SetOwnerUserId(userId);
+            } else {
+                if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+                    ANS_LOGE("isShared invalid userId %{public}d", userId);
+                    return AnsStatus::InvalidParam("invalid ownerUserId",
+                        EventSceneId::SCENE_14, EventBranchId::BRANCH_8);
+                }
             }
-            request->SetOwnerUserId(userId);
         } else {
             std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
             int32_t uid = -1;
