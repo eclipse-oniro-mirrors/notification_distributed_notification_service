@@ -1198,11 +1198,8 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
         napi_get_value_int32(env, nobj, &lockscreenVisibility);
         ANS_LOGD("lockscreenVisibility is: %{public}d", lockscreenVisibility);
         if (lockscreenVisibility < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
-            lockscreenVisibility >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-            ANS_LOGE("lockscreenVisibility is out of range.");
-            std::string msg = "Incorrect parameter types. The lockscreenVisibility is out of range.";
-            Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
-            return nullptr;
+            lockscreenVisibility > static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
+            lockscreenVisibility = static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE);
         }
         slot.SetLockscreenVisibleness(NotificationConstant::VisiblenessType(lockscreenVisibility));
     }

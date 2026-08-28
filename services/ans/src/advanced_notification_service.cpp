@@ -258,7 +258,10 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
     }
 
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
+        return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
+    }
     request->SetCreatorUserId(userId);
     request->SetCreatorBundleName(bundle);
     if (request->GetOwnerBundleName().empty()) {

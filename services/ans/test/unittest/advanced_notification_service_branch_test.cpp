@@ -3512,5 +3512,30 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_PrepareNotificationRequest_GetOsAccountFai
     MockGetOsAccountLocalIdFromUid(true, 0);
 }
 
+/**
+ * @tc.number    : AnsBranchTest_PrepareNotificationRequest_InvalidUserId
+ * @tc.name      : PrepareNotificationRequest_InvalidUserId
+ * @tc.desc      : Test PrepareNotificationRequest returns ERR_ANS_INNER_GET_ACTIVE_USER_FAILED
+ *                 when GetOsAccountLocalIdFromUid succeeds but resolved userId is invalid (< 0).
+ */
+HWTEST_F(AnsBranchTest, AnsBranchTest_PrepareNotificationRequest_InvalidUserId,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> req = new NotificationRequest();
+    EXPECT_NE(req, nullptr);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    MockIsNonBundleName(false);
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+
+    ASSERT_EQ(advancedNotificationService_->PrepareNotificationRequest(req).GetErrCode(),
+        (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(req->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
+
+    MockGetOsAccountLocalIdFromUid(true, 0);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

@@ -255,7 +255,7 @@ HWTEST_F(AdvancedNotificationPublishTest,
 
 /**
  * @tc.name: PublishContinuousTaskNotification_GetOsAccountFailed_00001
- * @tc.desc: Test PublishContinuousTaskNotification proceeds when GetOsAccountLocalIdFromUid fails
+ * @tc.desc: Test PublishContinuousTaskNotification returns early when GetOsAccountLocalIdFromUid fails
  * @tc.type: FUNC
  * @tc.require: I00001
  */
@@ -263,16 +263,78 @@ HWTEST_F(AdvancedNotificationPublishTest,
     PublishContinuousTaskNotification_GetOsAccountFailed_00001, Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
-    MockGetOsAccountLocalIdFromUid(false, 1); // resolution fails, mock out id is -2
+    MockGetOsAccountLocalIdFromUid(false, 1); // resolution fails
     auto service = GetService();
     sptr<NotificationRequest> request = new NotificationRequest();
 
     auto result = service->PublishContinuousTaskNotification(request);
-    EXPECT_EQ(result, ERR_OK); // resolution failure is tolerated, publish continues
-    EXPECT_EQ(request->GetCreatorUserId(), -2); // creatorUserId takes the resolved out value
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED); // resolution failure is rejected
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
 
     MockGetOsAccountLocalIdFromUid(true, 0);
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+}
+
+/**
+ * @tc.name: PublishContinuousTaskNotification_InvalidUserId_00001
+ * @tc.desc: Test PublishContinuousTaskNotification returns early when resolved userId is invalid
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest,
+    PublishContinuousTaskNotification_InvalidUserId_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    auto result = service->PublishContinuousTaskNotification(request);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED); // invalid resolved userId is rejected
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
+
+    MockGetOsAccountLocalIdFromUid(true, 0);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+}
+
+/**
+ * @tc.name: GrantSoundPermission_GetOsAccountFailed_00001
+ * @tc.desc: Test GrantSoundPermission returns false when GetOsAccountLocalIdFromUid fails
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, GrantSoundPermission_GetOsAccountFailed_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSound("uri::com.test.bundle/files/sound.mp3");
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    MockGetOsAccountLocalIdFromUid(false, 0); // resolution fails
+    auto result = service->GrantSoundPermission(request, bundle);
+    EXPECT_FALSE(result); // resolution failure is rejected
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GrantSoundPermission_InvalidUserId_00001
+ * @tc.desc: Test GrantSoundPermission returns false when resolved userId is invalid (< 0)
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, GrantSoundPermission_InvalidUserId_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSound("uri::com.test.bundle/files/sound.mp3");
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto result = service->GrantSoundPermission(request, bundle);
+    EXPECT_FALSE(result); // invalid resolved userId is rejected
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 }  // namespace Notification
