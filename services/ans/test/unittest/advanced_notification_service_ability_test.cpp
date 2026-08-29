@@ -15,7 +15,6 @@
 
 #include <functional>
 #include <gtest/gtest.h>
-#include "ans_service_errors.h"
 #include "ans_ut_constant.h"
 #include "mock_ipc_skeleton.h"
 
@@ -105,48 +104,6 @@ HWTEST_F(
     AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
     ErrCode ret = test.OnExtension(extension, data, reply);
     EXPECT_EQ(ret, 0);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_01700
- * @tc.name      : ANS_AdvancedNotificationServiceAbility_0700
- * @tc.desc      : Test OnExtension returns ERR_ANS_INNER_PERMISSION_DENIED when caller is
- *                 not a native token and not a system app.
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01700, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    std::string extension = "backup";
-    MessageParcel data;
-    MessageParcel reply;
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-    ErrCode ret = test.OnExtension(extension, data, reply);
-    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN); // reset to default for subsequent tests
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_01800
- * @tc.name      : ANS_AdvancedNotificationServiceAbility_0800
- * @tc.desc      : Test OnExtension returns ERR_ANS_INNER_PERMISSION_DENIED when system caller
- *                 lacks OHOS_PERMISSION_NOTIFICATION_CONTROLLER.
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01800, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    std::string extension = "backup";
-    MessageParcel data;
-    MessageParcel reply;
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-    MockVerifyCallerPermission(false);
-    ErrCode ret = test.OnExtension(extension, data, reply);
-    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
-    MockVerifyCallerPermission(true); // reset to default for subsequent tests
 }
 
 /**
@@ -371,26 +328,5 @@ HWTEST_F(
     ASSERT_NE(DistributedDeviceManager::GetInstance().stateCallback_, nullptr);
 }
 #endif
-
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_01600
- * @tc.name      : ANS_AdvancedNotificationServiceAbility_01600
- * @tc.desc      : Test OnExtension returns ERR_ANS_INNER_PERMISSION_DENIED for non-system-app caller.
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01600, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    std::string extension = "backup";
-    MessageParcel data;
-    MessageParcel reply;
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-
-    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
-    ErrCode ret = test.OnExtension(extension, data, reply);
-    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
-    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
-}
 }  // namespace Notification
 }  // namespace OHOS

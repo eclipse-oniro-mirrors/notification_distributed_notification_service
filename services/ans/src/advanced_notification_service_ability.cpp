@@ -185,15 +185,6 @@ int32_t AdvancedNotificationServiceAbility::OnExtension(const std::string& exten
     MessageParcel& data, MessageParcel& reply)
 {
     ANS_LOGI("extension is %{public}s.", extension.c_str());
-    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubSystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGE("Not system app or SA!");
-        return ERR_ANS_INNER_PERMISSION_DENIED;
-    }
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGE("Not have OHOS_PERMISSION_NOTIFICATION_CONTROLLER Permission!");
-        return ERR_ANS_INNER_PERMISSION_DENIED;
-    }
     auto notificationService = AdvancedNotificationService::GetInstance();
     if (notificationService == nullptr) {
         ANS_LOGW("notification service is not initial.");
