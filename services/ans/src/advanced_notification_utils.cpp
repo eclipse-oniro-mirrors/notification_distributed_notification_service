@@ -1584,19 +1584,28 @@ ErrCode AdvancedNotificationService::SetRequestBundleInfo(const sptr<Notificatio
     return ERR_OK;
 }
 
-void AdvancedNotificationService::ResolveCreatorUserId(const sptr<NotificationRequest> &request)
+AnsStatus AdvancedNotificationService::ResolveCreatorUserId(const sptr<NotificationRequest> &request)
 {
-    int32_t userId = SUBSCRIBE_USER_INIT;
-    if (request->GetCreatorUserId() == SUBSCRIBE_USER_INIT) {
-        if (request->GetCreatorUid() != 0) {
-            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(request->GetCreatorUid(), userId);
-        } else {
-            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
-        }
-        request->SetCreatorUserId(userId);
-    } else {
-        userId = request->GetCreatorUserId();
+    if (request->GetCreatorUserId() != SUBSCRIBE_USER_INIT) {
+        return AnsStatus();
     }
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if (request->GetCreatorUid() != 0) {
+        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
+            request->GetCreatorUid(), userId) != ERR_OK || userId < 0) {
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, request->GetCreatorUid());
+            return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
+        }
+    } else {
+        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
+            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId < 0) {
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s", __FUNCTION__);
+            return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
+        }
+    }
+    request->SetCreatorUserId(userId);
+    return AnsStatus();
 }
 
 AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<NotificationRequest> &request,
@@ -1614,7 +1623,10 @@ AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Not
     }
 
     request->SetCreatorPid(IPCSkeleton::GetCallingPid());
-    ResolveCreatorUserId(request);
+    AnsStatus ansStatus = ResolveCreatorUserId(request);
+    if (!ansStatus.Ok()) {
+        return ansStatus;
+    }
     if (request->GetOwnerUserId() == SUBSCRIBE_USER_INIT && request->GetOwnerUid() != DEFAULT_UID) {
         int32_t ownerUserId = SUBSCRIBE_USER_INIT;
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
@@ -1629,7 +1641,7 @@ AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Not
     if (request->GetDeliveryTime() <= 0) {
         request->SetDeliveryTime(GetCurrentTime());
     }
-    AnsStatus ansStatus = CheckPictureSize(request);
+    ansStatus = CheckPictureSize(request);
     if (!ansStatus.Ok()) {
         ansStatus.AppendSceneBranch(EventSceneId::SCENE_4, EventBranchId::BRANCH_2, "Failed to check picture size");
         return ansStatus;

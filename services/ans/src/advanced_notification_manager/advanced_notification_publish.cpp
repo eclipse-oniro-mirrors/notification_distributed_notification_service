@@ -113,7 +113,7 @@ bool AdvancedNotificationService::GrantSoundPermission(const sptr<NotificationRe
     auto bundleName = bundleOption->GetBundleName();
     auto appIndex = BundleManagerHelper::GetInstance()->GetAppIndexByUid(uid);
     int32_t userId = -1;
-    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK) {
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
         return false;
     }
     Security::AccessToken::AccessTokenID appTokenId = Security::AccessToken::AccessTokenKit::GetHapTokenID(
@@ -602,7 +602,10 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
 
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+    }
     request->SetCreatorUserId(userId);
     ANS_LOGD("%{public}s, uid=%{public}d userId=%{public}d", __FUNCTION__, uid, userId);
 

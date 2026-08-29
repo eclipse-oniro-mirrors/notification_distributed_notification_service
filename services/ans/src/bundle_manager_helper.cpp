@@ -467,13 +467,9 @@ bool __attribute__((weak)) BundleManagerHelper::QueryExtensionInfos(
         return false;
     }
     std::string identity = IPCSkeleton::ResetCallingIdentity();
-    bool ret = bundleMgr_->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER,
+    bundleMgr_->QueryExtensionAbilityInfos(AppExecFwk::ExtensionAbilityType::NOTIFICATION_SUBSCRIBER,
         userId, extensionInfos);
     IPCSkeleton::SetCallingIdentity(identity);
-    if (!ret) {
-        ANS_LOGE("QueryExtensionAbilityInfos failed, userId = %{public}d", userId);
-        return false;
-    }
     return true;
 }
 
@@ -531,12 +527,13 @@ bool __attribute__((weak)) BundleManagerHelper::CheckCurrentUserIdApp(
 bool __attribute__((weak)) BundleManagerHelper::IsAncoApp(const std::string &bundleName, int32_t uid)
 {
     int32_t userId = -1;
-    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK ||
-        userId == -1 || userId >= DEFAULT_USER_ID) {
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
         return false;
     }
-
+    if (userId >= DEFAULT_USER_ID) {
+        return false;
+    }
     userId = ZERO_USERID;
     AppExecFwk::BundleInfo bundleInfo;
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);

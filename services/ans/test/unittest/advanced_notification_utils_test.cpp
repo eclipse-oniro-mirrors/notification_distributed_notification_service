@@ -1864,7 +1864,7 @@ HWTEST_F(AnsUtilsTest, PrePublishNotificationBySa_PresetCreatorUserId_00001, Fun
 
 /**
  * @tc.name: PrePublishNotificationBySa_ResolveCreatorFailed_00001
- * @tc.desc: Test PrePublishNotificationBySa proceeds when CreatorUid to userId resolution fails
+ * @tc.desc: Test PrePublishNotificationBySa fails when CreatorUid to userId resolution fails
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -1874,16 +1874,17 @@ HWTEST_F(AnsUtilsTest, PrePublishNotificationBySa_ResolveCreatorFailed_00001, Fu
     request->SetCreatorUid(100);
     std::string bundle = "";
 
-    MockGetOsAccountLocalIdFromUid(false, 0); // resolution fails, mock out id is 100
+    MockGetOsAccountLocalIdFromUid(false, 0); // resolution fails
     auto result = advancedNotificationService_->PrePublishNotificationBySa(request, 100, bundle);
-    EXPECT_TRUE(result.Ok()); // resolution failure is tolerated, publish continues
-    EXPECT_EQ(request->GetCreatorUserId(), 100); // creatorUserId takes the resolved out value
+    EXPECT_FALSE(result.Ok()); // resolution failure is rejected
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
     MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**
  * @tc.name: PrePublishNotificationBySa_InvalidResolvedUserId_00001
- * @tc.desc: Test PrePublishNotificationBySa proceeds when resolved userId is invalid (<= 0)
+ * @tc.desc: Test PrePublishNotificationBySa fails when resolved userId is invalid (<= 0)
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -1895,14 +1896,15 @@ HWTEST_F(AnsUtilsTest, PrePublishNotificationBySa_InvalidResolvedUserId_00001, F
 
     MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
     auto result = advancedNotificationService_->PrePublishNotificationBySa(request, 100, bundle);
-    EXPECT_TRUE(result.Ok()); // invalid resolved userId is not rejected
-    EXPECT_EQ(request->GetCreatorUserId(), -2); // creatorUserId keeps the raw resolved value
+    EXPECT_FALSE(result.Ok()); // invalid resolved userId is rejected
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
     MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**
  * @tc.name: PrePublishNotificationBySa_ZeroCreatorUidResolveFailed_00001
- * @tc.desc: Test PrePublishNotificationBySa with zero CreatorUid (callingUid path) tolerates resolution failure
+ * @tc.desc: Test PrePublishNotificationBySa with zero CreatorUid (callingUid path) rejects resolution failure
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -1912,10 +1914,11 @@ HWTEST_F(AnsUtilsTest, PrePublishNotificationBySa_ZeroCreatorUidResolveFailed_00
     request->SetCreatorUid(0); // falls into the callingUid branch
     std::string bundle = "";
 
-    MockGetOsAccountLocalIdFromUid(false, 0); // calling-uid resolution fails, mock out id is 100
+    MockGetOsAccountLocalIdFromUid(false, 0); // calling-uid resolution fails
     auto result = advancedNotificationService_->PrePublishNotificationBySa(request, 100, bundle);
-    EXPECT_TRUE(result.Ok()); // resolution failure is tolerated, publish continues
-    EXPECT_EQ(request->GetCreatorUserId(), 100); // creatorUserId takes the resolved out value
+    EXPECT_FALSE(result.Ok()); // resolution failure is rejected
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
     MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
@@ -1937,6 +1940,133 @@ HWTEST_F(AnsUtilsTest, PrePublishNotificationBySa_ValidCreatorUid_00001, Functio
 }
 
 /**
+ * @tc.name: ResolveCreatorUserId_PresetUserId_00001
+ * @tc.desc: Test ResolveCreatorUserId keeps the preset CreatorUserId and returns Ok without re-resolution
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_PresetUserId_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUserId(2); // already resolved, early return expected
+    request->SetCreatorUid(100);
+
+    MockGetOsAccountLocalIdFromUid(false, 0); // resolution would fail if re-resolved
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_TRUE(result.Ok());
+    EXPECT_EQ(request->GetCreatorUserId(), 2); // preset value is kept
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: ResolveCreatorUserId_CreatorUidResolveFailed_00001
+ * @tc.desc: Test ResolveCreatorUserId fails when CreatorUid resolution returns error
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_CreatorUidResolveFailed_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(100);
+
+    MockGetOsAccountLocalIdFromUid(false, 0); // resolution fails
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_FALSE(result.Ok());
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: ResolveCreatorUserId_CreatorUidInvalidUserId_00001
+ * @tc.desc: Test ResolveCreatorUserId fails when CreatorUid resolves to an invalid userId
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_CreatorUidInvalidUserId_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(100);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_FALSE(result.Ok());
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: ResolveCreatorUserId_CallingUidResolveFailed_00001
+ * @tc.desc: Test ResolveCreatorUserId fails when callingUid resolution returns error (CreatorUid is 0)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_CallingUidResolveFailed_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(0); // falls into the callingUid branch
+
+    MockGetOsAccountLocalIdFromUid(false, 0); // resolution fails
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_FALSE(result.Ok());
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: ResolveCreatorUserId_CallingUidInvalidUserId_00001
+ * @tc.desc: Test ResolveCreatorUserId fails when callingUid resolves to an invalid userId (CreatorUid is 0)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_CallingUidInvalidUserId_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(0); // falls into the callingUid branch
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_FALSE(result.Ok());
+    EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: ResolveCreatorUserId_CallingUidValidUserId_00001
+ * @tc.desc: Test ResolveCreatorUserId stores the resolved userId when callingUid resolution succeeds
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_CallingUidValidUserId_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(0); // falls into the callingUid branch
+
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_TRUE(result.Ok());
+    EXPECT_EQ(request->GetCreatorUserId(), 100); // annex mock default id is 100
+}
+
+/**
+ * @tc.name: ResolveCreatorUserId_ValidCreatorUid_00001
+ * @tc.desc: Test ResolveCreatorUserId stores the resolved userId when CreatorUid resolution succeeds
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveCreatorUserId_ValidCreatorUid_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(100);
+
+    auto result = advancedNotificationService_->ResolveCreatorUserId(request);
+    EXPECT_TRUE(result.Ok());
+    EXPECT_EQ(request->GetCreatorUserId(), 100); // annex mock default id is 100
+}
+
+/**
  * @tc.name: PrePublishNotificationBySa_OwnerUidInvalidUserId_00001
  * @tc.desc: Test PrePublishNotificationBySa fails when OwnerUid resolves to invalid userId
  * @tc.type: FUNC
@@ -1945,15 +2075,18 @@ HWTEST_F(AnsUtilsTest, PrePublishNotificationBySa_ValidCreatorUid_00001, Functio
 HWTEST_F(AnsUtilsTest, PrePublishNotificationBySa_OwnerUidInvalidUserId_00001, Function | SmallTest | Level1)
 {
     sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUserId(100); // preset, ResolveCreatorUserId early-returns without mock call
     request->SetCreatorUid(100);
     request->SetOwnerUid(200); // non-default owner uid, OwnerUserId stays SUBSCRIBE_USER_INIT
     std::string bundle = "";
 
-    // first resolution (CreatorUid) succeeds with default id 100, owner resolution fails
+    // CreatorUserId is preset so only the OwnerUid resolution sees the invalid mock id (-2)
     MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
     auto result = advancedNotificationService_->PrePublishNotificationBySa(request, 100, bundle);
     EXPECT_FALSE(result.Ok());
     EXPECT_EQ(result.GetErrCode(), ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(request->GetCreatorUserId(), 100); // preset creator userId is kept
+    EXPECT_EQ(request->GetOwnerUserId(), SUBSCRIBE_USER_INIT); // owner userId is not set
     MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
