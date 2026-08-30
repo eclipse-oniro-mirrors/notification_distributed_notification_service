@@ -4596,7 +4596,12 @@ bool NotificationPreferencesDatabase::GetAllDistribuedEnabledBundles(int32_t use
         }
         std::vector<std::string> result;
         StringSplit(Item.first, '-', result);
-        if (result.size() != DISTRIBUTED_KEY_NUM && result.back() != deviceType) {
+        if (result.size() != DISTRIBUTED_KEY_NUM) {
+            ANS_LOGW("Invalid distributed key: %{public}s, token num: %{public}zu",
+                Item.first.c_str(), result.size());
+            continue;
+        }
+        if (result.back() != deviceType) {
             continue;
         }
         int32_t uid = AnsCommonUtils::StringToInt(result[DISTRIBUTED_KEY_UID_INDEX]);

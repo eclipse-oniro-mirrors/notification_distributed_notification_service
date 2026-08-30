@@ -25,6 +25,7 @@
 #undef protected
 #include "ans_service_errors.h"
 #include "mock_os_account_manager.h"
+#include "notification_rdb_mgr.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -3149,6 +3150,108 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GetAllDistribuedEnabledBundles_010
     std::vector<NotificationBundleOption> bundles;
 
     EXPECT_FALSE(notificationPreferencesDatabase->GetAllDistribuedEnabledBundles(userId, deviceType, bundles));
+}
+
+namespace {
+size_t CountBundleOption(const std::vector<NotificationBundleOption> &bundles,
+    const std::string &bundleName, const int32_t uid)
+{
+    size_t count = 0;
+    for (const auto &bundle : bundles) {
+        if (bundle.GetBundleName() == bundleName && bundle.GetUid() == uid) {
+            count++;
+        }
+    }
+    return count;
+}
+}
+
+/**
+ * @tc.name      : GetAllDistribuedEnabledBundles_0200
+ * @tc.desc      : Test GetAllDistribuedEnabledBundles parses well-formed keys, skips disabled
+ *                 or non-numeric values, and filters keys by deviceType.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllDistribuedEnabledBundles_0200, Function | SmallTest | Level1)
+{
+    const int32_t testUserId = 13579;
+    const std::string deviceType = "testDeviceType0200";
+    ASSERT_TRUE(preferncesDB_->CheckRdbStore());
+    ASSERT_NE(preferncesDB_->rdbDataManager_, nullptr);
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->InsertData(
+        "enabledDistributedNotification-bundleA-2001-testDeviceType0200", "1", testUserId), NativeRdb::E_OK);
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->InsertData(
+        "enabledDistributedNotification-bundleB-2002-testDeviceType0200", "0", testUserId), NativeRdb::E_OK);
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->InsertData(
+        "enabledDistributedNotification-bundleC-2003-testDeviceType0200", "abc", testUserId), NativeRdb::E_OK);
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->InsertData(
+        "enabledDistributedNotification-bundleE-2006-otherDeviceType0200", "1", testUserId), NativeRdb::E_OK);
+
+    std::vector<NotificationBundleOption> bundles;
+    EXPECT_TRUE(preferncesDB_->GetAllDistribuedEnabledBundles(testUserId, deviceType, bundles));
+    EXPECT_EQ(1u, CountBundleOption(bundles, "bundleA", 2001));
+    EXPECT_EQ(0u, CountBundleOption(bundles, "bundleB", 2002));
+    EXPECT_EQ(0u, CountBundleOption(bundles, "bundleC", 2003));
+    EXPECT_EQ(0u, CountBundleOption(bundles, "bundleE", 2006));
+
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->DropUserTable(testUserId), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : GetAllDistribuedEnabledBundles_0300
+ * @tc.desc      : Test GetAllDistribuedEnabledBundles skips corrupted keys whose token count
+ *                 is less than DISTRIBUTED_KEY_NUM, no out-of-bound access occurs.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllDistribuedEnabledBundles_0300, Function | SmallTest | Level1)
+{
+    const int32_t testUserId = 13580;
+    const std::string deviceType = "testDeviceType0300";
+    ASSERT_TRUE(preferncesDB_->CheckRdbStore());
+    ASSERT_NE(preferncesDB_->rdbDataManager_, nullptr);
+    // token num is 2, tail token equals deviceType
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->InsertData(
+        "enabledDistributedNotification-testDeviceType0300", "1", testUserId), NativeRdb::E_OK);
+    // token num is 3, tail token equals deviceType
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->InsertData(
+        "enabledDistributedNotification-bundleD-testDeviceType0300", "1", testUserId), NativeRdb::E_OK);
+    // token num is 1, tail token equals deviceType
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->InsertData(
+        "enabledDistributedNotification-", "1", testUserId), NativeRdb::E_OK);
+
+    std::vector<NotificationBundleOption> bundles;
+    EXPECT_TRUE(preferncesDB_->GetAllDistribuedEnabledBundles(
+        testUserId, "enabledDistributedNotification", bundles));
+    EXPECT_TRUE(bundles.empty());
+    bundles.clear();
+    EXPECT_TRUE(preferncesDB_->GetAllDistribuedEnabledBundles(testUserId, deviceType, bundles));
+    EXPECT_TRUE(bundles.empty());
+
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->DropUserTable(testUserId), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : GetAllDistribuedEnabledBundles_0400
+ * @tc.desc      : Test GetAllDistribuedEnabledBundles skips keys whose token count is not
+ *                 exactly DISTRIBUTED_KEY_NUM (e.g. bundle name contains '-'), no matter
+ *                 whether the tail token matches deviceType.
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GetAllDistribuedEnabledBundles_0400, Function | SmallTest | Level1)
+{
+    const int32_t testUserId = 13581;
+    const std::string deviceType = "testDeviceType0400";
+    ASSERT_TRUE(preferncesDB_->CheckRdbStore());
+    ASSERT_NE(preferncesDB_->rdbDataManager_, nullptr);
+    // token num is 5 (bundle name contains '-'), tail token equals deviceType
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->InsertData(
+        "enabledDistributedNotification-my-bundle-2004-testDeviceType0400", "1", testUserId), NativeRdb::E_OK);
+    // token num is 5, tail token does not equal deviceType
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->InsertData(
+        "enabledDistributedNotification-my-bundle-2005-otherDeviceType0400", "1", testUserId), NativeRdb::E_OK);
+
+    std::vector<NotificationBundleOption> bundles;
+    EXPECT_TRUE(preferncesDB_->GetAllDistribuedEnabledBundles(testUserId, deviceType, bundles));
+    EXPECT_TRUE(bundles.empty());
+
+    EXPECT_EQ(preferncesDB_->rdbDataManager_->DropUserTable(testUserId), NativeRdb::E_OK);
 }
 
 HWTEST_F(NotificationPreferencesDatabaseTest, SetHashCodeRule_0100, TestSize.Level1)
