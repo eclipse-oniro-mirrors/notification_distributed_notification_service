@@ -98,7 +98,12 @@ SystemEventObserver::~SystemEventObserver()
 void SystemEventObserver::InitSaStartTime()
 {
     g_saStartTime = NotificationAnalyticsUtil::GetCurrentTime();
-    g_saStartBootTime = MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs();
+    sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+    if (timer == nullptr) {
+        ANS_LOGE("TimeServiceClient is null, failed to init SA start boot time.");
+        return;
+    }
+    g_saStartBootTime = timer->GetBootTimeMs();
 }
 
 sptr<NotificationBundleOption> SystemEventObserver::GetBundleOption(AAFwk::Want want)
@@ -141,7 +146,12 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED ||
         action == EventFwk::CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED) {
         int64_t current = NotificationAnalyticsUtil::GetCurrentTime();
-        int64_t bootTimeMs = MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs();
+        sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
+        if (timer == nullptr) {
+            ANS_LOGE("TimeServiceClient is null, failed to get boot time.");
+            return;
+        }
+        int64_t bootTimeMs = timer->GetBootTimeMs();
         int64_t realTime = g_saStartTime + (bootTimeMs - g_saStartBootTime);
         int64_t diffTime = current - realTime;
         g_saStartTime = current;
