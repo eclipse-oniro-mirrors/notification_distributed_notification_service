@@ -3212,8 +3212,19 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
         return ERR_OK;
     }
 
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("notificationContent_ is nullptr, bundle name %{public}s, id %{public}d.",
+            GetCreatorBundleName().c_str(), GetNotificationId());
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
     using StatusType = NotificationLiveViewContent::LiveViewStatus;
     auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        ANS_LOGE("Invalid content, bundle name %{public}s, id %{public}d.",
+            GetCreatorBundleName().c_str(), GetNotificationId());
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     auto liveView = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto status = liveView->GetLiveViewStatus();
     if (oldRequest == nullptr) {
