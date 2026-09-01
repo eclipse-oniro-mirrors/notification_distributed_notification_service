@@ -267,6 +267,37 @@ void AdvancedDatashareHelper::AddDataShareItems(Uri &uri, const std::string &key
     dataShareItems_.push_back(dataShareItem);
 }
 
+ErrCode AdvancedDatashareHelper::QueryContactInnerExact(Uri &uri, const std::string &phoneNumber,
+	const std::string &policy, const std::string &profileId,
+    const std::string isSupportIntelligentScene, const int32_t userId)
+{
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    std::shared_ptr<DataShare::DataShareResultSet> resultSet = nullptr;
+    if (userId == SUBSCRIBE_USER_INIT) {
+        resultSet = GetContactResultSet(uri, phoneNumber, policy, profileId, isSupportIntelligentScene);
+    } else {
+        resultSet = GetContactResultSet(uri, phoneNumber, policy, profileId, isSupportIntelligentScene, userId);
+    }
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (resultSet == nullptr) {
+        ANS_LOGE("QueryContactExact error, resultSet is null.");
+        return ERROR_QUERY_INFO_FAILED;
+    }
+    int32_t isFound = 0;
+    int32_t rowCount = 0;
+    resultSet->GetRowCount(rowCount);
+    if (rowCount <= 0) {
+        ANS_LOGI("QueryContactExact success, but rowCount is 0.");
+        if (atoi(policy.c_str()) == ContactPolicy::FORBID_SPECIFIED_CONTACTS) {
+            isFound = 1;
+        }
+    } else if (resultSet->GoToFirstRow() == DataShare::E_OK) {
+        isFound = dealWithContactResult(resultSet, policy) ? QUERY_INFO_SUCCESS : ERR_OK;
+    }
+    resultSet->Close();
+    return isFound;
+}
+
 ErrCode AdvancedDatashareHelper::QueryContactInner(Uri &uri, const std::string &phoneNumber, const std::string &policy,
     const std::string &profileId, const std::string isSupportIntelligentScene, const int32_t userId)
 {
@@ -319,7 +350,11 @@ ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phone
         ANS_LOGE("Invalid string input length.");
         return ERROR_QUERY_INFO_FAILED;
     }
+#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
     return QueryContactInner(uri, phoneNumber, policy, profileId, isSupportIntelligentScene);
+#else
+    return QueryContactInnerExact(uri, phoneNumber, policy, profileId, isSupportIntelligentScene);
+#endif
 }
 
 ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phoneNumber, const std::string &policy,
@@ -329,7 +364,11 @@ ErrCode AdvancedDatashareHelper::QueryContact(Uri &uri, const std::string &phone
         ANS_LOGE("Check user exists failed.");
         return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
     }
+#ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
     return QueryContactInner(uri, phoneNumber, policy, profileId, isSupportIntelligentScene, userId);
+#else
+    return QueryContactInnerExact(uri, phoneNumber, policy, profileId, isSupportIntelligentScene, userId);
+#endif
 }
 
 std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetContactResultSetInner(Uri &uri,
@@ -357,7 +396,11 @@ std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetConta
         DataShare::DataSharePredicates predicates;
         predicates.EqualTo(MODE_ID, profileId);
         predicates.EqualTo(FOCUS_MODE_LIST, focusModeList);
-        SetPhoneNumQueryCondition(predicates, phoneNumber);
+#ifdef  ENABLE_ANS_TELEPHONY_CUST_WRAPPER
+	    SetPhoneNumQueryCondition(predicates, phoneNumber);
+#else
+        SetPhoneNumQueryConditionExact(predicates, phoneNumber);
+#endif
         resultSet = helper->Query(uri, predicates, QUERY_INTELLIGENT_COLUMN_LIST);
     } else {
         helper = CreateContactDataShareHelper(CONTACT_URI);
@@ -369,7 +412,11 @@ std::shared_ptr<DataShare::DataShareResultSet> AdvancedDatashareHelper::GetConta
         DataShare::DataSharePredicates predicates;
         predicates.EqualTo(IS_DELETED, 0);
         predicates.EqualTo(TYPE_ID, TYPE_ID_FIVE);
+#ifdef  ENABLE_ANS_TELEPHONY_CUST_WRAPPER
         SetPhoneNumQueryCondition(predicates, phoneNumber);
+#else
+        SetPhoneNumQueryConditionExact(predicates, phoneNumber);
+#endif
         resultSet = helper->Query(uri, predicates, QUERY_CONTACT_COLUMN_LIST);
     }
     helper->Release();
@@ -558,6 +605,12 @@ std::string AdvancedDatashareHelper::GetIntelligentData(
         return "";
     }
     return value + std::to_string(userId);
+}
+
+void AdvancedDatashareHelper::SetPhoneNumQueryConditionExact(DataShare::DataSharePredicates &predicates,
+    const std::string &phoneNumber)
+{
+    predicates.EqualTo(DETAIL_INFO, phoneNumber);
 }
 
 void AdvancedDatashareHelper::SetPhoneNumQueryCondition(DataShare::DataSharePredicates &predicates,
