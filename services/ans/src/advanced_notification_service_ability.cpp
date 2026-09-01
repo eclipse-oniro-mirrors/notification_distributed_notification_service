@@ -29,7 +29,6 @@
 #include "advanced_datashare_helper.h"
 #include "notification_ai_extension_wrapper.h"
 #include "advanced_notification_inline.h"
-#include "time_service_client.h"
 #include "parameters.h"
 
 namespace OHOS {
