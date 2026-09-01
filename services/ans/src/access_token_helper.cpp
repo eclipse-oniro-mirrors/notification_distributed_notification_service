@@ -63,7 +63,11 @@ bool __attribute__((weak)) AccessTokenHelper::IsDlpHap(const AccessTokenID &call
     ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag(callerToken);
     if (type == ATokenTypeEnum::TOKEN_HAP) {
         HapTokenInfo info;
-        AccessTokenKit::GetHapTokenInfo(callerToken, info);
+        int ret = AccessTokenKit::GetHapTokenInfo(callerToken, info);
+        if (ret != 0) {
+            ANS_LOGE("GetHapTokenInfo failed: %{public}d", ret);
+            return false;
+        }
         if (info.dlpType == DlpType::DLP_READ || info.dlpType == DlpType::DLP_FULL_CONTROL) {
             return true;
         }

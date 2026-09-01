@@ -61,14 +61,11 @@ namespace OHOS {
         // test GetDaysOfMonth function
         uint16_t year = fdp->ConsumeIntegral<uint16_t>() % YEAR;
         reminderRequestCalendar.GetDaysOfMonth(year, months);
-        // test GetNextDay function
-        struct tm target;
-        reminderRequestCalendar.GetNextDay(year, months, nowTime, target);
         // test GetNextTriggerTime function
         reminderRequestCalendar.GetNextTriggerTime();
         // test GetNextTriggerTimeAsRepeatReminder function
         struct tm tarTime;
-        reminderRequestCalendar.GetNextTriggerTimeAsRepeatReminder(nowTime, tarTime);
+        reminderRequestCalendar.GetNextTriggerTimeAsRepeatReminder(static_cast<int64_t>(YEAR), nowTime, tarTime);
         // test GetTimeInstantMilli function
         uint8_t hour = fdp->ConsumeIntegral<uint8_t>() % HOURS;
         uint8_t minute = fdp->ConsumeIntegral<uint8_t>() % MINUTES;

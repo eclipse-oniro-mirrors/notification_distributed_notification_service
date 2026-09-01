@@ -333,9 +333,8 @@ protected:
 
 private:
 
-    uint8_t GetNextDay(const uint16_t &settedYear, const uint8_t &settedMonth, const tm &now, const tm &target) const;
     uint64_t GetNextTriggerTime(const bool updateLast = false);
-    uint64_t GetNextTriggerTimeAsRepeatReminder(const tm &nowTime, const tm &tarTime) const;
+    uint64_t GetNextTriggerTimeAsRepeatReminder(int64_t nowTimeInSecond, const tm &nowTime, const tm &tarTime) const;
     uint64_t GetTimeInstantMilli(
         uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) const;
 

@@ -33,6 +33,7 @@ namespace NativeRdb {
 class RdbStore;
 class AbsSharedResultSet;
 class AbsRdbPredicates;
+class RdbStoreConfig;
 } // namespace NativeRdb
 namespace Notification::Infra {
 
@@ -164,6 +165,9 @@ private:
 
     /** @brief Populate createdTables_ from sqlite_master. */
     int32_t InitCreatedTables();
+
+    /** @brief Drop legacy per-user statistics tables whose userId is in (0, 100). */
+    void CleanLegacyStatisticsTables(std::set<std::string> &tableNames);
 
     /** @brief Build the list of tables that should be operated for the given user id. */
     std::vector<std::string> GenerateOperatedTables(const int32_t &userId);

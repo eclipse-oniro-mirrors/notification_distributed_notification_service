@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 namespace OHOS {
 namespace NotificationNapi {
 using OHOS::Notification::AnsNotification;
@@ -47,7 +46,11 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
         Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
     }
-    napi_get_value_bool(env, argv[PARAM0], &enabled);
+    if (napi_get_value_bool(env, argv[PARAM0], &enabled) != napi_ok) {
+        ANS_LOGE("Failed to parse the parameter as boolean, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "enabled");
+        return nullptr;
+    }
     return Common::NapiGetNull(env);
 }
 
@@ -126,7 +129,7 @@ napi_value NapiSetGeofenceEnabled(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackGeofenceEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetGeofenceEnabled(
+                    AnsNotification::GetInstance()->SetGeofenceEnabled(
                         asynccallbackinfo->enabled);
                 ANS_LOGI("SetGeofenceEnabled errorCode=%{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -180,7 +183,7 @@ napi_value NapiIsGeofenceEnabled(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackGeofenceEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsGeofenceEnabled(
+                    AnsNotification::GetInstance()->IsGeofenceEnabled(
                         asynccallbackinfo->enabled);
                 ANS_LOGI("IsGeofenceEnabled enabled=%{public}d", asynccallbackinfo->enabled);
             }

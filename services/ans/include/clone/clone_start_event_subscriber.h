@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_CLONE_START_EVENT_H
 
 #include <memory>
+#include "nocopyable.h"
 #include <string>
 
 #include "common_event_subscriber.h"

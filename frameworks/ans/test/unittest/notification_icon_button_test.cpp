@@ -16,7 +16,11 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <unistd.h>
+#define private public
+#define protected public
 #include "notification_icon_button.h"
+#undef private
+#undef protected
 #include "ans_image_util.h"
 
 using namespace testing::ext;
@@ -409,6 +413,39 @@ HWTEST_F(NotificationIconButtonTest, ClearButtonIconsResource_00002, Function | 
     button->ClearButtonIconsResource();
     EXPECT_EQ(button->GetIconResource(), nullptr);
     EXPECT_EQ(button->GetIconImage(), nullptr);
+}
+
+/**
+ * @tc.name: ReadFromParcel_ReadBoolFail_001
+ * @tc.desc: Test ReadFromParcel when iconImage valid bool read fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationIconButtonTest, ReadFromParcel_ReadBoolFail_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteString("text");
+    parcel.WriteString("name");
+    parcel.WriteBool(true);
+    NotificationIconButton button;
+    EXPECT_EQ(button.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_ReadBoolFail_002
+ * @tc.desc: Test ReadFromParcel when iconResource valid bool read fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationIconButtonTest, ReadFromParcel_ReadBoolFail_002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteString("text");
+    parcel.WriteString("name");
+    parcel.WriteBool(true);
+    parcel.WriteBool(false);
+    NotificationIconButton button;
+    EXPECT_EQ(button.ReadFromParcel(parcel), false);
 }
 }
 }

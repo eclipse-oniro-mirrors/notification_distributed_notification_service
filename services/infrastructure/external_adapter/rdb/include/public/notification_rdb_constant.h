@@ -46,6 +46,8 @@ public:
 
     /** The current database schema version number. Increment this when schema changes. */
     constexpr static int32_t NOTIFICATION_RDB_VERSION = 3;
+
+    constexpr static int32_t NOTIFICATION_RDB_CRASH_CLEANUP_THRESHOLD = 2;
 };
 }  // namespace OHOS::Notification::Infra
 

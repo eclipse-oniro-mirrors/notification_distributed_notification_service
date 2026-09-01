@@ -19,7 +19,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 
 namespace OHOS {
@@ -137,7 +136,7 @@ napi_value NapiSetAdditionConfig(napi_env env, napi_callback_info info)
             AsyncCallbackInfoConfig *asynccallbackinfo = static_cast<AsyncCallbackInfoConfig *>(data);
             if (asynccallbackinfo) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->SetAdditionConfig(
+                        AnsNotification::GetInstance()->SetAdditionConfig(
                             asynccallbackinfo->params.key, asynccallbackinfo->params.value);
             }
         }, AsyncSetConfigComplete, (void *)asynccallbackinfo, &asynccallbackinfo->asyncWork);

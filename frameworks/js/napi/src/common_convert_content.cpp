@@ -456,8 +456,11 @@ napi_value Common::SetConversationalMessage(const napi_env &env,
     napi_set_named_property(env, result, "mimeType", value);
 
     // uri: string
-    napi_create_string_utf8(env, conversationalMessage->GetUri()->ToString().c_str(), NAPI_AUTO_LENGTH, &value);
-    napi_set_named_property(env, result, "uri", value);
+    auto uri = conversationalMessage->GetUri();
+    if (uri != nullptr) {
+        napi_create_string_utf8(env, uri->ToString().c_str(), NAPI_AUTO_LENGTH, &value);
+        napi_set_named_property(env, result, "uri", value);
+    }
 
     return NapiGetBoolean(env, true);
 }

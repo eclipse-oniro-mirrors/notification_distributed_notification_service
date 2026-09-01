@@ -25,7 +25,6 @@
 #include "access_token_helper.h"
 #include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
-#include "notification_constant.h"
 #include "errors.h"
 #include "ipc_skeleton.h"
 #include "os_account_manager.h"

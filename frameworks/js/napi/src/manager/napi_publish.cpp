@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "publish.h"
 #include "hitrace_util.h"
 
@@ -65,7 +64,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
                     asynccallbackinfo->request.GetContent()->GetContentType());
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
+                    AnsNotification::GetInstance()->PublishNotification(
                         asynccallbackinfo->request, instanceKey);
             }
         },
@@ -159,7 +158,7 @@ napi_value NapiShowNotification(napi_env env, napi_callback_info info)
                     asynccallbackinfo->request.GetContent()->GetContentType());
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
+                    AnsNotification::GetInstance()->PublishNotification(
                         asynccallbackinfo->request, instanceKey);
             }
         },
@@ -242,7 +241,7 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
                     asynccallbackinfo->request.GetNotificationId(),
                     asynccallbackinfo->request.GetContent()->GetContentType());
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
+                    AnsNotification::GetInstance()->PublishNotification(
                         asynccallbackinfo->request);
             }
         },

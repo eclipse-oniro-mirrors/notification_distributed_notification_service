@@ -137,7 +137,7 @@ private:
     std::string name_ {};
     std::shared_ptr<ResourceManager::Resource> iconResource_ {};
     std::shared_ptr<Media::PixelMap> iconImage_ {};
-    bool hidePanel_;
+    bool hidePanel_ = false;
 };
 }  // namespace Notification
 }  // namespace OHOS

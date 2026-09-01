@@ -59,9 +59,46 @@ int32_t PriorityInfoMigrationHandler::OnUpgrade(
     return NativeRdb::E_OK;
 }
 
+void PriorityInfoMigrationHandler::OnUpgradeFailure(NativeRdb::RdbStore &rdbStore)
+{
+    ANS_LOGI("Cleaning up priority info data due to upgrade failure");
+    std::set<std::string> tables = GetTableNames(rdbStore);
+    if (tables.empty()) {
+        return;
+    }
+    int32_t ret = rdbStore.BeginTransaction();
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("BeginTransaction failed, ret=%{public}d", ret);
+        return;
+    }
+    for (const auto &tableName : tables) {
+        NativeRdb::RdbPredicates predicates(tableName);
+        predicates.BeginsWith(NOTIFICATION_KEY, PRIORITY_SWITCH_KEY)->Or()
+            ->BeginsWith(NOTIFICATION_KEY, PRIORITY_INTELLIGENT_SWITCH_KEY)->Or()
+            ->BeginsWith(NOTIFICATION_KEY, PRIORITY_STRATEGY_FOR_BUNDLE_KEY);
+        int32_t deletedRows = 0;
+        ret = rdbStore.Delete(deletedRows, predicates);
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGE("Failed to delete priority data from %{public}s: %{public}d", tableName.c_str(), ret);
+            rdbStore.RollBack();
+            return;
+        }
+    }
+    ret = rdbStore.Commit();
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("Commit failed, ret=%{public}d", ret);
+        rdbStore.RollBack();
+    }
+}
+
 std::string PriorityInfoMigrationHandler::GetHandlerName() const
 {
     return "PriorityInfoMigrationHandler";
+}
+
+std::string PriorityInfoMigrationHandler::GetMigrationMarkKey() const
+{
+    return "upgrade_migration_mark_priority_info";
 }
 
 std::set<std::string> PriorityInfoMigrationHandler::GetTableNames(NativeRdb::RdbStore &rdbStore)

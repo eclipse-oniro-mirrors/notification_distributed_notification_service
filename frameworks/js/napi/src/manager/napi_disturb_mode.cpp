@@ -17,7 +17,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "disturb_mode.h"
 
 const int SUBSCRIBE_MAX_PARA = 1;
@@ -53,11 +52,11 @@ napi_value NapiSetDoNotDisturbDate(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasUserId) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->SetDoNotDisturbDate(
+                        AnsNotification::GetInstance()->SetDoNotDisturbDate(
                             asynccallbackinfo->params.userId, asynccallbackinfo->params.date);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->SetDoNotDisturbDate(
+                        AnsNotification::GetInstance()->SetDoNotDisturbDate(
                             asynccallbackinfo->params.date);
                 }
 
@@ -145,11 +144,11 @@ napi_value NapiAddDoNotDisturbProfiles(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(
+                        AnsNotification::GetInstance()->AddDoNotDisturbProfiles(
                             asynccallbackinfo->profiles, asynccallbackinfo->userId);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->AddDoNotDisturbProfiles(
+                        AnsNotification::GetInstance()->AddDoNotDisturbProfiles(
                             asynccallbackinfo->profiles);
                 }
             }
@@ -218,11 +217,11 @@ napi_value NapiRemoveDoNotDisturbProfiles(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(
+                        AnsNotification::GetInstance()->RemoveDoNotDisturbProfiles(
                             asynccallbackinfo->profiles, asynccallbackinfo->userId);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->RemoveDoNotDisturbProfiles(
+                        AnsNotification::GetInstance()->RemoveDoNotDisturbProfiles(
                             asynccallbackinfo->profiles);
                 }
             }
@@ -320,11 +319,11 @@ napi_value NapiGetDoNotDisturbDate(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasUserId) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(
+                        AnsNotification::GetInstance()->GetDoNotDisturbDate(
                             asynccallbackinfo->params.userId, asynccallbackinfo->date);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbDate(
+                        AnsNotification::GetInstance()->GetDoNotDisturbDate(
                             asynccallbackinfo->date);
                 }
 
@@ -405,7 +404,7 @@ napi_value NapiSupportDoNotDisturbMode(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoSupportDoNotDisturb *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->DoesSupportDoNotDisturbMode(
+                    AnsNotification::GetInstance()->DoesSupportDoNotDisturbMode(
                         asynccallbackinfo->isSupported);
                 ANS_LOGI("supportDoNotDisturbMode code=%{public}d,isSupported=%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->isSupported);
@@ -533,12 +532,12 @@ napi_value NapiGetDoNotDisturbProfile(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->userId != SUBSCRIBE_USER_INIT) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(
+                        AnsNotification::GetInstance()->GetDoNotDisturbProfile(
                             asynccallbackinfo->params.profileId, asynccallbackinfo->data,
                             asynccallbackinfo->userId);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->GetDoNotDisturbProfile(
+                        AnsNotification::GetInstance()->GetDoNotDisturbProfile(
                             asynccallbackinfo->params.profileId, asynccallbackinfo->data);
                 }
             }

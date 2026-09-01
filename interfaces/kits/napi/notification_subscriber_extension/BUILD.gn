@@ -62,6 +62,7 @@ ohos_shared_library("notificationsubscriberextensionability_napi") {
   external_deps = [ 
     "napi:ace_napi",
     "node:node_header_notice",
+    "libuv:uv"
   ]
 
   relative_install_dir = "module/application"

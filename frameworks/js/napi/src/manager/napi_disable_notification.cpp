@@ -18,7 +18,6 @@
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "disable_notification.h"
 
 namespace OHOS {
@@ -54,7 +53,7 @@ napi_value NapiDisableNotificationFeature(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackInfoDisableNotification *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->DisableNotificationFeature(
+                    AnsNotification::GetInstance()->DisableNotificationFeature(
                         asynccallbackinfo->disableNotification);
             }
         },

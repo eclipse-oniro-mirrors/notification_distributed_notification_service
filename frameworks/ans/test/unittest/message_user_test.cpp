@@ -74,8 +74,9 @@ HWTEST_F(MessageUserTest, FromJson_00003, Function | SmallTest | Level1)
         {"version", 2}, {"tokenId", 685266937},
         {"tokenAttr", 0},
         {"dcaps", {"AT_CAP", "ST_CAP"}}};
-    messageUser.FromJson(jsonObject);
+    auto result = messageUser.FromJson(jsonObject);
     EXPECT_EQ(jsonObject.is_object(), true);
+    EXPECT_NE(result, nullptr);
 }
 
 /**
@@ -159,6 +160,98 @@ HWTEST_F(MessageUserTest, Marshalling_00001, Function | SmallTest | Level1)
     Parcel parcel;
     auto res = messageUser.Marshalling(parcel);
     EXPECT_NE(res, false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00003
+ * @tc.desc: Test ReadFromParcel when only key is written (name read fails).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MessageUserTest, ReadFromParcel_00003, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    Parcel parcel;
+
+    parcel.WriteString("key");
+    EXPECT_EQ(messageUser.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00004
+ * @tc.desc: Test ReadFromParcel when key and name are written (isMachine read fails).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MessageUserTest, ReadFromParcel_00004, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    Parcel parcel;
+
+    parcel.WriteString("key");
+    parcel.WriteString("name");
+    EXPECT_EQ(messageUser.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_00005
+ * @tc.desc: Test ReadFromParcel when key, name and isMachine are written (isUserImportant read fails).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MessageUserTest, ReadFromParcel_00005, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    Parcel parcel;
+
+    parcel.WriteString("key");
+    parcel.WriteString("name");
+    parcel.WriteBool(true);
+    EXPECT_EQ(messageUser.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadOptionalFromParcel_00001
+ * @tc.desc: Test ReadOptionalFromParcel when ReadInt32 fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MessageUserTest, ReadOptionalFromParcel_00001, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    Parcel parcel;
+
+    EXPECT_EQ(messageUser.ReadOptionalFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadOptionalFromParcel_00002
+ * @tc.desc: Test ReadOptionalFromParcel when uri string read fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MessageUserTest, ReadOptionalFromParcel_00002, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    Parcel parcel;
+
+    parcel.WriteInt32(MessageUser::VALUE_OBJECT);
+    EXPECT_EQ(messageUser.ReadOptionalFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadOptionalFromParcel_00003
+ * @tc.desc: Test ReadOptionalFromParcel when pixelMap valid bool read fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(MessageUserTest, ReadOptionalFromParcel_00003, Function | SmallTest | Level1)
+{
+    MessageUser messageUser;
+    Parcel parcel;
+
+    parcel.WriteInt32(MessageUser::VALUE_NULL);
+    EXPECT_EQ(messageUser.ReadOptionalFromParcel(parcel), false);
 }
 }
 }

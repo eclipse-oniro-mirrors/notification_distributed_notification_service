@@ -108,6 +108,10 @@ ErrCode NotificationDialogManager::RequestEnableNotificationDailog(
     const bool innerLake,
     const bool easyAbroad)
 {
+    if (bundle == nullptr) {
+        ANS_LOGE("Invalid bundle parameter.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     if (!AddDialogInfoIfNotExist(bundle, callback)) {
         ANS_LOGE("Dialog already exists. bundle = %{public}s",
             bundle->GetBundleName().c_str());
@@ -365,7 +369,12 @@ void NotificationDialogManager::SetDialogPoppedTimeInterVal(const sptr<Notificat
 {
     ANS_LOGD("SetDialogPoppedTimeInterVal called.");
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
+        userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, bundleOption->GetUid());
+        return;
+    }
     EXTENTION_WRAPPER->SetDialogOpenSuccessTimeInterval(bundleOption, userId);
     ANS_LOGD("SetDialogPoppedTimeInterVal end.");
 }

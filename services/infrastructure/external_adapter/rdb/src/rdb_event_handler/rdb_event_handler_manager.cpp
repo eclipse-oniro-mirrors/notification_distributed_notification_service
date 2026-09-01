@@ -15,10 +15,64 @@
 
 #include "rdb_event_handler_manager.h"
 #include <algorithm>
+#include <cstdlib>
 #include "ans_log_wrapper.h"
+#include "notification_rdb_constant.h"
+#include "rdb_predicates.h"
 #include "rdb_store.h"
 
 namespace OHOS::Notification::Infra {
+namespace {
+const std::string NOTIFICATION_KEY_COLUMN = "KEY";
+const std::string NOTIFICATION_VALUE_COLUMN = "VALUE";
+
+int32_t ReadCrashInterruptCount(NativeRdb::RdbStore &rdbStore, const std::string &markKey)
+{
+    NativeRdb::AbsRdbPredicates predicates(NtfRdbConstant::NOTIFICATION_RDB_TABLE_NAME);
+    predicates.EqualTo(NOTIFICATION_KEY_COLUMN, markKey);
+    auto resultSet = rdbStore.Query(predicates, std::vector<std::string>());
+    if (resultSet == nullptr || resultSet->GoToFirstRow() != NativeRdb::E_OK) {
+        if (resultSet != nullptr) {
+            resultSet->Close();
+        }
+        return 0;
+    }
+    std::string value;
+    int32_t ret = resultSet->GetString(1, value);
+    resultSet->Close();
+    if (ret != NativeRdb::E_OK || value.empty()) {
+        return 0;
+    }
+    int32_t count = static_cast<int32_t>(std::strtol(value.c_str(), nullptr, 10));
+    return count < 0 ? 0 : count;
+}
+
+void WriteCrashInterruptCount(NativeRdb::RdbStore &rdbStore, const std::string &markKey, int32_t count)
+{
+    if (count <= 0) {
+        NativeRdb::RdbPredicates predicates(NtfRdbConstant::NOTIFICATION_RDB_TABLE_NAME);
+        predicates.EqualTo(NOTIFICATION_KEY_COLUMN, markKey);
+        int32_t deletedRows = 0;
+        int32_t deleteRet = rdbStore.Delete(deletedRows, predicates);
+        if (deleteRet != NativeRdb::E_OK) {
+            ANS_LOGE("Failed to clear migration mark, ret=%{public}d", deleteRet);
+        }
+        return;
+    }
+
+    int64_t rowId = -1;
+    NativeRdb::ValuesBucket valuesBucket;
+    valuesBucket.PutString(NOTIFICATION_KEY_COLUMN, markKey);
+    valuesBucket.PutString(NOTIFICATION_VALUE_COLUMN, std::to_string(count));
+    int32_t insertRet = rdbStore.InsertWithConflictResolution(rowId,
+        NtfRdbConstant::NOTIFICATION_RDB_TABLE_NAME, valuesBucket,
+        NativeRdb::ConflictResolution::ON_CONFLICT_REPLACE);
+    if (insertRet != NativeRdb::E_OK) {
+        ANS_LOGE("Failed to set migration mark, ret=%{public}d", insertRet);
+    }
+}
+} // namespace
+
 bool RdbEventHandlerManager::RegisterHandler(EventType eventType, std::shared_ptr<IRdbEventHandler> handler)
 {
     if (!handler) {
@@ -80,6 +134,46 @@ int32_t RdbEventHandlerManager::ExecuteOnUpgrade(NativeRdb::RdbStore &rdbStore, 
         [&rdbStore, oldVersion, newVersion](std::shared_ptr<IRdbEventHandler> handler) {
             return handler->OnUpgrade(rdbStore, oldVersion, newVersion);
         });
+}
+
+int32_t RdbEventHandlerManager::ExecuteOnUpgradeWithCrashRecovery(NativeRdb::RdbStore &rdbStore,
+    int32_t oldVersion, int32_t newVersion)
+{
+    int32_t firstFailure = NativeRdb::E_OK;
+    ExecuteHandlerList(EventType::ON_UPGRADE, "OnUpgradeWithCrashRecovery",
+        [&rdbStore, oldVersion, newVersion, &firstFailure](std::shared_ptr<IRdbEventHandler> handler) {
+            std::string markKey = handler->GetMigrationMarkKey();
+            if (markKey.empty()) {
+                int32_t ret = handler->OnUpgrade(rdbStore, oldVersion, newVersion);
+                if (ret != NativeRdb::E_OK && firstFailure == NativeRdb::E_OK) {
+                    firstFailure = ret;
+                }
+                return NativeRdb::E_OK;
+            }
+
+            int32_t crashCount = ReadCrashInterruptCount(rdbStore, markKey);
+            if (crashCount > 0 && crashCount < NtfRdbConstant::NOTIFICATION_RDB_CRASH_CLEANUP_THRESHOLD) {
+                ANS_LOGW("Handler %{public}s migration was crash-interrupted %{public}d time(s), retrying",
+                    handler->GetHandlerName().c_str(), crashCount);
+            } else if (crashCount >= NtfRdbConstant::NOTIFICATION_RDB_CRASH_CLEANUP_THRESHOLD) {
+                ANS_LOGE("Handler %{public}s migration crash-interrupted %{public}d times, cleaning its data",
+                    handler->GetHandlerName().c_str(), crashCount);
+                handler->OnUpgradeFailure(rdbStore);
+                crashCount = 0;
+            }
+
+            // Mark before migration: if the process crashes mid-migration, the residual
+            // count on next boot is crashCount+1. Business failures never clean data;
+            // only repeated crash interruption does.
+            WriteCrashInterruptCount(rdbStore, markKey, crashCount + 1);
+            int32_t ret = handler->OnUpgrade(rdbStore, oldVersion, newVersion);
+            WriteCrashInterruptCount(rdbStore, markKey, 0);
+            if (ret != NativeRdb::E_OK && firstFailure == NativeRdb::E_OK) {
+                firstFailure = ret;
+            }
+            return NativeRdb::E_OK;
+        });
+    return firstFailure;
 }
 
 int32_t RdbEventHandlerManager::ExecuteOnDowngrade(

@@ -76,6 +76,18 @@ public:
     /** @brief Execute all enabled handlers registered for ON_UPGRADE. */
     int32_t ExecuteOnUpgrade(NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion);
 
+    /**
+     * @brief Execute ON_UPGRADE handlers with per-business crash recovery.
+     *
+     * Each handler owns a migration-in-progress mark key. The mark is set before the
+     * handler's migration and cleared after it returns. A residual mark means the last
+     * migration was interrupted by a crash, so only that handler's OnUpgradeFailure
+     * cleanup runs before retrying. Handlers execute without short-circuiting, and a
+     * normal business failure never triggers data cleanup.
+     */
+    int32_t ExecuteOnUpgradeWithCrashRecovery(NativeRdb::RdbStore &rdbStore,
+        int32_t oldVersion, int32_t newVersion);
+
     /** @brief Execute all enabled handlers registered for ON_DOWNGRADE. */
     int32_t ExecuteOnDowngrade(NativeRdb::RdbStore &rdbStore, int32_t currentVersion, int32_t targetVersion);
 

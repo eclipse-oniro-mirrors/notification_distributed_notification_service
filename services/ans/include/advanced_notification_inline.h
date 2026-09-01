@@ -58,6 +58,10 @@ inline int32_t CheckUserIdParams(const int userId)
 
 inline int64_t ResetSeconds(int64_t date)
 {
+    if (date < 0) {
+        ANS_LOGE("invalid seconds value");
+        return 0;
+    }
     auto milliseconds = std::chrono::milliseconds(date);
     auto tp = std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds>(milliseconds);
     auto tp_minutes = std::chrono::time_point_cast<std::chrono::minutes>(tp);

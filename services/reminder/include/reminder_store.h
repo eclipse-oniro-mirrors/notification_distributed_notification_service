@@ -51,6 +51,11 @@ public:
     int32_t DeleteState(const int32_t uid, const int64_t timestamp = 0);
     std::vector<ReminderState> QueryState(const int32_t uid);
 
+private:
+    int32_t DeleteAllData();
+    int32_t GetConfigValue(const std::string& key, int32_t& value);
+    int32_t SetConfigValue(const std::string& key, int32_t value);
+
 public:
     static void GetUInt8Val(const std::shared_ptr<NativeRdb::ResultSet>& resultSet,
         const std::string& name, uint8_t& value);
@@ -108,14 +113,24 @@ public:
     int32_t OnDowngrade(NativeRdb::RdbStore& store, int32_t currentVersion, int32_t targetVersion) override;
 
 private:
+    void UpgradeV1(NativeRdb::RdbStore& store);
+    void UpgradeV2(NativeRdb::RdbStore& store);
+    void UpgradeV3(NativeRdb::RdbStore& store);
+    void UpgradeV4(NativeRdb::RdbStore& store);
+    void UpgradeV5(NativeRdb::RdbStore& store);
+    void UpgradeV6(NativeRdb::RdbStore& store);
     void UpgradeV7(NativeRdb::RdbStore& store);
+    void UpgradeV8(NativeRdb::RdbStore& store);
     void UpgradeV9(NativeRdb::RdbStore& store);
+    void UpgradeV10(NativeRdb::RdbStore& store);
     void UpgradeV11(NativeRdb::RdbStore& store);
     void UpgradeV12(NativeRdb::RdbStore& store);
+    void UpgradeV13(NativeRdb::RdbStore& store);
 
 private:
     int32_t CreateTable(NativeRdb::RdbStore& store);
     int32_t CreateStateTable(NativeRdb::RdbStore& store);
+    int32_t CreateConfigTable(NativeRdb::RdbStore& store);
     int32_t CopyData(NativeRdb::RdbStore& store);
     std::vector<sptr<ReminderRequest>> GetOldReminders(NativeRdb::RdbStore& store);
     void InsertNewReminders(NativeRdb::RdbStore& store, const std::vector<sptr<ReminderRequest>>& reminders);

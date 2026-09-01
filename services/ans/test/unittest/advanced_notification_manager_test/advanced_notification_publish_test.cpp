@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "accesstoken_kit.h"
 #define private public
 #include "advanced_notification_service.h"
 #include "notification_bundle_option.h"
@@ -21,12 +22,16 @@
 #include "notification_content.h"
 
 using namespace testing::ext;
+using namespace OHOS::Security::AccessToken;
+
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 namespace OHOS {
 namespace Notification {
 
 extern void MockIsSystemApp(bool isSystemApp);
 extern void MockIsVerfyPermisson(bool isVerify);
+extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
 
 class AdvancedNotificationPublishTest : public testing::Test {
 public:
@@ -228,6 +233,108 @@ HWTEST_F(AdvancedNotificationPublishTest, GetUri_NullWantAgent_00001, Function |
     
     auto result = service->GetUri(request);
     EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.name: CheckNotificationRequest_PublishDelayTimeTooLarge_00001
+ * @tc.desc: Test CheckNotificationRequest with publishDelayTime > MAX_PUBLISH_DELAY_TIME
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest,
+    CheckNotificationRequest_PublishDelayTimeTooLarge_00001, Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    request->SetPublishDelayTime(MAX_PUBLISH_DELAY_TIME + 1);
+
+    auto result = service->CheckNotificationRequest(request);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: PublishContinuousTaskNotification_GetOsAccountFailed_00001
+ * @tc.desc: Test PublishContinuousTaskNotification returns early when GetOsAccountLocalIdFromUid fails
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest,
+    PublishContinuousTaskNotification_GetOsAccountFailed_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockGetOsAccountLocalIdFromUid(false, 1); // resolution fails
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    auto result = service->PublishContinuousTaskNotification(request);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED); // resolution failure is rejected
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
+
+    MockGetOsAccountLocalIdFromUid(true, 0);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+}
+
+/**
+ * @tc.name: PublishContinuousTaskNotification_InvalidUserId_00001
+ * @tc.desc: Test PublishContinuousTaskNotification returns early when resolved userId is invalid
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest,
+    PublishContinuousTaskNotification_InvalidUserId_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    auto result = service->PublishContinuousTaskNotification(request);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED); // invalid resolved userId is rejected
+    EXPECT_EQ(request->GetCreatorUserId(), SUBSCRIBE_USER_INIT); // creatorUserId is not set
+
+    MockGetOsAccountLocalIdFromUid(true, 0);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+}
+
+/**
+ * @tc.name: GrantSoundPermission_GetOsAccountFailed_00001
+ * @tc.desc: Test GrantSoundPermission returns false when GetOsAccountLocalIdFromUid fails
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, GrantSoundPermission_GetOsAccountFailed_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSound("uri::com.test.bundle/files/sound.mp3");
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    MockGetOsAccountLocalIdFromUid(false, 0); // resolution fails
+    auto result = service->GrantSoundPermission(request, bundle);
+    EXPECT_FALSE(result); // resolution failure is rejected
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GrantSoundPermission_InvalidUserId_00001
+ * @tc.desc: Test GrantSoundPermission returns false when resolved userId is invalid (< 0)
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, GrantSoundPermission_InvalidUserId_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSound("uri::com.test.bundle/files/sound.mp3");
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto result = service->GrantSoundPermission(request, bundle);
+    EXPECT_FALSE(result); // invalid resolved userId is rejected
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 }  // namespace Notification

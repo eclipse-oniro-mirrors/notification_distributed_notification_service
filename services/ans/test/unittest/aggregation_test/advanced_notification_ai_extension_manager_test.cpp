@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "singleton.h"
 #include <string>
 
 #define private public
@@ -23,10 +24,10 @@
 #undef protected
 #undef private
 
+#include "ans_common_utils.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "notification_classification.h"
-#include "notification_constant.h"
 #include "notification_preferences.h"
 #include "notification_request.h"
 #include "nlohmann/json.hpp"
@@ -50,35 +51,30 @@ public:
 
 /**
  * @tc.name: IsCollaborationNotification_0100
- * @tc.desc: Test IsCollaborationNotification returns false when extendInfo is nullptr
+ * @tc.desc: Test AnsCommonUtils::IsCollaborationNotification returns false when extendInfo is nullptr
  * @tc.type: FUNC
  * @tc.require: issue
  */
 HWTEST_F(AdvancedNotificationAiExtensionManagerTest, IsCollaborationNotification_0100, Function | SmallTest | Level1)
 {
-    auto manager = DelayedSingleton<AdvancedNotificationAiExtensionManager>::GetInstance();
-    ASSERT_NE(manager, nullptr);
-
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     ASSERT_NE(request, nullptr);
     // extendInfo is nullptr by default
     EXPECT_EQ(request->GetExtendInfo(), nullptr);
 
-    bool result = manager->IsCollaborationNotification(request);
+    bool result = AnsCommonUtils::IsCollaborationNotification(request);
     EXPECT_FALSE(result);
 }
 
 /**
  * @tc.name: IsCollaborationNotification_0200
- * @tc.desc: Test IsCollaborationNotification returns true when extendInfo has collaboration flag set to true
+ * @tc.desc: Test AnsCommonUtils::IsCollaborationNotification returns true when extendInfo has collaboration flag
+ *           set to true
  * @tc.type: FUNC
  * @tc.require: issue
  */
 HWTEST_F(AdvancedNotificationAiExtensionManagerTest, IsCollaborationNotification_0200, Function | SmallTest | Level1)
 {
-    auto manager = DelayedSingleton<AdvancedNotificationAiExtensionManager>::GetInstance();
-    ASSERT_NE(manager, nullptr);
-
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     ASSERT_NE(request, nullptr);
 
@@ -88,21 +84,19 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, IsCollaborationNotification
     extendInfo->SetParam(flagKey, AAFwk::Boolean::Box(true));
     request->SetExtendInfo(extendInfo);
 
-    bool result = manager->IsCollaborationNotification(request);
+    bool result = AnsCommonUtils::IsCollaborationNotification(request);
     EXPECT_TRUE(result);
 }
 
 /**
  * @tc.name: IsCollaborationNotification_0300
- * @tc.desc: Test IsCollaborationNotification returns false when extendInfo has collaboration flag set to false
+ * @tc.desc: Test AnsCommonUtils::IsCollaborationNotification returns false when extendInfo has collaboration flag
+ *           set to false
  * @tc.type: FUNC
  * @tc.require: issue
  */
 HWTEST_F(AdvancedNotificationAiExtensionManagerTest, IsCollaborationNotification_0300, Function | SmallTest | Level1)
 {
-    auto manager = DelayedSingleton<AdvancedNotificationAiExtensionManager>::GetInstance();
-    ASSERT_NE(manager, nullptr);
-
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     ASSERT_NE(request, nullptr);
 
@@ -112,21 +106,19 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, IsCollaborationNotification
     extendInfo->SetParam(flagKey, AAFwk::Boolean::Box(false));
     request->SetExtendInfo(extendInfo);
 
-    bool result = manager->IsCollaborationNotification(request);
+    bool result = AnsCommonUtils::IsCollaborationNotification(request);
     EXPECT_FALSE(result);
 }
 
 /**
  * @tc.name: IsCollaborationNotification_0400
- * @tc.desc: Test IsCollaborationNotification returns false when extendInfo has no collaboration flag param
+ * @tc.desc: Test AnsCommonUtils::IsCollaborationNotification returns false when extendInfo has no collaboration
+ *           flag param
  * @tc.type: FUNC
  * @tc.require: issue
  */
 HWTEST_F(AdvancedNotificationAiExtensionManagerTest, IsCollaborationNotification_0400, Function | SmallTest | Level1)
 {
-    auto manager = DelayedSingleton<AdvancedNotificationAiExtensionManager>::GetInstance();
-    ASSERT_NE(manager, nullptr);
-
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     ASSERT_NE(request, nullptr);
 
@@ -134,7 +126,7 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, IsCollaborationNotification
     std::shared_ptr<AAFwk::WantParams> extendInfo = std::make_shared<AAFwk::WantParams>();
     request->SetExtendInfo(extendInfo);
 
-    bool result = manager->IsCollaborationNotification(request);
+    bool result = AnsCommonUtils::IsCollaborationNotification(request);
     EXPECT_FALSE(result);
 }
 
@@ -401,6 +393,37 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, UpdateNotification_0500, Fu
 
     // Restore AI extension wrapper
     NOTIFICATION_AI_EXTENSION_WRAPPER->InitExtensionWrapper();
+}
+#endif
+
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+/**
+ * @tc.name: BuildCommandForUpdate_SetsPriorityTypeOther_0100
+ * @tc.desc: Verify BuildCommandForUpdate sets the request's InnerPriorityNotificationType to OTHER
+ *           (the new line before BuildPriorityCommand, which does not modify the type).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationAiExtensionManagerTest, BuildCommandForUpdate_SetsPriorityTypeOther_0100,
+    Function | SmallTest | Level1)
+{
+    auto manager = DelayedSingleton<AdvancedNotificationAiExtensionManager>::GetInstance();
+    ASSERT_NE(manager, nullptr);
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    // Non-LIVE_VIEW, non-collaboration so the priority block (line 78-86) is reached.
+    request->SetSlotType(NotificationConstant::SlotType::OTHER);
+
+    nlohmann::json command = nlohmann::json::object();
+    command[manager->HAS_COMMAND] = false;
+    command[manager->AI_STATUS] = 1;
+
+    manager->BuildCommandForUpdate(request, command, false);
+
+    // The new line sets InnerPriorityNotificationType to OTHER before BuildPriorityCommand (which only
+    // reads switches and does not modify the type), so the type must be OTHER afterwards.
+    EXPECT_EQ(request->GetPriorityNotificationType(), NotificationConstant::PriorityNotificationType::OTHER);
 }
 #endif
 }  // namespace Notification

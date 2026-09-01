@@ -18,7 +18,7 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
+#include "ans_const_define.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
@@ -27,6 +27,27 @@ namespace NotificationNapi {
 using OHOS::Notification::AnsNotification;
 
 const int GET_STATISTICS_MAX_PARA = 1;
+
+static napi_value ParseBundleElement(const napi_env &env, napi_value array, uint32_t index,
+    NotificationBundleOption &bundle)
+{
+    napi_value nBundle = nullptr;
+    NAPI_CALL(env, napi_get_element(env, array, index, &nBundle));
+    napi_valuetype valueType = napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, nBundle, &valueType));
+    if (valueType != napi_object) {
+        ANS_LOGE("Wrong argument type. Object expected, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "bundle");
+        std::string msg = "Incorrect parameter types.The type of param must be object.";
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+        return nullptr;
+    }
+    if (!Common::GetBundleOption(env, nBundle, bundle)) {
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
+        return nullptr;
+    }
+    return Common::NapiGetNull(env);
+}
 
 static napi_value ParseBundlesParameters(const napi_env &env, const napi_callback_info &info,
     std::vector<NotificationBundleOption> &bundles)
@@ -54,6 +75,13 @@ static napi_value ParseBundlesParameters(const napi_env &env, const napi_callbac
 
     uint32_t len = 0;
     NAPI_CALL(env, napi_get_array_length(env, argv[PARAM0], &len));
+    if (len > static_cast<uint32_t>(MAX_BUNDLE_LIST_SIZE)) {
+        ANS_LOGE("The array length exceeds limit, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "bundleOptions");
+        std::string msg = "The array length cannot exceed 1000.";
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+        return nullptr;
+    }
     if (len == 0) {
         ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
@@ -61,20 +89,9 @@ static napi_value ParseBundlesParameters(const napi_env &env, const napi_callbac
         return nullptr;
     }
 
-    napi_valuetype valueType = napi_undefined;
     for (uint32_t index = 0; index < len; ++index) {
-        napi_value nBundle = nullptr;
-        NAPI_CALL(env, napi_get_element(env, argv[PARAM0], index, &nBundle));
-        NAPI_CALL(env, napi_typeof(env, nBundle, &valueType));
-        if (valueType != napi_object) {
-            ANS_LOGE("Wrong argument type. Object expected.");
-            std::string msg = "Incorrect parameter types.The type of param must be object.";
-            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
-            return nullptr;
-        }
         NotificationBundleOption bundle;
-        if (!Common::GetBundleOption(env, nBundle, bundle)) {
-            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, PARAMETER_VERIFICATION_FAILED);
+        if (ParseBundleElement(env, argv[PARAM0], index, bundle) == nullptr) {
             return nullptr;
         }
         bundles.emplace_back(bundle);
@@ -168,7 +185,7 @@ napi_value NapiGetNotificationStatisticsByBundle(napi_env env, napi_callback_inf
                 static_cast<AsyncCallbackInfoStatistics *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetStatisticsByBundle(
+                    AnsNotification::GetInstance()->GetStatisticsByBundle(
                         asynccallbackinfo->bundles, asynccallbackinfo->statisticsInfos);
             }
         },

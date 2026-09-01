@@ -80,6 +80,7 @@ ohos_shared_library("ans_base") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "image_framework:image_native",
     "os_account:os_account_innerkits",
     "samgr:samgr_proxy",
     "time_service:time_client",

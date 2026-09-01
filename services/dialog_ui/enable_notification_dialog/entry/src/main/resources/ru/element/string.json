@@ -60,14 +60,14 @@
             "name":"ban_affect",
             "value":"\nЕсли вы выберете Запретить, вы не будете получать от этого приложения уведомления о сообщениях чата.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"cjy_click_detail",
             "value":"Подробнее >>",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

@@ -91,18 +91,20 @@ HWTEST_F(ReminderDataManagerTest, CheckSoundConfig_001, Level1)
 {
 #ifdef PLAYER_FRAMEWORK_ENABLE
     int32_t flag = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
-    bool ret = manager->CheckSoundConfig(true, flag, 0);
+    bool ret = manager->CheckSoundConfig(true, flag, 0, false);
     EXPECT_EQ(ret, false);
-    ret = manager->CheckSoundConfig(false, flag, 0);
+    ret = manager->CheckSoundConfig(false, flag, 0, false);
     EXPECT_EQ(ret, false);
     flag = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
-    ret = manager->CheckSoundConfig(false, flag, 0);
+    ret = manager->CheckSoundConfig(false, flag, 0, false);
     EXPECT_EQ(ret, false);
     flag = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
-    ret = manager->CheckSoundConfig(false, flag, 0);
+    ret = manager->CheckSoundConfig(false, flag, 0, false);
     EXPECT_EQ(ret, false);
-    ret = manager->CheckSoundConfig(false, flag, 1);
+    ret = manager->CheckSoundConfig(false, flag, 1, false);
     EXPECT_EQ(ret, true);
+    ret = manager->CheckSoundConfig(false, flag, 1, true);
+    EXPECT_EQ(ret, false);
 #endif
 }
 
@@ -141,25 +143,27 @@ HWTEST_F(ReminderDataManagerTest, CheckVibrationConfig_001, Level1)
 {
 #ifdef PLAYER_FRAMEWORK_ENABLE
     int32_t flag = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
-    bool ret = manager->CheckVibrationConfig(100, true, flag, 0);
+    bool ret = manager->CheckVibrationConfig(100, true, flag, 0, false);
     EXPECT_EQ(ret, false);
-    ret = manager->CheckVibrationConfig(100, false, flag, 0);
+    ret = manager->CheckVibrationConfig(100, false, flag, 0, false);
     EXPECT_EQ(ret, false);
     flag = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
-    ret = manager->CheckVibrationConfig(100, false, flag, 0);
+    ret = manager->CheckVibrationConfig(100, false, flag, 0, false);
     EXPECT_EQ(ret, false);
     flag = static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
     std::map<std::string, sptr<ReminderRequest>> reminders;
     MockReminderDatashareHelper::Reset();
     MockReminderDatashareHelper::MockQuery({true}, {"0"}, {reminders});
-    ret = manager->CheckVibrationConfig(100, false, flag, 0);
+    ret = manager->CheckVibrationConfig(100, false, flag, 0, false);
     EXPECT_EQ(ret, false);
     MockReminderDatashareHelper::Reset();
     MockReminderDatashareHelper::MockQuery({true}, {"1"}, {reminders});
     auto client = std::move(manager->systemSoundClient_);
-    ret = manager->CheckVibrationConfig(100, false, flag, 0);
+    ret = manager->CheckVibrationConfig(100, false, flag, 0, false);
     EXPECT_EQ(ret, false);
     manager->systemSoundClient_ = std::move(client);
+    ret = manager->CheckVibrationConfig(100, false, flag, 0, true);
+    EXPECT_EQ(ret, false);
 #endif
 }
 

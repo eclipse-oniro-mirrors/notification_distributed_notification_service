@@ -17,6 +17,8 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_ADVANCED_NOTIFICATION_SERVICE_H
 
 #include <ctime>
+#include "nocopyable.h"
+#include <atomic>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -112,6 +114,15 @@ public:
 
     static std::map<std::string, uint32_t>& GetDefaultSlotConfig();
 
+    /**
+     * @brief Clean up service state for test/fuzz processes.
+     *
+     * Destroys the system event observer (one-way, not re-created) to stop
+     * common-event dispatch, then drains or resets the internal FFRT queues.
+     * Only test/fuzz code calls this; production never does.
+     *
+     * @param resetQueues True to reset queues entirely, false to drain only.
+     */
     void SelfClean(bool resetQueues = false);
 
     /**
@@ -1796,6 +1807,9 @@ public:
      */
     ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
 
+    ErrCode ResolveAgentUid(const sptr<NotificationBundleOption> &bundleOption, int32_t id,
+        int32_t reason, int32_t &outUid);
+
     /**
      * @brief Init publish process.
      */
@@ -1968,7 +1982,6 @@ public:
     bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
 
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
-    ErrCode RemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason, int32_t userId = -1);
     static sptr<NotificationBundleOption> GenerateBundleOption();
     static sptr<NotificationBundleOption> GenerateValidBundleOption(
         const sptr<NotificationBundleOption> &bundleOption);
@@ -2043,6 +2056,8 @@ public:
      */
     void RemoveCommonLiveViewNotification(const int32_t pid);
     void SnoozeNotificationConsumed(const std::shared_ptr<NotificationRecord> &record);
+    void PrepareSnoozeDeviceFlags(const sptr<NotificationRequest> &request,
+        const std::shared_ptr<NotificationFlags> &currentFlags);
     bool IsCanRecoverSnooze(const std::shared_ptr<NotificationRecord> &record);
     void DeleteSnoozeNotificationFromDB(const std::shared_ptr<NotificationRecord> &record);
     bool SetEncryptToDB(const NotificationRequestDb &requestDb);
@@ -2173,7 +2188,7 @@ private:
     ErrCode CheckCommonLiveViewRights(const sptr<NotificationRequest> &request);
     ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
-    ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record);
+    ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
     ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
         NotificationKey notificationKey, sptr<Notification> &notification, int32_t removeReason,
         bool isCancel = false);
@@ -2312,6 +2327,7 @@ private:
 
     void ClearOverTimeRingToneInfo();
     void ClearRingtoneByApplication(int32_t userId, const std::vector<NotificationRingtoneInfo> cloneRingtoneInfos);
+    std::vector<NotificationRingtoneInfo> FilterValidRingtoneUris(const std::vector<NotificationRingtoneInfo> &infos);
     ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);
@@ -2339,6 +2355,7 @@ private:
     void SendLiveViewUploadHiSysEvent(const std::shared_ptr<NotificationRecord> &record, int32_t uploadStatus);
 
     ErrCode SetRequestBundleInfo(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
+    AnsStatus ResolveCreatorUserId(const sptr<NotificationRequest> &request);
     AnsStatus PrePublishNotificationBySa(const sptr<NotificationRequest> &request, int32_t uid, std::string &bundle);
     AnsStatus PrePublishRequest(const sptr<NotificationRequest> &request);
     AnsStatus PublishNotificationBySa(const sptr<NotificationRequest> &request);
@@ -2459,6 +2476,7 @@ private:
     AnsStatus RemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption, int32_t reason);
     void ExcuteRemoveAllNotificationsInner(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &bundle, int32_t &reason);
+    void ExcuteRemoveAllNotificationsByBundleName(const std::string &bundleName, int32_t reason, int32_t userId);
     void GetRemoveListForRemoveAll(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &bundle, std::vector<std::shared_ptr<NotificationRecord>> &removeList);
     AnsStatus ValidRightsForCancelAsBundle(int32_t notificationId, int32_t &reason);
@@ -2553,6 +2571,7 @@ private:
     void SetIsFromSAToExtendInfo(const sptr<NotificationRequest> &request);
     void SetVersionCodeToExtendInfo(const sptr<NotificationRequest> &request);
     void SetLiveViewShareSwitchToExtendInfo(const sptr<NotificationRequest> &request);
+    void SetCreateTimeToExtendInfo(const sptr<NotificationRequest> &request, int64_t createTime);
 
     ErrCode CheckNotificationRequest(const sptr<NotificationRequest> &request);
     ErrCode CheckNotificationRequestLineWantAgents(const std::shared_ptr<NotificationContent> &content,
@@ -2722,7 +2741,7 @@ private:
     std::shared_ptr<DistributedKvStoreDeathRecipient> distributedKvStoreDeathRecipient_ = nullptr;
     DistributedKv::DistributedKvDataManager dataManager_;
     NotificationConstant::DistributedReminderPolicy distributedReminderPolicy_ = DEFAULT_DISTRIBUTED_REMINDER_POLICY;
-    bool localScreenOn_ = true;
+    std::atomic<bool> localScreenOn_ = true;
 #endif
     std::shared_ptr<SoundPermissionInfo> soundPermissionInfo_ = nullptr;
     std::shared_ptr<PermissionFilter> permissonFilter_ = nullptr;

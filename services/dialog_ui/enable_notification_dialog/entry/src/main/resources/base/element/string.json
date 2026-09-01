@@ -72,14 +72,14 @@
             "name":"ban_affect",
             "value":"\nIf you select Deny, you won't receive chat message notifications from this app.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"cjy_click_detail",
             "value":"View details >>",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

@@ -72,14 +72,14 @@
             "name":"ban_affect",
             "value":"༼མི་ཆོག་༽བདམས་ཚེ། གླེང་མོལ་བརྡ་འཕྲིན་བརྡ་ཐོ་འབྱོར་མི་ཐུབ།",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"cjy_click_detail",
             "value":"བརྡབས་ནས་ཞིབ་ཕྲའི་གནས་ཚུལ་ལ་ལྟ་ཞིབ་བྱེད།",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

@@ -336,5 +336,22 @@ HWTEST_F(NotificationMultiLineContentTest, Marshalling_00002, Function | SmallTe
     rrc->lineWantAgents_.resize(256);
     EXPECT_EQ(rrc->Marshalling(parcel), false);
 }
+
+/**
+ * @tc.name: ReadFromParcel_NullWantAgent_001
+ * @tc.desc: Test ReadFromParcel returns false when a wantAgent parcelable reads as null.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationMultiLineContentTest, ReadFromParcel_NullWantAgent_001, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto rrc = std::make_shared<NotificationMultiLineContent>();
+    std::vector<std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>> agents = {nullptr};
+    rrc->SetLineWantAgents(agents);
+    rrc->Marshalling(parcel);
+    parcel.RewindRead(0);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
 }
 }

@@ -24,6 +24,7 @@
 #include "notification_parameters.h"
 
 using namespace testing::ext;
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 namespace OHOS {
 namespace Notification {
@@ -126,6 +127,44 @@ HWTEST_F(AdvancedNotificationQueryTest, QueryNotificationParameters_NullRecord_0
 
     auto result = service->QueryNotificationParameters(1, "testLabel", bundle, parameters);
     EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.name: QueryNotificationParameters_GetOsAccountFailed_00001
+ * @tc.desc: Test QueryNotificationParameters when GetOsAccountLocalIdFromUid fails
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationQueryTest, QueryNotificationParameters_GetOsAccountFailed_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationParameters> parameters = new NotificationParameters();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    MockGetOsAccountLocalIdFromUid(false, 0);
+    auto result = service->QueryNotificationParameters(1, "testLabel", bundle, parameters);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: QueryNotificationParameters_InvalidUserId_00001
+ * @tc.desc: Test QueryNotificationParameters when userId is invalid (<= 0)
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationQueryTest, QueryNotificationParameters_InvalidUserId_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationParameters> parameters = new NotificationParameters();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto result = service->QueryNotificationParameters(1, "testLabel", bundle, parameters);
+    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 }  // namespace Notification

@@ -17,12 +17,12 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_NOTIFICATION_PREFERENCES_H
 
 #include "refbase.h"
-#include "singleton.h"
 #include "ffrt_inner.h"
 
 #include "notification_bundle_option.h"
 #include "notification_do_not_disturb_date.h"
 #include "notification_preferences_database.h"
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include "notification_clone_bundle_info.h"
@@ -62,6 +62,9 @@ public:
     ErrCode AddNotificationBundleProperty(const sptr<NotificationBundleOption> &bundleOption);
     
     ErrCode PutNotificationStatistics(const int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
+
+    /** @brief Resolve the statistics table user id (ZERO_USERID for Anco apps, real userId otherwise). */
+    static int32_t ResolveStatisticsTableUserId(const NotificationBundleOption &bundle);
 
     ErrCode CleanExperData(const int32_t userId);
 
@@ -311,11 +314,13 @@ public:
      * @param bundleOptions Indicates the bundle options to query.
      * @param slotType Indicates the slot type.
      * @param slotEnabled Indicates the output map from bundle option to enabled state.
+     * @param userId Indicates the user id to query.
      * @return Return true on success, false on failure.
      */
     bool GetEnabledForBundleSlots(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         int32_t slotType,
-        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled);
+        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled,
+        int32_t userId);
 
     /**
      * @brief Remove all proferences info from DB.
@@ -884,8 +889,6 @@ public:
 
 private:
     std::map<int32_t, int64_t> cloneTimestamp;
-    static ffrt::mutex instanceMutex_;
-    static std::shared_ptr<NotificationPreferences> instance_;
     NotificationPreferencesInfo preferencesInfo_ {};
     ffrt::mutex preferenceMutex_;
 
@@ -897,9 +900,9 @@ private:
     std::shared_ptr<NotificationPreferencesDatabase> preferncesDB_ = nullptr;
     bool isCachedMirrorNotificationEnabledStatus_ = false;
     std::vector<std::string> mirrorNotificationEnabledStatus_ = {};
-    bool isKioskMode_ = false;
-    bool isKioskTrustListUpdate_ = false;
-    bool isRestrictedTrustListUpdate_ = false;
+    std::atomic<bool> isKioskMode_ = false;
+    std::atomic<bool> isKioskTrustListUpdate_ = false;
+    std::atomic<bool> isRestrictedTrustListUpdate_ = false;
 
     // Collaboration block list cache (multi-user support)
     // Key: userId, Value: set of (bundleName, appIndex) pairs

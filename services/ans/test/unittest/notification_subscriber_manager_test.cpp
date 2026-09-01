@@ -3027,5 +3027,77 @@ HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_WithV
     EXPECT_NE(nullptr, result->GetVoiceContent());
     EXPECT_EQ(result->GetVoiceContent()->GetTextContent(), voiceContent);
 }
+
+/**
+ * @tc.number    : NotifyBadgeEnabledChangedInner_InvalidUserId_001
+ * @tc.name      : test NotifyBadgeEnabledChangedInner returns early when uid resolves to invalid userId
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyBadgeEnabledChangedInner_InvalidUserId_001, Level1)
+{
+    sptr<EnabledNotificationCallbackData> callback(new EnabledNotificationCallbackData());
+    callback->SetBundle("com.example.test");
+    callback->SetUid(101);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    notificationSubscriberManager.NotifyBadgeEnabledChangedInner(callback);
+    notificationSubscriberManager.WaitForFfrtQueue();
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    EXPECT_NE(callback, nullptr);
+}
+
+/**
+ * @tc.number    : NotifyEnabledNotificationChangedInner_InvalidUserId_001
+ * @tc.name      : test NotifyEnabledNotificationChangedInner returns early when uid resolves to invalid userId
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledNotificationChangedInner_InvalidUserId_001, Level1)
+{
+    sptr<EnabledNotificationCallbackData> callback(new EnabledNotificationCallbackData());
+    callback->SetBundle("com.example.test");
+    callback->SetUid(101);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    notificationSubscriberManager.NotifyEnabledNotificationChangedInner(callback);
+    notificationSubscriberManager.WaitForFfrtQueue();
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    EXPECT_NE(callback, nullptr);
+}
+
+/**
+ * @tc.number    : NotifyEnabledSilentReminderChangedInner_InvalidUserId_001
+ * @tc.name      : test NotifyEnabledSilentReminderChangedInner returns early when uid resolves to invalid userId
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyEnabledSilentReminderChangedInner_InvalidUserId_001, Level1)
+{
+    sptr<EnabledSilentReminderCallbackData> callback(new EnabledSilentReminderCallbackData());
+    callback->SetBundle("com.example.test");
+    callback->SetUid(101);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    notificationSubscriberManager.NotifyEnabledSilentReminderChangedInner(callback);
+    notificationSubscriberManager.WaitForFfrtQueue();
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    EXPECT_NE(callback, nullptr);
+}
+
+/**
+ * @tc.number    : SetBadgeNumber_InvalidUserId_001
+ * @tc.name      : test SetBadgeNumber lambda returns early when uid resolves to invalid userId
+ */
+HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_InvalidUserId_001, Level1)
+{
+    sptr<BadgeNumberCallbackData> badge(new BadgeNumberCallbackData());
+    badge->SetBundle("com.example.test");
+    badge->SetUid(101);
+
+    NotificationSubscriberManager notificationSubscriberManager;
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    notificationSubscriberManager.SetBadgeNumber(badge);
+    notificationSubscriberManager.WaitForFfrtQueue();
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    EXPECT_NE(badge, nullptr);
+}
 }  // namespace Notification
 }  // namespace OHOS

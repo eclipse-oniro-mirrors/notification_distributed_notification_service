@@ -49,7 +49,9 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
     manager->GetRecentReminder();
     std::vector<sptr<ReminderRequest>> reminders;
     Notification::ReminderDataManager::ShowLimit limits;
-    manager->HandleImmediatelyShow(reminders, limits, value, value);
+    limits.isSysTimeChanged = value;
+    limits.isSlienceNotification = value;
+    manager->HandleImmediatelyShow(reminders, limits);
     manager->HandleExtensionReminder(reminders, static_cast<int8_t>(type));
     manager->HandleRefreshReminder(type, reminder);
     manager->HandleSameNotificationIdShowing(reminder);

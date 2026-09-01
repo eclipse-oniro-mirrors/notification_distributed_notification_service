@@ -15,6 +15,7 @@
 
 #include "subscriber_image_util.h"
 
+#include "ans_common_utils.h"
 #include "ans_log_wrapper.h"
 #include "image_pixelmap_helper.h"
 #include "int_wrapper.h"
@@ -37,11 +38,16 @@ void SubscriberImageUtil::ProcessPictureOption(
         return;
     }
     auto request = notification->GetNotificationRequestPoint();
-    if (request == nullptr || request->GetNotificationType() != NotificationContent::Type::LIVE_VIEW) {
-        ANS_LOGI("No need parse pic, not liveView");
+    if (request == nullptr || request->GetNotificationType() != NotificationContent::Type::LIVE_VIEW ||
+        AnsCommonUtils::IsCollaborationNotification(request)) {
+        ANS_LOGI("No need parse pic, not liveView or collaboration notification");
         return;
     }
     auto content = request->GetContent();
+    if (content == nullptr) {
+        ANS_LOGE("Invalid content.");
+        return;
+    }
     auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
         content->GetNotificationContent());
     if (liveViewContent == nullptr || liveViewContent->GetExtraInfo() == nullptr) {
@@ -154,6 +160,10 @@ bool SubscriberImageUtil::ExtractFromStringArray(
     }
     long size = 0;
     if (iArray->GetLength(size) != ERR_OK) {
+        return false;
+    }
+    if (size > MAX_PARCELABLE_VECTOR_NUM) {
+        ANS_LOGE("array size too large: %{public}ld", size);
         return false;
     }
     if (size == 0) {

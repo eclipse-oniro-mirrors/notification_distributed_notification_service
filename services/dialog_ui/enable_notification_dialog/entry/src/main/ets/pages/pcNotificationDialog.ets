@@ -36,13 +36,11 @@ import { MeasureUtils } from '@ohos.arkui.UIContext';
 import common from '@ohos.app.ability.common';
 import uiextension from '@ohos.arkui.uiExtension';
 import DisplayUtils from '../common/displayUtils';
-import uiMaterial from '@ohos.arkui.uiMaterial';
 
 const TAG = 'NotificationDialog_Service ';
 const MASK_COLOR = '#33000000';
 const TRANSPARANT_COLOR = '#00000000';
 const EMPTY_PAGE_PATH = 'emptyPage';
-const defaultUiMaterial = new uiMaterial.ImmersiveMaterial({style: uiMaterial.ImmersiveStyle.ULTRA_THICK});
 
 const permission: Record<string, Resource> = {
   'label': $r('app.string.group_label_notification'),
@@ -89,7 +87,6 @@ struct NotificationDialogPage {
     }),
     autoCancel: false,
     alignment: DialogAlignment.Center,
-    systemMaterial: defaultUiMaterial,
     customStyle: true,
     cornerRadius: Constants.PC_RDIUS_12,
     maskColor: $r('sys.color.ohos_id_color_mask_thin'),
@@ -235,7 +232,7 @@ struct PermissionDialog {
           }
         }
         .borderRadius(Constants.PC_RDIUS_12)
-        .systemMaterial(defaultUiMaterial)
+        .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
         .width(this.contentWidth)
         .outline({
             width: 1,

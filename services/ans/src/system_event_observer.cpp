@@ -14,6 +14,7 @@
  */
 
 #include "system_event_observer.h"
+#include "singleton.h"
 
 #include "advanced_datashare_helper.h"
 #include "advanced_notification_service.h"
@@ -22,10 +23,12 @@
 #include "clone_start_event_subscriber.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "notification_analytics_util.h"
 #include "notification_config_parse.h"
 #include "notification_preferences.h"
 #include "notification_ai_extension_wrapper.h"
 #include "notification_clone_manager.h"
+#include "time_service_client.h"
 #ifdef ALL_SCENARIO_COLLABORATION
 #include "distributed_device_manager.h"
 #include "distributed_bundle_service.h"
@@ -34,10 +37,18 @@
 
 namespace OHOS {
 namespace Notification {
+namespace {
+int64_t g_saStartTime = 0;
+int64_t g_saStartBootTime = 0;
+}
 SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callbacks_(callbacks)
 {
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED);
+#endif
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
@@ -84,6 +95,12 @@ SystemEventObserver::~SystemEventObserver()
     EventFwk::CommonEventManager::UnSubscribeCommonEvent(cloneStartSubscriber_);
 }
 
+void SystemEventObserver::InitSaStartTime()
+{
+    g_saStartTime = NotificationAnalyticsUtil::GetCurrentTime();
+    g_saStartBootTime = MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs();
+}
+
 sptr<NotificationBundleOption> SystemEventObserver::GetBundleOption(AAFwk::Want want)
 {
     auto element = want.GetElement();
@@ -120,6 +137,20 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
     auto want = data.GetWant();
     std::string action = want.GetAction();
     ANS_LOGD("OnReceiveEvent action is %{public}s.", action.c_str());
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED ||
+        action == EventFwk::CommonEventSupport::COMMON_EVENT_TIMEZONE_CHANGED) {
+        int64_t current = NotificationAnalyticsUtil::GetCurrentTime();
+        int64_t bootTimeMs = MiscServices::TimeServiceClient::GetInstance()->GetBootTimeMs();
+        int64_t realTime = g_saStartTime + (bootTimeMs - g_saStartBootTime);
+        int64_t diffTime = current - realTime;
+        g_saStartTime = current;
+        g_saStartBootTime = bootTimeMs;
+        NotificationPreferences::GetInstance()->UpdateCustomTimeData(diffTime);
+        NotificationAnalyticsUtil::UpdateCleanExperDataTimer();
+        return;
+    }
+#endif
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
         sptr<NotificationBundleOption> bundleOption = GetBundleOption(want);
         if (bundleOption != nullptr && callbacks_.onBundleRemovedByUserId != nullptr) {
@@ -140,6 +171,13 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         AdvancedNotificationService::GetInstance()->HandleBundleUninstall(bundleOption);
+#endif
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+        if (bundleOption != nullptr) {
+            int32_t userId = want.GetIntParam("userId", SUBSCRIBE_USER_INIT);
+            NotificationPreferences::GetInstance()->DeleteStatisticsByBundle(
+                userId, bundleOption->GetBundleName(), bundleOption->GetUid());
+        }
 #endif
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
@@ -183,6 +221,9 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         if (callbacks_.onResourceRemove != nullptr) {
             callbacks_.onResourceRemove(userId);
         }
+#ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
+        NotificationPreferences::GetInstance()->DropStatisticsTable(userId);
+#endif
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_STOPPED) {
         int32_t userId = data.GetCode();
         if (userId <= SUBSCRIBE_USER_INIT) {
@@ -224,14 +265,20 @@ void SystemEventObserver::OnReceiveEventInner(const EventFwk::CommonEventData &d
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) == 0) {
         OnBundleAddEventInner(data);
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-        AdvancedNotificationService::GetInstance()->HandleBundleInstall(bundleOption);
+        auto service = AdvancedNotificationService::GetInstance();
+        if (service != nullptr) {
+            service->HandleBundleInstall(bundleOption);
+        }
 #endif
         return;
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) == 0) {
         OnBundleUpdateEventInner(data);
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-        AdvancedNotificationService::GetInstance()->HandleBundleUpdate(bundleOption);
+        auto service = AdvancedNotificationService::GetInstance();
+        if (service != nullptr) {
+            service->HandleBundleUpdate(bundleOption);
+        }
 #endif
     }
     if (action.compare(EventFwk::CommonEventSupport::COMMON_EVENT_BOOT_COMPLETED) == 0) {

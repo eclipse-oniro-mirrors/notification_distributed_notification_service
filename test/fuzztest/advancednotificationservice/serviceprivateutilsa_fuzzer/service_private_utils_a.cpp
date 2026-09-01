@@ -144,7 +144,9 @@ namespace Notification {
             zeroUserRecord->slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
             service->notificationList_.push_back(zeroUserRecord);
         }
-        service->DeleteAllByUserStopped(userId);
+        service->notificationSvrQueue_.SyncSubmit([service, userId]() {
+            service->DeleteAllByUserStopped(userId);
+        });
 
         std::string oldKey = fuzzData->ConsumeRandomLengthString();
         std::string oldKey1 = fuzzData->ConsumeRandomLengthString();
@@ -191,9 +193,9 @@ namespace Notification {
         service->QueryContactByProfileId(phoneNum, policy, fuzzData->ConsumeIntegral<int32_t>());
 
         service->PublishSubscriberExistFlagEvent(fuzzData->ConsumeBool(), fuzzData->ConsumeBool());
-        service->RemoveAllNotificationsByBundleName(ConsumePrintableString(fuzzData),
+        service->ExcuteRemoveAllNotificationsByBundleName(ConsumePrintableString(fuzzData),
             fuzzData->ConsumeIntegral<int32_t>(), fuzzData->ConsumeIntegral<int32_t>());
-        service->RemoveAllNotificationsByBundleName("", 0, 0);
+        service->ExcuteRemoveAllNotificationsByBundleName("", 0, 0);
 
         request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
         auto liveContent = std::make_shared<NotificationLiveViewContent>();

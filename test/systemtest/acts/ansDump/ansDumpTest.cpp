@@ -17,7 +17,6 @@
 
 #include "ans_notification.h"
 #include "iservice_registry.h"
-#include "singleton.h"
 #include "system_ability_definition.h"
 
 #undef private
@@ -48,7 +47,7 @@ void AnsDumpTest::TearDownTestCase()
 void AnsDumpTest::SetUp()
 {
     if (!ans_) {
-        ans_ = DelayedSingleton<AnsNotification>::GetInstance();
+        ans_ = AnsNotification::GetInstance();
     }
 }
 

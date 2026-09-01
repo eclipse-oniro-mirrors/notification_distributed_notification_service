@@ -32,6 +32,9 @@
 #include "array_wrapper.h"
 #include "int_wrapper.h"
 #include "long_wrapper.h"
+#include "bool_wrapper.h"
+#include "ans_common_utils.h"
+#include "ans_const_define.h"
 #include "pixelmap_cache_manager.h"
 #include "../mock/mock_application_context.h"
 #include "../mock/mock_resource_manager.h"
@@ -154,6 +157,24 @@ HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00005, Function | SmallTe
     sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
     SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
     EXPECT_EQ(liveViewContent->GetExtraInfo(), nullptr);
+}
+
+/**
+ * @tc.name: ProcessPictureOption_NullContent_00001
+ * @tc.desc: Test ProcessPictureOption with LIVE_VIEW type but null content
+ * @tc.type: FUNC
+ * @tc.require: issue4281
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_NullContent_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    request->notificationContent_ = nullptr;
+    sptr<Notification> notification = new Notification(request);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
+    EXPECT_EQ(request->GetContent(), nullptr);
 }
 
 /**
@@ -359,6 +380,40 @@ HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00013, Function | SmallTe
 }
 
 /**
+ * @tc.name: ProcessPictureOption_00014
+ * @tc.desc: Test ProcessPictureOption with LIVE_VIEW collaboration notification should skip picture parsing.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ProcessPictureOption_00014, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto extraInfo = std::make_shared<AAFwk::WantParams>();
+    extraInfo->SetParam("pic1", AAFwk::String::Box("test_path.png"));
+    liveViewContent->SetExtraInfo(extraInfo);
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+
+    // Set collaboration flag to true in extend info
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    std::string flagKey = ANS_EXTENDINFO_INFO_PRE + EXTENDINFO_FLAG;
+    extendInfo->SetParam(flagKey, AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+
+    sptr<Notification> notification = new Notification(request);
+    std::shared_ptr<Notification> sharedNotification = std::make_shared<Notification>(*notification);
+    sptr<PictureOption> pictureOption = new PictureOption({"pic1"});
+
+    SubscriberImageUtil::ProcessPictureOption(sharedNotification, pictureOption);
+
+    // Collaboration notification should skip picture processing even though extraInfo has valid pic path
+    EXPECT_TRUE(AnsCommonUtils::IsCollaborationNotification(request));
+    EXPECT_TRUE(extraInfo->HasParam("pic1"));
+    EXPECT_EQ(liveViewContent->GetPicture().size(), 0);
+}
+
+/**
  * @tc.name: GetPixelMapByRes_00001
  * @tc.desc: Test GetPixelMapByRes when Init fails.
  * @tc.type: FUNC
@@ -524,6 +579,31 @@ HWTEST_F(SubscriberImageUtilTest, ExtractFromStringArray_00005, Function | Small
     bool result = SubscriberImageUtil::ExtractFromStringArray(param, picPaths);
     EXPECT_EQ(result, true);
     EXPECT_TRUE(picPaths.empty());
+}
+
+/**
+ * @tc.name: ExtractFromStringArray_TooLarge_001
+ * @tc.desc: Test ExtractFromStringArray when array size exceeds MAX_PARCELABLE_VECTOR_NUM.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(SubscriberImageUtilTest, ExtractFromStringArray_TooLarge_001, Function | SmallTest | Level1)
+{
+    class MockArrayTooLarge : public AAFwk::Array {
+    public:
+        MockArrayTooLarge() : AAFwk::Array(2, AAFwk::g_IID_IString) {}
+        ErrCode GetLength(long& size) override
+        {
+            size = static_cast<long>(MAX_PARCELABLE_VECTOR_NUM) + 1;
+            return ERR_OK;
+        }
+    };
+
+    sptr<AAFwk::IArray> array = new MockArrayTooLarge();
+    sptr<AAFwk::IInterface> param = array;
+    std::vector<std::string> picPaths;
+    bool result = SubscriberImageUtil::ExtractFromStringArray(param, picPaths);
+    EXPECT_EQ(result, false);
 }
 
 /**

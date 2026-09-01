@@ -125,4 +125,34 @@ int32_t ReminderBundleManagerHelper::GetAppIndexByUid(const int32_t uid)
     IPCSkeleton::SetCallingIdentity(identity);
     return appIndex;
 }
+
+bool ReminderBundleManagerHelper::CheckControlRule(const int32_t userId, const int32_t uid,
+    const std::string& bundleName)
+{
+    constexpr int32_t HEALTHY_DEVICE_USAGE_UID = 7007;
+    std::lock_guard<std::mutex> locker(mutex_);
+    Connect();
+    if (bundleMgr_ == nullptr) {
+        return false;
+    }
+    auto appControlMgr = bundleMgr_->GetAppControlProxy();
+    if (appControlMgr == nullptr) {
+        return false;
+    }
+    std::vector<AppExecFwk::DisposedRule> disposedRuleList;
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    int32_t appIndex = 0;
+    std::string dstBundleName;
+    bundleMgr_->GetNameAndIndexForUid(uid, dstBundleName, appIndex);
+    appControlMgr->GetAbilityRunningControlRule(bundleName, userId, disposedRuleList, appIndex);
+    IPCSkeleton::SetCallingIdentity(identity);
+    bool result = false;
+    for (auto& rule : disposedRuleList) {
+        if (rule.callerName.compare(std::to_string(HEALTHY_DEVICE_USAGE_UID)) == 0) {
+            result = true;
+            break;
+        }
+    }
+    return result;
+}
 }  // namespace OHOS::Notification

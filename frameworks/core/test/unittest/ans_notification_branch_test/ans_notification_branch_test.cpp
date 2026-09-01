@@ -32,7 +32,6 @@
 #include "ipc_types.h"
 #include "notification.h"
 #include "notification_request.h"
-#include "singleton.h"
 #include "notification_subscriber.h"
 #include "ibadge_query_callback.h"
 

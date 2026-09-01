@@ -293,6 +293,17 @@ public:
 public:
     static std::string GetCreateColumns();
 };
+
+class ReminderConfigTable {
+public:
+    static constexpr const char* TABLE_NAME = "reminder_config";
+
+    static constexpr const char* KEY = "key";
+    static constexpr const char* VALUE = "value";
+
+public:
+    static std::string GetCreateColumns();
+};
 }  // namespace Notification
 }  // namespace OHOS
 #endif  // BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_TABLE_H

@@ -17,7 +17,6 @@
 
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "sts_common.h"
 #include "sts_notification_manager.h"
 #include "sts_throw_erro.h"
@@ -143,6 +142,8 @@ ani_object AniSetNotificationSwitch(ani_env *env, ani_string switchName, ani_boo
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_INVALID_PARAM);
     }
+    asyncCallbackInfo->switchName =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->switchName, NotificationSts::STR_MAX_SIZE);
     asyncCallbackInfo->switchState = NotificationSts::AniBooleanToBool(switchState);
     asyncCallbackInfo->userId = userId;
 
@@ -160,7 +161,7 @@ ani_object AniSetNotificationSwitch(ani_env *env, ani_string switchName, ani_boo
             auto asyncCallbackInfo = static_cast<AsyncCallbackNotificationSwitchInfo *>(data);
             if (asyncCallbackInfo != nullptr) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSwitch(
+                    AnsNotification::GetInstance()->SetNotificationSwitch(
                         asyncCallbackInfo->switchName, asyncCallbackInfo->switchState,
                         asyncCallbackInfo->userId);
             }
@@ -189,6 +190,8 @@ ani_object AniGetNotificationSwitch(ani_env *env, ani_string switchName, ani_int
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_INVALID_PARAM);
     }
+    asyncCallbackInfo->switchName =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->switchName, NotificationSts::STR_MAX_SIZE);
     asyncCallbackInfo->userId = userId;
     asyncCallbackInfo->functionType = GET_NOTIFICATION_SWITCH;
 
@@ -208,7 +211,7 @@ ani_object AniGetNotificationSwitch(ani_env *env, ani_string switchName, ani_int
                 NotificationConstant::SWITCH_STATE switchState =
                     NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSwitch(
+                    AnsNotification::GetInstance()->GetNotificationSwitch(
                         asyncCallbackInfo->switchName, asyncCallbackInfo->userId,
                         switchState);
                 asyncCallbackInfo->enableStatus = static_cast<int32_t>(switchState);

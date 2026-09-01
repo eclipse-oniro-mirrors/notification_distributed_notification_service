@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_ANS_DIALOG_CALLBACK_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_ANS_DIALOG_CALLBACK_H
 #include <string>
+#include "nocopyable.h"
 #include "ani.h"
 #include "ani_base_context.h"
 #include "ans_dialog_host_client.h"

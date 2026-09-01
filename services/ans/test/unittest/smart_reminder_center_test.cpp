@@ -15,6 +15,7 @@
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "gtest/gtest.h"
+#include "singleton.h"
 #define private public
 #define protected public
 #include "notification_preferences.h"
@@ -26,6 +27,11 @@
 #include "mock_bundle_manager_helper.h"
 #undef private
 #undef protected
+#include "notification_live_view_content.h"
+#include "notification_content.h"
+#include "bool_wrapper.h"
+#include "int_wrapper.h"
+#include "want_params.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -116,6 +122,46 @@ HWTEST_F(SmartReminderCenterTest, IsCollaborationAllowed_00001, Function | Small
 
     request->SetForceDistributed(false);
     res = smartReminderCenter_->IsCollaborationAllowed(request);
+    ASSERT_TRUE(res);
+}
+
+/**
+ * @tc.name: IsCollaborationAllowed_SharedThirdpartyLiveView_00002
+ * @tc.desc: Test IsCollaborationAllowed returns false when request is a shared thirdparty live view.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, IsCollaborationAllowed_SharedThirdpartyLiveView_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    request->SetExtendInfo(extendInfo);
+    EXPECT_TRUE(request->IsSharedThirdpartyLiveView());
+
+    auto res = smartReminderCenter_->IsCollaborationAllowed(request);
+    ASSERT_FALSE(res);
+}
+
+/**
+ * @tc.name: IsCollaborationAllowed_NotSharedLiveView_00003
+ * @tc.desc: Test IsCollaborationAllowed continues when live view is not shared (non-system-app allowed).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, IsCollaborationAllowed_NotSharedLiveView_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    EXPECT_FALSE(request->IsSharedThirdpartyLiveView());
+    EXPECT_FALSE(request->IsSystemApp());
+
+    auto res = smartReminderCenter_->IsCollaborationAllowed(request);
     ASSERT_TRUE(res);
 }
 
@@ -919,6 +965,7 @@ HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_200, Function | SmallTest
  */
 HWTEST_F(SmartReminderCenterTest, CheckHealthWhiteList_300, Function | SmallTest | Level1)
 {
+    NotificationPreferences::GetInstance()->SetKvToDb("HEALTH_BUNDLE_WHITE_LIST", "", -1);
     std::string deviceType = NotificationConstant::WEARABLE_DEVICE_TYPE;;
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);

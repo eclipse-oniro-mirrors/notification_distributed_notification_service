@@ -249,6 +249,13 @@ private:
      */
     DataShare::DataSharePredicates BuildQueryPredicates(int64_t timestamp, int64_t targetTimestamp);
 
+    /**
+     * @brief Determine whether the current system is in Bopd mode.
+     *
+     * @return True in bopd mode otherwies false.
+     */
+    bool IsBopdRunMode();
+
 private:
     // Singleton
     ReminderDataShareHelper();

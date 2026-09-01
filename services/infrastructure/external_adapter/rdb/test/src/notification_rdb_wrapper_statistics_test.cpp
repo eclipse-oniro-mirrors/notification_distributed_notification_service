@@ -15,10 +15,12 @@
 
 
 #include "gtest/gtest.h"
-#include "rdb_store_wrapper.h"
 #include "mock_rdb_helper.h"
 #include "mock_rdb_store.h"
 #include "mock_abs_shared_result_set.h"
+#define private public
+#include "rdb_store_wrapper.h"
+#undef private
 
 using namespace testing::ext;
 
@@ -947,5 +949,223 @@ HWTEST_F(NtfRdbStoreWrapperStatisticsTest, GetStatisticsInfos_103, Function | Sm
     int64_t lastTime = 0;
     ret = rdbWrapper.GetStatisticsInfos(0, uid, "", totalCount, lastTime);
     EXPECT_EQ(ret, NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name: CleanLegacyStatisticsTables_001
+ * @tc.desc: Verify a legacy statistics table with userId in (0,100) is dropped when ExecuteSql succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, CleanLegacyStatisticsTables_001, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.rdbStore_ = std::make_shared<MockRdbStore>();
+
+    std::set<std::string> tableNames = {"notification_statistics_5"};
+    SetMockExecuteSqlErrCodes({NativeRdb::E_OK});
+    rdbWrapper.CleanLegacyStatisticsTables(tableNames);
+    EXPECT_TRUE(tableNames.find("notification_statistics_5") == tableNames.end());
+}
+
+/**
+ * @tc.name: CleanLegacyStatisticsTables_002
+ * @tc.desc: Verify the ZERO_USERID (0) statistics table is kept.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, CleanLegacyStatisticsTables_002, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.rdbStore_ = std::make_shared<MockRdbStore>();
+
+    std::set<std::string> tableNames = {"notification_statistics_0"};
+    rdbWrapper.CleanLegacyStatisticsTables(tableNames);
+    EXPECT_NE(tableNames.find("notification_statistics_0"), tableNames.end());
+}
+
+/**
+ * @tc.name: CleanLegacyStatisticsTables_003
+ * @tc.desc: Verify a real-user statistics table (userId >= 100) is kept.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, CleanLegacyStatisticsTables_003, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.rdbStore_ = std::make_shared<MockRdbStore>();
+
+    std::set<std::string> tableNames = {"notification_statistics_100", "notification_statistics_200"};
+    rdbWrapper.CleanLegacyStatisticsTables(tableNames);
+    EXPECT_NE(tableNames.find("notification_statistics_100"), tableNames.end());
+    EXPECT_NE(tableNames.find("notification_statistics_200"), tableNames.end());
+}
+
+/**
+ * @tc.name: CleanLegacyStatisticsTables_004
+ * @tc.desc: Verify non-statistics tables (prefix mismatch) are kept.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, CleanLegacyStatisticsTables_004, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.rdbStore_ = std::make_shared<MockRdbStore>();
+
+    std::set<std::string> tableNames = {"notification_preferences", "ans_kv_store"};
+    rdbWrapper.CleanLegacyStatisticsTables(tableNames);
+    EXPECT_EQ(tableNames.size(), static_cast<size_t>(2));
+}
+
+/**
+ * @tc.name: CleanLegacyStatisticsTables_005
+ * @tc.desc: Verify the statistics table without a userId suffix is kept, and a non-digit suffix is kept.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, CleanLegacyStatisticsTables_005, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.rdbStore_ = std::make_shared<MockRdbStore>();
+
+    std::set<std::string> tableNames = {"notification_statistics", "notification_statistics_abc"};
+    rdbWrapper.CleanLegacyStatisticsTables(tableNames);
+    EXPECT_NE(tableNames.find("notification_statistics"), tableNames.end());
+    EXPECT_NE(tableNames.find("notification_statistics_abc"), tableNames.end());
+}
+
+/**
+ * @tc.name: CleanLegacyStatisticsTables_006
+ * @tc.desc: Verify a legacy table is kept when ExecuteSql fails (drop error path).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, CleanLegacyStatisticsTables_006, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.rdbStore_ = std::make_shared<MockRdbStore>();
+
+    std::set<std::string> tableNames = {"notification_statistics_5"};
+    SetMockExecuteSqlErrCodes({NativeRdb::E_ERROR});
+    rdbWrapper.CleanLegacyStatisticsTables(tableNames);
+    EXPECT_NE(tableNames.find("notification_statistics_5"), tableNames.end());
+}
+
+/**
+ * @tc.name: CleanLegacyStatisticsTables_007
+ * @tc.desc: Verify a mixed set drops only legacy tables in (0,100) and keeps the rest.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, CleanLegacyStatisticsTables_007, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.rdbStore_ = std::make_shared<MockRdbStore>();
+
+    std::set<std::string> tableNames = {"notification_statistics", "notification_statistics_0",
+        "notification_statistics_100", "notification_statistics_5", "notification_statistics_99",
+        "notification_statistics_abc", "notification_preferences"};
+    SetMockExecuteSqlErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    rdbWrapper.CleanLegacyStatisticsTables(tableNames);
+    EXPECT_TRUE(tableNames.find("notification_statistics_5") == tableNames.end());
+    EXPECT_TRUE(tableNames.find("notification_statistics_99") == tableNames.end());
+    EXPECT_NE(tableNames.find("notification_statistics"), tableNames.end());
+    EXPECT_NE(tableNames.find("notification_statistics_0"), tableNames.end());
+    EXPECT_NE(tableNames.find("notification_statistics_100"), tableNames.end());
+    EXPECT_NE(tableNames.find("notification_statistics_abc"), tableNames.end());
+    EXPECT_NE(tableNames.find("notification_preferences"), tableNames.end());
+}
+
+/**
+ * @tc.name: DeleteStatisticsByBundle_Statistics_500
+ * @tc.desc: Verify DeleteStatisticsByBundle returns E_ERROR when userId is invalid (-1)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, DeleteStatisticsByBundle_Statistics_500, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"testValue"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    int32_t ret = rdbWrapper.Init();
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+
+    ret = rdbWrapper.DeleteStatisticsByBundle(-1, "com.example.myapplication", 20010044);
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name: DeleteStatisticsByBundle_Statistics_600
+ * @tc.desc: Verify DeleteStatisticsByBundle returns E_ERROR when bundleName is empty or contains path traversal
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, DeleteStatisticsByBundle_Statistics_600, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"testValue"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    int32_t ret = rdbWrapper.Init();
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+
+    int32_t nonSystemUserId = 100;
+    ret = rdbWrapper.DeleteStatisticsByBundle(nonSystemUserId, "", 20010044);
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+
+    ret = rdbWrapper.DeleteStatisticsByBundle(nonSystemUserId, "../malicious", 20010044);
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+
+    ret = rdbWrapper.DeleteStatisticsByBundle(nonSystemUserId, "bundle/with/slash", 20010044);
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
 }
 } // OHOS::Notification::Infra

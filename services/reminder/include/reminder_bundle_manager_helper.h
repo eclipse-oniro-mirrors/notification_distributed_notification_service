@@ -66,6 +66,16 @@ public:
      */
     int32_t GetAppIndexByUid(const int32_t uid);
 
+    /**
+     * @brief Check if the application has been disabled by the healthy use device application.
+     *
+     * @param userId Indicates user id.
+     * @param uid Indicates uid.
+     * @param bundleName Indicates bundle name.
+     * @return Returns true if disabled by a healthy device; otherwise, return false.
+     */
+    bool CheckControlRule(const int32_t userId, const int32_t uid, const std::string& bundleName);
+
 private:
     void Connect();
     void Disconnect();

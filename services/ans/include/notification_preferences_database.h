@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "notification_bundle_option.h"
-#include "notification_rdb_data_mgr.h"
 #include "notification_clone_priority_info.h"
 #include "notification_preferences_info.h"
 
@@ -59,14 +58,15 @@ public:
 
     bool PutNotificationStatistics(const int32_t userId, const int64_t insertTime,
         const sptr<NotificationBundleOption> &bundleOption);
-    
+
     bool CleanExperDbData(const int32_t userId);
 
     bool DeleteStatisticsByBundle(const int32_t userId, const std::string &bundleName, int32_t packageId);
 
     bool TimerCleanExperData(const std::vector<int32_t> &userIds);
 
-    bool QueryStatisticsByBundle(const int32_t bundleUid, int32_t &recentCount, int64_t &lastTime);
+    bool QueryStatisticsByBundle(const int32_t bundleUid, const int32_t tableUserId,
+        int32_t &recentCount, int64_t &lastTime);
 
     bool UpdateCustomTimeDbData(int64_t offsetMs);
 
@@ -435,11 +435,13 @@ public:
      * @param bundleOptions Indicates the bundle options to query.
      * @param slotType Indicates the slot type.
      * @param slotEnabled Indicates the output map from bundle option to enabled state.
+     * @param userId Indicates the user id to query.
      * @return Return true on success, false on failure.
      */
     bool GetEnabledForBundleSlots(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
         int32_t slotType,
-        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled);
+        std::map<sptr<NotificationBundleOption>, bool> &slotEnabled,
+        int32_t userId);
 
     /**
      * @brief Delete all slots in the of bundle from disturbe DB.

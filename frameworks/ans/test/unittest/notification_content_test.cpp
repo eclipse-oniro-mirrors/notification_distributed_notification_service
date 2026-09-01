@@ -293,8 +293,9 @@ HWTEST_F(NotificationContentTest, FromJson_00003, Function | SmallTest | Level1)
         {"version", 2}, {"tokenId", 685266937},
         {"tokenAttr", 0},
         {"dcaps", {"AT_CAP", "ST_CAP"}}};
-    notificationContent.FromJson(jsonObject);
+    auto result = notificationContent.FromJson(jsonObject);
     EXPECT_EQ(jsonObject.is_object(), true);
+    EXPECT_EQ(result, nullptr);
 }
 
 /**
@@ -360,22 +361,22 @@ HWTEST_F(NotificationContentTest, NotificationContentMarshalling_0200, Level1)
 {
     std::shared_ptr<NotificationNormalContent> normalContent = nullptr;
     auto sptr1 = std::make_shared<NotificationContent>(normalContent);
-    EXPECT_NE(sptr1, nullptr);
+    EXPECT_EQ(sptr1->GetNotificationContent(), nullptr);
     std::shared_ptr<NotificationLongTextContent> longTextContent = nullptr;
     auto sptr2 = std::make_shared<NotificationContent>(longTextContent);
-    EXPECT_NE(sptr2, nullptr);
+    EXPECT_EQ(sptr2->GetNotificationContent(), nullptr);
     std::shared_ptr<NotificationPictureContent> pictureContent = nullptr;
     auto sptr3 = std::make_shared<NotificationContent>(pictureContent);
-    EXPECT_NE(sptr3, nullptr);
+    EXPECT_EQ(sptr3->GetNotificationContent(), nullptr);
     std::shared_ptr<NotificationConversationalContent> conversationContent = nullptr;
     auto sptr4 = std::make_shared<NotificationContent>(conversationContent);
-    EXPECT_NE(sptr4, nullptr);
+    EXPECT_EQ(sptr4->GetNotificationContent(), nullptr);
     std::shared_ptr<NotificationMultiLineContent> multiLineContent = nullptr;
     auto sptr5 = std::make_shared<NotificationContent>(multiLineContent);
-    EXPECT_NE(sptr5, nullptr);
+    EXPECT_EQ(sptr5->GetNotificationContent(), nullptr);
     std::shared_ptr<NotificationMediaContent> mediaContent = nullptr;
     auto sptr6 = std::make_shared<NotificationContent>(mediaContent);
-    EXPECT_NE(sptr6, nullptr);
+    EXPECT_EQ(sptr6->GetNotificationContent(), nullptr);
 }
 
 /**
@@ -413,7 +414,9 @@ HWTEST_F(NotificationContentTest, NotificationBasicContentReadFromJson_00001, Le
         {"title", "test"},
         {"additionalText", "test"}};
     notificationBasicContent->ReadFromJson(jsonObject);
-    EXPECT_NE(notificationBasicContent, nullptr);
+    EXPECT_EQ(notificationBasicContent->GetText(), "test");
+    EXPECT_EQ(notificationBasicContent->GetTitle(), "test");
+    EXPECT_EQ(notificationBasicContent->GetAdditionalText(), "test");
 }
 
 /**
@@ -643,6 +646,22 @@ HWTEST_F(NotificationContentTest, ReadFromJson_StructuredText_00200, Level1)
         {"structuredText", "not_an_object"}};
     content.ReadFromJson(jsonObject);
     EXPECT_EQ(content.GetText(), "test");
+}
+
+/**
+ * @tc.name: ReadFromParcel_LiveViewNull_00100
+ * @tc.desc: Test ReadFromParcel returns false when contentType is LIVE_VIEW but content parcelable is null.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationContentTest, ReadFromParcel_LiveViewNull_00100, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteInt32(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    parcel.WriteBool(true);
+    parcel.WriteInt32(-1);
+    NotificationContent content;
+    EXPECT_EQ(content.ReadFromParcel(parcel), false);
 }
 }
 }

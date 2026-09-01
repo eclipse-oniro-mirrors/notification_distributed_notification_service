@@ -55,7 +55,12 @@ extern "C" {
 
 void UpdateUnifiedGroupInfo(const std::string &key, std::shared_ptr<NotificationUnifiedGroupInfo> &groupInfo)
 {
-    AdvancedNotificationService::GetInstance()->UpdateUnifiedGroupInfo(key, groupInfo);
+    auto service = AdvancedNotificationService::GetInstance();
+    if (service == nullptr) {
+        ANS_LOGE("AdvancedNotificationService instance is null.");
+        return;
+    }
+    service->UpdateUnifiedGroupInfo(key, groupInfo);
 }
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
@@ -194,7 +199,15 @@ void ExtensionWrapper::CheckIfSetlocalSwitch()
         isRegisterDataSettingObserver = true;
     }
     std::string enable = "";
-    AdvancedNotificationService::GetInstance()->GetUnifiedGroupInfoFromDb(enable);
+    auto service = AdvancedNotificationService::GetInstance();
+    if (service == nullptr) {
+        ANS_LOGE("AdvancedNotificationService instance is null.");
+        return;
+    }
+    if (service->GetUnifiedGroupInfoFromDb(enable) != ERR_OK) {
+        ANS_LOGE("GetUnifiedGroupInfoFromDb failed, skip setting local switch.");
+        return;
+    }
     SetlocalSwitch(enable);
 }
 
@@ -380,6 +393,10 @@ bool ExtensionWrapper::NotificationDialogControl()
 
 bool ExtensionWrapper::NotificationContentControl(const sptr<NotificationRequest> &request, const int32_t &userId)
 {
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return false;
+    }
     if (notificationContentControl_ == nullptr) {
         ANS_LOGE("NotificationContentControl wrapper symbol failed");
         return true;

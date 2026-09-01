@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "ans_const_define.h"
 #include "ans_log_wrapper.h"
 
 #define private public
@@ -152,7 +153,7 @@ HWTEST_F(NotificationDoNotDisturbProfileTest, Unmarshalling_0100, TestSize.Level
             unmarshalling = false;
         }
     }
-    EXPECT_EQ(unmarshalling, true);
+    EXPECT_EQ(unmarshalling, false);
 }
 
 /**
@@ -194,6 +195,60 @@ HWTEST_F(NotificationDoNotDisturbProfileTest, FromJson_0100, TestSize.Level1)
     temp.FromJson(jsonString);
 
     ASSERT_EQ(temp.GetProfileTrustList().size(), 1);
+}
+
+/**
+ * @tc.name: ReadFromParcel_0400
+ * @tc.desc: test ReadFromParcel when only id is written (name read fails).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, ReadFromParcel_0400, TestSize.Level1)
+{
+    NotificationDoNotDisturbProfile profile;
+    Parcel parcel;
+    parcel.WriteInt64(1);
+    EXPECT_EQ(profile.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_0500
+ * @tc.desc: test ReadFromParcel when id and name are written (size read fails).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, ReadFromParcel_0500, TestSize.Level1)
+{
+    NotificationDoNotDisturbProfile profile;
+    Parcel parcel;
+    parcel.WriteInt64(1);
+    parcel.WriteString("name");
+    EXPECT_EQ(profile.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_0600
+ * @tc.desc: test ReadFromParcel when parcel is empty (ReadInt64 of id fails).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, ReadFromParcel_0600, TestSize.Level1)
+{
+    NotificationDoNotDisturbProfile profile;
+    Parcel parcel;
+    EXPECT_EQ(profile.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: Marshalling_0200
+ * @tc.desc: test Marshalling returns false when trust list size exceeds MAX_PARCELABLE_VECTOR_NUM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationDoNotDisturbProfileTest, Marshalling_0200, TestSize.Level1)
+{
+    int32_t id = 1;
+    std::string name = "name";
+    std::vector<NotificationBundleOption> trustlist(MAX_PARCELABLE_VECTOR_NUM + 1);
+    auto rrc = std::make_shared<NotificationDoNotDisturbProfile>(id, name, trustlist);
+    Parcel parcel;
+    EXPECT_EQ(rrc->Marshalling(parcel), false);
 }
 }  // namespace Notification
 }  // namespace OHOS

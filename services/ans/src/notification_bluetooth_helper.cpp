@@ -99,7 +99,12 @@ bool NotificationBluetoothHelper::CheckHfpState(const std::string &bluetoothAddr
 {
     OHOS::Bluetooth::BluetoothRemoteDevice remoteDevice(bluetoothAddress, OHOS::Bluetooth::BT_TRANSPORT_NONE);
     int32_t btConnectState = static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED);
-    int32_t ret = OHOS::Bluetooth::HandsFreeAudioGateway::GetProfile()->GetDeviceState(remoteDevice, btConnectState);
+    auto profile = OHOS::Bluetooth::HandsFreeAudioGateway::GetProfile();
+    if (profile == nullptr) {
+        ANS_LOGE("Failed to get HandsFreeAudioGateway profile.");
+        return false;
+    }
+    int32_t ret = profile->GetDeviceState(remoteDevice, btConnectState);
     ANS_LOGI("Bluetooth HFP device: %{public}s, connect state: %{public}d", StringAnonymous(bluetoothAddress).c_str(),
         btConnectState);
     return ret == ERR_OK && btConnectState == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED);

@@ -27,7 +27,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ipc_skeleton.h"
 #include "tokenid_kit.h"
 #include "accesstoken_kit.h"
@@ -264,12 +263,21 @@ napi_value GetBadgeQueryCallBackInfo(const napi_env &env, const napi_value &valu
         Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
         return nullptr;
     }
-    napi_create_reference(env, value, 1, &(badgeQueryCallbackInfo->ref));
+    if (napi_create_reference(env, value, 1, &(badgeQueryCallbackInfo->ref)) != napi_ok) {
+        ANS_LOGE("Failed to create reference");
+        return nullptr;
+    }
     napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "tsfn", NAPI_AUTO_LENGTH, &resourceName);
+    if (napi_create_string_latin1(env, "tsfn", NAPI_AUTO_LENGTH, &resourceName) != napi_ok) {
+        ANS_LOGE("Failed to create string");
+        return nullptr;
+    }
     napi_threadsafe_function tsfn = nullptr;
-    napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, nullptr, nullptr,
-        nullptr, ThreadSafeBadgeQuery, &tsfn);
+    if (napi_create_threadsafe_function(env, nullptr, nullptr, resourceName, 0, 1, nullptr, nullptr,
+        nullptr, ThreadSafeBadgeQuery, &tsfn) != napi_ok) {
+        ANS_LOGE("Failed to create threadsafe function");
+        return nullptr;
+    }
     {
         std::lock_guard<ffrt::mutex> lock(badgeQueryCallbackInfo->tsfnMutex_);
         badgeQueryCallbackInfo->SetThreadSafeFunction(tsfn);
@@ -288,6 +296,11 @@ bool AddBadgeQueryCallBackInfo(const napi_env &env, const int32_t &userId,
         return false;
     }
     std::lock_guard<ffrt::mutex> lock(badgeQueryCallbackInfoMutex_);
+    auto it = badgeQueryCallbackInfos_.find(userId);
+    if (it != badgeQueryCallbackInfos_.end() && it->second != nullptr &&
+        it->second != badgeQueryCallbackInfo) {
+        it->second->RemoveEnvCleanupHook();
+    }
     badgeQueryCallbackInfos_.insert_or_assign(userId, badgeQueryCallbackInfo);
 
     return true;
@@ -402,7 +415,7 @@ napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackBadgeNumberQuery *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->RegisterBadgeQueryCallback(
+                    AnsNotification::GetInstance()->RegisterBadgeQueryCallback(
                         asynccallbackinfo->objectInfo);
             }
         },
@@ -456,6 +469,7 @@ void AsyncCompleteCallbackNapiOffBadgeNumberQuery(napi_env env, napi_status stat
             napi_delete_reference(env, asynccallbackinfo->objectInfo->ref);
             asynccallbackinfo->objectInfo->ref = nullptr;
         }
+        asynccallbackinfo->objectInfo->RemoveEnvCleanupHook();
         asynccallbackinfo->objectInfo->SetEnv(nullptr);
     }
 
@@ -511,7 +525,7 @@ napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackOffBadgeNumberQuery *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->UnRegisterBadgeQueryCallback(
+                    AnsNotification::GetInstance()->UnRegisterBadgeQueryCallback(
                         asynccallbackinfo->objectInfo);
             }
         },
@@ -571,9 +585,14 @@ void JSBadgeQueryCallBack::ClearEnv()
         napi_delete_reference(env_, ref);
         ref = nullptr;
     }
+    RemoveEnvCleanupHook();
+    env_ = nullptr;
+}
+
+void JSBadgeQueryCallBack::RemoveEnvCleanupHook()
+{
     if (env_ != nullptr) {
         napi_remove_env_cleanup_hook(env_, ClearEnvCallback, this);
-        env_ = nullptr;
     }
 }
 

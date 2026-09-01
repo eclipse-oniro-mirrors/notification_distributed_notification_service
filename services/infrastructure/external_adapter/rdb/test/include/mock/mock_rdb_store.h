@@ -44,6 +44,21 @@ public:
         (void)version;
         return 0;
     }
+
+    int BeginTransaction() override
+    {
+        return 0;
+    }
+
+    int Commit() override
+    {
+        return 0;
+    }
+
+    int RollBack() override
+    {
+        return 0;
+    }
 };
 
 void SetMockQuerySqlResults(const std::vector<MockRdbStore::AbsSharedResultSetPtr> &results);

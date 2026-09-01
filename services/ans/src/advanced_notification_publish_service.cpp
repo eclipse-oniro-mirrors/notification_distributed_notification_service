@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "singleton.h"
 
 #include <functional>
 #include <iomanip>
@@ -29,7 +30,6 @@
 
 #include "ipc_skeleton.h"
 #include "notification_bundle_option.h"
-#include "notification_constant.h"
 #include "notification_unified_group_Info.h"
 #include "os_account_manager.h"
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
@@ -397,6 +397,11 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbModeInner(
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("IsNeedSilentInDoNotDisturbMode CheckPermission failed.");
         return ERR_ANS_INNER_PERMISSION_DENIED;
+    }
+
+    if (phoneNumber.empty()) {
+        ANS_LOGE("empty phoneNumber");
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     return CheckNeedSilent(phoneNumber, callerType, userId);
@@ -1072,7 +1077,12 @@ void AdvancedNotificationService::SetDialogPoppedUnEnableTime(const sptr<Notific
 {
     ANS_LOGD("SetDialogPoppedRefuseTime called.");
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
+        userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, bundleOption->GetUid());
+        return;
+    }
     EXTENTION_WRAPPER->SetDialogOpenSuccessTimeStamp(bundleOption, userId);
     ANS_LOGD("SetDialogPoppedRefuseTime end.");
 }
@@ -1394,78 +1404,70 @@ void AdvancedNotificationService::PublishSubscriberExistFlagEvent(bool headsetEx
     }
 }
 
-ErrCode AdvancedNotificationService::RemoveAllNotificationsByBundleName(
+void AdvancedNotificationService::ExcuteRemoveAllNotificationsByBundleName(
     const std::string &bundleName, int32_t reason, int32_t userId)
 {
-    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-
     if (bundleName.empty()) {
         std::string message = "bundle name is empty.";
         OHOS::Notification::HaMetaMessage haMetaMessage = HaMetaMessage(8, 1).ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE);
         ReportDeleteFailedEventPush(haMetaMessage, reason, message);
         ANS_LOGE("%{public}s", message.c_str());
-        return ERR_ANS_INNER_INVALID_BUNDLE;
+        return;
     }
 
-    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
-        std::vector<std::shared_ptr<NotificationRecord>> removeList;
-        ANS_LOGD("ffrt enter!");
-        RemoveAllNotificationsByBundleNameFromTriggerNotificationList(bundleName);
-        for (auto record : notificationList_) {
-            if (record == nullptr) {
-                ANS_LOGE("record is nullptr");
+    std::vector<std::shared_ptr<NotificationRecord>> removeList;
+    RemoveAllNotificationsByBundleNameFromTriggerNotificationList(bundleName);
+    for (auto record : notificationList_) {
+        if (record == nullptr) {
+            ANS_LOGE("record is nullptr");
+            continue;
+        }
+        if (userId != -1) {
+            int32_t bundleUserId = -1;
+            auto ret = OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
+                record->bundleOption->GetUid(), bundleUserId);
+            if ((ret != ERR_OK || bundleUserId != userId) && record->request->GetReceiverUserId() != userId) {
                 continue;
             }
-            if (userId != -1) {
-                int32_t bundleUserId = -1;
-                auto ret = OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
-                    record->bundleOption->GetUid(), bundleUserId);
-                if ((ret != ERR_OK || bundleUserId != userId) && record->request->GetReceiverUserId() != userId) {
-                    continue;
-                }
-            }
-            if ((record->bundleOption->GetBundleName() == bundleName)
+        }
+        if ((record->bundleOption->GetBundleName() == bundleName)
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-                && record->deviceId.empty()
+            && record->deviceId.empty()
 #endif
-            ) {
-                ProcForDeleteNotificationFromDb(record);
-                removeList.push_back(record);
-            }
+        ) {
+            ProcForDeleteNotificationFromDb(record);
+            removeList.push_back(record);
         }
-        std::vector<sptr<Notification>> notifications;
-        std::vector<uint64_t> timerIds;
-        for (auto record : removeList) {
-            if (record == nullptr) {
-                ANS_LOGE("record is nullptr");
-                continue;
-            }
-            NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
-            notificationList_.remove(record);
-            if (record->notification != nullptr) {
-                ANS_LOGD("record->notification is not nullptr.");
-                UpdateRecentNotification(record->notification, true, reason);
-                notifications.emplace_back(record->notification);
-                timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
+    }
+    std::vector<sptr<Notification>> notifications;
+    std::vector<uint64_t> timerIds;
+    for (auto record : removeList) {
+        if (record == nullptr) {
+            ANS_LOGE("record is nullptr");
+            continue;
+        }
+        NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+        notificationList_.remove(record);
+        if (record->notification != nullptr) {
+            ANS_LOGD("record->notification is not nullptr.");
+            UpdateRecentNotification(record->notification, true, reason);
+            notifications.emplace_back(record->notification);
+            timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-                DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
+            DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
-            }
-            if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
-                SendNotificationsOnCanceled(notifications, nullptr, reason);
-            }
-
-            TriggerRemoveWantAgent(record->request, reason, record->isThirdparty);
+        }
+        if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+            SendNotificationsOnCanceled(notifications, nullptr, reason);
         }
 
-        if (!notifications.empty()) {
-            NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, reason);
-        }
-        BatchCancelTimer(timerIds);
-    }));
-    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove all notifications by bundle.");
+        TriggerRemoveWantAgent(record->request, reason, record->isThirdparty);
+    }
 
-    return ERR_OK;
+    if (!notifications.empty()) {
+        NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, reason);
+    }
+    BatchCancelTimer(timerIds);
 }
 
 ErrCode AdvancedNotificationService::SetHashCodeRuleInner(const uint32_t type, const int32_t userId)

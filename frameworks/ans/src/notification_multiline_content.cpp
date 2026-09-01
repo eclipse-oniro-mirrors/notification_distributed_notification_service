@@ -244,6 +244,10 @@ bool NotificationMultiLineContent::ReadFromParcel(Parcel &parcel)
     for (std::uint8_t i = 0; i < lineWantAgentsLength; i++) {
         auto wantAgent = std::shared_ptr<AbilityRuntime::WantAgent::WantAgent>(
             parcel.ReadParcelable<AbilityRuntime::WantAgent::WantAgent>());
+        if (wantAgent == nullptr) {
+            ANS_LOGE("Failed to read wantAgent, index is %{public}u", i);
+            return false;
+        }
         lineWantAgents_.push_back(wantAgent);
     }
 

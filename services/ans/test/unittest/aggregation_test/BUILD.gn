@@ -37,6 +37,10 @@ ohos_unittest("advanced_notification_aggregation_test") {
     "${services_path}/ans/include/aggregation_notification",
     "${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
   version_script = "../libans_test.map"
 
@@ -60,10 +64,13 @@ ohos_unittest("advanced_notification_aggregation_test") {
   if (distributed_notification_service_feature_aggregation_notification) {
     defines += [ "ANS_FEATURE_AGGREGATION_NOTIFICATION" ]
   }
+  if (distributed_notification_service_feature_priority_notification) {
+    defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
+  }
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 

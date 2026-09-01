@@ -167,12 +167,22 @@ NotificationTrigger *NotificationTrigger::FromJson(const nlohmann::json &jsonObj
 
     if (jsonObject.find(TRIGGER_TYPE) != jsonEnd && jsonObject.at(TRIGGER_TYPE).is_number_integer()) {
         auto triggerType  = jsonObject.at(TRIGGER_TYPE).get<int32_t>();
-        pNotificationTrigger->type_ = static_cast<NotificationConstant::TriggerType>(triggerType);
+        if (triggerType < static_cast<int32_t>(NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE) ||
+            triggerType > static_cast<int32_t>(NotificationConstant::TriggerType::TRIGGER_TYPE_FENCE)) {
+            ANS_LOGE("invalid TriggerType: %{public}d", triggerType);
+        } else {
+            pNotificationTrigger->type_ = static_cast<NotificationConstant::TriggerType>(triggerType);
+        }
     }
 
     if (jsonObject.find(TRIGGER_CONFIG_PATH) != jsonEnd && jsonObject.at(TRIGGER_CONFIG_PATH).is_number_integer()) {
         auto configPath  = jsonObject.at(TRIGGER_CONFIG_PATH).get<int32_t>();
-        pNotificationTrigger->configPath_ = static_cast<NotificationConstant::ConfigPath>(configPath);
+        if (configPath < static_cast<int32_t>(NotificationConstant::ConfigPath::CONFIG_PATH_DEVICE_CONFIG) ||
+            configPath > static_cast<int32_t>(NotificationConstant::ConfigPath::CONFIG_PATH_CLOUD_CONFIG)) {
+            ANS_LOGE("invalid ConfigPath: %{public}d", configPath);
+        } else {
+            pNotificationTrigger->configPath_ = static_cast<NotificationConstant::ConfigPath>(configPath);
+        }
     }
 
     if (!ConvertJsonToNotificationGeofence(pNotificationTrigger, jsonObject)) {

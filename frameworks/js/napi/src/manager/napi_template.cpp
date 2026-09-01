@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_template.h"
 
 namespace OHOS {
@@ -53,7 +52,7 @@ napi_value NapiIsSupportTemplate(napi_env env, napi_callback_info info)
 
             if (asyncCallbackinfo) {
                 asyncCallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsSupportTemplate(
+                    AnsNotification::GetInstance()->IsSupportTemplate(
                         asyncCallbackinfo->params.templateName, asyncCallbackinfo->params.support);
             }
         },

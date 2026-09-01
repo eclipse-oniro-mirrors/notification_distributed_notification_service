@@ -14,6 +14,7 @@
  */
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 #include "reminder_swing_decision_center.h"
+#include "singleton.h"
 #include "notification_preferences.h"
 #include "smart_reminder_center.h"
 #include "reminder_affected.h"

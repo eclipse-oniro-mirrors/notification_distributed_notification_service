@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "singleton.h"
 #include "ans_service_errors.h"
 
 #include "ans_log_wrapper.h"
@@ -356,7 +357,12 @@ ErrCode AdvancedNotificationService::QueryNotificationParameters(
     ANS_LOGD("called");
 
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
+        userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, bundleOption->GetUid());
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+    }
     auto record = GetRecordFromNotificationList(
         notificationId, bundleOption->GetUid(), label, bundleOption->GetBundleName(), userId);
     if (record == nullptr || record->request == nullptr) {

@@ -14,6 +14,7 @@
  */
 
 #include "distributed_bundle_service.h"
+#include "singleton.h"
 
 #include "bundle_icon_box.h"
 #include "analytics_util.h"

@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "get_active.h"
 #include "napi_common_util.h"
 #include "napi_common_want.h"
@@ -108,7 +107,7 @@ napi_value NapiGetAllActiveNotifications(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetAllActiveNotifications(
+                    AnsNotification::GetInstance()->GetAllActiveNotifications(
                         asynccallbackinfo->notifications);
             }
         },
@@ -232,7 +231,7 @@ napi_value NapiGetActiveNotifications(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotifications(
+                    AnsNotification::GetInstance()->GetActiveNotifications(
                         asynccallbackinfo->requests, instanceKey);
             }
         },
@@ -330,7 +329,7 @@ napi_value NapiGetActiveNotificationCount(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncCallbackInfoActive *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationNums(
+                    AnsNotification::GetInstance()->GetActiveNotificationNums(
                         asynccallbackinfo->num);
                 ANS_LOGD("getActiveNotificationCount count=%{public}" PRIu64 "", asynccallbackinfo->num);
             }
@@ -461,7 +460,7 @@ void AsyncGetLiveViewExecute(napi_env env, void *data)
     auto asyncLiveViewCallBackInfo = static_cast<AsyncLiveViewCallBackInfo *>(data);
     if (asyncLiveViewCallBackInfo) {
         asyncLiveViewCallBackInfo->info.errorCode =
-            DelayedSingleton<AnsNotification>::GetInstance()->GetActiveNotificationByFilter(
+            AnsNotification::GetInstance()->GetActiveNotificationByFilter(
                 asyncLiveViewCallBackInfo->filter, asyncLiveViewCallBackInfo->notificationRequest);
     }
 }
@@ -675,7 +674,7 @@ napi_value NapiGetActiveNotification(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = static_cast<AsyncGetActiveNotificationInfo *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationRequestByHashCode(
+                    AnsNotification::GetInstance()->GetNotificationRequestByHashCode(
                         asynccallbackinfo->hashCode, asynccallbackinfo->notificationRequest);
             }
         },

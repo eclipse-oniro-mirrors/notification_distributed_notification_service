@@ -15,7 +15,6 @@
 #include "ani_publish.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_bundle_option.h"
 #include "sts_throw_erro.h"
@@ -116,7 +115,7 @@ void ExecutePublishWork(ani_env* env, void* data)
     auto asyncCallbackInfo = static_cast<AsyncCallbackPublishInfo*>(data);
     if (asyncCallbackInfo) {
         asyncCallbackInfo->info.returnCode =
-            DelayedSingleton<AnsNotification>::GetInstance()->PublishNotification(
+            AnsNotification::GetInstance()->PublishNotification(
                 *(asyncCallbackInfo->notificationRequest));
     }
 }
@@ -238,6 +237,7 @@ ani_object AniPublishAsBundle(ani_env *env, ani_object request, ani_string repre
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    bundleStr = NotificationSts::GetResizeStr(bundleStr, NotificationSts::STR_MAX_SIZE);
     asyncCallbackInfo->notificationRequest->SetOwnerUserId(userId);
     asyncCallbackInfo->notificationRequest->SetOwnerBundleName(bundleStr);
     asyncCallbackInfo->notificationRequest->SetIsAgentNotification(true);

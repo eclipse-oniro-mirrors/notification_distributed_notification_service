@@ -32,16 +32,16 @@ void NapiRemoveExecuteCallback(napi_env env, void *data)
     if (removeInfo) {
         if (!removeInfo->params.hashcodes.empty()) {
             removeInfo->info.errorCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotifications(
+                AnsNotification::GetInstance()->RemoveNotifications(
                     removeInfo->params.hashcodes, removeInfo->params.removeReason);
         } else if (removeInfo->params.hashcode.has_value()) {
             removeInfo->info.errorCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotification(
+                AnsNotification::GetInstance()->RemoveNotification(
                     removeInfo->params.hashcode.value(), removeInfo->params.removeReason);
         } else if (removeInfo->params.bundleAndKeyInfo.has_value()) {
             auto &infos = removeInfo->params.bundleAndKeyInfo.value();
             removeInfo->info.errorCode =
-                DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotification(
+                AnsNotification::GetInstance()->RemoveNotification(
                     infos.option, infos.key.id, infos.key.label, removeInfo->params.removeReason);
         }
     }
@@ -151,14 +151,14 @@ napi_value NapiRemoveAll(napi_env env, napi_callback_info info)
                 if (asynccallbackinfo->params.bundleAndKeyInfo.has_value()) {
                     auto &infos = asynccallbackinfo->params.bundleAndKeyInfo.value();
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->RemoveAllNotifications(infos.option);
+                        AnsNotification::GetInstance()->RemoveAllNotifications(infos.option);
                 } else if (asynccallbackinfo->params.hasUserId) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotifications(
+                        AnsNotification::GetInstance()->RemoveNotifications(
                             asynccallbackinfo->params.userId);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotifications();
+                        AnsNotification::GetInstance()->RemoveNotifications();
                 }
             }
         },

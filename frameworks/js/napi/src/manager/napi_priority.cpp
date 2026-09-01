@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "priority.h"
 
 namespace OHOS {
@@ -79,7 +78,7 @@ napi_value NapiSetPriorityEnabled(napi_env env, napi_callback_info info)
             AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetPriorityEnabled(
+                    AnsNotification::GetInstance()->SetPriorityEnabled(
                         asynccallbackinfo->enable);
                 ANS_LOGD("errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -132,7 +131,7 @@ napi_value NapiSetPriorityEnabledByBundle(napi_env env, napi_callback_info info)
             AsyncCallbackInfoEnabledByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabledByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     SetPriorityEnabledByBundle(asynccallbackinfo->option, asynccallbackinfo->enableStatus);
                 ANS_LOGD("errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -219,7 +218,7 @@ napi_value NapiIsPriorityEnabled(napi_env env, napi_callback_info info)
 
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     IsPriorityEnabled(asynccallbackinfo->enable);
                 ANS_LOGI("IsPriorityEnabled enable=%{public}d", asynccallbackinfo->enable);
             }
@@ -303,7 +302,7 @@ napi_value NapiIsPriorityEnabledByBundle(napi_env env, napi_callback_info info)
 
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     IsPriorityEnabledByBundle(asynccallbackinfo->option, asynccallbackinfo->enableStatus);
             }
         }, AsyncCompleteCallbackNapiIsPriorityEnabledByBundle,
@@ -356,7 +355,7 @@ napi_value NapiSetBundlePriorityConfig(napi_env env, napi_callback_info info)
             AsyncCallbackInfoConfigByBundle *asynccallbackinfo = static_cast<AsyncCallbackInfoConfigByBundle *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     SetBundlePriorityConfig(asynccallbackinfo->option, asynccallbackinfo->configValue);
                 ANS_LOGD("NapiSetBundlePriorityConfig errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -453,7 +452,7 @@ napi_value NapiGetBundlePriorityConfig(napi_env env, napi_callback_info info)
 
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     GetBundlePriorityConfig(asynccallbackinfo->option, asynccallbackinfo->configValue);
             }
         }, AsyncCompleteCallbackNapiGetBundlePriorityConfig,
@@ -599,7 +598,7 @@ napi_value NapiGetPriorityEnabledByBundles(napi_env env, napi_callback_info info
                 static_cast<AsyncCallbackInfoPriorityEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     GetPriorityEnabledByBundles(asynccallbackinfo->bundles, asynccallbackinfo->priorityEnable);
             }
         },
@@ -755,7 +754,7 @@ napi_value NapiSetPriorityEnabledByBundles(napi_env env, napi_callback_info info
             AsyncCallbackInfoPriorityEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoPriorityEnabled *>(data);
             if (asynccallbackinfo != nullptr) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     SetPriorityEnabledByBundles(asynccallbackinfo->priorityEnable);
             }
         },
@@ -815,7 +814,7 @@ napi_value NapiIsPriorityIntelligentEnabled(napi_env env, napi_callback_info inf
 
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     IsPriorityIntelligentEnabled(asynccallbackinfo->enable);
                 ANS_LOGI("IsPriorityIntelligentEnabled enable=%{public}d", asynccallbackinfo->enable);
             }
@@ -866,7 +865,7 @@ napi_value NapiSetPriorityIntelligentEnabled(napi_env env, napi_callback_info in
             AsyncCallbackInfoEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     SetPriorityIntelligentEnabled(asynccallbackinfo->enable);
                 ANS_LOGI("SetPriorityIntelligentEnabled errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -957,7 +956,7 @@ napi_value NapiGetPriorityStrategyByBundles(napi_env env, napi_callback_info inf
                 static_cast<AsyncCallbackInfoPriorityEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     GetPriorityStrategyByBundles(asynccallbackinfo->bundles, asynccallbackinfo->priorityStrategy);
                 ANS_LOGI("prioStrategyCb ret=%{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -1009,7 +1008,7 @@ napi_value NapiSetPriorityStrategyByBundles(napi_env env, napi_callback_info inf
             AsyncCallbackInfoPriorityEnabled *asynccallbackinfo = static_cast<AsyncCallbackInfoPriorityEnabled *>(data);
             if (asynccallbackinfo != nullptr) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->
+                    AnsNotification::GetInstance()->
                     SetPriorityStrategyByBundles(asynccallbackinfo->priorityStrategy);
                 ANS_LOGI("SetPriorityStrategyByBundles errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }

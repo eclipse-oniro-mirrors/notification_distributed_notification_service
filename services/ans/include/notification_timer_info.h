@@ -24,7 +24,7 @@ namespace OHOS {
 namespace Notification {
 class NotificationTimerInfo : public MiscServices::ITimerInfo {
 public:
-    NotificationTimerInfo() {};
+    explicit NotificationTimerInfo(wptr<AdvancedNotificationService> service = nullptr) : service_(service) {};
     virtual ~NotificationTimerInfo() {};
     /**
      * When timing is up, this function will execute as call back.
@@ -54,9 +54,11 @@ public:
     void SetCallbackInfo(const std::function<void()> &callBack);
 
     std::function<void()> GetCallBack();
+
 private:
     std::function<void()> callBack_ = nullptr;
     ffrt::mutex callBackMutex_;
+    wptr<AdvancedNotificationService> service_ = nullptr;
 };
 } // namespace OHOS
 } // namespace Notification

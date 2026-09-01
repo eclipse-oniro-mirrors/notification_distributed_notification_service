@@ -754,7 +754,10 @@ void GetNotificationTemplate(ani_env *env, ani_object obj,
     status = GetPropertyRef(env, obj, "template", isUndefind, templateRef);
     if (status == ANI_OK && isUndefind == ANI_FALSE) {
         OHOS::Notification::NotificationTemplate tmplate;
-        UnwrapNotificationTemplate(env, static_cast<ani_object>(templateRef), tmplate);
+        if (UnwrapNotificationTemplate(env, static_cast<ani_object>(templateRef), tmplate) != ANI_OK) {
+            ANS_LOGE("UnwrapNotificationTemplate failed");
+            return;
+        }
         request->SetTemplate(std::make_shared<OHOS::Notification::NotificationTemplate>(tmplate));
     }
 }

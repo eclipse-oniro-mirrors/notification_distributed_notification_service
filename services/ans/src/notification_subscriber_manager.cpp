@@ -14,6 +14,7 @@
  */
 
 #include "notification_subscriber_manager.h"
+#include "singleton.h"
 
 #include <algorithm>
 #include <memory>
@@ -34,7 +35,6 @@
 #include "voice_extension_wrapper.h"
 #include "notification_ai_extension_wrapper.h"
 #include "notification_classification_mgr.h"
-#include "notification_constant.h"
 #include "notification_config_parse.h"
 #include "notification_extension_wrapper.h"
 #include "voice_content_option.h"
@@ -71,6 +71,8 @@ NotificationSubscriberManager::NotificationSubscriberManager()
 NotificationSubscriberManager::~NotificationSubscriberManager()
 {
     ANS_LOGD("called");
+    ResetFfrtQueue();
+    std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
     subscriberRecordList_.clear();
 }
 
@@ -720,8 +722,13 @@ ErrCode NotificationSubscriberManager::AddSubscriberInner(
             std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
             subscriberRecordList_.push_back(record);
         }
-        if (subscribeInfo->GetNeedSilentReplayOnSubscribe() && onSubscriberAddCallback_ != nullptr) {
-            onSubscriberAddCallback_(record);
+        std::function<void(const std::shared_ptr<SubscriberRecord> &)> onSubscriberAddCallback = nullptr;
+        {
+            std::lock_guard<ffrt::mutex> lock(onSubscriberAddCallbackMutex_);
+            onSubscriberAddCallback = onSubscriberAddCallback_;
+        }
+        if (subscribeInfo->GetNeedSilentReplayOnSubscribe() && onSubscriberAddCallback != nullptr) {
+            onSubscriberAddCallback(record);
         }
         if (subscribeInfo->GetSubscribedFlags() &
             NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABL_WATCH_CHANGED) {
@@ -1080,9 +1087,11 @@ void NotificationSubscriberManager::NotifyCanceledInner(
     }
 
     if (IsSystemUser(notification->GetUserId())) {
-        if ((notification->GetNotificationRequestPoint()->GetWantAgent() != nullptr) ||
-            (notification->GetNotificationRequestPoint()->GetRemovalWantAgent() != nullptr) ||
-            (notification->GetNotificationRequestPoint()->GetMaxScreenWantAgent() != nullptr)) {
+        auto canceledRequest = notification->GetNotificationRequestPoint();
+        if (canceledRequest != nullptr &&
+            ((canceledRequest->GetWantAgent() != nullptr) ||
+            (canceledRequest->GetRemovalWantAgent() != nullptr) ||
+            (canceledRequest->GetMaxScreenWantAgent() != nullptr))) {
                 HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_11, EventBranchId::BRANCH_0);
                 message.Message("User 0 ntf:" + notification->GetKey());
                 NotificationAnalyticsUtil::ReportModifyEvent(message);
@@ -1132,9 +1141,14 @@ void NotificationSubscriberManager::NotifyConsumedSubscribers(
 bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
 {
-    auto soltType = notification->GetNotificationRequestPoint()->GetSlotType();
+    auto request = notification->GetNotificationRequestPoint();
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return false;
+    }
+    auto soltType = request->GetSlotType();
     auto bundleNames = notification->GetBundleName();
-    auto uid = notification->GetNotificationRequestPoint()->GetOwnerUid();
+    auto uid = request->GetOwnerUid();
 #ifdef ENABLE_ANS_ADDITIONAL_CONTROL
     if (!record->isSubscribeSelf &&
         EXTENTION_WRAPPER->IsSubscribeControl(record->subscriberBundleName_, soltType)) {
@@ -1146,7 +1160,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     auto iterUid = std::find(record->uidList_.begin(), record->uidList_.end(), uid);
     bool isSubscribedTheNotification =
         record->subscribedAll || (iter != record->bundleList_.end()) || (iterUid != record->uidList_.end()) ||
-        (notification->GetNotificationRequestPoint()->GetCreatorUid() == record->subscriberUid);
+        (request->GetCreatorUid() == record->subscriberUid);
     if (!isSubscribedTheNotification) {
         return false;
     }
@@ -1160,7 +1174,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
         return true;
     }
 
-    int32_t recvUserId = notification->GetNotificationRequestPoint()->GetReceiverUserId();
+    int32_t recvUserId = request->GetReceiverUserId();
     int32_t sendUserId = notification->GetUserId();
     if (record->userId == recvUserId) {
         return true;
@@ -1220,6 +1234,10 @@ sptr<Notification> NotificationSubscriberManager::GenerateSubscribedNotification
             NotificationConstant::PriorityNotificationType::OTHER);
     }
 #endif
+    if (notificationStub == nullptr) {
+        ANS_LOGE("null notificationStub");
+        return nullptr;
+    }
     if (!voiceContent.empty()) {
         auto content = std::make_shared<NotificationVoiceContent>();
         if (content != nullptr) {
@@ -1386,6 +1404,9 @@ void NotificationSubscriberManager::ClearLiveViewContent(sptr<Notification> &not
         return;
     }
     auto requestContent = notification->GetNotificationRequest().GetContent();
+    if (requestContent == nullptr) {
+        return;
+    }
     if (notification->GetNotificationRequest().IsCommonLiveView() &&
         requestContent->GetNotificationContent() != nullptr) {
         auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
@@ -1412,6 +1433,9 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
 
     std::string notificationKeys = "";
     for (auto notification : notifications) {
+        if (notification == nullptr) {
+            continue;
+        }
         notificationKeys.append(notification->GetKey()).append("-");
         if (notification->GetNotificationRequestPoint() != nullptr) {
             bool liveView = notification->GetNotificationRequestPoint()->IsCommonLiveView();
@@ -1458,7 +1482,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         if (!currNotifications.empty()) {
             ANS_LOGD("onCanceledList currNotifications size = <%{public}zu>", currNotifications.size());
             if (record->subscriber == nullptr) {
-                return;
+                continue;
             }
             if (notificationMap != nullptr) {
                 record->subscriber->OnCanceledList(currNotifications, notificationMap, deleteReason);
@@ -1467,7 +1491,6 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
             }
         }
     }
-
     RemoveConsumedHashCodes(notifications);
 }
 
@@ -1596,7 +1619,10 @@ void NotificationSubscriberManager::NotifyBadgeEnabledChangedInner(
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
     int32_t uid = callbackData->GetUid();
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
+        return;
+    }
     NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGEENABLE_CHANGED,
         &IAnsSubscriber::OnBadgeEnabledChanged, callbackData);
 }
@@ -1614,7 +1640,12 @@ void NotificationSubscriberManager::NotifyEnabledNotificationChangedInner(
         return;
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(callbackData->GetUid(), userId) != ERR_OK ||
+        userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, callbackData->GetUid());
+        return;
+    }
     std::string bundle = callbackData->GetBundle();
     NotifySubscribers(userId, bundle, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLENOTIFICATION_CHANGED,
         &IAnsSubscriber::OnEnabledNotificationChanged, callbackData);
@@ -1629,7 +1660,10 @@ void NotificationSubscriberManager::NotifyEnabledSilentReminderChangedInner(
     }
     int32_t userId = SUBSCRIBE_USER_INIT;
     int32_t uid = callbackData->GetUid();
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
+        return;
+    }
     NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_ENABLEDSILENTREMINDER_CHANGED,
         &IAnsSubscriber::OnEnabledSilentReminderChanged, callbackData);
 }
@@ -1712,7 +1746,11 @@ void NotificationSubscriberManager::SetBadgeNumber(const sptr<BadgeNumberCallbac
     std::function<void()> setBadgeNumberFunc = [this, badgeData] () {
         int32_t userId = SUBSCRIBE_USER_INIT;
         int32_t uid = badgeData->GetUid();
-        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId);
+        if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK ||
+            userId < 0) {
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
+            return;
+        }
         NotifySubscribers(userId, uid, NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_BADGE_CHANGED,
             &IAnsSubscriber::OnBadgeChanged, badgeData);
         NotificationAnalyticsUtil::ReportBadgeChange(badgeData);
@@ -1728,11 +1766,13 @@ void NotificationSubscriberManager::RegisterOnSubscriberAddCallback(
         return;
     }
 
+    std::lock_guard<ffrt::mutex> lock(onSubscriberAddCallbackMutex_);
     onSubscriberAddCallback_ = callback;
 }
 
 void NotificationSubscriberManager::UnRegisterOnSubscriberAddCallback()
 {
+    std::lock_guard<ffrt::mutex> lock(onSubscriberAddCallbackMutex_);
     onSubscriberAddCallback_ = nullptr;
 }
 
@@ -1771,6 +1811,7 @@ void NotificationSubscriberManager::NotifyApplicationInfochangedInner(
 using SubscriberRecordPtr = std::shared_ptr<NotificationSubscriberManager::SubscriberRecord>;
 std::list<SubscriberRecordPtr> NotificationSubscriberManager::GetSubscriberRecords()
 {
+    std::lock_guard<ffrt::mutex> lock(subscriberRecordListMutex_);
     return subscriberRecordList_;
 }
 

@@ -45,6 +45,7 @@ const std::string PROGRESS_VALUE = "progressValue";
 constexpr int32_t BGTASK_UID = 1096;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr int32_t MAX_RESTART_ATTEMPTS = 2;
+constexpr size_t MAX_JSON_SIZE = 1024 * 1024;
 const std::string RECOVER_FAIL_COUNT_KEY = "ans_recover_fail_count";
 
 namespace {
@@ -228,7 +229,7 @@ void AdvancedNotificationService::ProcessRecoveryEntry(const std::vector<Notific
             return;
         }
     }
-    if (AssignToNotificationList(record) != ERR_OK) {
+    if (AssignToNotificationList(record, true) != ERR_OK) {
         ANS_LOGE("Add notification to record list failed.");
         DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
             requestObj.request->GetSecureKey(), requestObj.request->GetReceiverUserId());
@@ -559,8 +560,12 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
     }
 
     std::string encryptValue;
-    ErrCode errorCode = AesGcmHelper::Encrypt(
-        jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), encryptValue);
+    std::string jsonStr = jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+    if (jsonStr.size() > MAX_JSON_SIZE) {
+        ANS_LOGE("json data too large: %{public}zu", jsonStr.size());
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    ErrCode errorCode = AesGcmHelper::Encrypt(jsonStr, encryptValue);
     if (errorCode != ERR_OK) {
         ANS_LOGE("SetNotificationRequestToDb encrypt error");
         return static_cast<int>(errorCode);
@@ -928,7 +933,7 @@ uint64_t AdvancedNotificationService::StartDelayPublishTimer(
             sThis->StartPublishDelayedNotificationTimeOut(ownerUid, notificationId);
         }
     };
-    std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>();
+    std::shared_ptr<NotificationTimerInfo> notificationTimerInfo = std::make_shared<NotificationTimerInfo>(wThis);
     notificationTimerInfo->SetCallbackInfo(timeoutFunc);
 
     sptr<MiscServices::TimeServiceClient> timer = MiscServices::TimeServiceClient::GetInstance();
@@ -1068,6 +1073,11 @@ AnsStatus AdvancedNotificationService::UpdateRecordByOwner(
     if (isSystemApp) {
         record->request->SetContent(content);
     } else {
+        if (downloadTemplate == nullptr) {
+            ANS_LOGE("downloadTemplate is null.");
+            StartFinishTimerForUpdate(record, process);
+            return AnsStatus();
+        }
         record->request->SetTemplate(downloadTemplate);
         auto data = downloadTemplate->GetTemplateData();
         if (data != nullptr && data->HasParam(PROGRESS_VALUE)) {

@@ -18,6 +18,7 @@
 
 #define private public
 #define protected public
+#include "ans_const_define.h"
 #include "notification_subscribe_info.h"
 #include "picture_option.h"
 #include "voice_content_option.h"
@@ -902,6 +903,121 @@ HWTEST_F(NotificationSubscribeInfoTest, PriorityStrategy_Marshalling_00001, Func
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetPriorityStrategy(), 0);
     delete result;
+}
+
+/**
+ * @tc.name: ReadSlotTypesFromParcel_InvalidSlotType_001
+ * @tc.desc: Test ReadSlotTypesFromParcel returns false when slotType is out of range.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, ReadSlotTypesFromParcel_InvalidSlotType_001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    Parcel parcel;
+    parcel.WriteUint32(1);
+    parcel.WriteInt32(-1);
+    parcel.RewindRead(0);
+    EXPECT_EQ(subscribeInfo.ReadSlotTypesFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadSlotTypesFromParcel_InvalidSlotType_002
+ * @tc.desc: Test ReadSlotTypesFromParcel returns false when slotType >= ILLEGAL_TYPE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, ReadSlotTypesFromParcel_InvalidSlotType_002, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    Parcel parcel;
+    parcel.WriteUint32(1);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE));
+    parcel.RewindRead(0);
+    EXPECT_EQ(subscribeInfo.ReadSlotTypesFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_AppNamesTooLarge_001
+ * @tc.desc: Test ReadFromParcel returns false when appNames size exceeds MAX_BUNDLE_LIST_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, ReadFromParcel_AppNamesTooLarge_001, Function | SmallTest | Level1)
+{
+    std::vector<std::string> appNames(MAX_BUNDLE_LIST_SIZE + 1, "app");
+    Parcel parcel;
+    parcel.WriteStringVector(appNames);
+    parcel.RewindRead(0);
+    NotificationSubscribeInfo subscribeInfo;
+    EXPECT_EQ(subscribeInfo.ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadVoiceContentOptionFromParcel_ReadBoolFail_001
+ * @tc.desc: Test ReadVoiceContentOptionFromParcel returns false when ReadBool fails.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, ReadVoiceContentOptionFromParcel_ReadBoolFail_001,
+    Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    Parcel parcel;
+    EXPECT_EQ(subscribeInfo.ReadVoiceContentOptionFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadPictureOptionFromParcel_ReadBoolFail_001
+ * @tc.desc: Test ReadPictureOptionFromParcel returns false when ReadBool fails.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, ReadPictureOptionFromParcel_ReadBoolFail_001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    Parcel parcel;
+    EXPECT_EQ(subscribeInfo.ReadPictureOptionFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: SetSubscriberBundleName_Empty_001
+ * @tc.desc: Test SetSubscriberBundleName rejects empty string.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, SetSubscriberBundleName_Empty_001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    subscribeInfo.SetSubscriberBundleName("");
+    EXPECT_EQ(subscribeInfo.GetSubscriberBundleName(), "");
+}
+
+/**
+ * @tc.name: SetSubscriberBundleName_TooLarge_001
+ * @tc.desc: Test SetSubscriberBundleName rejects string exceeding STR_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, SetSubscriberBundleName_TooLarge_001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    std::string largeName(STR_MAX_SIZE + 1, 'a');
+    subscribeInfo.SetSubscriberBundleName(largeName);
+    EXPECT_EQ(subscribeInfo.GetSubscriberBundleName(), "");
+}
+
+/**
+ * @tc.name: SetSubscriberBundleName_Valid_001
+ * @tc.desc: Test SetSubscriberBundleName accepts valid string.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WRQ2
+ */
+HWTEST_F(NotificationSubscribeInfoTest, SetSubscriberBundleName_Valid_001, Function | SmallTest | Level1)
+{
+    NotificationSubscribeInfo subscribeInfo;
+    subscribeInfo.SetSubscriberBundleName("com.test.bundle");
+    EXPECT_EQ(subscribeInfo.GetSubscriberBundleName(), "com.test.bundle");
 }
 }
 }

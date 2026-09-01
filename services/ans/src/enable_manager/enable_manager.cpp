@@ -147,7 +147,12 @@ ErrCode AdvancedNotificationService::CommonRequestEnableNotification(const std::
         ANS_LOGW("Has popped is true.");
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         int32_t userId = -1;
-        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
+            bundleOption->GetUid(), userId) != ERR_OK || userId < 0) {
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, bundleOption->GetUid());
+            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+        }
         ANS_LOGD("GetOsAccountLocalIdFromUid PRI, %{public}d, %{public}d", bundleOption->GetUid(), userId);
         if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
             ANS_LOGE("GetPrivilegeDialogPopped false.");
@@ -376,7 +381,12 @@ ErrCode AdvancedNotificationService::CanPopEnableNotificationDialog(
         ANS_LOGE("Has popped is true.");
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
         int32_t userId = -1;
-        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
+        if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
+            bundleOption->GetUid(), userId) != ERR_OK || userId < 0) {
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, bundleOption->GetUid());
+            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+        }
         ANS_LOGD("GetOsAccountLocalIdFromUid PRI, %{public}d, %{public}d", bundleOption->GetUid(), userId);
         if (!EXTENTION_WRAPPER->GetPrivilegeDialogPopped(bundleOption, userId)) {
             ANS_LOGE("GetPrivilegeDialogPopped false.");

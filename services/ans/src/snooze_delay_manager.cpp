@@ -20,6 +20,7 @@
 #include "access_token_helper.h"
 #include "advanced_notification_inline.h"
 #include "aes_gcm_helper.h"
+#include "ans_common_utils.h"
 #include "ans_const_define.h"
 #include "ans_service_errors.h"
 #include "ans_trace_wrapper.h"
@@ -93,8 +94,7 @@ ErrCode AdvancedNotificationService::ExcuteSnoozeNotification(const std::string 
             message.ErrorCode(ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS).BranchId(BRANCH_3));
         return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     }
-    bool isCollaboration =
-        AdvancedNotificationPriorityHelper::GetInstance()->IsCollaborationNotification(outRecord->request);
+    bool isCollaboration = AnsCommonUtils::IsCollaborationNotification(outRecord->request);
     if (outRecord->request->IsCommonLiveView() || outRecord->request->IsSystemLiveView() ||
         !outRecord->notification->IsRemoveAllowed() || isCollaboration) {
         ANS_LOGE("notification is not supported to snooze");
@@ -146,6 +146,22 @@ bool AdvancedNotificationService::SetSnoozeDelayTimeToDB(const int64_t delayTime
     return true;
 }
 
+void AdvancedNotificationService::PrepareSnoozeDeviceFlags(const sptr<NotificationRequest> &request,
+    const std::shared_ptr<NotificationFlags> &currentFlags)
+{
+    auto deviceFlags = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    auto src = request->GetDeviceFlags();
+    if (src != nullptr) {
+        for (auto it = src->begin(); it != src->end(); ++it) {
+            if (it->second != nullptr) {
+                deviceFlags->emplace(it->first, std::make_shared<NotificationFlags>(it->second->GetReminderFlags()));
+            }
+        }
+    }
+    (*deviceFlags)[NotificationConstant::CURRENT_DEVICE_TYPE] = currentFlags;
+    request->SetDeviceFlags(deviceFlags);
+}
+
 void AdvancedNotificationService::SnoozeNotificationConsumed(const std::shared_ptr<NotificationRecord> &record)
 {
     if (record == nullptr || record->request == nullptr) {
@@ -160,11 +176,8 @@ void AdvancedNotificationService::SnoozeNotificationConsumed(const std::shared_p
     ANS_COND_DO_ERR(recordNew->request == nullptr, return, "NotificationRequest malloc error.");
     std::shared_ptr<NotificationFlags> flags = record->request->GetFlags() == nullptr ?
         nullptr : std::make_shared<NotificationFlags>(record->request->GetFlags()->GetReminderFlags());
-    auto notificationFlagsOfDevices =
-        std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
     recordNew->request->SetFlags(flags);
-    (*notificationFlagsOfDevices)[NotificationConstant::CURRENT_DEVICE_TYPE] = flags;
-    recordNew->request->SetDeviceFlags(notificationFlagsOfDevices);
+    PrepareSnoozeDeviceFlags(recordNew->request, flags);
     recordNew->request->SetBadgeNumber(0);
     recordNew->notification = new (std::nothrow) Notification(recordNew->request);
     ANS_COND_DO_ERR(recordNew->notification == nullptr, return, "Notification malloc error.");
@@ -292,8 +305,8 @@ void AdvancedNotificationService::InsertsnoozeDelayTimer(const std::shared_ptr<N
 
 void AdvancedNotificationService::CreateSnoozeTimer()
 {
-    auto timerInfo = std::make_shared<NotificationTimerInfo>();
     wptr<AdvancedNotificationService> wThis = this;
+    auto timerInfo = std::make_shared<NotificationTimerInfo>(wThis);
     auto triggerFunc = [wThis] {
         sptr<AdvancedNotificationService> sThis = wThis.promote();
         if (sThis != nullptr) {

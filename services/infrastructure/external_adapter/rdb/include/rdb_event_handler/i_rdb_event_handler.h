@@ -66,6 +66,24 @@ public:
      */
     virtual int32_t OnCorruption(const std::string &databaseFile);
 
+    /**
+     * @brief Called when upgrade has failed repeatedly and data cleanup is needed.
+     *
+     * Each handler should delete only the data it manages (e.g., specific key prefixes)
+     * to preserve unrelated data in the database.
+     */
+    virtual void OnUpgradeFailure(NativeRdb::RdbStore &rdbStore);
+
+    /**
+     * @brief Per-business migration-in-progress mark key for crash recovery.
+     *
+     * The mark is written before the handler's migration starts and cleared after it
+     * returns normally. A residual mark on the next open means the last migration was
+     * interrupted by a crash, so the handler's data may be half-migrated and its
+     * OnUpgradeFailure cleanup must run. An empty string opts out of crash recovery.
+     */
+    virtual std::string GetMigrationMarkKey() const;
+
     /** @brief Unique handler name used for registration and logging. */
     virtual std::string GetHandlerName() const = 0;
 

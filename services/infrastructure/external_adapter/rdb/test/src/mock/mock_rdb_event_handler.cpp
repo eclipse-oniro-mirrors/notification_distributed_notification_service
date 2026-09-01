@@ -47,6 +47,21 @@ int32_t MockRdbEventHandler::OnCorruption(const std::string &)
     return ret_;
 }
 
+void MockRdbEventHandler::OnUpgradeFailure(NativeRdb::RdbStore &)
+{
+    upgradeFailureCallCount_++;
+}
+
+std::string MockRdbEventHandler::GetMigrationMarkKey() const
+{
+    return migrationMarkKey_;
+}
+
+void MockRdbEventHandler::SetMigrationMarkKey(const std::string &key)
+{
+    migrationMarkKey_ = key;
+}
+
 std::string MockRdbEventHandler::GetHandlerName() const
 {
     return name_;
@@ -65,5 +80,10 @@ void MockRdbEventHandler::SetEnabled(bool enabled)
 void MockRdbEventHandler::SetReturnCode(int32_t ret)
 {
     ret_ = ret;
+}
+
+int32_t MockRdbEventHandler::GetUpgradeFailureCallCount() const
+{
+    return upgradeFailureCallCount_;
 }
 } // namespace OHOS::Notification::Infra

@@ -30,10 +30,13 @@ public:
     MockAnsManagerProxy() = default;
     virtual ~MockAnsManagerProxy() {};
 
+    int32_t mockBundleImportance_ = NotificationSlot::LEVEL_HIGH + 1;
+    ErrCode mockBundleImportanceRet_ = ERR_OK;
+
     ErrCode GetBundleImportance(int32_t& importance)
     {
-        importance = NotificationSlot::LEVEL_HIGH + 1;
-        return ERR_OK;
+        importance = mockBundleImportance_;
+        return mockBundleImportanceRet_;
     }
 
     MOCK_METHOD2(Publish, ErrCode(const std::string&, const sptr<NotificationRequest>&));

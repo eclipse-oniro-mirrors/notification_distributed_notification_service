@@ -14,6 +14,7 @@
  */
 
 #include "distributed_publish_service.h"
+#include "singleton.h"
 
 #include <memory>
 #include <string>

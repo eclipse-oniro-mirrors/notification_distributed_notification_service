@@ -152,6 +152,7 @@ ohos_shared_library("libdans") {
   defines = []
 
   external_deps = [
+    "ability_runtime:wantagent_innerkits",
     "ability_base:zuri",
     "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
@@ -163,6 +164,7 @@ ohos_shared_library("libdans") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "image_framework:image_native",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "power_manager:powermgr_client",

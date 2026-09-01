@@ -349,6 +349,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> recipient_ {};
     std::shared_ptr<ffrt::queue> notificationSubQueue_ = nullptr;
     std::function<void(const std::shared_ptr<SubscriberRecord> &)> onSubscriberAddCallback_ = nullptr;
+    ffrt::mutex onSubscriberAddCallbackMutex_;
     static constexpr size_t MAX_CONSUMED_HASH_CODE_LIST_SIZE = 1000;
     std::list<std::string> consumedHashCodes_;
     ffrt::mutex consumedHashCodesMutex_;

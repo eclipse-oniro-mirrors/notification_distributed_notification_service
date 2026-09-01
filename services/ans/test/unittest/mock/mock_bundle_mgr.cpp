@@ -22,8 +22,8 @@
 
 namespace OHOS {
 namespace Notification {
+__attribute__((weak)) bool g_isNonBundleName = false;
 namespace {
-bool g_isNonBundleName = false;
 bool g_isEnable = true;
 bool g_setBundleInfoEnabled = false;
 bool g_getBundleInfoFailed = false;
@@ -45,7 +45,7 @@ void MockSetBundleInfoEnabled(bool enabled)
     g_setBundleInfoEnabled = enabled;
 }
 
-void MockIsNonBundleName(bool isNonBundleName)
+__attribute__((weak)) void MockIsNonBundleName(bool isNonBundleName)
 {
     g_isNonBundleName = isNonBundleName;
 }

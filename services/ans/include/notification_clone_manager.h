@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CLONE_MANAGER_H
 
 #include <set>
+#include "nocopyable.h"
 #include <map>
 #include <string>
 

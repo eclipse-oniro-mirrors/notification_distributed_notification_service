@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "singleton.h"
 
 #include <functional>
 #include <iomanip>
@@ -45,6 +46,7 @@
 #include "voice_extension_wrapper.h"
 #include "notification_analytics_util.h"
 #include "all_scenarios_extension_wrapper.h"
+#include "ans_const_define.h"
 
 namespace OHOS {
 namespace Notification {
@@ -467,6 +469,7 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
     uint32_t &slotFlags)
 {
     ANS_LOGD("called");
+    slotFlags = 0;
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_INNER_NON_SYSTEM_APP;
@@ -600,6 +603,10 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
 AnsStatus AdvancedNotificationService::AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
     const sptr<NotificationBundleOption> &bundleOption)
 {
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Invalid bundleOption.");
+        return AnsStatus(ERR_ANS_INNER_INVALID_BUNDLE, "bundleoption null");
+    }
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = record->request->GetSlotType();
     ErrCode result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
@@ -678,6 +685,10 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
 void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<NotificationSlot> &slot,
     const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot, uint32_t defaultSlotFlags)
 {
+    if (slot == nullptr) {
+        ANS_LOGE("Invalid slot.");
+        return;
+    }
     uint32_t slotFlags = defaultSlotFlags;
     auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
     if (ret != ERR_OK) {
@@ -752,7 +763,12 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
 
     auto slotReminderMode = slot->GetReminderMode();
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), userId);
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(request->GetOwnerUid(), userId) != ERR_OK ||
+        userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, request->GetOwnerUid());
+        return;
+    }
     uint32_t notificationControlFlags = request->GetNotificationControlFlags();
     if (((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) &&
         !request->GetCreatorBundleName().empty() && request->IsAgentNotification() &&
@@ -1069,12 +1085,14 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlot(
         return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         std::vector<sptr<NotificationBundleOption>> bundles = {bundle};
         std::map<sptr<NotificationBundleOption>, bool> slotEnabled;
         bool dbResult = NotificationPreferences::GetInstance()->GetEnabledForBundleSlots(
-            bundles, slotTypeInt, slotEnabled);
+            bundles, slotTypeInt, slotEnabled, userId);
         if (!dbResult) {
             result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
             return;
@@ -1124,10 +1142,12 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlots(
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_OK;
     }
+    int32_t userId = -1;
+    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         bool dbResult = NotificationPreferences::GetInstance()->GetEnabledForBundleSlots(
-            resolvedBundles, slotType, slotEnabled);
+            resolvedBundles, slotType, slotEnabled, userId);
         if (!dbResult) {
             result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
             return;
@@ -1267,9 +1287,15 @@ void AdvancedNotificationService::InvockLiveViewSwitchCheck(
         return;
     }
 
-    notificationSvrQueue_.Submit(std::bind([&, bundles, userId, index]() {
-        InvockLiveViewSwitchCheck(bundles, userId, index);
-    }),
+    wptr<AdvancedNotificationService> wThis = this;
+    notificationSvrQueue_.Submit([wThis, bundles, userId, index]() {
+        sptr<AdvancedNotificationService> sThis = wThis.promote();
+        if (sThis == nullptr) {
+            ANS_LOGW("Service is null, skip live view switch check.");
+            return;
+        }
+        sThis->InvockLiveViewSwitchCheck(bundles, userId, index);
+    },
         INTERVAL_CHECK_LIVEVIEW, "doTriggerLiveView");
 }
 
@@ -1280,11 +1306,15 @@ void AdvancedNotificationService::TriggerLiveViewSwitchCheck(int32_t userId)
     }
 
     ANS_LOGD("Trigger live view start.");
-    notificationSvrQueue_.Submit(std::bind([&, userId]() {
+    wptr<AdvancedNotificationService> wThis = this;
+    notificationSvrQueue_.Submit([wThis, userId]() {
+        sptr<AdvancedNotificationService> sThis = wThis.promote();
+        if (sThis == nullptr) {
+            ANS_LOGW("Service is null, skip trigger live view switch check.");
+            return;
+        }
         std::map<std::string, sptr<NotificationBundleOption>> bundleOptions;
         if (BundleManagerHelper::GetInstance()->GetAllBundleInfo(bundleOptions, userId) != ERR_OK) {
-            NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
-                NotificationLiveViewUtils::ERASE_FLAG_INIT);
             NotificationLiveViewUtils::GetInstance().SetLiveViewRebuild(userId,
                 NotificationLiveViewUtils::ERASE_FLAG_INIT);
             return;
@@ -1304,8 +1334,8 @@ void AdvancedNotificationService::TriggerLiveViewSwitchCheck(int32_t userId)
         }
         ANS_LOGI("trigger liveview %{public}zu %{public}zu %{public}zu.", bundleOptions.size(), checkBundles.size(),
             bundlesMap.size());
-        InvockLiveViewSwitchCheck(checkBundles, userId, 0);
-    }),
+        sThis->InvockLiveViewSwitchCheck(checkBundles, userId, 0);
+    },
         DELAY_TIME_TRIGGER_LIVEVIEW, "triggerLiveView");
 }
 
@@ -1324,6 +1354,10 @@ ErrCode AdvancedNotificationService::SetCheckConfig(int32_t response, const std:
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&, response, requestId, value]() {
         if (response == ERR_OK) {
+            if (value.length() > STR_500K_SIZE) {
+                ANS_LOGE("Invalid value: too long.");
+                return;
+            }
             Infra::ALL_SCENARIOS_EXTENTION_WRAPPER.UpdateLiveViewConfig(value);
             return;
         }
@@ -1429,8 +1463,11 @@ ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundlesInner(
 ErrCode AdvancedNotificationService::GetAllLiveViewEnabledBundles(
     std::vector<NotificationBundleOption> &bundleOption)
 {
-    int32_t userId = 100;
-    OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    if ((OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) || (userId < 0)) {
+        ANS_LOGE("Failed to get valid active user id!");
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+    }
     return GetAllLiveViewEnabledBundlesInner(bundleOption, userId);
 }
 
@@ -1571,7 +1608,7 @@ ErrCode AdvancedNotificationService::UpdateVoiceUpdate(const std::string &config
 
 ErrCode AdvancedNotificationService::UpdateInnerConfig(const std::string &configKey, const std::string &configValue)
 {
-    ANS_LOGI("UpdateInnerConfig: configKey=%{public}s, configValue=%{public}s", configKey.c_str(), configValue.c_str());
+    ANS_LOGI("UpdateInnerConfig: configKey=%{public}s", configKey.c_str());
 
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubSystem) {

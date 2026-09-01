@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "singleton.h"
 
 #include <functional>
 #include <iomanip>
@@ -28,7 +29,6 @@
 #include "errors.h"
 
 #include "ipc_skeleton.h"
-#include "notification_constant.h"
 #include "os_account_info.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"

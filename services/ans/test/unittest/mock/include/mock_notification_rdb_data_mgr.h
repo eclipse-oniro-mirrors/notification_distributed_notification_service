@@ -31,6 +31,13 @@ void MockDeleteBatchData(bool mockRet);
 void MockDeleteData(bool mockRet);
 void MockQueryAllData(bool mockRet);
 void MockDropTable(bool mockRet);
+void MockInsertStatisticsData(bool mockRet);
+void MockQueryStatisticsByBundle(bool mockRet);
+void MockUpdateStatisticsTime(bool mockRet);
+void MockDropStatisticsTable(bool mockRet);
+void MockCleanStatisticsExperData(bool mockRet);
+void MockDeleteStatisticsByBundle(bool mockRet);
+void MockClearStatisticsState();
 }
 }
 #endif

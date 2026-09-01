@@ -42,6 +42,9 @@ public:
      */
     ~SystemEventObserver();
 
+    /** @brief Record the SA start wall time and boot time for time-change statistics correction. */
+    static void InitSaStartTime();
+
 private:
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
     void OnReceiveEventInner(const EventFwk::CommonEventData &data);

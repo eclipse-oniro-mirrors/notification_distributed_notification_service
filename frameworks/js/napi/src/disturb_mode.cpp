@@ -710,6 +710,11 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             return Common::NapiGetNull(env);
         }
         NAPI_CALL(env, napi_get_value_int64(env, argv[PARAM0], &params.profileId));
+        if (params.profileId < DO_NOT_DISTURB_PROFILE_MIN_ID ||
+            params.profileId > DO_NOT_DISTURB_PROFILE_MAX_ID) {
+            ANS_LOGE("Invalid profileId");
+            return nullptr;
+        }
     }
 
     return Common::NapiGetNull(env);

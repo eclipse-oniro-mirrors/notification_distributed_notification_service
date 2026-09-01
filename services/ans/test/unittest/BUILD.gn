@@ -53,7 +53,7 @@ ohos_unittest("ans_unit_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -169,7 +169,7 @@ ohos_unittest("health_white_list_util_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -285,7 +285,7 @@ ohos_unittest("notification_hisysevent_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -401,7 +401,7 @@ ohos_unittest("notification_local_live_view_subscriber_manager_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -517,7 +517,7 @@ ohos_unittest("notification_slot_filter_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -610,6 +610,10 @@ ohos_unittest("permission_filter_test") {
     "/${services_path}/ans/include/utils",
     "/${services_path}/ans/include/notification_extension",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   sources = [
@@ -633,7 +637,7 @@ ohos_unittest("permission_filter_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -751,7 +755,7 @@ ohos_unittest("notification_priority_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -867,7 +871,7 @@ ohos_unittest("reminder_affected_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -983,7 +987,7 @@ ohos_unittest("smart_reminder_center_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -1097,7 +1101,7 @@ ohos_unittest("notification_preferences_database_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   if (distributed_notification_service_feature_original_distributed) {
@@ -1187,7 +1191,7 @@ ohos_unittest("notification_preferences_database_two_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   if (distributed_notification_service_feature_original_distributed) {
@@ -1285,7 +1289,7 @@ ohos_unittest("notification_subscriber_manager_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   if (distributed_notification_service_feature_original_distributed) {
@@ -1376,6 +1380,9 @@ ohos_unittest("notification_service_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   defines = []
@@ -1383,6 +1390,7 @@ ohos_unittest("notification_service_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -1398,7 +1406,7 @@ ohos_unittest("notification_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1484,6 +1492,9 @@ ohos_unittest("notification_live_view_service_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   defines = []
@@ -1506,7 +1517,7 @@ ohos_unittest("notification_live_view_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1599,6 +1610,7 @@ ohos_unittest("notification_atomic_service_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_manager_test/advanced_notification_atomic_service_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -1614,7 +1626,7 @@ ohos_unittest("notification_atomic_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1722,7 +1734,7 @@ ohos_unittest("notification_cancel_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1830,7 +1842,7 @@ ohos_unittest("notification_publish_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -1938,7 +1950,7 @@ ohos_unittest("notification_query_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -2024,6 +2036,9 @@ ohos_unittest("notification_slot_service_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   defines = []
@@ -2031,6 +2046,7 @@ ohos_unittest("notification_slot_service_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_slot_service_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -2046,7 +2062,7 @@ ohos_unittest("notification_slot_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -2132,6 +2148,9 @@ ohos_unittest("notification_utils_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   defines = []
@@ -2139,6 +2158,7 @@ ohos_unittest("notification_utils_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_utils_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -2154,7 +2174,7 @@ ohos_unittest("notification_utils_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -2240,6 +2260,9 @@ ohos_unittest("snooze_delay_manager_test") {
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   defines = []
@@ -2262,7 +2285,7 @@ ohos_unittest("snooze_delay_manager_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -2376,7 +2399,7 @@ ohos_unittest("notification_clone_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   if (distributed_notification_service_feature_original_distributed) {
@@ -2467,7 +2490,7 @@ ohos_unittest("clone_subscriber_unit_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   if (distributed_notification_service_feature_original_distributed) {
@@ -2571,7 +2594,7 @@ ohos_unittest("notification_flow_control_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -2681,7 +2704,7 @@ ohos_unittest("notification_publish_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -2803,7 +2826,7 @@ ohos_unittest("notification_publish_process_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -2890,6 +2913,10 @@ ohos_unittest("notification_service_publish_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   defines = []
@@ -2897,6 +2924,7 @@ ohos_unittest("notification_service_publish_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_test/advanced_notification_service_publish_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -2910,7 +2938,7 @@ ohos_unittest("notification_service_publish_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   if (distributed_notification_service_feature_original_distributed) {
@@ -2985,11 +3013,14 @@ ohos_unittest("notification_preferences_second_test") {
 
   defines = []
 
-  sources = [ "notification_preferences_second_test.cpp" ]
+  sources = [
+    "notification_preferences_second_test.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
+  ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -3007,6 +3038,7 @@ ohos_unittest("notification_preferences_second_test") {
     "kv_store:distributeddata_inner",
     "relational_store:native_rdb",
     "time_service:time_client",
+    "os_account:os_account_innerkits",
   ]
 
   if (player_framework) {
@@ -3029,6 +3061,9 @@ ohos_unittest("notification_preferences_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "${services_path}/infrastructure/interfaces",
     "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   use_exceptions = true
@@ -3058,7 +3093,7 @@ ohos_unittest("notification_preferences_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   if (distributed_notification_service_feature_original_distributed) {
@@ -3198,11 +3233,13 @@ ohos_unittest("bundle_manager_helper_branch_test") {
   sources = [
     "bundle_manager_helper_branch_test/bundle_manager_helper_branch_test.cpp",
     "bundle_manager_helper_branch_test/mock_service_registry.cpp",
+    "mock/mock_bundle_mgr.cpp",
+    "notification_dialog_test/mock_os_account_manager_annex.cpp",
   ]
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -3237,6 +3274,11 @@ ohos_unittest("bundle_manager_helper_branch_test") {
     external_deps += [ "player_framework:media_client" ]
     defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
   }
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
@@ -3258,7 +3300,7 @@ ohos_unittest("notification_dialog_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -3294,6 +3336,9 @@ ohos_unittest("notification_dialog_test") {
     external_deps += [ "player_framework:media_client" ]
     defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
   }
+  if (distributed_notification_service_feature_privileged_message) {
+    defines += [ "ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER" ]
+  }
   subsystem_name = "${subsystem_name}"
   part_name = "${component_name}"
 }
@@ -3325,7 +3370,7 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -3380,6 +3425,10 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   defines = []
@@ -3401,7 +3450,7 @@ ohos_unittest("advanced_notification_ringtone_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -3473,6 +3522,10 @@ ohos_unittest("advanced_notification_geofence_service_test") {
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils/",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   defines = []
@@ -3493,7 +3546,7 @@ ohos_unittest("advanced_notification_geofence_service_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -3572,6 +3625,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_branch_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -3585,7 +3639,7 @@ ohos_unittest("advanced_notification_service_branch_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -3639,8 +3693,8 @@ ohos_unittest("notification_preferences_database_branch_test") {
     "/${services_path}/ans/include",
     "${services_path}/ans/test/unittest/mock/include",
     "/${services_path}/ans/include/utils",
-    "${services_path}/domain/settings/rdb_mgr_repo/include",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
     "${services_path}/infrastructure/external_adapter/rdb/include",
   ]
 
@@ -3653,7 +3707,7 @@ ohos_unittest("notification_preferences_database_branch_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -3708,66 +3762,7 @@ ohos_unittest("push_callback_stub_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
-  ]
-
-  external_deps = [
-    "ability_base:want",
-    "ability_base:zuri",
-    "ability_runtime:abilitykit_native",
-    "ability_runtime:app_manager",
-    "ability_runtime:wantagent_innerkits",
-    "access_token:libaccesstoken_sdk",
-    "bluetooth:btframework",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
-    "eventhandler:libeventhandler",
-    "ffrt:libffrt",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-    "hitrace:hitrace_meter",
-    "hitrace:libhitracechain",
-    "image_framework:image_native",
-    "ipc:ipc_core",
-    "kv_store:distributeddata_inner",
-    "os_account:os_account_innerkits",
-    "relational_store:native_rdb",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
-    "time_service:time_client",
-  ]
-
-  if (player_framework) {
-    external_deps += [ "player_framework:media_client" ]
-    defines = [ "PLAYER_FRAMEWORK_ENABLE" ]
-  }
-  subsystem_name = "${subsystem_name}"
-  part_name = "${component_name}"
-}
-
-ohos_unittest("notification_rdb_data_mgr_test") {
-  module_out_path = module_output_path
-  include_dirs = [
-    ".",
-    "include",
-    "/${services_path}/ans/include",
-    "${services_path}/ans/test/unittest/mock/include",
-    "${services_path}/infrastructure/interfaces",
-    "${services_path}/infrastructure/external_adapter/rdb/include",
-  ]
-
-  sources = [
-    "notification_rdb_data_mgr_test/mock_abs_result_set.cpp",
-    "notification_rdb_data_mgr_test/mock_abs_shared_result_set.cpp",
-    "notification_rdb_data_mgr_test/mock_rdb_helper.cpp",
-    "notification_rdb_data_mgr_test/notification_rdb_data_mgr_test.cpp",
-  ]
-
-  deps = [
-    "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -3824,7 +3819,7 @@ ohos_unittest("notification_config_parse_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -3875,7 +3870,7 @@ ohos_unittest("os_account_manager_helper_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -3932,7 +3927,7 @@ ohos_unittest("advanced_datashare_observer_unit_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -3975,7 +3970,7 @@ ohos_unittest("notification_extension_wrapper_unit_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -4036,6 +4031,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_test/advanced_notification_distributed_manager_service_test.cpp",
     "advanced_notification_service_test/advanced_notification_service_unit_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "advanced_notification_service_test/advanced_notification_system_live_view_service_test.cpp",
     "distributed_device_status_test.cpp",
     "mock/mock_accesstoken_kit.cpp",
@@ -4057,7 +4053,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -4136,7 +4132,7 @@ ohos_unittest("common_utils_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [
@@ -4255,7 +4251,6 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/notification_preferences.cpp",
     "${services_path}/ans/src/notification_preferences_database.cpp",
     "${services_path}/ans/src/notification_preferences_info.cpp",
-    "${services_path}/ans/src/notification_rdb_data_mgr.cpp",
     "${services_path}/ans/src/notification_slot_filter.cpp",
     "${services_path}/ans/src/notification_smart_reminder/reminder_affected.cpp",
     "${services_path}/ans/src/notification_smart_reminder/smart_reminder_center.cpp",
@@ -4420,7 +4415,6 @@ group("unittest") {
     ":notification_publish_service_test",
     ":notification_flow_control_service_test",
     ":notification_publish_process_test",
-    ":notification_rdb_data_mgr_test",
     ":notification_service_publish_test",
     ":notification_service_test",
     ":notification_live_view_service_test",

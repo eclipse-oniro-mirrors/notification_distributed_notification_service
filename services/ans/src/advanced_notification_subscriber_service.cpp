@@ -27,7 +27,6 @@
 #include "errors.h"
 
 #include "ipc_skeleton.h"
-#include "notification_constant.h"
 #include "os_account_manager_helper.h"
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
 #include "distributed_notification_manager.h"

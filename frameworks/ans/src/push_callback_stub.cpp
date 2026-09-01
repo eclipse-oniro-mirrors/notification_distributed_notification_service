@@ -20,7 +20,6 @@
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "push_callback_proxy.h"
-#include "singleton.h"
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
 #include "nlohmann/json.hpp"
@@ -137,25 +136,25 @@ int32_t PushCallBackProxy::OnCheckNotification(
 
     if (!data.WriteInterfaceToken(PushCallBackProxy::GetDescriptor())) {
         ANS_LOGE("Write interface token failed.");
-        return false;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     if (!data.WriteString(notificationData)) {
         ANS_LOGE("Connect done element error.");
-        return false;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     auto remote = Remote();
     if (remote == nullptr) {
         ANS_LOGE("null remote");
-        return false;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     int error = remote->SendRequest(static_cast<uint32_t>(NotificationInterfaceCode::ON_CHECK_NOTIFICATION),
         data, reply, option);
     if (error != NO_ERROR) {
         ANS_LOGE("error: %{public}d", error);
-        return false;
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     int result = reply.ReadInt32();

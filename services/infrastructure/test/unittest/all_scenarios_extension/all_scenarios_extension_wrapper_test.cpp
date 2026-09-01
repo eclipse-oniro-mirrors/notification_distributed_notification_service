@@ -102,7 +102,7 @@ HWTEST_F(AllScenariosExtensionWrapperTest, CheckLiveViewRights_003, Function | S
 
     sptr<NotificationRequest> request = new NotificationRequest();
     ErrCode result = wrapper.CheckLiveViewRights(request);
-    if (wrapper.ExtensionHandle_ == nullptr) {
+    if (wrapper.ExtensionHandle_ == nullptr || wrapper.checkLiveViewRights_ == nullptr) {
         GTEST_SKIP() << "libliveview.z.so not exist";
     }
     EXPECT_EQ(result, ERR_ANS_INNER_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED);

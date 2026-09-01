@@ -538,6 +538,72 @@ HWTEST_F(
 }
 
 /**
+ * @tc.name   : ExtensionServiceConnection_FreezeUnfreeze_0200
+ * @tc.number : ExtensionServiceConnection_FreezeUnfreeze_0200
+ * @tc.desc   : Test DoFreezeUnfreeze with valid pid exercises the actual freeze/unfreeze path.
+ */
+HWTEST_F(
+    NotificationExtensionServiceTest, ExtensionServiceConnection_FreezeUnfreeze_0200, Function | SmallTest | Level1)
+{
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleE2";
+    info.extensionName = "extE2";
+    info.userId = 9;
+    info.uid = 18;
+    ExtensionServiceConnection connection(info, [](const ExtensionSubscriberInfo &) {});
+    connection.state_ = ExtensionServiceConnectionState::CONNECTED;
+    connection.pid_ = 100;
+    connection.DoFreezeUnfreeze(true);
+    connection.DoFreezeUnfreeze(false);
+    EXPECT_EQ(connection.state_, ExtensionServiceConnectionState::CONNECTED);
+    EXPECT_EQ(connection.remoteObject_, nullptr);
+}
+
+/**
+ * @tc.name   : ExtensionServiceConnection_FreezeUnfreeze_0300
+ * @tc.number : ExtensionServiceConnection_FreezeUnfreeze_0300
+ * @tc.desc   : Test DoFreezeUnfreeze returns early when pid_ is invalid (negative).
+ */
+HWTEST_F(
+    NotificationExtensionServiceTest, ExtensionServiceConnection_FreezeUnfreeze_0300, Function | SmallTest | Level1)
+{
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleE3";
+    info.extensionName = "extE3";
+    info.userId = 11;
+    info.uid = 22;
+    ExtensionServiceConnection connection(info, [](const ExtensionSubscriberInfo &) {});
+    connection.state_ = ExtensionServiceConnectionState::CONNECTED;
+    connection.pid_ = -1;
+    connection.DoFreezeUnfreeze(true);
+    EXPECT_EQ(connection.pid_, -1);
+    EXPECT_EQ(connection.state_, ExtensionServiceConnectionState::CONNECTED);
+    EXPECT_EQ(connection.remoteObject_, nullptr);
+}
+
+/**
+ * @tc.name   : ExtensionServiceConnection_FreezeUnfreeze_0400
+ * @tc.number : ExtensionServiceConnection_FreezeUnfreeze_0400
+ * @tc.desc   : Test DoFreezeUnfreeze returns early when pid_ is zero.
+ */
+HWTEST_F(
+    NotificationExtensionServiceTest, ExtensionServiceConnection_FreezeUnfreeze_0400, Function | SmallTest | Level1)
+{
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleE4";
+    info.extensionName = "extE4";
+    info.userId = 13;
+    info.uid = 26;
+    ExtensionServiceConnection connection(info, [](const ExtensionSubscriberInfo &) {});
+    connection.state_ = ExtensionServiceConnectionState::CONNECTED;
+    connection.pid_ = 0;
+    connection.DoFreezeUnfreeze(false);
+    EXPECT_EQ(connection.pid_, 0);
+    EXPECT_EQ(connection.state_, ExtensionServiceConnectionState::CONNECTED);
+    EXPECT_EQ(connection.remoteObject_, nullptr);
+}
+
+/**
  * @tc.name   : ExtensionServiceConnection_PrepareFreezeDisconnect_0100
  * @tc.number : ExtensionServiceConnection_PrepareFreezeDisconnect_0100
  * @tc.desc   : Test PrepareFreeze and PrepareDisconnect do not crash when timer client missing.

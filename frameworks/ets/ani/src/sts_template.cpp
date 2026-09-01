@@ -43,6 +43,7 @@ ani_status UnwrapNotificationTemplate(ani_env *env, ani_object aniObj, Notificat
         ANS_LOGE("GetStringByAniString faild. status %{public}d", status);
         return status;
     }
+    nameStr = GetResizeStr(nameStr, NotificationSts::STR_MAX_SIZE);
     ani_ref dataRef;
     if (ANI_OK != (status = env->Object_GetPropertyByName_Ref(aniObj, "data", &dataRef))) {
         ANS_LOGE("Object_GetPropertyByName_Ref 'data' faild. status %{public}d", status);

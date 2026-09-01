@@ -17,6 +17,7 @@
 #define private public
 #include <gtest/gtest.h>
 
+#include "ans_service_errors.h"
 #define private public
 #define protected public
 #include "notification_preferences_database.h"
@@ -615,9 +616,10 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationPreferences_0370
     MockInit(false);
     // set type is BUNDLE_NAME_TYPE
     BundleType type = BundleType::BUNDLE_NAME_TYPE;
-    // test PutBundlePropertyToDisturbeDB function
+    // test PutBundlePropertyToDisturbeDB function, unknown type is rejected with ERR_ANS_INNER_INVALID_PARAM
     std::string bundleKey = "<bundleKey>";
-    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0), false);
+    ASSERT_EQ(preferncesDB_->PutBundlePropertyToDisturbeDB(bundleKey, type, true, 0),
+        (int32_t)ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
@@ -1020,6 +1022,9 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, DropUserTable_00200, Functio
 HWTEST_F(NotificationPreferencesDatabaseBranchTest, PutSlotFlags_00100, Function | SmallTest | Level1)
 {
     NotificationPreferencesInfo::BundleInfo bundleInfo;
+    bundleInfo.SetBundleName("<SetBundleName>");
+    MockInit(true);
+    MockInsertData(true);
     ASSERT_EQ(preferncesDB_->PutSlotFlags(bundleInfo, 0), true);
 }
 
@@ -1212,6 +1217,91 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, StringToInt64_00200, Functio
 {
     std::string str = "123456789";
     ASSERT_EQ(AnsCommonUtils::StringToInt64(str), 123456789);
+}
+
+/**
+ * @tc.name      : ParseDistributedInfoFromDB_00100
+ * @tc.number    :
+ * @tc.desc      : test ParseDistributedInfoFromDB skips entry when QueryDataBeginWithKey returns E_ERROR
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, ParseDistributedInfoFromDB_00100,
+    Function | SmallTest | Level1)
+{
+    // set CheckRdbStore is true
+    MockInit(true);
+    // set QueryDataBeginWithKey returns E_ERROR
+    MockQueryDataBeginWithKey(false);
+    std::unordered_map<std::string, std::string> values = { {"k", "com.demo.test20020001"} };
+    std::vector<NotificationDistributedBundle> bundles;
+    preferncesDB_->ParseDistributedInfoFromDB("tablet", 100, values, bundles);
+    ASSERT_EQ(bundles.empty(), true);
+    // reset to default for subsequent tests
+    MockQueryDataBeginWithKey(true);
+}
+
+/**
+ * @tc.name      : GetUserDisableNotificationInfo_0200
+ * @tc.number    :
+ * @tc.desc      : test GetUserDisableNotificationInfo returns false when value is empty
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, GetUserDisableNotificationInfo_0200,
+    Function | SmallTest | Level1)
+{
+    // set CheckRdbStore is true
+    MockInit(true);
+    // set QueryData returns E_OK with empty value
+    MockQueryData(NativeRdb::E_OK);
+    MockSetDataValue("");
+    NotificationDisable disable;
+    ASSERT_EQ(preferncesDB_->GetUserDisableNotificationInfo(100, disable), false);
+    // reset to default for subsequent tests
+    MockSetDataValue("");
+}
+
+/**
+ * @tc.name      : GetUserDisableNotificationInfo_0300
+ * @tc.number    :
+ * @tc.desc      : test GetUserDisableNotificationInfo returns false when value is not valid JSON
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, GetUserDisableNotificationInfo_0300,
+    Function | SmallTest | Level1)
+{
+    // set CheckRdbStore is true
+    MockInit(true);
+    // set QueryData returns E_OK with an invalid JSON value
+    MockQueryData(NativeRdb::E_OK);
+    MockSetDataValue("not-a-json");
+    NotificationDisable disable;
+    ASSERT_EQ(preferncesDB_->GetUserDisableNotificationInfo(100, disable), false);
+    // reset to default for subsequent tests
+    MockSetDataValue("");
+}
+
+/**
+ * @tc.name      : GetClonePriorityInfos_0200
+ * @tc.number    :
+ * @tc.desc      : test GetClonePriorityInfos skips invalid JSON entries and entries
+ *                 whose FromJson fails, and keeps valid entries
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, GetClonePriorityInfos_0200,
+    Function | SmallTest | Level1)
+{
+    // set CheckRdbStore is true
+    MockInit(true);
+    // set QueryDataBeginWithKey returns E_OK
+    MockQueryDataBeginWithKey(true);
+    std::unordered_map<std::string, std::string> values;
+    values.emplace("k1", "invalid-json"); // not valid JSON, skipped
+    values.emplace("k2", "{\"name\":\"noType\"}"); // valid JSON but missing "type", FromJson fails
+    values.emplace("k3", "{\"type\":1,\"name\":\"okBundle\"}"); // valid entry
+    MockSetDataValues(values);
+    std::vector<NotificationClonePriorityInfo> cloneInfos;
+    preferncesDB_->GetClonePriorityInfos(100, cloneInfos);
+    ASSERT_EQ(cloneInfos.size(), 1);
+    EXPECT_EQ(cloneInfos[0].GetBundleName(), "okBundle");
+    // reset to default for subsequent tests
+    std::unordered_map<std::string, std::string> emptyValues;
+    MockSetDataValues(emptyValues);
 }
 }  // namespace Notification
 }  // namespace OHOS

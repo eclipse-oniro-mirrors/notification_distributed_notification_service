@@ -17,7 +17,6 @@
 
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "sts_common.h"
 #include "sts_notification_manager.h"
 #include "sts_throw_erro.h"
@@ -121,7 +120,7 @@ ani_object AniSetGeofenceEnabled(ani_env *env, ani_boolean enabled, ani_object c
             auto asyncCallbackInfo = static_cast<AsyncCallbackGeofenceInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetGeofenceEnabled(
+                    AnsNotification::GetInstance()->SetGeofenceEnabled(
                         asyncCallbackInfo->isGeofence);
             }
         },
@@ -197,7 +196,7 @@ ani_object AniIsGeofenceEnabled(ani_env *env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackGeofenceInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsGeofenceEnabled(
+                    AnsNotification::GetInstance()->IsGeofenceEnabled(
                         asyncCallbackInfo->isGeofence);
             }
         },

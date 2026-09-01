@@ -17,6 +17,7 @@
 #include "ans_service_errors.h"
 
 #include "advanced_notification_priority_helper.h"
+#include "ans_common_utils.h"
 #include "ans_permission_def.h"
 #include "bundle_manager_helper.h"
 #include "notification_ai_extension_wrapper.h"
@@ -272,8 +273,7 @@ void AdvancedNotificationService::GetRequestsFromNotification(
             continue;
         }
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-        if (AdvancedNotificationPriorityHelper::GetInstance()->IsCollaborationNotification(
-            notification->GetNotificationRequestPoint())) {
+        if (AnsCommonUtils::IsCollaborationNotification(notification->GetNotificationRequestPoint())) {
             continue;
         }
         if (notification->GetNotificationRequestPoint()->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW) {

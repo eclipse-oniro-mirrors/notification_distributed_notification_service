@@ -487,7 +487,12 @@ napi_value ParsePublishAsBundleParameters(
             return nullptr;
         }
         int32_t userId = 0;
-        napi_get_value_int32(env, argv[PARAM2], &userId);
+        napi_status status = napi_get_value_int32(env, argv[PARAM2], &userId);
+        if (status != napi_ok) {
+            ANS_LOGE("Failed to parse the third parameter as number");
+            Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
+            return nullptr;
+        }
         params.request.SetOwnerUserId(userId);
         params.request.SetIsAgentNotification(true);
     }

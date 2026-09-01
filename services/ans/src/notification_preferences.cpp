@@ -14,6 +14,7 @@
  */
 
 #include "notification_preferences.h"
+#include "singleton.h"
 
 #include <chrono>
 #include <fstream>
@@ -52,9 +53,21 @@ constexpr static const char* KEY_PRIORITY_CONFIG_FOR_BUNDLE = "priorityConfigFor
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE_V2 = "priorityNotificationSwitchForBundleV2";
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_STRATEGY_FOR_BUNDLE = "priorityStrategyForBundle";
 const static std::string KEY_UNDER_LINE = "_";
+constexpr size_t MAX_TEMPLATE_FILE_SIZE = 1024 * 1024;
 }
-ffrt::mutex NotificationPreferences::instanceMutex_;
-std::shared_ptr<NotificationPreferences> NotificationPreferences::instance_;
+
+int32_t NotificationPreferences::ResolveStatisticsTableUserId(const NotificationBundleOption &bundle)
+{
+    int32_t userId = INVALID_USER_ID;
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundle.GetUid(), userId) != ERR_OK ||
+        userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+            __FUNCTION__, bundle.GetUid());
+        return INVALID_USER_ID;
+    }
+    bool isAncoApp = BundleManagerHelper::GetInstance()->IsAncoApp(bundle.GetBundleName(), bundle.GetUid());
+    return isAncoApp ? ZERO_USERID : userId;
+}
 
 NotificationPreferences::NotificationPreferences()
 {
@@ -75,13 +88,8 @@ NotificationPreferences::~NotificationPreferences()
 
 std::shared_ptr<NotificationPreferences> NotificationPreferences::GetInstance()
 {
-    if (instance_ == nullptr) {
-        std::lock_guard<ffrt::mutex> lock(instanceMutex_);
-        if (instance_ == nullptr) {
-            instance_ = std::make_shared<NotificationPreferences>();
-        }
-    }
-    return instance_;
+    static std::shared_ptr<NotificationPreferences> instance = std::make_shared<NotificationPreferences>();
+    return instance;
 }
 
 void NotificationPreferences::StartCacheCleanupTimer()
@@ -217,13 +225,14 @@ ErrCode NotificationPreferences::DeleteStatisticsByBundle(const int32_t userId,
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     ErrCode result = ERR_OK;
 
-    if (!preferncesDB_->DeleteStatisticsByBundle(userId, bundleName, packageId)) {
+    bool retUserId = preferncesDB_->DeleteStatisticsByBundle(userId, bundleName, packageId);
+    bool retZero = preferncesDB_->DeleteStatisticsByBundle(ZERO_USERID, bundleName, packageId);
+    if (!retUserId && !retZero) {
+        ANS_LOGI("DeleteStatisticsByBundle fail, uid: %{public}d", packageId);
         result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         return result;
     }
-
     preferencesInfo_.RemoveNotificationStatisticsByBundle(packageId);
-    ANS_LOGI("NotificationPreferences::DeleteStatisticsByBundle.result: %{public}d", result);
     return result;
 }
 
@@ -242,7 +251,8 @@ ErrCode NotificationPreferences::QueryStatisticsByBundle(const sptr<Notification
         return result;
     }
 
-    if (!preferncesDB_->QueryStatisticsByBundle(bundle->GetUid(), recentCount, lastTime)) {
+    int32_t tableUserId = ResolveStatisticsTableUserId(*bundle);
+    if (!preferncesDB_->QueryStatisticsByBundle(bundle->GetUid(), tableUserId, recentCount, lastTime)) {
         ANS_LOGE("NotificationPreferences::QueryStatisticsByBundle failed.");
         result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
         return result;
@@ -290,7 +300,9 @@ void NotificationPreferences::UpdateStatisticsAll()
     for (auto &statistics : statisticsVec) {
         int32_t recentCount = 0;
         int64_t lastTime = 0;
-        if (!preferncesDB_->QueryStatisticsByBundle(statistics.GetBundleOption().GetUid(), recentCount, lastTime)) {
+        int32_t tableUserId = ResolveStatisticsTableUserId(statistics.GetBundleOption());
+        if (!preferncesDB_->QueryStatisticsByBundle(statistics.GetBundleOption().GetUid(),
+            tableUserId, recentCount, lastTime)) {
             ANS_LOGE("NotificationPreferences::QueryStatisticsByBundle failed.");
             return;
         }
@@ -432,6 +444,10 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
         return ERR_ANS_INNER_INVALID_PARAM;
     }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("preferncesDB_ is null.");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
 
     ErrCode result = ERR_OK;
@@ -440,8 +456,11 @@ ErrCode NotificationPreferences::RemoveNotificationForBundle(const sptr<Notifica
         sptr<NotificationRingtoneInfo> savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
         if (savedRingtoneInfo != nullptr) {
             if (preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, savedRingtoneInfo)) {
-                AdvancedNotificationService::GetInstance()->ReportRingtoneChanged(bundleOption,
-                    bundleInfo.GetRingtoneInfo(), NotificationConstant::RingtoneReportType::RINGTONE_REMOVE);
+                auto ansInstance = AdvancedNotificationService::GetInstance();
+                if (ansInstance != nullptr) {
+                    ansInstance->ReportRingtoneChanged(bundleOption,
+                        bundleInfo.GetRingtoneInfo(), NotificationConstant::RingtoneReportType::RINGTONE_REMOVE);
+                }
                 SystemSoundHelper::GetInstance()->RemoveCustomizedTone(savedRingtoneInfo);
             }
         }
@@ -954,6 +973,12 @@ bool NotificationPreferences::BuildCloneSlotInfo(const NotificationCloneBundleIn
     std::vector<sptr<NotificationSlot>>& slots)
 {
     for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
+        int32_t slotTypeInt = static_cast<int32_t>(cloneSlot.slotType_);
+        if (slotTypeInt < 0 ||
+            slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
+            ANS_LOGE("Invalid slot type: %{public}d", slotTypeInt);
+            continue;
+        }
         sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
         if (slotInfo == nullptr) {
             return false;
@@ -1293,14 +1318,15 @@ ErrCode NotificationPreferences::GetAllNotificationEnabledBundles(
 bool __attribute__((weak)) NotificationPreferences::GetEnabledForBundleSlots(
     const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
     int32_t slotType,
-    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled)
+    std::map<sptr<NotificationBundleOption>, bool> &slotEnabled,
+    int32_t userId)
 {
     ANS_LOGD("called");
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferncesDB_ == nullptr) {
         return false;
     }
-    return preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled);
+    return preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled, userId);
 }
 
 ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
@@ -1571,13 +1597,24 @@ ErrCode NotificationPreferences::GetTemplateSupported(const std::string& templat
         ANS_LOGE("template name is null.");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
+    if (templateName.size() > static_cast<size_t>(STR_MAX_SIZE)) {
+        ANS_LOGE("template name too long: %{public}zu", templateName.size());
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
 
     std::ifstream inFile;
-    inFile.open(DEFAULT_TEMPLATE_PATH.c_str(), std::ios::in);
+    inFile.open(DEFAULT_TEMPLATE_PATH.c_str(), std::ios::in | std::ios::ate);
     if (!inFile.is_open()) {
         ANS_LOGE("read template config error.");
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
     }
+    std::streampos fileSize = inFile.tellg();
+    if (fileSize < 0 || static_cast<size_t>(fileSize) > MAX_TEMPLATE_FILE_SIZE) {
+        ANS_LOGE("template file size invalid: %{public}lld", static_cast<long long>(fileSize));
+        inFile.close();
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_READ_TEMPLATE_CONFIG_FAILED;
+    }
+    inFile.seekg(0, std::ios::beg);
 
     std::string fileContent((std::istreambuf_iterator<char>(inFile)), std::istreambuf_iterator<char>());
     inFile.close();
@@ -1949,6 +1986,10 @@ ErrCode NotificationPreferences::SetSmartReminderEnabled(const std::string &devi
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("preferncesDB_ is null.");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->SetSmartReminderEnabled(deviceType, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -1962,6 +2003,10 @@ ErrCode NotificationPreferences::IsSmartReminderEnabled(const std::string &devic
     }
 
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("preferncesDB_ is null.");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
     bool storeDBResult = true;
     storeDBResult = preferncesDB_->IsSmartReminderEnabled(deviceType, enabled);
     return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
@@ -2049,7 +2094,11 @@ bool NotificationPreferences::GetBundleSoundPermission(bool &allPackage, std::se
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::string value = "";
     int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId);
+    if ((OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId) != ERR_OK) ||
+        (userId < 0)) {
+        ANS_LOGE("Get valid userId failed, function: %{public}s, userId: %{public}d", __FUNCTION__, userId);
+        return false;
+    }
     if (GetKvFromDb(RING_TRUST_PKG_KEY, value, userId) != ERR_OK) {
         ANS_LOGD("Get bundle sound permission failed.");
         return false;
@@ -2144,8 +2193,20 @@ ErrCode NotificationPreferences::GetRingtoneInfoByBundle(const sptr<Notification
     sptr<NotificationRingtoneInfo> savedRingtoneInfo = bundleInfo.GetRingtoneInfo();
     if (savedRingtoneInfo == nullptr) {
         savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+        if (savedRingtoneInfo == nullptr) {
+            ANS_LOGE("Failed to create NotificationRingtoneInfo.");
+            return ERR_ANS_INNER_NO_MEMORY;
+        }
+        if (preferncesDB_ == nullptr) {
+            ANS_LOGE("preferncesDB_ is null.");
+            return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+        }
         if (!preferncesDB_->GetRingtoneInfoByBundle(bundleInfo, savedRingtoneInfo)) {
             savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+            if (savedRingtoneInfo == nullptr) {
+                ANS_LOGE("Failed to create NotificationRingtoneInfo.");
+                return ERR_ANS_INNER_NO_MEMORY;
+            }
         }
         bundleInfo.SetRingtoneInfo(savedRingtoneInfo);
         preferencesInfo_.SetBundleInfo(bundleInfo);
@@ -2462,6 +2523,10 @@ std::string NotificationPreferences::GetAdditionalConfig(const std::string &key)
 bool NotificationPreferences::DelCloneProfileInfo(const int32_t &userId,
     const sptr<NotificationDoNotDisturbProfile>& info)
 {
+    if (info == nullptr) {
+        ANS_LOGE("Invalid info parameter.");
+        return false;
+    }
     if (preferncesDB_ == nullptr) {
         return false;
     }
@@ -2498,6 +2563,10 @@ bool NotificationPreferences::DelClonePriorityInfo(
 bool NotificationPreferences::UpdateClonePriorityInfos(
     const int32_t &userId, const std::vector<NotificationClonePriorityInfo> &cloneInfos)
 {
+    if (userId <= SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Invalid userId: %{public}d, function: %{public}s", userId, __FUNCTION__);
+        return false;
+    }
     if (preferncesDB_ == nullptr) {
         return false;
     }
@@ -2608,6 +2677,10 @@ bool NotificationPreferences::GetDisableNotificationInfo(NotificationDisable &no
 
 bool NotificationPreferences::GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable)
 {
+    if (userId <= SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Invalid userId: %{public}d, function: %{public}s", userId, __FUNCTION__);
+        return false;
+    }
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     if (preferencesInfo_.GetUserDisableNotificationInfo(userId, notificationDisable)) {
         ANS_LOGD("info get disable notification success");
@@ -2660,6 +2733,10 @@ bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kio
             kioskAppTrustList.push_back(item.get<std::string>());
         }
     }
+    if (kioskAppTrustList.size() > MAX_BUNDLE_LIST_SIZE) {
+        ANS_LOGE("kiosk app trust list size too large: %{public}zu", kioskAppTrustList.size());
+        return false;
+    }
     preferencesInfo_.SetkioskAppTrustList(kioskAppTrustList);
     isKioskTrustListUpdate_ = false;
     return true;
@@ -2707,6 +2784,10 @@ bool NotificationPreferences::GetRestrictedModeTrustList(std::unordered_map<int3
 bool NotificationPreferences::IsExistRestrictedModeTrustList(const std::string &bundleName, const int32_t &userId)
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
+    if (bundleName.empty()) {
+        ANS_LOGE("bundleName is empty, function: %{public}s", __FUNCTION__);
+        return false;
+    }
     std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;
     if (NotificationPreferences::GetInstance()->GetRestrictedModeTrustList(restrictedModeTrustList)) {
         auto it = restrictedModeTrustList.find(userId);
@@ -2745,7 +2826,7 @@ bool NotificationPreferences::SetRestrictedModeTrustList(const std::string &valu
             ANS_LOGE("Missing or invalid 'userId' field");
             return false;
         }
-        int32_t userId = item["userId"];
+        int32_t userId = item["userId"].get<int32_t>();
         if (!item.contains("trustList") || !item["trustList"].is_array()) {
             ANS_LOGE("Missing or invalid 'trustList' field");
             return false;
@@ -2766,10 +2847,22 @@ ErrCode NotificationPreferences::SetDistributedDevicelist(std::vector<std::strin
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-    bool storeDBResult = true;
-    nlohmann::json deviceTypesJson = deviceTypes;
-    std::string deviceTypesjsonString = deviceTypesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
-    storeDBResult = preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
+    }
+    std::string deviceTypesjsonString;
+    if (deviceTypes.size() > MAX_PARCELABLE_VECTOR_NUM) {
+        ANS_LOGE("deviceTypes size exceeds limit: %{public}zu", deviceTypes.size());
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    nlohmann::json deviceTypesJson = nlohmann::json(deviceTypes);
+    if (deviceTypesJson.is_null() || !deviceTypesJson.is_array()) {
+        ANS_LOGE("Failed to create deviceTypes json array");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    deviceTypesjsonString = deviceTypesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+    bool storeDBResult = preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
     return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 

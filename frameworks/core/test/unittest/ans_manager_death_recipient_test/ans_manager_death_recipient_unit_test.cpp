@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <functional>
+#include "singleton.h"
 #include "gtest/gtest.h"
 #define private public
 #include "ans_inner_errors.h"

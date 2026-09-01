@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "singleton.h"
 #include "access_token_helper.h"
 #include "aes_gcm_helper.h"
 #include "advanced_datashare_helper.h"
@@ -251,7 +252,12 @@ void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<Notif
     for (auto it = bundles.begin(); it != bundles.end();) {
         AppExecFwk::BundleInfo bundleInfo;
         int32_t userId = -1;
-        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid((*it)->GetUid(), userId);
+        if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid((*it)->GetUid(), userId) != ERR_OK ||
+            userId < 0) {
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, (*it)->GetUid());
+            return;
+        }
         int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
         auto result = BundleManagerHelper::GetInstance()->GetBundleInfoV9(
             (*it)->GetBundleName(), flags, bundleInfo, userId);
@@ -397,8 +403,7 @@ bool AdvancedNotificationService::EnsureBundlesCanSubscribeOrUnsubscribe(
     const sptr<NotificationBundleOption> &bundle)
 {
     std::vector<sptr<NotificationBundleOption>> bundles{bundle};
-    EnsureBundlesCanSubscribeOrUnsubscribe(bundles);
-    return true;
+    return EnsureBundlesCanSubscribeOrUnsubscribe(bundles);
 }
 
 bool AdvancedNotificationService::EnsureBundlesCanSubscribeOrUnsubscribe(
@@ -494,7 +499,12 @@ void AdvancedNotificationService::HandleBundleUpdate(const sptr<NotificationBund
         }
         int32_t installedUserId = -1;
         int32_t currentUserId = -1;
-        OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), installedUserId);
+        if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
+            bundleOption->GetUid(), installedUserId) != ERR_OK || installedUserId < 0) {
+            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
+                __FUNCTION__, bundleOption->GetUid());
+            return;
+        }
         OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(currentUserId);
         if (installedUserId != currentUserId) {
             ANS_LOGE("update another user package, skip check extensionService");

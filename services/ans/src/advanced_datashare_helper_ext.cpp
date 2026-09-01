@@ -21,7 +21,6 @@
 #include "message_parcel.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
-#include "singleton.h"
 #include "system_ability_definition.h"
 #include <string>
 

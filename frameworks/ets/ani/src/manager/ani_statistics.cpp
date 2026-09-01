@@ -21,7 +21,6 @@
 #include "sts_notification_manager.h"
 #include "sts_notification_statistics.h"
 #include "ans_notification.h"
-#include "singleton.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -126,7 +125,7 @@ ani_object AniGetNotificationStatisticsByBundle(ani_env *env, ani_object obj)
             auto asyncCallbackInfo = static_cast<AsyncCallbackStatistics*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetStatisticsByBundle(
+                    AnsNotification::GetInstance()->GetStatisticsByBundle(
                         asyncCallbackInfo->bundles, asyncCallbackInfo->statisticsInfos);
             }
         },

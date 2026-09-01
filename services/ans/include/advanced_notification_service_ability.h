@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_SERVICE_ABILITY_H
 
 #include "system_ability.h"
+#include "nocopyable.h"
 
 #include "advanced_datashare_observer.h"
 #include "advanced_notification_service.h"

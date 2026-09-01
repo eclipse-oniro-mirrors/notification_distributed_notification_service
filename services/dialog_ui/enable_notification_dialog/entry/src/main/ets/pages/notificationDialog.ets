@@ -31,7 +31,6 @@ import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSessi
 import { MeasureOptions } from '@ohos.measure';
 import { MeasureUtils } from '@ohos.arkui.UIContext';
 import common from '@ohos.app.ability.common';
-import uiMaterial from '@ohos.arkui.uiMaterial';
 
 const TAG = 'NotificationDialog_Service ';
 const mainWindowId = 'mainWindow';
@@ -41,7 +40,8 @@ const permission: Record<string, Resource> = {
   'reason': $r('app.string.reason'),
 };
 const bottomPopoverTypes = ['default', 'phone'];
-const defaultUiMaterial = new uiMaterial.ImmersiveMaterial({style: uiMaterial.ImmersiveStyle.ULTRA_THICK});
+const reasonHeightDifference = 150;
+const minReasonHeight = 10;
 
 let storage = LocalStorage.getShared();
 
@@ -89,7 +89,6 @@ struct NotificationDialogPage {
     alignment: DialogAlignment.Center,
     customStyle: true,
     maskColor: $r('app.color.mask_thin'),
-    systemMaterial: defaultUiMaterial,
     onWillDismiss: (dismissDialogAction: DismissDialogAction) => {
       console.info(TAG, `dialog onWillDismiss reason= : ${JSON.stringify(dismissDialogAction.reason)}`);
     }
@@ -116,7 +115,14 @@ struct PermissionDialog {
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
   @State titleContainerWidth: string | number = 'auto';
-  @State maxHeight: string | number = '85%';
+  @State @Watch('recalcReasonMaxHeight') maxHeight: number = 0;
+  @State iconRowHeight: number = 0;
+  @State titleRowHeight: number = 0;
+  @State doubleButtonsRowHeight: number = 0;
+  @State singleBanRowHeight: number = 0;
+  @State singleAllowRowHeight: number = 0;
+  @State dialogRowHeight: number = 0;
+  @State reasonMaxHeight: string | number = '60%';
   @State buttonVisibility: Visibility = Visibility.Visible;
   @State singleRowButtonVisibility: Visibility = Visibility.None;
 
@@ -124,7 +130,7 @@ struct PermissionDialog {
     Row(){
       Flex({ justifyContent: FlexAlign.Center, alignItems: this.isBottomPopover ? ItemAlign.End : ItemAlign.Center }) {
         Column() {
-          Scroll() {
+          Row() {
             Column() {
               Row() {
                 Image(permission.icon)
@@ -134,6 +140,10 @@ struct PermissionDialog {
                   top: Constants.DIALOG_ICON_MARGIN_TOP
                 })
               }
+              .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
+                this.iconRowHeight = newValue.height as number;
+                this.recalcReasonMaxHeight();
+              })
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
                   Text($r('app.string.group_label_notification', this.appName))
@@ -173,32 +183,48 @@ struct PermissionDialog {
                   console.info(TAG, `onSizeChange titleContainerWidth: ${this.titleContainerWidth}`);
                 })
               }
+              .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
+                this.titleRowHeight = newValue.height as number;
+                this.recalcReasonMaxHeight();
+              })
               Row() {
-                Flex({ justifyContent: FlexAlign.Center, direction: FlexDirection.Column }) {
-                  Text() {
-                    if (this.dialog.easyAbroad) {
-                      Span($r('app.string.reason_cjy'))
-                    } else if (this.dialog.innerLake) {
-                      Span($r('app.string.reason_zyt'))
-                    } else {
-                      Span(permission.reason)
+                Scroll() {
+                  Column() {
+                    Row() {
+                      Flex({ justifyContent: FlexAlign.Center, direction: FlexDirection.Column }) {
+                        Text() {
+                          if (this.dialog.easyAbroad) {
+                            Span($r('app.string.reason_cjy'))
+                          } else if (this.dialog.innerLake) {
+                            Span($r('app.string.reason_zyt'))
+                          } else {
+                            Span(permission.reason)
+                          }
+                        }
+                        .contentText()
+                        if(this.dialog.banAffectContent) {
+                          Text() {
+                            Span($r('app.string.ban_affect'))
+                          }
+                          .contentText()
+                        }
+                      }
+                      .margin({
+                        top: Constants.DIALOG_DESP_MARGIN_TOP,
+                        left: Constants.DIALOG_DESP_MARGIN_LEFT,
+                        right: Constants.DIALOG_DESP_MARGIN_RIGHT
+                      })
                     }
+                    .width(Constants.FULL_WIDTH)
                   }
-                  .contentText()
-                  if(this.dialog.banAffectContent) {
-                    Text() {
-                      Span($r('app.string.ban_affect'))
-                    }
-                    .contentText()
-                  }
+                  .width(Constants.FULL_WIDTH)
                 }
-                .margin({
-                  top: Constants.DIALOG_DESP_MARGIN_TOP,
-                  left: Constants.DIALOG_DESP_MARGIN_LEFT,
-                  right: Constants.DIALOG_DESP_MARGIN_RIGHT,
-                  bottom: Constants.DIALOG_DESP_MARGIN_BOTTOM
-                })
+                .width(Constants.FULL_WIDTH)
               }
+              .width(Constants.FULL_WIDTH)
+              .constraintSize({
+                maxHeight: this.reasonMaxHeight
+              })
               Row() {
                 Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
                   Button($r('app.string.BAN'))
@@ -221,12 +247,17 @@ struct PermissionDialog {
                     .fontColor($r('app.color.button_text'))
                 }
                 .margin({ 
+                  top: Constants.BUTTON_MARGIN_TOP,
                   left: Constants.BUTTON_MARGIN_LEFT, 
                   right: Constants.BUTTON_MARGIN_RIGHT,
                   bottom: Constants.DIALOG_PADDING_BOTTOM
                  })
               }
               .visibility(this.buttonVisibility)
+              .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
+                this.doubleButtonsRowHeight = newValue.height as number;
+                this.recalcReasonMaxHeight();
+              })
 
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
@@ -243,11 +274,16 @@ struct PermissionDialog {
                   })
                 }
                 .margin({ 
+                  top: Constants.BUTTON_MARGIN_TOP,
                   left: Constants.BUTTON_MARGIN_LEFT, 
                   right: Constants.BUTTON_MARGIN_RIGHT 
                 })
               }
               .visibility(this.singleRowButtonVisibility)
+              .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
+                this.singleBanRowHeight = newValue.height as number;
+                this.recalcReasonMaxHeight();
+              })
               
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
@@ -269,27 +305,35 @@ struct PermissionDialog {
                 })
               }
               .visibility(this.singleRowButtonVisibility)
+              .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
+                this.singleAllowRowHeight = newValue.height as number;
+                this.recalcReasonMaxHeight();
+              })
             }
           }
         }
         .borderRadius(Constants.DIALOG_PRIVACY_BORDER_RADIUS)
+        .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK)
         .width(Constants.FULL_WIDTH)
         .clip(true)
         .id(mainWindowId)
         .onAreaChange((oldArea: Area, newArea: Area) => {
           this.updateButtomVisibility(newArea.width as number);
         })
-        .systemMaterial(defaultUiMaterial)
       }
     }
     .margin({
-      left: this.isBottomPopover ? Constants.DIALOG_MARGIN_VERTICAL : Constants.DIALOG_MARGIN,
-      right: this.isBottomPopover ? Constants.DIALOG_MARGIN_VERTICAL : Constants.DIALOG_MARGIN,
-      bottom: this.isBottomPopover ? this.naviHeight : 0
+      left: this.isBottomPopover ? Constants.DIALOG_MARGIN_VERTICAL : Constants.DIALOG_MARGIN, 
+      right: this.isBottomPopover ? Constants.DIALOG_MARGIN_VERTICAL : Constants.DIALOG_MARGIN, 
+      bottom: this.isBottomPopover ? this.naviHeight : 0 
     })
     .constraintSize({ 
-      maxHeight: this.maxHeight,
+      maxHeight: '90%',
       maxWidth: Constants.MAX_DIALOG_WIDTH
+    })
+    .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
+      this.dialogRowHeight = newValue.height as number;
+      this.recalcReasonMaxHeight();
     })
   }
 
@@ -363,6 +407,42 @@ struct PermissionDialog {
     }
   }
 
+  recalcReasonMaxHeight(): void {
+    if (this.maxHeight <= 0 || this.dialogRowHeight <= 0 ||
+      this.iconRowHeight <= 0 || this.titleRowHeight <= 0) {
+      console.info(TAG, 'recalcReasonMaxHeight not init');
+      return;
+    }
+
+    let buttonArea = 0;
+    if (this.singleRowButtonVisibility === Visibility.Visible) {
+      buttonArea = this.singleBanRowHeight + this.singleAllowRowHeight;
+    } else {
+      buttonArea = this.doubleButtonsRowHeight;
+    }
+    if (buttonArea <= 0) {
+      console.info(TAG, 'recalcReasonMaxHeight btn not init');
+      return;
+    }
+
+    let effectiveMax: number;
+    if (Math.abs(this.maxHeight - this.dialogRowHeight) <= reasonHeightDifference) {
+      effectiveMax = Math.min(this.maxHeight, this.dialogRowHeight);
+    } else {
+      effectiveMax = this.maxHeight;
+    }
+
+    let height = effectiveMax - this.iconRowHeight - this.titleRowHeight - buttonArea;
+    console.info(TAG, `recalcReasonMaxHeight maxHeight=${this.maxHeight} dialogHeight=${this.dialogRowHeight}`
+      + ` icon=${this.iconRowHeight} title=${this.titleRowHeight} btn=${buttonArea} result=${height} `);
+    if (height <= 0) {
+      height = minReasonHeight;
+    }
+    if (this.reasonMaxHeight !== height) {
+      this.reasonMaxHeight = height;
+    }
+  }
+
   updateButtomVisibility(dialogWidth: number): void {
     try {
       let buttonWidth = (vp2px(dialogWidth - Constants.BUTTON_LEFT - Constants.BUTTON_RIGHT -
@@ -396,6 +476,7 @@ struct PermissionDialog {
         this.buttonVisibility = Visibility.Visible;
         this.singleRowButtonVisibility = Visibility.None;
       }
+      this.recalcReasonMaxHeight();
     } catch (err) {
       console.error(TAG, `updateButtomVisibility error. Cause: ${err?.code}`);
     }

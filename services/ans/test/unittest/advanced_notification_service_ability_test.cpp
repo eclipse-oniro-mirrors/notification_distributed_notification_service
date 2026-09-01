@@ -15,6 +15,15 @@
 
 #include <functional>
 #include <gtest/gtest.h>
+#include "ans_ut_constant.h"
+#include "mock_ipc_skeleton.h"
+
+namespace OHOS {
+namespace Notification {
+extern void MockVerifyCallerPermission(bool isVerify);
+}
+}
+
 #define private public
 #define protected public
 #include "advanced_notification_service_ability.h"
@@ -44,7 +53,8 @@ HWTEST_F(
 {
     int32_t systemAbilityId = 1;
     bool runOnCreate = true;
-    AdvancedNotificationServiceAbility(systemAbilityId, runOnCreate);
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+    EXPECT_FALSE(test.isDatashaReready_);
 }
 
 /**
@@ -59,6 +69,7 @@ HWTEST_F(
     bool runOnCreate = true;
     AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
     test.OnStart();
+    EXPECT_FALSE(test.isDatashaReready_);
 }
 
 /**
@@ -74,6 +85,7 @@ HWTEST_F(
     AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
     test.OnStop();
     test.OnStart();
+    EXPECT_FALSE(test.isDatashaReready_);
 }
 
 /**

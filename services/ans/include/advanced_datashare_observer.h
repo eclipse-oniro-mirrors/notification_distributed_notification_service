@@ -17,6 +17,7 @@
 #define NOTIFICATION_ADVANCED_DATASHAER_OBSERVER_H
 
 #include "datashare_helper.h"
+#include "singleton.h"
 #include "iremote_broker.h"
 #include "singleton.h"
 #include "ans_const_define.h"

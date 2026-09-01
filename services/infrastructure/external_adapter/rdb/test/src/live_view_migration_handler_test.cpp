@@ -369,4 +369,76 @@ HWTEST_F(LiveViewMigrationHandlerTest, OnUpgrade_MigrationFail_DeleteAlsoFails, 
     int32_t ret = handler.OnUpgrade(rdbStore, 1, 2);
     EXPECT_EQ(ret, NativeRdb::E_OK);
 }
+
+/**
+ * @tc.name: OnUpgradeFailure_100
+ * @tc.desc: Verify OnUpgradeFailure handles empty table set without crash when QuerySql returns null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LiveViewMigrationHandlerTest, OnUpgradeFailure_100, Function | SmallTest | Level1)
+{
+    NtfRdbHook hooks;
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    LiveViewMigrationHandler handler(hookMgr);
+    MockRdbStore rdbStore;
+    SetMockQuerySqlResults({nullptr});
+    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+}
+
+/**
+ * @tc.name: OnUpgradeFailure_200
+ * @tc.desc: Verify OnUpgradeFailure handles empty result set when GoToFirstRow fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LiveViewMigrationHandlerTest, OnUpgradeFailure_200, Function | SmallTest | Level1)
+{
+    NtfRdbHook hooks;
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    LiveViewMigrationHandler handler(hookMgr);
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_ERROR});
+    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+}
+
+/**
+ * @tc.name: OnUpgradeFailure_300
+ * @tc.desc: Verify OnUpgradeFailure executes DELETE SQL for each table when tables exist and ExecuteSql succeeds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LiveViewMigrationHandlerTest, OnUpgradeFailure_300, Function | SmallTest | Level1)
+{
+    NtfRdbHook hooks;
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    LiveViewMigrationHandler handler(hookMgr);
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"notification_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+}
+
+/**
+ * @tc.name: OnUpgradeFailure_400
+ * @tc.desc: Verify OnUpgradeFailure rolls back the transaction when Delete fails on a table.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LiveViewMigrationHandlerTest, OnUpgradeFailure_400, Function | SmallTest | Level1)
+{
+    NtfRdbHook hooks;
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    LiveViewMigrationHandler handler(hookMgr);
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"table1", "table2"}, {NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_OK, NativeRdb::E_ERROR});
+    SetMockDeleteErrCodes({NativeRdb::E_ERROR});
+    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+}
 } // namespace OHOS::Notification::Infra

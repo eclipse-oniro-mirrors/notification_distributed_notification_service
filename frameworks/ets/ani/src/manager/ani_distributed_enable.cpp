@@ -15,7 +15,6 @@
 #include "ani_distributed_enable.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -81,6 +80,8 @@ bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackDistributedInfo* a
 {
     if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
+        delete asyncCallbackInfo;
+        asyncCallbackInfo = nullptr;
         return false;
     }
     if (asyncCallbackInfo->info.returnCode != ERR_OK) {
@@ -162,7 +163,7 @@ ani_object AniIsDistributedEnabled(ani_env* env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabled(
+                    AnsNotification::GetInstance()->IsDistributedEnabled(
                         asyncCallbackInfo->isEnabled);
             }
         },
@@ -211,7 +212,7 @@ ani_object AniIsDistributedEnabledByBundle(ani_env* env, ani_object obj, ani_obj
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnableByBundle(
+                    AnsNotification::GetInstance()->IsDistributedEnableByBundle(
                         asyncCallbackInfo->option, asyncCallbackInfo->isEnabled);
             }
         },
@@ -241,12 +242,13 @@ ani_object AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, ani
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    std::string deviceTypeStr;
     if (NotificationSts::GetStringByAniString(env, deviceType, asyncCallbackInfo->deviceTypeStr) != ANI_OK) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "deviceType parse failed!");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->deviceTypeStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -268,7 +270,7 @@ ani_object AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, ani
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledByBundle(
+                    AnsNotification::GetInstance()->IsDistributedEnabledByBundle(
                         asyncCallbackInfo->option, asyncCallbackInfo->deviceTypeStr, true, enabled);
                 asyncCallbackInfo->isEnabled =
                 (enabled == static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) ||
@@ -315,7 +317,7 @@ ani_object AniSetDistributedEnable(ani_env* env, ani_boolean enabled, ani_object
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->EnableDistributed(
+                    AnsNotification::GetInstance()->EnableDistributed(
                         asyncCallbackInfo->isEnabled);
             }
         },
@@ -364,7 +366,7 @@ ani_object AniSetDistributedEnableByBundle(ani_env* env, ani_object obj, ani_boo
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->EnableDistributedByBundle(
+                    AnsNotification::GetInstance()->EnableDistributedByBundle(
                         asyncCallbackInfo->option, asyncCallbackInfo->isEnabled);
             }
         },
@@ -395,6 +397,8 @@ ani_object AniSetDistributedEnableByBundleAndType(ani_env* env, ani_object obj, 
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->deviceTypeStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
 
     if (!NotificationSts::UnwrapBundleOption(env, obj, asyncCallbackInfo->option)) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapBundleOption failed");
@@ -421,7 +425,7 @@ ani_object AniSetDistributedEnableByBundleAndType(ani_env* env, ani_object obj, 
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledByBundle(
+                    AnsNotification::GetInstance()->SetDistributedEnabledByBundle(
                         asyncCallbackInfo->option, asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
             }
         },
@@ -456,6 +460,8 @@ ani_object AniIsDistributedEnabledBySlot(ani_env* env, ani_enum_item slot, ani_s
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->deviceTypeStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -476,7 +482,7 @@ ani_object AniIsDistributedEnabledBySlot(ani_env* env, ani_enum_item slot, ani_s
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledBySlot(
+                    AnsNotification::GetInstance()->IsDistributedEnabledBySlot(
                         asyncCallbackInfo->slotType, asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
             }
         },
@@ -511,6 +517,8 @@ ani_object AniSetDistributedEnableBySlot(ani_env *env, ani_enum_item slot, ani_s
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->deviceTypeStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
     asyncCallbackInfo->isEnabled = NotificationSts::AniBooleanToBool(enable);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
@@ -531,7 +539,7 @@ ani_object AniSetDistributedEnableBySlot(ani_env *env, ani_enum_item slot, ani_s
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledBySlot(
+                    AnsNotification::GetInstance()->SetDistributedEnabledBySlot(
                         asyncCallbackInfo->slotType, asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
             }
         },
@@ -560,6 +568,8 @@ ani_object AniIsDistributedEnabledByDeviceType(ani_env* env, ani_string deviceTy
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->deviceTypeStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
     ani_object promise;
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
@@ -580,7 +590,7 @@ ani_object AniIsDistributedEnabledByDeviceType(ani_env* env, ani_string deviceTy
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabled(
+                    AnsNotification::GetInstance()->IsDistributedEnabled(
                         asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
             }
         },
@@ -610,6 +620,8 @@ ani_object AniSetDistributedEnabledByDeviceType(ani_env* env,
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->deviceTypeStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
     asyncCallbackInfo->isEnabled = NotificationSts::AniBooleanToBool(enable);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
@@ -630,7 +642,7 @@ ani_object AniSetDistributedEnabledByDeviceType(ani_env* env,
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabled(
+                    AnsNotification::GetInstance()->SetDistributedEnabled(
                         asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
             }
         },
@@ -659,6 +671,8 @@ ani_object AniSetDistributedEnableByBundles(ani_env* env, ani_object obj, ani_st
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->deviceTypeStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
     if (!NotificationSts::UnwrapArrayDistributedBundleOption(env, obj, asyncCallbackInfo->bundles)) {
         NotificationSts::ThrowInternerErrorWithLogE(env, "UnwrapArrayDistributedBundleOption failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
@@ -683,7 +697,7 @@ ani_object AniSetDistributedEnableByBundles(ani_env* env, ani_object obj, ani_st
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedBundleOption(
+                    AnsNotification::GetInstance()->SetDistributedBundleOption(
                         asyncCallbackInfo->bundles, asyncCallbackInfo->deviceTypeStr);
             }
         },
@@ -727,7 +741,7 @@ ani_object AniGetDistributedDeviceList(ani_env* env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedDevicelist(
+                    AnsNotification::GetInstance()->GetDistributedDevicelist(
                         asyncCallbackInfo->deviceList);
             }
         },
@@ -756,6 +770,8 @@ ani_object AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_lon
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->deviceTypeStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
     asyncCallbackInfo->status = static_cast<int32_t>(deviceStatus);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
@@ -776,7 +792,7 @@ ani_object AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_lon
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetTargetDeviceStatus(
+                    AnsNotification::GetInstance()->SetTargetDeviceStatus(
                         asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->status, DISTURB_DEFAULT_FLAG);
             }
         },
@@ -805,6 +821,8 @@ ani_object AniIsSmartReminderEnabled(ani_env* env, ani_string deviceType, ani_ob
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->deviceTypeStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -825,7 +843,7 @@ ani_object AniIsSmartReminderEnabled(ani_env* env, ani_string deviceType, ani_ob
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(
+                    AnsNotification::GetInstance()->IsSmartReminderEnabled(
                         asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
             }
         },
@@ -854,6 +872,8 @@ ani_object AniSetSmartReminderEnable(ani_env* env, ani_string deviceType, ani_bo
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->deviceTypeStr =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
     asyncCallbackInfo->isEnabled = NotificationSts::AniBooleanToBool(enable);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
@@ -874,7 +894,7 @@ ani_object AniSetSmartReminderEnable(ani_env* env, ani_string deviceType, ani_bo
             auto asyncCallbackInfo = static_cast<AsyncCallbackDistributedInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetSmartReminderEnabled(
+                    AnsNotification::GetInstance()->SetSmartReminderEnabled(
                         asyncCallbackInfo->deviceTypeStr, asyncCallbackInfo->isEnabled);
             }
         },

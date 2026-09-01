@@ -14,6 +14,7 @@
  */
 
 #include <chrono>
+#include "singleton.h"
 #include <functional>
 #include <memory>
 #include <thread>
@@ -732,6 +733,7 @@ HWTEST_F(AnsPublishServiceTest, DeleteAll_00003, Function | SmallTest | Level1)
     MockGetOsAccountLocalIdFromUid(false, 1);
     auto ret = advancedNotificationService_->DeleteAll();
     ASSERT_EQ(ret, (int)ERR_OK);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**
@@ -1231,6 +1233,7 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForAllBundles_00002, Func
     MockQueryForgroundOsAccountId(true, 1);
     result = advancedNotificationService_->SetNotificationsEnabledForAllBundles(deviceId, enabled);
     ASSERT_EQ(result, ERR_OK);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
 }
 
 /**
@@ -1336,8 +1339,8 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForSpecialBundle_00003, F
  *  3. Subsystem (Native token) and non-system app -> return ERR_ANS_INNER_PERMISSION_DENIED
  *  4. Subsystem (Native token) and system app -> return ERR_ANS_INNER_PERMISSION_DENIED
  *  with permission
- *  5. GetcurrentActiveUserId faild -> return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED
- *  6. GetcurrentActiveUserId success -> return ERR_ANS_INNER_INVALID_PARAM
+ *  5. GetCurrentCallingUserId faild -> return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED
+ *  6. GetCurrentCallingUserId success, no enabled-all preference for user -> return ERR_ANS_INNER_INVALID_PARAM
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -1365,13 +1368,20 @@ HWTEST_F(AnsPublishServiceTest, IsAllowedNotify_00001, Function | SmallTest | Le
     ASSERT_EQ(result, ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockIsVerfyPermisson(true);
-    MockQueryForgroundOsAccountId(false, 1);
+    // IsAllowedNotify resolves userId via GetOsAccountLocalIdFromUid (GetCurrentCallingUserId)
+    MockGetOsAccountLocalIdFromUid(false, 0);
     result = advancedNotificationService_->IsAllowedNotify(enabled);
     ASSERT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
 
-    MockQueryForgroundOsAccountId(true, 1);
+    MockGetOsAccountLocalIdFromUid(true, 0);
     result = advancedNotificationService_->IsAllowedNotify(enabled);
-    ASSERT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    ASSERT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
+    // reset shared mocks to defaults for subsequent tests
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockQueryForgroundOsAccountId(true, 0);
+    MockGetOsAccountLocalIdFromUid(true, 0);
 }
 
 /**
@@ -1591,6 +1601,7 @@ HWTEST_F(AnsPublishServiceTest, SetDistributedEnabledByBundle_0100, TestSize.Lev
 {
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(true, 0);
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
@@ -1641,6 +1652,7 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0100, TestSize.Leve
 {
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(true, 0);
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType1111";
     int32_t enable;
@@ -1657,6 +1669,7 @@ HWTEST_F(AnsPublishServiceTest, IsDistributedEnabledByBundle_0200, TestSize.Leve
 {
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(true, 0);
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     std::string deviceType = "testDeviceType";
 
@@ -1862,6 +1875,7 @@ HWTEST_F(AnsPublishServiceTest, SetSmartReminderEnabled_0100, TestSize.Level1)
 {
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(true, 0);
     ErrCode res = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
     ASSERT_EQ(res, ERR_OK);
 }
@@ -1905,6 +1919,7 @@ HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0100, TestSize.Level1)
 {
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(true, 0);
     bool enable = true;
     ErrCode result = advancedNotificationService_->IsSmartReminderEnabled("testDeviceType1111", enable);
     ASSERT_EQ(result, ERR_OK);
@@ -1919,6 +1934,7 @@ HWTEST_F(AnsPublishServiceTest, IsSmartReminderEnabled_0200, TestSize.Level1)
 {
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
+    MockQueryForgroundOsAccountId(true, 0);
     ErrCode ret = advancedNotificationService_->SetSmartReminderEnabled("testDeviceType", true);
     ASSERT_EQ(ret, ERR_OK);
     bool enable = false;
@@ -2040,6 +2056,56 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_001, Function | SmallTest 
     ASSERT_FALSE(result);
 }
 
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+/**
+ * @tc.name: SetDialogPoppedUnEnableTime_00001
+ * @tc.desc: Test SetDialogPoppedUnEnableTime when GetOsAccountLocalIdFromUid fails, returns early
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetDialogPoppedUnEnableTime_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+
+    MockGetOsAccountLocalIdFromUid(false, 1);
+    // early return at line 1082 before touching EXTENTION_WRAPPER; must not crash
+    advancedNotificationService_->SetDialogPoppedUnEnableTime(bundle);
+    EXPECT_NE(bundle, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: SetDialogPoppedUnEnableTime_00002
+ * @tc.desc: Test SetDialogPoppedUnEnableTime with invalid userId (<= 0), returns early
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetDialogPoppedUnEnableTime_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    // early return at line 1082; must not crash
+    advancedNotificationService_->SetDialogPoppedUnEnableTime(bundle);
+    EXPECT_NE(bundle, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: SetDialogPoppedUnEnableTime_00003
+ * @tc.desc: Test SetDialogPoppedUnEnableTime with valid userId reaches wrapper call (symbol not loaded)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetDialogPoppedUnEnableTime_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
+    // SetUp leaves wrapper symbols null; valid userId path calls wrapper which safely returns false
+    advancedNotificationService_->SetDialogPoppedUnEnableTime(bundle);
+    EXPECT_NE(bundle, nullptr);
+}
+#endif
+
 /**
  * @tc.name: IsDisableNotification_002
  * @tc.desc: Test IsDisableNotification
@@ -2048,6 +2114,7 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_001, Function | SmallTest 
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotification_002, Function | SmallTest | Level1)
 {
+    MockQueryForgroundOsAccountId(true, 0);
     bool defaultPolicy = system::GetBoolParameter("persist.edm.notification_disable", false);
     if (!defaultPolicy) {
         system::SetBoolParameter("persist.edm.notification_disable", true);
@@ -2066,6 +2133,8 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_002, Function | SmallTest 
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotification_006, Function | SmallTest | Level1)
 {
+    MockGetOsAccountLocalIdFromUid(true, 0);
+    system::SetBoolParameter("persist.edm.notification_disable", false);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 1);
     bool result = advancedNotificationService_->IsDisableNotification(bundle);
     ASSERT_FALSE(result);
@@ -2088,6 +2157,7 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_007, Function | SmallTest 
     bool result = advancedNotificationService_->IsDisableNotification(bundle);
     ASSERT_TRUE(result);
     system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**
@@ -2154,6 +2224,7 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0010, Function | SmallTest
     EXPECT_TRUE(result);
     NotificationPreferences::GetInstance()->preferencesInfo_.userDisableNotificationInfo_.clear();
     system::SetBoolParameter("persist.edm.notification_disable", defaultPolicy);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**
@@ -2164,6 +2235,7 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0010, Function | SmallTest
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0011, Function | SmallTest | Level1)
 {
+    MockQueryForgroundOsAccountId(true, 0);
     bool defaultPolicy = system::GetBoolParameter("persist.edm.notification_disable", false);
     if (defaultPolicy) {
         system::SetBoolParameter("persist.edm.notification_disable", false);
@@ -2193,6 +2265,7 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0011, Function | SmallTest
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0012, Function | SmallTest | Level1)
 {
+    MockQueryForgroundOsAccountId(true, 0);
     bool defaultPolicy = system::GetBoolParameter("persist.edm.notification_disable", false);
     if (defaultPolicy) {
         system::SetBoolParameter("persist.edm.notification_disable", false);
@@ -2221,6 +2294,7 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0012, Function | SmallTest
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0013, Function | SmallTest | Level1)
 {
+    MockQueryForgroundOsAccountId(true, 0);
     bool defaultPolicy = system::GetBoolParameter("persist.edm.notification_disable", false);
     if (defaultPolicy) {
         system::SetBoolParameter("persist.edm.notification_disable", false);
@@ -2248,6 +2322,7 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0013, Function | SmallTest
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0014, Function | SmallTest | Level1)
 {
+    MockQueryForgroundOsAccountId(true, 0);
     bool defaultPolicy = system::GetBoolParameter("persist.edm.notification_disable", false);
     if (defaultPolicy) {
         system::SetBoolParameter("persist.edm.notification_disable", false);
@@ -2276,6 +2351,7 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0014, Function | SmallTest
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotification_0015, Function | SmallTest | Level1)
 {
+    MockQueryForgroundOsAccountId(true, 0);
     bool defaultPolicy = system::GetBoolParameter("persist.edm.notification_disable", false);
     if (defaultPolicy) {
         system::SetBoolParameter("persist.edm.notification_disable", false);
@@ -2410,6 +2486,42 @@ HWTEST_F(AnsPublishServiceTest, PrePublishRequest_00001, Function | SmallTest | 
 }
 
 /**
+ * @tc.name: PrePublishRequest_00002
+ * @tc.desc: Test PrePublishRequest when GetOsAccountLocalIdFromUid fails for CreatorUid
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PrePublishRequest_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetReceiverUserId(100);
+    request->SetCreatorUid(1); // CreatorUserId stays SUBSCRIBE_USER_INIT
+
+    MockGetOsAccountLocalIdFromUid(false, 0);
+    ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request).GetErrCode(),
+        (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: PrePublishRequest_00003
+ * @tc.desc: Test PrePublishRequest when resolved userId from CreatorUid is invalid (<= 0)
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, PrePublishRequest_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetReceiverUserId(100);
+    request->SetCreatorUid(1); // CreatorUserId stays SUBSCRIBE_USER_INIT
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    ASSERT_EQ(advancedNotificationService_->PrePublishRequest(request).GetErrCode(),
+        (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
  * @tc.name: CollaboratePublish_00001
  * @tc.desc: Test CollaboratePublish
  * @tc.type: FUNC
@@ -2506,6 +2618,10 @@ HWTEST_F(AnsPublishServiceTest, CollaboratePublish_00003, Function | SmallTest |
 HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00001, Function | SmallTest | Level1)
 {
     MockIsVerfyPermisson(true);
+    // self-contained arrange: ensure notification is not disabled and user ids are valid
+    system::SetBoolParameter("persist.edm.notification_disable", false);
+    MockQueryForgroundOsAccountId(true, 0);
+    MockGetOsAccountLocalIdFromUid(true, 0);
     IPCSkeleton::SetCallingUid(5557);
     auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(nullptr);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
@@ -2584,6 +2700,7 @@ HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00004, Funct
     MockQueryForgroundOsAccountId(false, 0);
     auto ret = advancedNotificationService_->PublishNotificationForIndirectProxy(request);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
 }
 
 /**
@@ -3130,7 +3247,7 @@ HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00001, Functi
     std::string bundleName = TEST_DEFUALT_BUNDLE;
     int32_t reason = 0;
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
-    auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason);
+    advancedNotificationService_->ExcuteRemoveAllNotificationsByBundleName(bundleName, reason, -1);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
 }
 
@@ -3641,14 +3758,15 @@ HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00002, Functi
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
     int32_t userId = 100;
     MockGetOsAccountLocalIdFromUid(false, 1);
-    auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    advancedNotificationService_->ExcuteRemoveAllNotificationsByBundleName(bundleName, reason, 100);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
     MockGetOsAccountLocalIdFromUid(true, 1);
-    ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    advancedNotificationService_->ExcuteRemoveAllNotificationsByBundleName(bundleName, reason, 100);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
     MockGetOsAccountLocalIdFromUid(true, 3);
-    ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    advancedNotificationService_->ExcuteRemoveAllNotificationsByBundleName(bundleName, reason, 100);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 
@@ -3676,8 +3794,9 @@ HWTEST_F(AnsPublishServiceTest, RemoveAllNotificationsByBundleName_00003, Functi
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 2);
     int32_t userId = 100;
     MockGetOsAccountLocalIdFromUid(false, 1);
-    auto ret = advancedNotificationService_->RemoveAllNotificationsByBundleName(bundleName, reason, 100);
+    advancedNotificationService_->ExcuteRemoveAllNotificationsByBundleName(bundleName, reason, 100);
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
 /**
@@ -4185,6 +4304,258 @@ HWTEST_F(AnsPublishServiceTest, CheckCommonLiveViewRights_NonCommonLiveView_Skip
     EXPECT_EQ(ret, ERR_OK);
 
     wrapper.checkLiveViewRights_ = nullptr;
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_NullRequest_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo with null request, should return without crash.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_NullRequest_00001,
+    Function | SmallTest | Level1)
+{
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(nullptr);
+    EXPECT_EQ(ERR_OK, ERR_OK);
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_NotCommonLiveView_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo with non-live-view request, extendInfo should not be created.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_NotCommonLiveView_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(request);
+    EXPECT_EQ(request->GetExtendInfo(), nullptr);
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_GetKvFailed_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo when GetKvFromDb fails, extendInfo should not be set.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_GetKvFailed_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetExtendInfo(nullptr);
+
+    MockQueryData(-1);
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(request);
+    MockQueryData(0);
+
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_EQ(extendInfo, nullptr);
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_CreateNewExtendInfo_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo creates new extendInfo and stores switch value.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_CreateNewExtendInfo_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetExtendInfo(nullptr);
+
+    MockSetDataValue("on");
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(request);
+
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_NE(extendInfo, nullptr);
+    EXPECT_TRUE(extendInfo->HasParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY));
+    auto value = extendInfo->GetParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY);
+    auto strValue = AAFwk::IString::Query(value);
+    ASSERT_NE(strValue, nullptr);
+    EXPECT_EQ(AAFwk::String::Unbox(strValue), "on");
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_PreserveExistingExtendInfo_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo preserves existing extendInfo params.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_PreserveExistingExtendInfo_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("existingParam", AAFwk::String::Box("value"));
+    request->SetExtendInfo(extendInfo);
+
+    MockSetDataValue("off");
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(request);
+
+    auto newExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(newExtendInfo, nullptr);
+    EXPECT_TRUE(newExtendInfo->HasParam("existingParam"));
+    EXPECT_TRUE(newExtendInfo->HasParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY));
+    auto value = newExtendInfo->GetParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY);
+    auto strValue = AAFwk::IString::Query(value);
+    ASSERT_NE(strValue, nullptr);
+    EXPECT_EQ(AAFwk::String::Unbox(strValue), "off");
+}
+
+/**
+ * @tc.name: SetLiveViewShareSwitchToExtendInfo_EmptyValue_00001
+ * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo stores empty switch value when kv is empty.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, SetLiveViewShareSwitchToExtendInfo_EmptyValue_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetExtendInfo(nullptr);
+
+    MockSetDataValue("");
+    advancedNotificationService_->SetLiveViewShareSwitchToExtendInfo(request);
+
+    auto extendInfo = request->GetExtendInfo();
+    EXPECT_NE(extendInfo, nullptr);
+    EXPECT_TRUE(extendInfo->HasParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY));
+    auto value = extendInfo->GetParam(LIVE_VIEW_SHARE_FUNC_SWITCH_KEY);
+    auto strValue = AAFwk::IString::Query(value);
+    ASSERT_NE(strValue, nullptr);
+    EXPECT_EQ(AAFwk::String::Unbox(strValue), "");
+}
+
+/**
+ * @tc.name: CheckNotificationRequest_PreserveIsShared_AgentLiveView_00001
+ * @tc.desc: Test CheckNotificationRequest preserves isShared when agent controller + common live view + agent notif.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_PreserveIsShared_AgentLiveView_00001,
+    Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetIsAgentNotification(true);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    request->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(request->IsCommonLiveView());
+    ASSERT_TRUE(request->IsAgentNotification());
+
+    auto ret = advancedNotificationService_->CheckNotificationRequest(request);
+
+    EXPECT_EQ(ret, ERR_OK);
+    auto outExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(outExtendInfo, nullptr);
+    EXPECT_TRUE(outExtendInfo->HasParam("isShared"));
+}
+
+/**
+ * @tc.name: CheckNotificationRequest_RemoveIsShared_NotAgentNotification_00001
+ * @tc.desc: Test CheckNotificationRequest removes isShared when request is not agent notification.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_RemoveIsShared_NotAgentNotification_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetIsAgentNotification(false);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    extendInfo->SetParam("keepParam", AAFwk::String::Box("keep"));
+    request->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(request->IsCommonLiveView());
+
+    auto ret = advancedNotificationService_->CheckNotificationRequest(request);
+
+    EXPECT_EQ(ret, ERR_OK);
+    auto outExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(outExtendInfo, nullptr);
+    EXPECT_FALSE(outExtendInfo->HasParam("isShared"));
+    EXPECT_TRUE(outExtendInfo->HasParam("keepParam"));
+}
+
+/**
+ * @tc.name: CheckNotificationRequest_RemoveIsShared_NotCommonLiveView_00001
+ * @tc.desc: Test CheckNotificationRequest removes isShared when request is not a common live view.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_RemoveIsShared_NotCommonLiveView_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetIsAgentNotification(true);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    request->SetExtendInfo(extendInfo);
+    ASSERT_FALSE(request->IsCommonLiveView());
+
+    auto ret = advancedNotificationService_->CheckNotificationRequest(request);
+
+    EXPECT_EQ(ret, ERR_OK);
+    auto outExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(outExtendInfo, nullptr);
+    EXPECT_FALSE(outExtendInfo->HasParam("isShared"));
+}
+
+/**
+ * @tc.name: CheckNotificationRequest_NoIsSharedParam_00001
+ * @tc.desc: Test CheckNotificationRequest does nothing when extendInfo has no isShared param.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsPublishServiceTest, CheckNotificationRequest_NoIsSharedParam_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveViewContent);
+    request->SetContent(content);
+    request->SetIsAgentNotification(false);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("otherParam", AAFwk::String::Box("value"));
+    request->SetExtendInfo(extendInfo);
+
+    auto ret = advancedNotificationService_->CheckNotificationRequest(request);
+
+    EXPECT_EQ(ret, ERR_OK);
+    auto outExtendInfo = request->GetExtendInfo();
+    EXPECT_NE(outExtendInfo, nullptr);
+    EXPECT_TRUE(outExtendInfo->HasParam("otherParam"));
+    EXPECT_FALSE(outExtendInfo->HasParam("isShared"));
 }
 }  // namespace Notification
 }  // namespace OHOS

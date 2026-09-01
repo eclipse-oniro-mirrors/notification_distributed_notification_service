@@ -16,7 +16,6 @@
 
 #include "ans_notification.h"
 #include "ans_service_errors.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -59,7 +58,7 @@ void AniRemoveForBundle(ani_env *env, ani_object bundle, ani_object notification
         return;
     }
     InnerErrorCode ret =
-        DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotification(
+        AnsNotification::GetInstance()->RemoveNotification(
             option, key.id, key.label, reasonType);
     if (ret != ERR_OK) {
         ANS_LOGD("StsRemoveForBundle ret %{public}d", ret);
@@ -93,7 +92,7 @@ void AniRemoveForHashCode(ani_env *env, ani_string hashCode, ani_object reasonEn
     }
     ANS_LOGD("hashCode: %{public}s, reasonType: %{public}d", hashCodeStd.c_str(), reasonType);
     InnerErrorCode ret =
-        DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotification(hashCodeStd, reasonType);
+        AnsNotification::GetInstance()->RemoveNotification(hashCodeStd, reasonType);
     if (ret != ERR_OK) {
         ANS_LOGD("StsRemoveForHashCode ret %{public}d", ret);
         OHOS::NotificationSts::ThrowErrorWithCode(env, ret);
@@ -128,7 +127,7 @@ void AniRemoveForHashCodes(ani_env *env, ani_object hashCodes, ani_object reason
         return;
     }
     InnerErrorCode ret =
-        DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotifications(hashCodesStd, reasonType);
+        AnsNotification::GetInstance()->RemoveNotifications(hashCodesStd, reasonType);
     if (ret != ERR_OK) {
         ANS_LOGD("StsRemoveForHashCodes ret %{public}d", ret);
         OHOS::NotificationSts::ThrowErrorWithCode(env, ret);
@@ -139,7 +138,7 @@ void AniRemoveAll(ani_env *env)
 {
     ANS_LOGD("removeAll enter");
     InnerErrorCode ret =
-        DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotifications();
+        AnsNotification::GetInstance()->RemoveNotifications();
     if (ret != ERR_OK) {
         ANS_LOGD("AniRemoveAll ret %{public}d", ret);
         OHOS::NotificationSts::ThrowErrorWithCode(env, ret);
@@ -157,7 +156,7 @@ void AniRemoveAllForBundle(ani_env *env, ani_object bundle)
         return;
     }
     InnerErrorCode ret =
-        DelayedSingleton<AnsNotification>::GetInstance()->RemoveAllNotifications(option);
+        AnsNotification::GetInstance()->RemoveAllNotifications(option);
     if (ret != ERR_OK) {
         ANS_LOGD("StsRemoveForBundle ret %{public}d", ret);
         OHOS::NotificationSts::ThrowErrorWithCode(env, ret);
@@ -168,7 +167,7 @@ void AniRemoveAllForUserId(ani_env *env, ani_int userId)
 {
     ANS_LOGD("AniRemoveAllForUserId enter");
     InnerErrorCode ret =
-        DelayedSingleton<AnsNotification>::GetInstance()->RemoveNotifications(userId);
+        AnsNotification::GetInstance()->RemoveNotifications(userId);
     if (ret != ERR_OK) {
         ANS_LOGE("StsRemoveForBundle ret %{public}d", ret);
         OHOS::NotificationSts::ThrowErrorWithCode(env, ret);

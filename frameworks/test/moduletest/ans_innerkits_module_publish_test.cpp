@@ -30,6 +30,7 @@
 #include "iservice_registry.h"
 #include "notification_helper.h"
 #include "notification_json_convert.h"
+#include "mock_ans_rdb_mgr_builder.h"
 #include "remote_native_token.h"
 #include "system_ability_definition.h"
 #include "want_agent_info.h"
@@ -511,6 +512,7 @@ void AnsInnerKitsModulePublishTest::TearDownTestCase()
     if (service_ != nullptr) {
         service_->SelfClean();
     }
+    OHOS::Notification::Domain::DestroyTestRdb();
 }
 
 void AnsInnerKitsModulePublishTest::SetUp()

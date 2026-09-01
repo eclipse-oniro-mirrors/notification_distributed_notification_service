@@ -18,7 +18,6 @@
 
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
@@ -212,7 +211,7 @@ napi_value NapiSetNotificationSwitch(napi_env env, napi_callback_info info)
             auto *asyncCallbackInfo = static_cast<AsyncCallbackNotificationClassificationSwitch *>(data);
             if (asyncCallbackInfo != nullptr) {
                 asyncCallbackInfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetNotificationSwitch(
+                    AnsNotification::GetInstance()->SetNotificationSwitch(
                         asyncCallbackInfo->params.switchName, asyncCallbackInfo->params.switchState,
                         asyncCallbackInfo->params.userId);
                 ANS_LOGI("SetNotificationSwitch result=%{public}d", asyncCallbackInfo->info.errorCode);
@@ -263,7 +262,7 @@ napi_value NapiGetNotificationSwitch(napi_env env, napi_callback_info info)
             auto *asyncCallbackInfo = static_cast<AsyncCallbackNotificationClassificationSwitch *>(data);
             if (asyncCallbackInfo != nullptr) {
                 asyncCallbackInfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetNotificationSwitch(
+                    AnsNotification::GetInstance()->GetNotificationSwitch(
                         asyncCallbackInfo->params.switchName, asyncCallbackInfo->params.userId,
                         asyncCallbackInfo->params.enableStatus);
             }

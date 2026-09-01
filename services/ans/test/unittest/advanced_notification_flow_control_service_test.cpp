@@ -16,7 +16,11 @@
 #include "gtest/gtest.h"
 
 #include <thread>
+#define private public
+#define protected public
 #include "advanced_notification_flow_control_service.h"
+#undef private
+#undef protected
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
@@ -528,6 +532,68 @@ HWTEST_F(FlowControlServiceTest, FlowControl_1700, Function | SmallTest | Level1
     ansStatus = FlowControlService::GetInstance().FlowControl(record, uid, true);
     ASSERT_EQ(ansStatus.GetErrCode(), (int)ERR_ANS_INNER_OVER_MAX_UPDATE_PERSECOND);
     std::this_thread::sleep_for(std::chrono::seconds(1));
+}
+
+/**
+ * @tc.name: InitDefaultThresholdIfNeeded_BelowMin_001
+ * @tc.desc: Test InitDefaultThresholdIfNeeded clamps thresholds below FLOW_CTRL_THRESHOLD_MIN
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, InitDefaultThresholdIfNeeded_BelowMin_001, Function | SmallTest | Level1)
+{
+    auto &threshold = FlowControlService::GetInstance().threshold_;
+    threshold.maxCreateNumPerSecond = 0;
+    threshold.maxUpdateNumPerSecond = 0;
+    threshold.maxCreateNumPerSecondPerApp = 0;
+    threshold.maxUpdateNumPerSecondPerApp = 0;
+
+    FlowControlService::GetInstance().InitDefaultThresholdIfNeeded();
+
+    EXPECT_EQ(threshold.maxCreateNumPerSecond, MAX_CREATE_NUM_PERSECOND);
+    EXPECT_EQ(threshold.maxUpdateNumPerSecond, MAX_UPDATE_NUM_PERSECOND);
+    EXPECT_EQ(threshold.maxCreateNumPerSecondPerApp, MAX_CREATE_NUM_PERSECOND_PERAPP);
+    EXPECT_EQ(threshold.maxUpdateNumPerSecondPerApp, MAX_UPDATE_NUM_PERSECOND_PERAPP);
+}
+
+/**
+ * @tc.name: InitDefaultThresholdIfNeeded_AboveMax_001
+ * @tc.desc: Test InitDefaultThresholdIfNeeded clamps thresholds above FLOW_CTRL_THRESHOLD_MAX
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, InitDefaultThresholdIfNeeded_AboveMax_001, Function | SmallTest | Level1)
+{
+    constexpr uint32_t aboveMax = 10001; // FLOW_CTRL_THRESHOLD_MAX + 1
+    auto &threshold = FlowControlService::GetInstance().threshold_;
+    threshold.maxCreateNumPerSecond = aboveMax;
+    threshold.maxUpdateNumPerSecond = aboveMax;
+    threshold.maxCreateNumPerSecondPerApp = aboveMax;
+    threshold.maxUpdateNumPerSecondPerApp = aboveMax;
+
+    FlowControlService::GetInstance().InitDefaultThresholdIfNeeded();
+
+    EXPECT_EQ(threshold.maxCreateNumPerSecond, MAX_CREATE_NUM_PERSECOND);
+    EXPECT_EQ(threshold.maxUpdateNumPerSecond, MAX_UPDATE_NUM_PERSECOND);
+    EXPECT_EQ(threshold.maxCreateNumPerSecondPerApp, MAX_CREATE_NUM_PERSECOND_PERAPP);
+    EXPECT_EQ(threshold.maxUpdateNumPerSecondPerApp, MAX_UPDATE_NUM_PERSECOND_PERAPP);
+}
+
+/**
+ * @tc.name: InitDefaultThresholdIfNeeded_ValidValueKept_001
+ * @tc.desc: Test InitDefaultThresholdIfNeeded keeps a valid threshold unchanged
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(FlowControlServiceTest, InitDefaultThresholdIfNeeded_ValidValueKept_001, Function | SmallTest | Level1)
+{
+    auto &threshold = FlowControlService::GetInstance().threshold_;
+    threshold.maxCreateNumPerSecond = 50; // within [FLOW_CTRL_THRESHOLD_MIN, FLOW_CTRL_THRESHOLD_MAX]
+
+    FlowControlService::GetInstance().InitDefaultThresholdIfNeeded();
+
+    EXPECT_EQ(threshold.maxCreateNumPerSecond, 50);
+    threshold.maxCreateNumPerSecond = MAX_CREATE_NUM_PERSECOND; // restore default for subsequent tests
 }
 }  // namespace Notification
 }  // namespace OHOS

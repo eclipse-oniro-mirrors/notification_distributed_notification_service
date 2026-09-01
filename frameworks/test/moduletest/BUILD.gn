@@ -48,9 +48,12 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${core_path}/common/include",
     "${core_path}/include",
     "${inner_api_path}",
-    "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   sources = [
@@ -65,7 +68,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   defines = []
@@ -124,9 +127,12 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "${core_path}/common/include",
     "${core_path}/include",
     "${inner_api_path}",
-    "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   sources = [
@@ -143,7 +149,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   defines = []
@@ -207,9 +213,12 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "${core_path}/common/include",
     "${core_path}/include",
     "${inner_api_path}",
-    "${frameworks_path}/test/moduletest/mock/include",
     "${component_path}/services/ans/include/utils",
     "${services_path}/infrastructure/interfaces",
+    "${services_path}/domain/settings/rdb_mgr_repo/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include",
+    "${services_path}/infrastructure/external_adapter/rdb/include/public",
+    "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
   sources = [
@@ -223,7 +232,7 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   defines = []

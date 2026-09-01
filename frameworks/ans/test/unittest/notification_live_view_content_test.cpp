@@ -16,6 +16,8 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#include "ans_const_define.h"
+
 #define private public
 #define protected public
 #include "notification_live_view_content.h"
@@ -439,6 +441,126 @@ HWTEST_F(NotificationLiveViewContentTest, ReadFromParcel_InvalidStatus_00002, Fu
     parcel.WriteString("text");
     parcel.WriteString("additionalText");
     parcel.WriteInt32(-1);
+    EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadTrailingFieldsFromParcel_ReadUint32Fail_001
+ * @tc.desc: Test ReadTrailingFieldsFromParcel returns false when ReadUint32(removeState) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, ReadTrailingFieldsFromParcel_ReadUint32Fail_001,
+    Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    Parcel parcel;
+    EXPECT_EQ(rrc->ReadTrailingFieldsFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadTrailingFieldsFromParcel_InvalidRemoveState_001
+ * @tc.desc: Test ReadTrailingFieldsFromParcel returns false when removeState exceeds LIVE_VIEW_NO_REMOVE.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, ReadTrailingFieldsFromParcel_InvalidRemoveState_001,
+    Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    Parcel parcel;
+    parcel.WriteUint32(static_cast<uint32_t>(NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_NO_REMOVE) +
+        1);
+    parcel.RewindRead(0);
+    EXPECT_EQ(rrc->ReadTrailingFieldsFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadTrailingFieldsFromParcel_ReadInt32Fail_001
+ * @tc.desc: Test ReadTrailingFieldsFromParcel returns false when ReadInt32(createPid_) fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, ReadTrailingFieldsFromParcel_ReadInt32Fail_001, Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    Parcel parcel;
+    parcel.WriteUint32(static_cast<uint32_t>(NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_NO_REMOVE));
+    parcel.RewindRead(0);
+    EXPECT_EQ(rrc->ReadTrailingFieldsFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadPictureMapFromParcel_EmptyParcel_001
+ * @tc.desc: Test ReadPictureMapFromParcel returns true when parcel is empty (len reads 0).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, ReadPictureMapFromParcel_EmptyParcel_001,
+    Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    Parcel parcel;
+    EXPECT_EQ(rrc->ReadPictureMapFromParcel(parcel), true);
+    EXPECT_TRUE(rrc->pictureMap_.empty());
+}
+
+/**
+ * @tc.name: ReadPictureMapFromParcel_TooLarge_001
+ * @tc.desc: Test ReadPictureMapFromParcel returns false when len exceeds MAX_PARCELABLE_VECTOR_NUM.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, ReadPictureMapFromParcel_TooLarge_001,
+    Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    Parcel parcel;
+    parcel.WriteUint64(static_cast<uint64_t>(MAX_PARCELABLE_VECTOR_NUM) + 1);
+    parcel.RewindRead(0);
+    EXPECT_EQ(rrc->ReadPictureMapFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadPictureMapFromParcel_VectorReadFail_001
+ * @tc.desc: Test ReadPictureMapFromParcel returns false when pixel map vector read fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, ReadPictureMapFromParcel_VectorReadFail_001,
+    Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    Parcel parcel;
+    parcel.WriteUint64(1);
+    parcel.WriteString("key");
+    parcel.RewindRead(0);
+    EXPECT_EQ(rrc->ReadPictureMapFromParcel(parcel), false);
+}
+
+/**
+ * @tc.name: ReadFromParcel_NullExtensionWantAgent_001
+ * @tc.desc: Test ReadFromParcel returns false when extensionWantAgent flag is true but parcelable is null.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, ReadFromParcel_NullExtensionWantAgent_001,
+    Function | SmallTest | Level1)
+{
+    auto rrc = std::make_shared<NotificationLiveViewContent>();
+    Parcel parcel;
+    parcel.WriteString("text");
+    parcel.WriteString("title");
+    parcel.WriteString("additionalText");
+    parcel.WriteBool(false);
+    parcel.WriteInt32(0);
+    parcel.WriteInt32(static_cast<int32_t>(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE));
+    parcel.WriteUint32(1);
+    parcel.WriteBool(false);
+    parcel.WriteBool(false);
+    parcel.WriteUint64(0);
+    parcel.WriteBool(true);
+    parcel.RewindRead(0);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
 }

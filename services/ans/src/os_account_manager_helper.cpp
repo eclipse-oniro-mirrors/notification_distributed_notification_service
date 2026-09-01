@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "ans_log_wrapper.h"
+#include "singleton.h"
 #include "ans_service_errors.h"
 #include "errors.h"
 #include "ipc_skeleton.h"

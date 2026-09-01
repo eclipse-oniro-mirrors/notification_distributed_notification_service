@@ -27,10 +27,10 @@
 #include "system_ability_definition.h"
 #include "want_agent_helper.h"
 #include "nlohmann/json.hpp"
-#include "want_params_wrapper.h"
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
+#include "notification_want_params_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -686,10 +686,7 @@ void ReminderRequest::RecoverWantAgentByJson(const std::string& wantAgentInfo, c
             GetJsonValue<std::string>(root, "uri", wai->uri);
             std::string parameters;
             GetJsonValue<std::string>(root, "parameters", parameters);
-            auto result = AAFwk::WantParamWrapper::Parse(parameters);
-            if (result != nullptr) {
-                result->GetValue(wai->parameters);
-            }
+            wai->parameters = NotificationWantParamsHelper::ParseWantParamsWithBrackets(parameters);
             SetWantAgentInfo(wai);
             break;
         }
@@ -1159,14 +1156,14 @@ void ReminderRequest::SetNotDistributed(const bool notDistributed)
 }
 
 void ReminderRequest::UpdateNotificationRequest(NotificationRequest& notificationRequest, const bool isSnooze,
-    const int32_t index)
+    const int32_t index, const bool isUpdateDeliveryTime)
 {
     if (isSnooze) {
         UpdateNotificationStateForSnooze(notificationRequest);
     } else {
         UpdateNotificationStateForAlert(notificationRequest);
     }
-    UpdateNotificationCommon(notificationRequest, isSnooze);
+    UpdateNotificationCommon(notificationRequest, isSnooze, isUpdateDeliveryTime);
     UpdateNotificationAddRemovalWantAgent(notificationRequest);
     UpdateNotificationWantAgent(notificationRequest, index);
     UpdateNotificationMaxScreenWantAgent(notificationRequest);
@@ -1903,12 +1900,19 @@ bool ReminderRequest::UpdateNextReminder(const bool &force)
     return result;
 }
 
-void ReminderRequest::UpdateNotificationCommon(NotificationRequest& notificationRequest, bool isSnooze)
+void ReminderRequest::UpdateNotificationCommon(NotificationRequest& notificationRequest, bool isSnooze,
+    const bool isUpdateDeliveryTime)
 {
     ANSR_LOGI("UpdateNotification common information");
-    time_t now;
-    (void)time(&now);  // unit is seconds.
-    notificationRequest.SetDeliveryTime(GetDurationSinceEpochInMilli(now));
+    if (isUpdateDeliveryTime) {
+        time_t now;
+        (void)time(&now);  // unit is seconds.
+        deliveryTime_ = GetDurationSinceEpochInMilli(now);
+    }
+    if (deliveryTime_ == 0) {
+        deliveryTime_ = triggerTimeInMilli_;
+    }
+    notificationRequest.SetDeliveryTime(static_cast<int64_t>(deliveryTime_));
     notificationRequest.SetLabel(NOTIFICATION_LABEL);
     notificationRequest.SetShowDeliveryTime(true);
     if (isSnooze) {
@@ -2022,8 +2026,7 @@ void ReminderRequest::SerializeWantAgent(std::string& wantInfoStr, std::string& 
         pkgName = wantAgentInfo_->pkgName;
         abilityName = wantAgentInfo_->abilityName;
         uri = wantAgentInfo_->uri;
-        AAFwk::WantParamWrapper wrapper(wantAgentInfo_->parameters);
-        parameters = wrapper.ToString();
+        parameters = NotificationWantParamsHelper::SerializeWantParams(wantAgentInfo_->parameters);
     }
     nlohmann::json wantInfo;
     wantInfo["pkgName"] = pkgName;

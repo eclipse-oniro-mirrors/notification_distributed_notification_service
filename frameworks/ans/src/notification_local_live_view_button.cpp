@@ -76,7 +76,7 @@ ResourceVectorPtr NotificationLocalLiveViewButton::GetAllButtonIconResource() co
 void NotificationLocalLiveViewButton::addSingleButtonIconResource(
     std::shared_ptr<ResourceManager::Resource> &iconResource)
 {
-    if (buttonIcons_.size() >= BUTTON_MAX_SIZE) {
+    if (buttonIconsResource_.size() >= BUTTON_MAX_SIZE) {
         ANS_LOGW("already added 3 buttonIcon");
         return;
     }

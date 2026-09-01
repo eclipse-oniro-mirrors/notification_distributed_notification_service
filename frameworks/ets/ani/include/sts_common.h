@@ -20,6 +20,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <set>
 #include "ans_log_wrapper.h"
 #include <ani_signature_builder.h>
 #ifdef ANS_FEATURE_API_METRICS_HISTOGRAM
@@ -202,7 +203,12 @@ void deletePoint(T &result)
 template<class T>
 void deleteVectorWithPoints(std::vector<T> &results)
 {
-    for (auto result : results) {
+    std::set<T> deleted;
+    for (auto &result : results) {
+        if (result == nullptr || deleted.count(result) > 0) {
+            continue;
+        }
+        deleted.insert(result);
         deletePoint(result);
     }
     results.clear();

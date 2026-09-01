@@ -135,9 +135,9 @@ void NotificationCloneBundle::OnRestore(const nlohmann::json &jsonObject, std::s
 void NotificationCloneBundle::OnRestoreStart(const std::string bundleName, int32_t appIndex,
     int32_t userId, int32_t uid)
 {
+    std::unique_lock lock(lock_);
     ANS_LOGI("Handle bundle event %{public}s %{public}d %{public}d %{public}d %{public}zu.",
         bundleName.c_str(), appIndex, userId, uid, bundlesInfo_.size());
-    std::unique_lock lock(lock_);
     if (bundlesInfo_.empty()) {
         return;
     }

@@ -60,14 +60,14 @@
             "name":"ban_affect",
             "value":"\nSe selezioni Rifiuta, non riceverai notifiche sui messaggi di chat da questa app.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"cjy_click_detail",
             "value":"Vedi dettagli >>",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

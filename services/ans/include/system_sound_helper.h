@@ -20,7 +20,6 @@
 #include <vector>
 #include <string>
 
-#include "singleton.h"
 #include "ffrt.h"
 #include "notification_ringtone_info.h"
 
@@ -36,11 +35,9 @@ public:
 
     void RemoveCustomizedTones(std::vector<NotificationRingtoneInfo> ringtoneInfos);
 
-    void ResetQueue();
+    void WaitForFfrtQueue(bool reset = false);
 
 private:
-    static ffrt::mutex instanceMutex_;
-    static std::shared_ptr<SystemSoundHelper> instance_;
     std::shared_ptr<ffrt::queue> soundHelperQueue_ = nullptr;
 };
 }  // namespace Notification

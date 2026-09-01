@@ -34,6 +34,8 @@ using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 using namespace OHOS::Media;
 
+extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase = 0);
+
 namespace OHOS {
 namespace Notification {
 namespace {
@@ -422,6 +424,58 @@ HWTEST_F(AnsGeofenceServiceTest, SetGeofenceEnabled_00001, Function | SmallTest 
 
     auto result = advancedNotificationService_->SetGeofenceEnabled(true);
     EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.number    : SetGeofenceEnabled_00002
+ * @tc.name      : SetGeofenceEnabled(false) with GetCurrentActiveUserId failed
+ * @tc.desc      : Test SetGeofenceEnabled returns ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED
+ *                 when disabling geofence and GetCurrentActiveUserId fails, because the preference
+ *                 store resolves the active user first and fails before the userId check.
+ */
+HWTEST_F(AnsGeofenceServiceTest, SetGeofenceEnabled_00002, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+
+    MockQueryForgroundOsAccountId(false, 0);
+    auto result = advancedNotificationService_->SetGeofenceEnabled(false);
+    EXPECT_EQ(result, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.number    : SetGeofenceEnabled_00003
+ * @tc.name      : SetGeofenceEnabled(false) with invalid active user id
+ * @tc.desc      : Test SetGeofenceEnabled returns ERR_ANS_INNER_GET_ACTIVE_USER_FAILED when
+ *                 disabling geofence and active user id is invalid (< 0).
+ */
+HWTEST_F(AnsGeofenceServiceTest, SetGeofenceEnabled_00003, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+
+    MockQueryForgroundOsAccountId(true, 3); // mock invalid id (-1)
+    auto result = advancedNotificationService_->SetGeofenceEnabled(false);
+    EXPECT_EQ(result, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    MockQueryForgroundOsAccountId(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.number    : RecoverGeofenceLiveViewFromDb_00001
+ * @tc.name      : RecoverGeofenceLiveViewFromDb with empty db
+ * @tc.desc      : Test RecoverGeofenceLiveViewFromDb with an empty trigger db: the batch query on
+ *                 the real rdb returns an RDB sqlite-layer error (27394048, 0x1A20000) which is
+ *                 propagated to the caller, and no record is added to the trigger list.
+ */
+HWTEST_F(AnsGeofenceServiceTest, RecoverGeofenceLiveViewFromDb_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+
+    // Empty db: the batch query returns an RDB layer error (observed 27394048 = 0x1A20000),
+    // which is returned directly and the recover loop body is skipped
+    auto result = advancedNotificationService_->RecoverGeofenceLiveViewFromDb(TEST_VALID_ID);
+    EXPECT_EQ(result, 27394048); // RDB sqlite-layer error code
+    EXPECT_TRUE(advancedNotificationService_->triggerNotificationList_.empty());
 }
 
 /**
@@ -825,6 +879,138 @@ HWTEST_F(AnsGeofenceServiceTest, GeneratePublishNotificationParameter_00001, Fun
     advancedNotificationService_->GeneratePublishNotificationParameter(request, bundleOption, false, parameter);
     EXPECT_EQ(parameter.request, request);
     EXPECT_EQ(parameter.bundleOption, bundleOption);
+}
+
+/**
+ * @tc.number    : UpdateTriggerRecord_NullOldRecord_00001
+ * @tc.name      : UpdateTriggerRecord with null oldRecord
+ * @tc.desc      : Test UpdateTriggerRecord returns early when oldRecord is nullptr.
+ */
+HWTEST_F(AnsGeofenceServiceTest, UpdateTriggerRecord_NullOldRecord_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    auto newRecord = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->UpdateTriggerRecord(nullptr, newRecord);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 0);
+}
+
+/**
+ * @tc.number    : UpdateTriggerRecord_NullEntries_00001
+ * @tc.name      : UpdateTriggerRecord with null entries in list
+ * @tc.desc      : Test UpdateTriggerRecord skips null entries without crash.
+ */
+HWTEST_F(AnsGeofenceServiceTest, UpdateTriggerRecord_NullEntries_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullMemberRecord = std::make_shared<NotificationRecord>();
+    nullMemberRecord->request = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullMemberRecord);
+    auto newRecord = std::make_shared<NotificationRecord>();
+    newRecord->request = new NotificationRequest();
+    advancedNotificationService_->triggerNotificationList_.push_back(newRecord);
+    auto oldRecord = std::make_shared<NotificationRecord>();
+    oldRecord->request = new NotificationRequest();
+    advancedNotificationService_->UpdateTriggerRecord(oldRecord, newRecord);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 3);
+}
+
+/**
+ * @tc.number    : DeleteAllByUserStopped_NullEntries_00001
+ * @tc.name      : DeleteAllByUserStoppedFromTriggerNotificationList with null entries
+ * @tc.desc      : Test DeleteAllByUserStoppedFromTriggerNotificationList skips null entries.
+ */
+HWTEST_F(AnsGeofenceServiceTest, DeleteAllByUserStopped_NullEntries_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullNotifRecord = std::make_shared<NotificationRecord>();
+    nullNotifRecord->notification = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullNotifRecord);
+    advancedNotificationService_->DeleteAllByUserStoppedFromTriggerNotificationList("testKey", 0);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 2);
+}
+
+/**
+ * @tc.number    : ExecuteRemoveNotification_NullEntries_00001
+ * @tc.name      : ExecuteRemoveNotificationFromTriggerNotificationList with null entries
+ * @tc.desc      : Test ExecuteRemoveNotificationFromTriggerNotificationList skips null entries.
+ */
+HWTEST_F(AnsGeofenceServiceTest, ExecuteRemoveNotification_NullEntries_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullMemberRecord = std::make_shared<NotificationRecord>();
+    nullMemberRecord->bundleOption = nullptr;
+    nullMemberRecord->notification = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullMemberRecord);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", TEST_VALID_ID);
+    advancedNotificationService_->ExecuteRemoveNotificationFromTriggerNotificationList(bundle, 1, "label");
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 2);
+}
+
+/**
+ * @tc.number    : RemoveGroupByBundle_NullEntries_00001
+ * @tc.name      : RemoveGroupByBundleFromTriggerNotificationList with null entries
+ * @tc.desc      : Test RemoveGroupByBundleFromTriggerNotificationList skips null entries.
+ */
+HWTEST_F(AnsGeofenceServiceTest, RemoveGroupByBundle_NullEntries_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullMemberRecord = std::make_shared<NotificationRecord>();
+    nullMemberRecord->bundleOption = nullptr;
+    nullMemberRecord->request = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullMemberRecord);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", TEST_VALID_ID);
+    advancedNotificationService_->RemoveGroupByBundleFromTriggerNotificationList(bundle, "testGroup");
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 2);
+}
+
+/**
+ * @tc.number    : ExecuteCancelGroupCancel_NullEntries_00001
+ * @tc.name      : ExecuteCancelGroupCancelFromTriggerNotificationList with null entries
+ * @tc.desc      : Test ExecuteCancelGroupCancelFromTriggerNotificationList skips null entries.
+ */
+HWTEST_F(AnsGeofenceServiceTest, ExecuteCancelGroupCancel_NullEntries_00001, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullMemberRecord = std::make_shared<NotificationRecord>();
+    nullMemberRecord->bundleOption = nullptr;
+    nullMemberRecord->notification = nullptr;
+    nullMemberRecord->request = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullMemberRecord);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", TEST_VALID_ID);
+    advancedNotificationService_->ExecuteCancelGroupCancelFromTriggerNotificationList(bundleOption, "testGroup");
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 2);
+}
+
+/**
+ * @tc.number    : RemoveFromTriggerNotificationList_OptionNullEntries_00001
+ * @tc.name      : RemoveFromTriggerNotificationList with bundleOption and null entries
+ * @tc.desc      : Test RemoveFromTriggerNotificationList(bundleOption, key) skips null entries.
+ */
+HWTEST_F(AnsGeofenceServiceTest, RemoveFromTriggerNotificationList_OptionNullEntries_00001,
+    Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    advancedNotificationService_->triggerNotificationList_.clear();
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullptr);
+    auto nullMemberRecord = std::make_shared<NotificationRecord>();
+    nullMemberRecord->bundleOption = nullptr;
+    nullMemberRecord->notification = nullptr;
+    advancedNotificationService_->triggerNotificationList_.emplace_back(nullMemberRecord);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", TEST_VALID_ID);
+    NotificationKey notificationKey{1, "testLabel"};
+    advancedNotificationService_->RemoveFromTriggerNotificationList(bundleOption, notificationKey);
+    EXPECT_EQ(advancedNotificationService_->triggerNotificationList_.size(), 2);
 }
 }  // namespace Notification
 }  // namespace OHOS

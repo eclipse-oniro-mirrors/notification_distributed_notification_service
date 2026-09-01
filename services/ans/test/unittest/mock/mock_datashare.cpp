@@ -25,6 +25,9 @@ bool g_isFailedToCreateDataShareHelper = false;
 bool g_isFailedToQueryDataShareResultSet = false;
 int g_rowCount = 1;
 int g_goToNextRow = DataShare::E_OK;
+int g_getColumnIndexRet = DataShare::E_OK;
+int g_getColumnIndexValue = 0;
+int g_getStringRet = DataShare::E_OK;
 }
 
 void MockIsFailedGoToFirstRow(const int goToFirstRow)
@@ -57,6 +60,17 @@ void MockGoToGetNextRow(const int goToNextRow)
     g_goToNextRow = goToNextRow;
 }
 
+void MockGetColumnIndex(const int ret, const int columnIndex)
+{
+    g_getColumnIndexRet = ret;
+    g_getColumnIndexValue = columnIndex;
+}
+
+void MockGetStringRet(const int ret)
+{
+    g_getStringRet = ret;
+}
+
 } // namespace Notification
 
 namespace DataShare {
@@ -75,11 +89,15 @@ public:
 
     int GetColumnIndex(const std::string &columnName, int &columnIndex) override
     {
-        return 0;
+        columnIndex = Notification::g_getColumnIndexValue;
+        return Notification::g_getColumnIndexRet;
     }
 
     int GetString(int columnIndex, std::string &value) override
     {
+        if (Notification::g_getStringRet != DataShare::E_OK) {
+            return Notification::g_getStringRet;
+        }
         value = Notification::g_getStringValue;
         return 0;
     }
@@ -344,4 +362,11 @@ std::pair<int, std::shared_ptr<DataShareHelper>> DataShareHelper::Create(const s
     }
 }
 } // namespace DataShare
+
+namespace Notification {
+std::shared_ptr<DataShare::DataShareResultSet> CreateMockDataShareResultSet()
+{
+    return std::make_shared<DataShare::MockDataShareResultSet>();
+}
+} // namespace Notification
 } // namespace OHOS

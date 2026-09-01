@@ -25,7 +25,6 @@ namespace OHOS {
 namespace Notification {
 class AdvancedNotificationPriorityHelper : public DelayedSingleton<AdvancedNotificationPriorityHelper> {
 public:
-bool IsCollaborationNotification(const sptr<NotificationRequest> &request);
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
     void UpdatePriorityType(const sptr<NotificationRequest> &request);
     void SetPriorityTypeToExtendInfo(const sptr<NotificationRequest> &request);

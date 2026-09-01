@@ -26,9 +26,6 @@
 #include "os_account_manager_helper.h"
 #include "system_sound_helper.h"
 
-namespace {
-static const uint64_t DEL_TASK_DELAY = 5 * 1000;
-}
 namespace OHOS {
 namespace Notification {
 ErrCode AdvancedNotificationService::SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
@@ -108,7 +105,7 @@ void AdvancedNotificationService::ClearRingtoneByApplication(int32_t userId,
         ANS_LOGE("Empty queue %{public}d %{public}zu.", userId, cloneRingtoneInfos.size());
         return;
     }
-    notificationSvrQueue_.Submit(std::bind([&, userId, cloneRingtoneInfos]() {
+    notificationSvrQueue_.Submit([userId, cloneRingtoneInfos]() {
         std::unordered_map<std::string, std::string> bundlesMap;
         if (NotificationPreferences::GetInstance()->InitBundlesInfo(userId, bundlesMap) != ERR_OK) {
             return;
@@ -141,11 +138,31 @@ void AdvancedNotificationService::ClearRingtoneByApplication(int32_t userId,
             if (uris.count(item.GetRingtoneUri())) {
                 continue;
             }
+            if (item.GetRingtoneUri().find("..") != std::string::npos) {
+                ANS_LOGE("invalid ringtoneUri contains .., function: %{public}s", __FUNCTION__);
+                continue;
+            }
             delRingtoneInfos.push_back(item);
         }
         SystemSoundHelper::GetInstance()->RemoveCustomizedTones(delRingtoneInfos);
-    }),
-        DEL_TASK_DELAY, "delRingtone");
+    });
+}
+
+std::vector<NotificationRingtoneInfo> AdvancedNotificationService::FilterValidRingtoneUris(
+    const std::vector<NotificationRingtoneInfo> &infos)
+{
+    std::vector<NotificationRingtoneInfo> validRingtoneInfos;
+    for (const auto &item : infos) {
+        if (item.GetRingtoneUri().empty()) {
+            continue;
+        }
+        if (item.GetRingtoneUri().find("..") != std::string::npos) {
+            ANS_LOGE("invalid ringtoneUri contains .., function: %{public}s", __FUNCTION__);
+            continue;
+        }
+        validRingtoneInfos.push_back(item);
+    }
+    return validRingtoneInfos;
 }
 
 void AdvancedNotificationService::ClearOverTimeRingToneInfo()
@@ -155,10 +172,10 @@ void AdvancedNotificationService::ClearOverTimeRingToneInfo()
     if (cloneTime != 0 && cloneTime < curTime && (curTime - cloneTime) >=
         NotificationConstant::MAX_CLONE_TIME) {
         ANS_LOGI("Start clear overtime ringinfo.");
-        notificationSvrQueue_.Submit(std::bind([&]() {
+        notificationSvrQueue_.Submit([this]() {
             int32_t userId = -1;
             if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-                ANS_LOGE("Failed to get active user id!");
+                ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
                 return;
             }
             std::vector<NotificationRingtoneInfo> cloneRingtoneInfos;
@@ -169,12 +186,12 @@ void AdvancedNotificationService::ClearOverTimeRingToneInfo()
             // clear dh data
             cloneRingtoneInfos.clear();
             NotificationPreferences::GetInstance()->GetAllCloneRingtoneInfo(ZERO_USERID, cloneRingtoneInfos);
-            SystemSoundHelper::GetInstance()->RemoveCustomizedTones(cloneRingtoneInfos);
+            std::vector<NotificationRingtoneInfo> validRingtoneInfos = FilterValidRingtoneUris(cloneRingtoneInfos);
+            SystemSoundHelper::GetInstance()->RemoveCustomizedTones(validRingtoneInfos);
             ClearRingtoneByApplication(ZERO_USERID, cloneRingtoneInfos);
             NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId, 0);
             ANS_LOGI("Clear overtime ringinfo %{public}d", userId);
-        }),
-            DEL_TASK_DELAY, "ringtone");
+        });
     }
 }
 }  // namespace Notification

@@ -16,7 +16,6 @@
 #include "ani_ringtone_info_by_bundle.h"
 
 #include "ans_notification.h"
-#include "singleton.h"
 #include "ans_log_wrapper.h"
 #include "sts_throw_erro.h"
 #include "sts_common.h"
@@ -82,6 +81,8 @@ bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackRingtoneInfo* asyn
 {
     if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
+        delete asyncCallbackInfo;
+        asyncCallbackInfo = nullptr;
         return false;
     }
     if (asyncCallbackInfo->info.returnCode != ERR_OK) {
@@ -154,7 +155,7 @@ ani_object AniSetRingtoneInfoByBundle(ani_env* env, ani_object bundleObj, ani_ob
             auto asyncCallbackInfo = static_cast<AsyncCallbackRingtoneInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetRingtoneInfoByBundle(
+                    AnsNotification::GetInstance()->SetRingtoneInfoByBundle(
                         asyncCallbackInfo->bundle, asyncCallbackInfo->ringtoneInfo);
             }
         },
@@ -203,7 +204,7 @@ ani_object AniGetRingtoneInfoByBundle(ani_env *env, ani_object bundleObj, ani_ob
             auto asyncCallbackInfo = static_cast<AsyncCallbackRingtoneInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetRingtoneInfoByBundle(
+                    AnsNotification::GetInstance()->GetRingtoneInfoByBundle(
                         asyncCallbackInfo->bundle, asyncCallbackInfo->ringtoneInfo);
             }
         },

@@ -34,7 +34,7 @@ ohos_unittest("rdb_mgr_repo_unit_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
   ]
 
   external_deps = [

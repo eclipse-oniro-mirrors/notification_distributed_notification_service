@@ -19,7 +19,6 @@
 #include <functional>
 
 #include "refbase.h"
-#include "singleton.h"
 
 #include "ans_log_wrapper.h"
 #include "ans_inner_errors.h"

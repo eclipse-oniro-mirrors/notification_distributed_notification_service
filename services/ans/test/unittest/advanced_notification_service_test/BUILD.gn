@@ -60,7 +60,7 @@ ohos_unittest("advanced_notification_extension_subscription_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${services_path}/ans:ans_service_sources",
+    "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
 
@@ -88,10 +88,12 @@ ohos_unittest("advanced_notification_extension_subscription_test") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "image_framework:image_native",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
     "relational_store:native_rdb",
     "time_service:time_client",
+    "ability_runtime:wantagent_innerkits"
   ]
 
   subsystem_name = "${subsystem_name}"

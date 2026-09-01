@@ -60,14 +60,14 @@
             "name":"ban_affect",
             "value":"\n거부를 선택하면 이 앱의 채팅 메시지 알림이 수신되지 않습니다.",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         },
         {
             "name":"cjy_click_detail",
             "value":"상세정보 보기 >>",
             "attr":{
-                "priority":"translate"
+                "priority":"LT"
             }
         }
     ]

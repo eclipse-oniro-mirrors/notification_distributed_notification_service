@@ -17,7 +17,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "napi_remove_group.h"
 
 namespace OHOS {
@@ -147,7 +146,7 @@ napi_value NapiRemoveGroupByBundle(napi_env env, napi_callback_info info)
                     asynccallbackinfo->params.option.GetUid(),
                     asynccallbackinfo->params.groupName.c_str());
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->RemoveGroupByBundle(
+                    AnsNotification::GetInstance()->RemoveGroupByBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->params.groupName);
             }
         },

@@ -14,6 +14,7 @@
  */
 
 #include <thread>
+#include "singleton.h"
 #include "gtest/gtest.h"
 
 #define private public
@@ -35,12 +36,23 @@
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
+#include "long_wrapper.h"
+#include "notification_live_view_content.h"
+#include "notification_content.h"
+#include "want_params.h"
 #include "mock_push_callback_stub.h"
 #include "advanced_notdisturb_enabled_observer.h"
 #include "advanced_notdisturb_white_list_observer.h"
+#include "system_event_observer.h"
+#include "notification_preferences.h"
+#include "common_event_support.h"
+#include "common_event_data.h"
+#include "want.h"
 
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
+extern void MockIsOsAccountExists(bool mockRet);
 extern void MockEncrypt(bool mockRet);
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -341,6 +353,146 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, PrepareNotificationRequest_1200, F
 }
 
 /**
+ * @tc.name: PrepareNotificationRequest_SharedLiveView_GetActiveUserFailed_1300
+ * @tc.desc: Test PrepareNotificationRequest when isShared live view and GetCurrentActiveUserId fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    PrepareNotificationRequest_SharedLiveView_GetActiveUserFailed_1300, Function | SmallTest | Level1)
+{
+    MockIsNonBundleName(false);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetIsAgentNotification(true);
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    req->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    req->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(req->IsSharedThirdpartyLiveView());
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    MockQueryForgroundOsAccountId(false, 0);
+
+    auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
+
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    ASSERT_EQ(req->GetOwnerUid(), DEFAULT_UID);
+    MockQueryForgroundOsAccountId(true, 0);
+}
+
+/**
+ * @tc.name: PrepareNotificationRequest_SharedLiveView_Success_1400
+ * @tc.desc: Test PrepareNotificationRequest when isShared live view and GetCurrentActiveUserId succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    PrepareNotificationRequest_SharedLiveView_Success_1400, Function | SmallTest | Level1)
+{
+    MockIsNonBundleName(false);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetIsAgentNotification(true);
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    req->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    req->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(req->IsSharedThirdpartyLiveView());
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    MockQueryForgroundOsAccountId(true, 0);
+
+    auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
+
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
+    ASSERT_EQ(req->GetOwnerUid(), DEFAULT_UID);
+    MockQueryForgroundOsAccountId(true, 0);
+}
+
+/**
+ * @tc.name: PrepareNotificationRequest_SharedLiveView_OwnerUserIdNotExists_1500
+ * @tc.desc: Test PrepareNotificationRequest when isShared live view with ownerUserId set but user not exists.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    PrepareNotificationRequest_SharedLiveView_OwnerUserIdNotExists_1500, Function | SmallTest | Level1)
+{
+    MockIsNonBundleName(false);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetIsAgentNotification(true);
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    req->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    req->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(req->IsSharedThirdpartyLiveView());
+    constexpr int32_t testOwnerUserId = 101;
+    req->SetOwnerUserId(testOwnerUserId);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    MockQueryForgroundOsAccountId(true, 0);
+    MockIsOsAccountExists(false);
+
+    auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
+
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_PARAM);
+    ASSERT_EQ(req->GetOwnerUid(), DEFAULT_UID);
+    ASSERT_EQ(req->GetOwnerUserId(), testOwnerUserId);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.name: PrepareNotificationRequest_SharedLiveView_ValidOwnerUserId_1600
+ * @tc.desc: Test PrepareNotificationRequest when isShared live view with valid ownerUserId, userId should be kept.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    PrepareNotificationRequest_SharedLiveView_ValidOwnerUserId_1600, Function | SmallTest | Level1)
+{
+    MockIsNonBundleName(false);
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetIsAgentNotification(true);
+    req->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    req->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    req->SetExtendInfo(extendInfo);
+    ASSERT_TRUE(req->IsSharedThirdpartyLiveView());
+    constexpr int32_t testOwnerUserId = 101;
+    req->SetOwnerUserId(testOwnerUserId);
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    MockQueryForgroundOsAccountId(true, 0);
+    MockIsOsAccountExists(true);
+
+    auto ret = advancedNotificationService_->PrepareNotificationRequest(req);
+
+    ASSERT_EQ(ret.GetErrCode(), (int)ERR_OK);
+    ASSERT_EQ(req->GetOwnerUid(), DEFAULT_UID);
+    ASSERT_EQ(req->GetOwnerUserId(), testOwnerUserId);
+    MockIsOsAccountExists(true);
+}
+
+/**
  * @tc.name: AssignToNotificationList_100
  * @tc.desc: Test AssignToNotificationList.
  * @tc.type: FUNC
@@ -411,6 +563,165 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, AssignToNotificationList_400, Func
 
     ret = advancedNotificationService_->AssignToNotificationList(record);
     ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: AssignToNotificationList_CreateTimeInExtendInfo_00001
+ * @tc.desc: Test AssignToNotificationList stores createTime in extendInfo on create.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    AssignToNotificationList_CreateTimeInExtendInfo_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetNotificationId(1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    auto ret = advancedNotificationService_->AssignToNotificationList(record);
+    ASSERT_EQ(ret, (int)ERR_OK);
+
+    auto extendInfo = request->GetExtendInfo();
+    ASSERT_NE(extendInfo, nullptr);
+    EXPECT_TRUE(extendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    auto param = extendInfo->GetParam(EXTENDINFO_CREATE_TIME);
+    AAFwk::ILong* iLong = AAFwk::ILong::Query(param);
+    ASSERT_NE(iLong, nullptr);
+    EXPECT_EQ(AAFwk::Long::Unbox(iLong), request->GetCreateTime());
+}
+
+/**
+ * @tc.name: AssignToNotificationList_RecoverPreserveCreateTime_00001
+ * @tc.desc: Test AssignToNotificationList with isRecover=true resets request createTime to
+ *           current time but preserves createTime in extendInfo restored from db.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    AssignToNotificationList_RecoverPreserveCreateTime_00001, Function | SmallTest | Level1)
+{
+    const int64_t fixedCreateTime = 1718000000000;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetNotificationId(2);
+    request->SetCreateTime(fixedCreateTime);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam(EXTENDINFO_CREATE_TIME, AAFwk::Long::Box(static_cast<long>(fixedCreateTime)));
+    request->SetExtendInfo(extendInfo);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->AssignToNotificationList(record, true);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+    // request createTime keeps the original reset logic
+    EXPECT_GT(request->GetCreateTime(), fixedCreateTime);
+    // createTime in extendInfo is preserved from db
+    auto newExtendInfo = request->GetExtendInfo();
+    ASSERT_NE(newExtendInfo, nullptr);
+    EXPECT_TRUE(newExtendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    auto param = newExtendInfo->GetParam(EXTENDINFO_CREATE_TIME);
+    AAFwk::ILong* iLong = AAFwk::ILong::Query(param);
+    ASSERT_NE(iLong, nullptr);
+    EXPECT_EQ(AAFwk::Long::Unbox(iLong), fixedCreateTime);
+}
+
+/**
+ * @tc.name: AssignToNotificationList_RecoverNoExtendInfoCreateTime_00002
+ * @tc.desc: Test AssignToNotificationList with isRecover=true leaves extendInfo untouched
+ *           when restored extendInfo has no createTime param.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    AssignToNotificationList_RecoverNoExtendInfoCreateTime_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetNotificationId(3);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("otherParam", AAFwk::String::Box("value"));
+    request->SetExtendInfo(extendInfo);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+
+    auto ret = advancedNotificationService_->AssignToNotificationList(record, true);
+
+    ASSERT_EQ(ret, (int)ERR_OK);
+    EXPECT_GT(request->GetCreateTime(), 0);
+    auto newExtendInfo = request->GetExtendInfo();
+    ASSERT_NE(newExtendInfo, nullptr);
+    EXPECT_FALSE(newExtendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    EXPECT_TRUE(newExtendInfo->HasParam("otherParam"));
+}
+
+/**
+ * @tc.name: FillMissingParameters_PreserveCreateTime_00001
+ * @tc.desc: Test FillMissingParameters preserves createTime from old request on update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    FillMissingParameters_PreserveCreateTime_00001, Function | SmallTest | Level1)
+{
+    const int64_t fixedCreateTime = 1718000000000;
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    auto oldExtendInfo = std::make_shared<AAFwk::WantParams>();
+    oldExtendInfo->SetParam(EXTENDINFO_CREATE_TIME,
+        AAFwk::Long::Box(static_cast<long>(fixedCreateTime)));
+    oldRequest->SetExtendInfo(oldExtendInfo);
+
+    sptr<NotificationRequest> newRequest = new (std::nothrow) NotificationRequest();
+    newRequest->FillMissingParameters(oldRequest);
+
+    auto newExtendInfo = newRequest->GetExtendInfo();
+    ASSERT_NE(newExtendInfo, nullptr);
+    EXPECT_TRUE(newExtendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    auto param = newExtendInfo->GetParam(EXTENDINFO_CREATE_TIME);
+    AAFwk::ILong* iLong = AAFwk::ILong::Query(param);
+    ASSERT_NE(iLong, nullptr);
+    EXPECT_EQ(AAFwk::Long::Unbox(iLong), fixedCreateTime);
+}
+
+/**
+ * @tc.name: FillMissingParameters_NoCreateTimeInOld_00001
+ * @tc.desc: Test FillMissingParameters does not write createTime when old request lacks it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    FillMissingParameters_NoCreateTimeInOld_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    auto oldExtendInfo = std::make_shared<AAFwk::WantParams>();
+    oldExtendInfo->SetParam("otherParam", AAFwk::String::Box("value"));
+    oldRequest->SetExtendInfo(oldExtendInfo);
+
+    sptr<NotificationRequest> newRequest = new (std::nothrow) NotificationRequest();
+    newRequest->FillMissingParameters(oldRequest);
+
+    auto newExtendInfo = newRequest->GetExtendInfo();
+    if (newExtendInfo != nullptr) {
+        EXPECT_FALSE(newExtendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    }
+}
+
+/**
+ * @tc.name: SetCreateTimeToExtendInfo_00001
+ * @tc.desc: Test SetCreateTimeToExtendInfo for nullptr request, null and existing extendInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetCreateTimeToExtendInfo_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->SetCreateTimeToExtendInfo(nullptr, 1000);
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    advancedNotificationService_->SetCreateTimeToExtendInfo(request, 2000);
+    auto extendInfo = request->GetExtendInfo();
+    ASSERT_NE(extendInfo, nullptr);
+    EXPECT_TRUE(extendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+
+    auto existingExtendInfo = std::make_shared<AAFwk::WantParams>();
+    existingExtendInfo->SetParam("existingParam", AAFwk::String::Box("value"));
+    request->SetExtendInfo(existingExtendInfo);
+    advancedNotificationService_->SetCreateTimeToExtendInfo(request, 3000);
+    auto newExtendInfo = request->GetExtendInfo();
+    ASSERT_NE(newExtendInfo, nullptr);
+    EXPECT_TRUE(newExtendInfo->HasParam(EXTENDINFO_CREATE_TIME));
+    EXPECT_TRUE(newExtendInfo->HasParam("existingParam"));
 }
 
 /**
@@ -1100,6 +1411,43 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationKeys_100, Function 
 }
 
 /**
+ * @tc.name: GetNotificationKeys_SkipSharedThirdpartyLiveView_200
+ * @tc.desc: test GetNotificationKeys skips records whose request is a shared thirdparty live view.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, GetNotificationKeys_SkipSharedThirdpartyLiveView_200,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+
+    sptr<NotificationRequest> request1 = new (std::nothrow) NotificationRequest();
+    request1->SetNotificationId(1);
+    request1->SetOwnerUid(SYSTEM_APP_UID);
+    auto record1 = advancedNotificationService_->MakeNotificationRecord(request1, bundle);
+
+    sptr<NotificationRequest> request2 = new (std::nothrow) NotificationRequest();
+    request2->SetNotificationId(2);
+    request2->SetOwnerUid(SYSTEM_APP_UID);
+    request2->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request2->SetContent(content);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isShared", AAFwk::Integer::Box(1));
+    request2->SetExtendInfo(extendInfo);
+    auto record2 = advancedNotificationService_->MakeNotificationRecord(request2, bundle);
+    ASSERT_TRUE(record2->request->IsSharedThirdpartyLiveView());
+
+    advancedNotificationService_->AddToNotificationList(record1);
+    advancedNotificationService_->AddToNotificationList(record2);
+
+    auto res = advancedNotificationService_->GetNotificationKeys(bundle);
+
+    ASSERT_EQ(res.size(), 1);
+    ASSERT_EQ(res[0], record1->notification->GetKey());
+}
+
+/**
  * @tc.name: GetNotificationKeysByBundle_100
  * @tc.desc: test GetNotificationKeysByBundle when bundleOption is nullptr and record exists in delayNotificationList_
  *           and notificationList_.
@@ -1390,6 +1738,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationListForDelet
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetNotificationId(1);
+    request->SetCreatorUserId(100);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     record->notification->SetRemoveAllowed(false);
     advancedNotificationService_->AddToNotificationList(record);
@@ -1410,6 +1759,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationListForDelet
 {
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetCreatorUserId(100);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     record->notification->SetRemoveAllowed(true);
     record->request->SetUnremovable(true);
@@ -1600,6 +1950,68 @@ HWTEST_F(AdvancedNotificationServiceUnitTest,
 
     auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
     EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00006
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey when GetOsAccountLocalIdFromUid fails
+ *           with non-default owner uid, returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00006, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", NON_SYSTEM_APP_UID, INVALID_USER_ID, 0);
+    request->SetLabel("testLabel");
+    auto record = CreateAtomicServiceRecord(1, "com.test.bundle", NON_SYSTEM_APP_UID, 100);
+    record->request->SetLabel("testLabel");
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    MockGetOsAccountLocalIdFromUid(false, 1);
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_EQ(result, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00007
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey when resolved ownerUserId is invalid (<= 0),
+ *           returns nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00007, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", NON_SYSTEM_APP_UID, INVALID_USER_ID, 0);
+    request->SetLabel("testLabel");
+    auto record = CreateAtomicServiceRecord(1, "com.test.bundle", NON_SYSTEM_APP_UID, 100);
+    record->request->SetLabel("testLabel");
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_EQ(result, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GetFromNotificationListByAtomicServiceKey_00008
+ * @tc.desc: test GetFromNotificationListByAtomicServiceKey resolves ownerUserId from uid and matches record
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    GetFromNotificationListByAtomicServiceKey_00008, Function | SmallTest | Level1)
+{
+    sptr request = CreateAtomicServiceRequest(1, "com.test.bundle", NON_SYSTEM_APP_UID, INVALID_USER_ID, 0);
+    request->SetLabel("testLabel");
+    auto record = CreateAtomicServiceRecord(1, "com.test.bundle", NON_SYSTEM_APP_UID, 100);
+    record->request->SetLabel("testLabel");
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    // annex mock default resolves uid to userId 100, request ownerUserId becomes 100 and matches record
+    auto result = advancedNotificationService_->GetFromNotificationListByAtomicServiceKey(request);
+    EXPECT_NE(result, nullptr);
+    EXPECT_EQ(result->request->GetNotificationId(), 1);
 }
 
 /**
@@ -2867,6 +3279,103 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationStatisticsToDB_100,
     advancedNotificationService_->GetStatisticsByBundle(bundles, statistic);
     int ret = statistic.size();
     ASSERT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: SetNotificationStatisticsToDB_200
+ * @tc.desc: Test SetNotificationStatisticsToDB returns early when ResolveStatisticsTableUserId < 0 (line 802),
+ *           so no statistics row is written.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationStatisticsToDB_200, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    request->SetNotificationId(200);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    sptr<NotificationBundleOption> bundle01 = sptr<NotificationBundleOption>::MakeSptr();
+    bundle01->SetBundleName(TEST_DEFUALT_BUNDLE);
+    bundle01->SetUid(200200);
+
+    // userId resolution fails -> ResolveStatisticsTableUserId returns INVALID_USER_ID (< 0) -> line 802 early return.
+    MockGetOsAccountLocalIdFromUid(false, 1);
+    advancedNotificationService_->SetNotificationStatisticsToDB(record, bundle01, false);
+
+    // Keep the failing mock so the query also targets notification_statistics_-1; a buggy write (tableUserId < 0
+    // not guarded) would land in that table and surface as recentCount > 0.
+    std::vector<sptr<NotificationBundleOption>> bundles;
+    bundles.push_back(bundle01);
+    std::vector<NotificationStatistics> statistic;
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(true);
+    advancedNotificationService_->GetStatisticsByBundle(bundles, statistic);
+    ASSERT_FALSE(statistic.empty());
+    EXPECT_EQ(statistic[0].GetRecentCount(), 0);
+
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default
+}
+
+/**
+ * @tc.name: SystemEventObserver_OnReceiveEvent_TimeChanged_001
+ * @tc.desc: Verify OnReceiveEvent enters the TIME_CHANGED judgment (line 140): the handler calls
+ *           UpdateCustomTimeData, which shifts the seeded row's notificationTime in the active user's
+ *           statistics table (QueryStatisticsByBundle requires a positive tableUserId).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_OnReceiveEvent_TimeChanged_001,
+    Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    ASSERT_NE(advancedNotificationService_->systemEventObserver_, nullptr);
+
+    constexpr int32_t STATS_USER_ID = 100; // positive userId required by QueryStatisticsByBundle
+    // Seed a row in the active user's statistics table; UpdateCustomTimeData shifts active user tables.
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundleStats140", 20014044);
+    ASSERT_EQ(NotificationPreferences::GetInstance()->PutNotificationStatistics(STATS_USER_ID, bundle), ERR_OK);
+
+    int32_t recentCount = 0;
+    int64_t lastTimeBefore = 0;
+    ASSERT_TRUE(NotificationPreferences::GetInstance()->preferncesDB_->QueryStatisticsByBundle(
+        bundle->GetUid(), STATS_USER_ID, recentCount, lastTimeBefore));
+    ASSERT_GT(recentCount, 0);
+
+    EventFwk::CommonEventData data;
+    AAFwk::Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_TIME_CHANGED);
+    data.SetWant(want);
+    advancedNotificationService_->systemEventObserver_->OnReceiveEvent(data); // line 140 -> shifts user rows
+
+    int64_t lastTimeAfter = 0;
+    ASSERT_TRUE(NotificationPreferences::GetInstance()->preferncesDB_->QueryStatisticsByBundle(
+        bundle->GetUid(), STATS_USER_ID, recentCount, lastTimeAfter));
+    // line 140 entered -> UpdateCustomTimeData shifted notificationTime -> lastTime must change.
+    EXPECT_NE(lastTimeAfter, lastTimeBefore);
+}
+
+/**
+ * @tc.name: SystemEventObserver_OnReceiveEvent_PackageRemoved_001
+ * @tc.desc: Verify OnReceiveEvent enters the PACKAGE_REMOVED statistics block (line 175) with
+ *           bundleOption != nullptr (the onBundleRemovedByUserId spy fires).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_OnReceiveEvent_PackageRemoved_001,
+    Function | SmallTest | Level1)
+{
+    ISystemEvent callbacks = {};
+    bool spyFired = false;
+    callbacks.onBundleRemovedByUserId = [&spyFired](const sptr<NotificationBundleOption> &, int32_t) {
+        spyFired = true;
+    };
+    SystemEventObserver observer(callbacks);
+
+    EventFwk::CommonEventData data;
+    AAFwk::Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
+    data.SetWant(want);
+
+    observer.OnReceiveEvent(data);
+    // bundleOption != nullptr -> PACKAGE_REMOVED handler runs -> line 175 entered
+    EXPECT_TRUE(spyFired);
 }
 #endif
 }

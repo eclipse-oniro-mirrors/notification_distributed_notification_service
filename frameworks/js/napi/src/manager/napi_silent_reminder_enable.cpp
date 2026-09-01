@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
@@ -124,7 +123,7 @@ napi_value NapiSetSilentReminderEnabled(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackSilentReminderEnable *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetSilentReminderEnabled(
+                    AnsNotification::GetInstance()->SetSilentReminderEnabled(
                         asynccallbackinfo->params.option, asynccallbackinfo->params.enabled);
                 ANS_LOGI("SetSilentReminder errorCode=%{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -212,7 +211,7 @@ napi_value NapiIsSilentReminderEnabled(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackSilentReminderEnable *>(data);
             if (asynccallbackinfo) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->IsSilentReminderEnabled(
+                        AnsNotification::GetInstance()->IsSilentReminderEnabled(
                             asynccallbackinfo->params.option, asynccallbackinfo->params.enableStatus);
                 ANS_LOGI("isSmartReminder code=%{public}u,status=%{public}d",
                     asynccallbackinfo->info.errorCode, asynccallbackinfo->params.enableStatus);

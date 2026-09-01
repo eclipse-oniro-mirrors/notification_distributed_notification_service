@@ -45,12 +45,10 @@
 #include "notification_local_live_view_content.h"
 #include "notification_action_button.h"
 #include "notification_flags.h"
-#include "notification_constant.h"
 #include "notification_helper.h"
 #include "want_params.h"
 #include "want_params_wrapper.h"
 #include "token_setproc.h"
-#include "singleton.h"
 
 using json = nlohmann::json;
 
@@ -347,7 +345,7 @@ ErrCode NotificationShellCommand::Init()
 {
     ErrCode result = OHOS::ERR_OK;
     if (!ans_) {
-        ans_ = DelayedSingleton<AnsNotification>::GetInstance();
+        ans_ = AnsNotification::GetInstance();
     }
     if (!ans_) {
         result = OHOS::ERR_INVALID_VALUE;

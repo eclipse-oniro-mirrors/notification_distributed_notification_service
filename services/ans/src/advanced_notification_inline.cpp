@@ -26,7 +26,6 @@
 #include "bundle_manager_helper.h"
 #include "errors.h"
 #include "ipc_skeleton.h"
-#include "notification_constant.h"
 #include "os_account_manager_helper.h"
 #include "notification_preferences.h"
 #include "notification_analytics_util.h"

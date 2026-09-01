@@ -16,7 +16,6 @@
 
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "sts_badge_query_callback.h"
 #include "sts_callback_promise.h"
 #include "sts_common.h"
@@ -168,7 +167,7 @@ ani_object AniDisplayBadge(ani_env *env, ani_object obj, ani_boolean enable, ani
             auto asyncCallbackInfo = static_cast<AsyncCallbackBadgeInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetShowBadgeEnabledForBundle(
+                    AnsNotification::GetInstance()->SetShowBadgeEnabledForBundle(
                         asyncCallbackInfo->option, asyncCallbackInfo->isEnable);
             }
         },
@@ -218,7 +217,7 @@ ani_object AniIsBadgeDisplayed(ani_env *env, ani_object obj, ani_object callback
             auto asyncCallbackInfo = static_cast<AsyncCallbackBadgeInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabledForBundle(
+                    AnsNotification::GetInstance()->GetShowBadgeEnabledForBundle(
                         asyncCallbackInfo->option, asyncCallbackInfo->isEnable);
             }
         },
@@ -266,7 +265,7 @@ ani_object AniSetBadgeNumber(ani_env *env, ani_int badgeNumber, ani_object callb
             auto asyncCallbackInfo = static_cast<AsyncCallbackBadgeInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(
+                    AnsNotification::GetInstance()->SetBadgeNumber(
                         asyncCallbackInfo->badgeNumber);
             }
         },
@@ -316,7 +315,7 @@ ani_object AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_int badge
             auto asyncCallbackInfo = static_cast<AsyncCallbackBadgeInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumberByBundle(
+                    AnsNotification::GetInstance()->SetBadgeNumberByBundle(
                         asyncCallbackInfo->option, asyncCallbackInfo->badgeNumber);
             }
         },
@@ -366,7 +365,7 @@ ani_object AniSetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj, ani_o
             auto asyncCallbackInfo = static_cast<AsyncCallbackBadgeInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetShowBadgeEnabledForBundles(
+                    AnsNotification::GetInstance()->SetShowBadgeEnabledForBundles(
                         asyncCallbackInfo->options);
             }
         },
@@ -416,7 +415,7 @@ ani_object AniGetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj, ani_o
             auto asyncCallbackInfo = static_cast<AsyncCallbackBadgeInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabledForBundles(
+                    AnsNotification::GetInstance()->GetShowBadgeEnabledForBundles(
                         asyncCallbackInfo->bundles, asyncCallbackInfo->bundleEnable);
             }
         },
@@ -462,7 +461,7 @@ ani_object AniGetBadgeNumber(ani_env *env, ani_object callback)
             auto asyncCallbackInfo = static_cast<AsyncCallbackBadgeInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetBadgeNumber(
+                    AnsNotification::GetInstance()->GetBadgeNumber(
                         asyncCallbackInfo->badgeNumber);
             }
         },

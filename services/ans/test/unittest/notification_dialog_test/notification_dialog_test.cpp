@@ -24,8 +24,10 @@
 #undef protected
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
+#include "notification_bundle_option.h"
 
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
+extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 
 using namespace testing::ext;
@@ -34,6 +36,16 @@ namespace Notification {
 namespace {
 constexpr const char* NOTIFICATION_DIALOG_SERVICE_BUNDLE = "com.ohos.notificationdialog";
 constexpr const char* NOTIFICATION_DIALOG_SERVICE_ABILITY = "EnableNotificationDialog";
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+// NotificationDialogManager only stores the AdvancedNotificationService reference in its
+// constructor, and SetDialogPoppedTimeInterVal never dereferences it, so binding the
+// reference to a dummy object is sufficient for these tests.
+AdvancedNotificationService& GetAnsRefForDialogManager()
+{
+    static unsigned char dummyAns[sizeof(void *)] = {0};
+    return *reinterpret_cast<AdvancedNotificationService *>(dummyAns);
+}
+#endif
 }
 
 class NotificationDialogTest : public testing::Test {
@@ -163,5 +175,39 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00600, Function | SmallTest 
         false);
     ASSERT_NE(result, (int)ERR_ANS_INVALID_BUNDLE);
 }
+
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+/**
+ * @tc.name      : SetDialogPoppedTimeInterVal_00100
+ * @tc.number    : SetDialogPoppedTimeInterVal_00100
+ * @tc.desc      : test SetDialogPoppedTimeInterVal when GetOsAccountLocalIdFromUid fails
+ */
+HWTEST_F(NotificationDialogTest, SetDialogPoppedTimeInterVal_00100, Function | SmallTest | Level1)
+{
+    NotificationDialogManager dialogManager(GetAnsRefForDialogManager());
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", 1);
+
+    MockGetOsAccountLocalIdFromUid(false, 0); // uid-to-userId resolution fails (line 373-374)
+    dialogManager.SetDialogPoppedTimeInterVal(bundleOption); // early return, no crash
+    EXPECT_NE(bundleOption, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name      : SetDialogPoppedTimeInterVal_00200
+ * @tc.number    : SetDialogPoppedTimeInterVal_00200
+ * @tc.desc      : test SetDialogPoppedTimeInterVal when resolved userId is invalid (<= 0)
+ */
+HWTEST_F(NotificationDialogTest, SetDialogPoppedTimeInterVal_00200, Function | SmallTest | Level1)
+{
+    NotificationDialogManager dialogManager(GetAnsRefForDialogManager());
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundle", 1);
+
+    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
+    dialogManager.SetDialogPoppedTimeInterVal(bundleOption); // early return, no crash
+    EXPECT_NE(bundleOption, nullptr);
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

@@ -18,7 +18,7 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
+#include "ans_const_define.h"
 #include "display_badge.h"
 
 namespace OHOS {
@@ -57,7 +57,7 @@ napi_value NapiDisplayBadge(napi_env env, napi_callback_info info)
             AsyncCallbackInfoEnableBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoEnableBadge *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetShowBadgeEnabledForBundle(
+                    AnsNotification::GetInstance()->SetShowBadgeEnabledForBundle(
                         asynccallbackinfo->params.option, asynccallbackinfo->params.enable);
                 ANS_LOGI("displayBadge bundle=%{public}s uid=%{public}d enable=%{public}d code=%{public}d",
                     asynccallbackinfo->params.option.GetBundleName().c_str(),
@@ -170,7 +170,7 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
             if (asynccallbackinfo) {
                 if (asynccallbackinfo->params.hasBundleOption) {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabledForBundle(
+                        AnsNotification::GetInstance()->GetShowBadgeEnabledForBundle(
                             asynccallbackinfo->params.option, asynccallbackinfo->enabled);
                     ANS_LOGI("get badgeEnabled bundle:%{public}s,uid:%{public}d,code:%{public}d,enabled:%{public}d",
                         asynccallbackinfo->params.option.GetBundleName().c_str(),
@@ -178,7 +178,7 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
                         asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
                 } else {
                     asynccallbackinfo->info.errorCode =
-                        DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabled(
+                        AnsNotification::GetInstance()->GetShowBadgeEnabled(
                             asynccallbackinfo->enabled);
                     ANS_LOGI("get badgeEnabled code:%{public}d,enabled:%{public}d",
                         asynccallbackinfo->info.errorCode, asynccallbackinfo->enabled);
@@ -226,8 +226,6 @@ napi_value NapiIsBadgeDisplayed(napi_env env, napi_callback_info info)
 
 napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, SetBadgeNumberParams &params)
 {
-    ANS_LOGD("called");
-
     size_t argc = SET_BADGE_NUMBER_MAX_PARA;
     napi_value argv[SET_BADGE_NUMBER_MAX_PARA] = {nullptr};
     napi_value thisVar = nullptr;
@@ -249,7 +247,10 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
             Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
             return nullptr;
         }
-        Common::GetBundleOption(env, argv[PARAM0], params.option);
+        if (Common::GetBundleOption(env, argv[PARAM0], params.option) == nullptr) {
+            ANS_LOGE("GetBundleOption failed.");
+            return nullptr;
+        }
         // argv[1]: badgeNumber
         NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
         if (valuetype != napi_number) {
@@ -334,7 +335,7 @@ napi_value NapiSetBadgeNumber(napi_env env, napi_callback_info info)
                 ANS_LOGI("setBadge n=%{public}d", asynccallbackinfo->params.badgeNumber);
                 std::string instanceKey = Common::GetAppInstanceKey();
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumber(
+                    AnsNotification::GetInstance()->SetBadgeNumber(
                         asynccallbackinfo->params.badgeNumber, instanceKey);
             }
         },
@@ -410,7 +411,7 @@ napi_value NapiSetBadgeNumberByBundle(napi_env env, napi_callback_info info)
                     asyncCallbackInfo->params.option.GetUid(),
                     asyncCallbackInfo->params.badgeNumber);
                 asyncCallbackInfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetBadgeNumberByBundle(
+                    AnsNotification::GetInstance()->SetBadgeNumberByBundle(
                         asyncCallbackInfo->params.option, asyncCallbackInfo->params.badgeNumber);
             }
         },
@@ -479,6 +480,13 @@ napi_value ParseParametersForGetBadges(const napi_env& env, const napi_callback_
 
     uint32_t length = 0;
     NAPI_CALL(env, napi_get_array_length(env, argv[PARAM0], &length));
+    if (length > static_cast<uint32_t>(MAX_BUNDLE_LIST_SIZE)) {
+        ANS_LOGE("The array length exceeds max size, function: %{public}s, field: %{public}s",
+            __FUNCTION__, "bundleOptions");
+        std::string msg = "The array length exceeds max size.";
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+        return nullptr;
+    }
     for (uint32_t i = 0; i < length; ++i) {
         napi_value item = nullptr;
         NAPI_CALL(env, napi_get_element(env, argv[PARAM0], i, &item));
@@ -579,7 +587,7 @@ napi_value NapiSetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info i
             AsyncCallbackInfoBatchSetBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoBatchSetBadge *>(data);
             if (asynccallbackinfo != nullptr) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetShowBadgeEnabledForBundles(
+                    AnsNotification::GetInstance()->SetShowBadgeEnabledForBundles(
                         asynccallbackinfo->params);
             }
         },
@@ -686,7 +694,7 @@ napi_value NapiGetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info i
             AsyncCallbackInfoBatchGetBadge *asynccallbackinfo = static_cast<AsyncCallbackInfoBatchGetBadge *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetShowBadgeEnabledForBundles(
+                    AnsNotification::GetInstance()->GetShowBadgeEnabledForBundles(
                         asynccallbackinfo->bundles, asynccallbackinfo->bundleEnable);
             }
         },
@@ -760,7 +768,7 @@ napi_value NapiGetBadgeNumber(napi_env env, napi_callback_info info)
             auto asynccallbackinfo = reinterpret_cast<AsyncCallbackGetBadgeNumber *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetBadgeNumber(
+                    AnsNotification::GetInstance()->GetBadgeNumber(
                         asynccallbackinfo->badgeNumber);
             }
         },

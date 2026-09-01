@@ -18,7 +18,7 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
+#include "ans_const_define.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 #include "napi_common.h"
@@ -79,7 +79,7 @@ napi_value ParseParameters(const napi_env &env, const napi_callback_info &info, 
     }
     char str[STR_MAX_SIZE] = {0};
     size_t strLen = 0;
-    napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen);
+    NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM1], str, STR_MAX_SIZE - 1, &strLen));
     if (std::strlen(str) == 0) {
         ANS_LOGE("Property deviceType is empty");
         Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
@@ -172,7 +172,7 @@ napi_value NapiSetDistributedEnabledByBundle(napi_env env, napi_callback_info in
             if (asynccallbackinfo) {
                 std::string deviceType = asynccallbackinfo->params.deviceType;
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledByBundle(
+                    AnsNotification::GetInstance()->SetDistributedEnabledByBundle(
                         asynccallbackinfo->params.option, deviceType, asynccallbackinfo->params.enable);
                 ANS_LOGI("set distributedEnabled code=%{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -326,7 +326,7 @@ napi_value NapiSetDistributedBundleOption(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackDistributedBundleOption *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedBundleOption(
+                    AnsNotification::GetInstance()->SetDistributedBundleOption(
                         asynccallbackinfo->params.bundles,  asynccallbackinfo->params.deviceType);
                 ANS_LOGI("set distributedBundleOption code=%{public}d", asynccallbackinfo->info.errorCode);
             }
@@ -455,7 +455,7 @@ napi_value NapiSetSmartReminderEnabled(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackSmartReminderEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetSmartReminderEnabled(
+                    AnsNotification::GetInstance()->SetSmartReminderEnabled(
                         asynccallbackinfo->params.deviceType, asynccallbackinfo->params.enable);
                 ANS_LOGD("errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -542,7 +542,7 @@ napi_value NapiIsSmartReminderEnabled(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackSmartReminderEnabled *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsSmartReminderEnabled(
+                    AnsNotification::GetInstance()->IsSmartReminderEnabled(
                         asynccallbackinfo->params.deviceType, asynccallbackinfo->params.enable);
                 ANS_LOGD("errorCode = %{public}u", asynccallbackinfo->info.errorCode);
             }
@@ -689,7 +689,7 @@ napi_value NapiSetDistributedEnabledBySlot(napi_env env, napi_callback_info info
                 static_cast<AsyncCallbackDistributedEnableBySlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SetDistributedEnabledBySlot(
+                    AnsNotification::GetInstance()->SetDistributedEnabledBySlot(
                         asynccallbackinfo->params.slot, asynccallbackinfo->params.deviceType,
                         asynccallbackinfo->params.enable);
                 ANS_LOGI("distSlotCb ret=%{public}d", asynccallbackinfo->info.errorCode);
@@ -778,7 +778,7 @@ napi_value NapiIsDistributedEnabledBySlot(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackDistributedEnableBySlot *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->IsDistributedEnabledBySlot(
+                    AnsNotification::GetInstance()->IsDistributedEnabledBySlot(
                         asynccallbackinfo->params.slot, asynccallbackinfo->params.deviceType,
                         asynccallbackinfo->params.enable);
                 ANS_LOGD("errorCode = %{public}u", asynccallbackinfo->info.errorCode);
@@ -833,7 +833,7 @@ napi_value ParseBundleListParameters(const napi_env &env, const napi_callback_in
     }
 
     int32_t notificationType = 0;
-    napi_get_value_int32(env, argv[PARAM0], &notificationType);
+    NAPI_CALL(env, napi_get_value_int32(env, argv[PARAM0], &notificationType));
     if (notificationType < static_cast<int32_t>(NotificationType::NOTIFICATION) ||
         notificationType > static_cast<int32_t>(NotificationType::LIVE_VIEW)) {
         ANS_LOGE("Parameter type exceed. Enum expected.");
@@ -937,7 +937,7 @@ napi_value NapiGetDistributedBundleListByType(napi_env env, napi_callback_info i
                 static_cast<AsyncCallbackDistributedBundleList *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedBundleListByType(
+                    AnsNotification::GetInstance()->GetDistributedBundleListByType(
                         asynccallbackinfo->notification, asynccallbackinfo->bundleList);
                 ANS_LOGI("Get distributed bundles %{public}d %{public}zu %{public}d", asynccallbackinfo->notification,
                     asynccallbackinfo->bundleList.size(), asynccallbackinfo->info.errorCode);
@@ -972,7 +972,6 @@ napi_value NapiGetDistributedBundleListByType(napi_env env, napi_callback_info i
 napi_value ParseGetDistributedBundlesParameters(const napi_env &env, const napi_callback_info &info,
     std::vector<NotificationBundleOption> &bundles)
 {
-    ANS_LOGD("ParseParameters bundles");
     size_t argc = ARGC_ONE;
     napi_value argv[ARGC_ONE] = {nullptr};
     napi_value thisVar = nullptr;
@@ -995,8 +994,12 @@ napi_value ParseGetDistributedBundlesParameters(const napi_env &env, const napi_
 
     uint32_t len = 0;
     NAPI_CALL(env, napi_get_array_length(env, argv[PARAM0], &len));
+    if (len > static_cast<uint32_t>(MAX_BUNDLE_LIST_SIZE)) {
+        std::string msg = "The array length exceeds max size.";
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
+        return nullptr;
+    }
     if (len == 0) {
-        ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";
         Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
         return nullptr;
@@ -1122,7 +1125,7 @@ napi_value NapiGetDistributedBundleInfo(napi_env env, napi_callback_info info)
                 static_cast<AsyncCallbackDistributedBundleInfo *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->GetDistributedBundleInfo(
+                    AnsNotification::GetInstance()->GetDistributedBundleInfo(
                         asynccallbackinfo->bundles, asynccallbackinfo->bundleInfoList);
                 ANS_LOGI("Get bundle info %{public}zu %{public}zu %{public}d.", asynccallbackinfo->bundles.size(),
                     asynccallbackinfo->bundleInfoList.size(), asynccallbackinfo->info.errorCode);

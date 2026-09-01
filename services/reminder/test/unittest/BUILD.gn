@@ -31,7 +31,7 @@ ohos_unittest("reminder_unit_test") {
   defines = []
 
   sources = [
-    "mock/mock_ipc.cpp",
+    "mock/mock_ipc_skeleton.cpp",
     "reminder_data_manager_test.cpp",
   ]
 
@@ -205,6 +205,7 @@ ohos_unittest("reminder_bundle_manager_helper_test") {
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",

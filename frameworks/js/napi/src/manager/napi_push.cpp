@@ -17,7 +17,6 @@
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "common.h"
 #include "ipc_skeleton.h"
 #include "js_error_utils.h"
@@ -112,7 +111,7 @@ napi_value NapiPush::OnRegisterPushCallback(napi_env env, const napi_callback_in
     }
     NotificationConstant::SlotType outSlotType = checkRequest->GetSlotType();
     jsPushCallBack_->SetJsPushCallBackObject(outSlotType, argv[INDEX_TWO]);
-    InnerErrorCode svcResult = DelayedSingleton<AnsNotification>::GetInstance()->RegisterPushCallback(
+    InnerErrorCode svcResult = AnsNotification::GetInstance()->RegisterPushCallback(
         jsPushCallBack_->AsObject(), checkRequest);
     if (svcResult != ERR_ANS_INNER_OK) {
         ANS_LOGE("result: %{public}d", svcResult);
@@ -173,7 +172,7 @@ napi_value NapiPush::OnUnregisterPushCallback(napi_env env, const napi_callback_
         }
     }
 
-    DelayedSingleton<AnsNotification>::GetInstance()->UnregisterPushCallback();
+    AnsNotification::GetInstance()->UnregisterPushCallback();
     return undefined;
 }
 

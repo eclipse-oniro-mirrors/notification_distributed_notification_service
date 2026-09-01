@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_ANS_DIALOG_HOST_CLIENT_H
 
 #include "ans_dialog_callback_stub.h"
+#include "nocopyable.h"
 
 #include <memory>
 #include <mutex>

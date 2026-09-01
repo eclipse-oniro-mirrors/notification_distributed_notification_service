@@ -17,7 +17,6 @@
 
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
-#include "singleton.h"
 #include "sts_common.h"
 #include "sts_throw_erro.h"
 #include "sts_bundle_option.h"
@@ -147,7 +146,7 @@ ani_object AniRemoveGroupByBundle(ani_env *env, ani_object bundleOption, ani_str
             auto asyncCallbackInfo = static_cast<AsyncCallbackGroupInfo*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->RemoveGroupByBundle(
+                    AnsNotification::GetInstance()->RemoveGroupByBundle(
                         asyncCallbackInfo->option, asyncCallbackInfo->groupNameStr);
             }
         },

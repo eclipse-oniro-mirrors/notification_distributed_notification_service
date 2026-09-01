@@ -14,6 +14,7 @@
  */
 
 #include "advanced_notification_service.h"
+#include "singleton.h"
 
 #include "access_token_helper.h"
 #include "advanced_notification_inline.h"
@@ -57,7 +58,11 @@ ErrCode AdvancedNotificationService::SetGeofenceEnabled(bool enabled)
         }
         if (!enabled) {
             int32_t userId = SUBSCRIBE_USER_INIT;
-            OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
+            if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK || userId < 0) {
+                ANS_LOGE("Failed to get active user id, function: %{public}s", __FUNCTION__);
+                result = ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+                return;
+            }
             result = ClearAllGeofenceNotificationRequests(userId);
             if (result != ERR_OK) {
                 ANS_LOGW("ClearAllGeofenceNotificationRequests failed, errCode=%{public}d", result);
@@ -83,7 +88,6 @@ ErrCode AdvancedNotificationService::IsGeofenceEnabled(bool &enabled)
 
 ErrCode AdvancedNotificationService::OnNotifyDelayedNotification(const PublishNotificationParameter &parameter)
 {
-    ANS_LOGD("Called OnNotifyDelayedNotification, delayRecords size %{public}zu", triggerNotificationList_.size());
     if (parameter.request == nullptr || parameter.request->GetNotificationTrigger() == nullptr) {
         ANS_LOGE("Request or trigger is null.");
         return ERR_ANS_INNER_INVALID_PARAM;
@@ -222,9 +226,14 @@ ErrCode AdvancedNotificationService::PublishDelayedNotification(const std::strin
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED));
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
+    ErrCode result = ERR_OK;
     std::shared_ptr<NotificationRecord> record = nullptr;
     PublishNotificationParameter parameter;
-    auto result = GetDelayedNotificationParameterByTriggerKey(triggerKey, parameter, record);
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        ANS_LOGD("ffrt enter!");
+        result = GetDelayedNotificationParameterByTriggerKey(triggerKey, parameter, record);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Publish delayed notification.");
     if (result != ERR_OK) {
         ANS_LOGE("GetDelayedNotificationParameterByTriggerKey failed, errCode=%{public}d", result);
         return result;
@@ -578,6 +587,10 @@ ErrCode AdvancedNotificationService::RecoverGeofenceLiveViewFromDb(int32_t userI
     ANS_LOGD("The number of live views to recover: %{public}zu.", requestsDb.size());
     std::vector<std::string> keys;
     for (const auto &requestObj : requestsDb) {
+        if (requestObj.request == nullptr || requestObj.bundleOption == nullptr) {
+            ANS_LOGE("Invalid request or bundleOption from db.");
+            continue;
+        }
         auto record = MakeNotificationRecord(requestObj.request, requestObj.bundleOption);
         if (record == nullptr) {
             ANS_LOGE("Make notification record failed.");
@@ -706,9 +719,16 @@ ErrCode AdvancedNotificationService::UpdateTriggerNotification(PublishNotificati
 void AdvancedNotificationService::UpdateTriggerRecord(std::shared_ptr<NotificationRecord> oldRecord,
     std::shared_ptr<NotificationRecord> newRecord)
 {
+    if (oldRecord == nullptr || oldRecord->request == nullptr || newRecord == nullptr) {
+        ANS_LOGE("Invalid record parameter.");
+        return;
+    }
     {
         std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
         for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end(); ++it) {
+            if (*it == nullptr || (*it)->request == nullptr) {
+                continue;
+            }
             if ((*it)->request->GetTriggerSecureKey() == oldRecord->request->GetTriggerSecureKey()) {
                 *it = newRecord;
                 break;
@@ -783,6 +803,11 @@ void AdvancedNotificationService::ExecuteCancelGroupCancelFromTriggerNotificatio
 {
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->bundleOption == nullptr ||
+            (*it)->notification == nullptr || (*it)->request == nullptr) {
+            ++it;
+            continue;
+        }
         if (((*it)->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundleOption->GetUid()) &&
             ((*it)->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
@@ -800,6 +825,10 @@ void AdvancedNotificationService::RemoveFromTriggerNotificationList(const sptr<N
 {
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->bundleOption == nullptr || (*it)->notification == nullptr) {
+            ++it;
+            continue;
+        }
         if (((*it)->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundleOption->GetUid()) &&
             ((*it)->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
@@ -939,6 +968,10 @@ void AdvancedNotificationService::DeleteAllByUserStoppedFromTriggerNotificationL
 {
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->notification == nullptr) {
+            ++it;
+            continue;
+        }
         if (((*it)->notification->GetKey() == key) &&
             (((*it)->notification->GetRecvUserId() == userId) ||
             ((*it)->notification->GetRecvUserId() == ZERO_USER_ID))) {
@@ -955,6 +988,10 @@ void AdvancedNotificationService::ExecuteRemoveNotificationFromTriggerNotificati
 {
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->bundleOption == nullptr || (*it)->notification == nullptr) {
+            ++it;
+            continue;
+        }
         if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
             ((*it)->notification->GetId() == notificationId) && ((*it)->notification->GetLabel() == label)) {
@@ -971,6 +1008,10 @@ void AdvancedNotificationService::RemoveGroupByBundleFromTriggerNotificationList
 {
     std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
     for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->bundleOption == nullptr || (*it)->request == nullptr) {
+            ++it;
+            continue;
+        }
         if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
             ((*it)->bundleOption->GetUid() == bundle->GetUid()) &&
             ((*it)->request->GetGroupName() == groupName)) {

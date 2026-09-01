@@ -19,6 +19,7 @@
 #include "os_account_constants.h"
 #include "os_account_info.h"
 #include "os_account_manager.h"
+#include <limits>
 
 namespace OHOS {
 namespace NotificationSts {
@@ -120,7 +121,11 @@ ani_status GetStringByAniString(ani_env *env, ani_string str, std::string &res)
         ANS_LOGE("status : %{public}d", status);
         return status;
     }
-    res.resize(sz + 1);
+    if (sz >= std::numeric_limits<ani_size>::max()) {
+        ANS_LOGE("str size %{public}zu exceeds ani_size max, resize would overflow", sz);
+        return ANI_INVALID_ARGS;
+    }
+    res.resize(static_cast<size_t>(sz) + 1);
     if ((status = env->String_GetUTF8SubString(str, 0, sz, res.data(), res.size(), &sz)) != ANI_OK) {
         ANS_LOGE("status : %{public}d", status);
         return status;
@@ -1153,6 +1158,10 @@ ani_object CreateMapObject(ani_env *env, const std::string name, const char *sig
 
 ani_status GetMapIterator(ani_env *env, ani_object &mapObj, const char *method, ani_ref *it)
 {
+    if (env == nullptr || mapObj == nullptr || it == nullptr) {
+        ANS_LOGE("GetMapIterator fail, has nullptr");
+        return ANI_INVALID_ARGS;
+    }
     ani_status status = env->Object_CallMethodByName_Ref(mapObj, method, nullptr, it);
     if (status != ANI_OK) {
         ANS_LOGD("Failed to get %{public}s iterator, status: %{public}d", method, status);
@@ -1162,6 +1171,10 @@ ani_status GetMapIterator(ani_env *env, ani_object &mapObj, const char *method, 
 
 ani_status GetMapIteratorNext(ani_env *env, ani_ref &it, ani_ref *next)
 {
+    if (env == nullptr || next == nullptr) {
+        ANS_LOGE("GetMapIteratorNext fail, env or next is nullptr");
+        return ANI_INVALID_ARGS;
+    }
     ani_status status = env->Object_CallMethodByName_Ref(reinterpret_cast<ani_object>(it), "next", nullptr, next);
     if (status != ANI_OK) {
         ANS_LOGD("Failed to get next, status: %{public}d", status);
@@ -1171,6 +1184,10 @@ ani_status GetMapIteratorNext(ani_env *env, ani_ref &it, ani_ref *next)
 
 ani_status GetMapIteratorStringValue(ani_env *env, ani_ref &next, std::string &str)
 {
+    if (env == nullptr || next == nullptr) {
+        ANS_LOGE("GetMapIteratorStringValue fail, env or next is nullptr");
+        return ANI_INVALID_ARGS;
+    }
     ani_ref val;
     ani_status status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(next), "value", &val);
     if (status != ANI_OK) {

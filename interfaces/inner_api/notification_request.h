@@ -19,7 +19,6 @@
 #include "ans_const_define.h"
 #include "message_user.h"
 #include "notification_action_button.h"
-#include "notification_constant.h"
 #include "notification_content.h"
 #include "notification_distributed_options.h"
 #include "notification_flags.h"

@@ -24,7 +24,7 @@ namespace Notification {
 namespace {
 constexpr int32_t MAX_VECTOR_SIZE = 3;
 constexpr int32_t MIN_USER_ID = -1;
-constexpr int32_t MAX_USER_ID = 100;
+constexpr int32_t MAX_FUZZ_USER_ID = 100;
 }
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
@@ -37,7 +37,7 @@ constexpr int32_t MAX_USER_ID = 100;
         auto userIdsSize = fuzzData->ConsumeIntegralInRange<int32_t>(0, MAX_VECTOR_SIZE);
         std::vector<int32_t> userIds;
         for (int i = 0; i < userIdsSize; ++i) {
-            userIds.push_back(fuzzData->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_USER_ID));
+            userIds.push_back(fuzzData->ConsumeIntegralInRange<int32_t>(MIN_USER_ID, MAX_FUZZ_USER_ID));
         }
         service->ClearDelayNotification(triggerKeys, userIds);
         return true;

@@ -203,43 +203,6 @@ uint8_t ReminderRequestCalendar::GetDaysOfMonth(const uint16_t &year, const uint
     return days;
 }
 
-uint8_t ReminderRequestCalendar::GetNextDay(
-    const uint16_t &settedYear, const uint8_t &settedMonth, const tm &now, const tm &target) const
-{
-    uint32_t repeatDayTmp = repeatDay_;
-    uint8_t daysOfSpecialMonth = GetDaysOfMonth(settedYear, settedMonth);
-    uint8_t setDayTmp = INVALID_U8_VALUE;
-    for (uint8_t i = 1; i <= daysOfSpecialMonth; i++) {
-        if ((repeatDayTmp & (1 << (i - 1))) > 0) {
-            struct tm setTime;
-            setTime.tm_year = GetCTime(TimeTransferType::YEAR, settedYear);
-            setTime.tm_mon = GetCTime(TimeTransferType::MONTH, settedMonth);
-            setTime.tm_mday = static_cast<int>(i);
-            setTime.tm_hour = target.tm_hour;
-            setTime.tm_min = target.tm_min;
-            setTime.tm_sec = target.tm_sec;
-            setTime.tm_isdst = -1;
-
-            struct tm nowTime;
-            nowTime.tm_year = now.tm_year;
-            nowTime.tm_mon = now.tm_mon;
-            nowTime.tm_mday = now.tm_mday;
-            nowTime.tm_hour = now.tm_hour;
-            nowTime.tm_min = now.tm_min;
-            nowTime.tm_sec = now.tm_sec;
-            nowTime.tm_isdst = -1;
-
-            if (mktime(&nowTime) >= mktime(&setTime)) {
-                continue;
-            } else {
-                setDayTmp = i;
-                return setDayTmp;
-            }
-        }
-    }
-    return setDayTmp;
-}
-
 bool ReminderRequestCalendar::CheckCalenderIsExpired(const uint64_t now)
 {
     if (IsInExcludeDate()) {
@@ -390,7 +353,7 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime(const bool updateLast)
     const time_t target = mktime(&tarTime);
     ANSR_LOGD("Now time is: %{public}s", GetDateTimeInfo(now).c_str());
     if (repeatMonth_ > 0 && repeatDay_ > 0) {
-        triggerTimeInMilli = GetNextTriggerTimeAsRepeatReminder(nowTime, tarTime);
+        triggerTimeInMilli = GetNextTriggerTimeAsRepeatReminder(static_cast<int64_t>(now), nowTime, tarTime);
         startDateTime_ = triggerTimeInMilli;
         endDateTime_ = triggerTimeInMilli + durationTime_;
     } else if (repeatDaysOfWeek_ > 0 && (target <= now)) {
@@ -421,35 +384,58 @@ uint64_t ReminderRequestCalendar::GetNextTriggerTime(const bool updateLast)
     return triggerTimeInMilli;
 }
 
-uint64_t ReminderRequestCalendar::GetNextTriggerTimeAsRepeatReminder(const tm &nowTime, const tm &tarTime) const
+uint64_t ReminderRequestCalendar::GetNextTriggerTimeAsRepeatReminder(int64_t nowTimeInSecond, const tm &nowTime,
+    const tm &tarTime) const
 {
-    uint64_t triggerTimeInMilli = INVALID_LONG_LONG_VALUE;
-    uint16_t setYear = static_cast<uint16_t>(GetActualTime(TimeTransferType::YEAR, nowTime.tm_year));
-    uint8_t setMonth = INVALID_U8_VALUE;
-    uint8_t setDay = INVALID_U8_VALUE;
-    uint8_t beginMonth = static_cast<uint8_t>(GetActualTime(TimeTransferType::MONTH, nowTime.tm_mon));
-    uint8_t count = 1;
-    uint16_t repeatMonthTmp = repeatMonth_;
-    for (uint8_t i = beginMonth; i < (MAX_MONTHS_OF_YEAR + beginMonth + 1); i++) {
-        if ((repeatMonthTmp & (1 << ((i - 1) % MAX_MONTHS_OF_YEAR))) > 0) {
-            setMonth = (i % MAX_MONTHS_OF_YEAR);
-            setMonth = setMonth == 0 ? DECEMBER : setMonth;
-            if (count != 1) {
-                setYear = setMonth <= beginMonth ? setYear + 1 : setYear;
+    uint64_t nowMilli = static_cast<uint64_t>(nowTimeInSecond) * MILLI_SECONDS;
+    if (GetTriggerTimeInMilli() > nowMilli) {
+        return GetTriggerTimeInMilli();
+    }
+
+    int32_t baseYear = GetActualTime(TimeTransferType::YEAR, nowTime.tm_year);
+    int32_t baseMonth = GetActualTime(TimeTransferType::MONTH, nowTime.tm_mon);
+    int32_t baseDay = nowTime.tm_mday;
+    std::vector<uint8_t> repeatDays = GetRepeatDays();
+    if (repeatDays.empty()) {
+        return INVALID_LONG_LONG_VALUE;
+    }
+    constexpr int32_t MAX_SCAN_MONTHS = 5 * MAX_MONTHS_OF_YEAR;
+    int32_t baseAbsMonth = baseYear * MAX_MONTHS_OF_YEAR + (baseMonth - 1);
+    for (int32_t mIdx = 0; mIdx < MAX_SCAN_MONTHS; mIdx++) {
+        int32_t absMonth = baseAbsMonth + mIdx;
+        int32_t year = absMonth / MAX_MONTHS_OF_YEAR;
+        uint8_t month = static_cast<uint8_t>((absMonth % MAX_MONTHS_OF_YEAR) + 1);
+        if (!IsRepeatMonth(month)) {
+            continue;
+        }
+        uint8_t daysInMonth = GetDaysOfMonth(static_cast<uint16_t>(year), month);
+        uint8_t startDay = (mIdx == 0) ? static_cast<uint8_t>(baseDay) : 1;
+        for (uint8_t day : repeatDays) {
+            if (day < startDay || day > daysInMonth) {
+                continue;
             }
-            setDay = GetNextDay(setYear, setMonth, nowTime, tarTime);
+            struct tm candidate = {};
+            candidate.tm_year = GetCTime(TimeTransferType::YEAR, year);
+            candidate.tm_mon = GetCTime(TimeTransferType::MONTH, month);
+            candidate.tm_mday = day;
+            candidate.tm_hour = tarTime.tm_hour;
+            candidate.tm_min = tarTime.tm_min;
+            candidate.tm_sec = second_;
+            candidate.tm_isdst = -1;
+            time_t candidateT = mktime(&candidate);
+            if (candidateT == -1) {
+                continue;
+            }
+            uint64_t candidateMilli = ReminderRequest::GetDurationSinceEpochInMilli(candidateT);
+            if (candidateMilli > nowMilli && candidateMilli > startDateTime_) {
+                ANSR_LOGD("Next calendar time: %{public}d-%{public}d-%{public}d %{public}d:%{public}d",
+                    year, month, day, tarTime.tm_hour, tarTime.tm_min);
+                return candidateMilli;
+            }
         }
-        if (setDay != INVALID_U8_VALUE) {
-            break;
-        }
-        count++;
     }
-    if ((triggerTimeInMilli = GetTimeInstantMilli(setYear, setMonth, setDay, hour_, minute_, second_))
-        != INVALID_LONG_LONG_VALUE) {
-        ANSR_LOGD("Next calendar time:%{public}hu/%{public}hhu/%{public}hhu %{public}hhu:%{public}hhu:%{public}hhu",
-            setYear, setMonth, setDay, hour_, minute_, second_);
-    }
-    return triggerTimeInMilli;
+    ANSR_LOGW("No valid next trigger time found within scan range.");
+    return INVALID_LONG_LONG_VALUE;
 }
 
 uint64_t ReminderRequestCalendar::GetTimeInstantMilli(

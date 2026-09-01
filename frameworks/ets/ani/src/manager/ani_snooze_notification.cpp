@@ -20,7 +20,6 @@
 #include "sts_bundle_option.h"
 #include "sts_notification_manager.h"
 #include "ans_notification.h"
-#include "singleton.h"
 
 namespace OHOS {
 namespace NotificationManagerSts {
@@ -100,6 +99,8 @@ ani_object AniSetNotificationSnooze(ani_env *env, ani_string hashCode, ani_long 
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
+    asyncCallbackInfo->hashCode =
+        NotificationSts::GetResizeStr(asyncCallbackInfo->hashCode, NotificationSts::STR_MAX_SIZE);
     asyncCallbackInfo->delayTime = static_cast<int64_t>(delayTime);
     ani_object promise;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
@@ -110,7 +111,7 @@ ani_object AniSetNotificationSnooze(ani_env *env, ani_string hashCode, ani_long 
             auto asyncCallbackInfo = static_cast<AsyncCallbackSnooze*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    DelayedSingleton<AnsNotification>::GetInstance()->SnoozeNotification(
+                    AnsNotification::GetInstance()->SnoozeNotification(
                         asyncCallbackInfo->hashCode, asyncCallbackInfo->delayTime);
             }
         },
