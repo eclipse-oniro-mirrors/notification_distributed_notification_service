@@ -30,6 +30,7 @@
 #include "notification_ai_extension_wrapper.h"
 #include "advanced_notification_inline.h"
 #include "time_service_client.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace Notification {
@@ -54,6 +55,10 @@ AdvancedNotificationServiceAbility::~AdvancedNotificationServiceAbility()
 
 void AdvancedNotificationServiceAbility::OnStart()
 {
+    if (IsBopdOrRescueMode()) {
+        ANS_LOGW("Skip init agentmgr in bopd or rescue mode");
+        return;
+    }
     if (service_ != nullptr) {
         return;
     }
@@ -230,6 +235,27 @@ int32_t AdvancedNotificationServiceAbility::OnExtension(const std::string& exten
         return notificationService->OnRestore(data, reply);
     }
     return ERR_OK;
+}
+
+bool AdvancedNotificationServiceAbility::IsBopdMode()
+{
+    const std::unordered_set<std::string> bopdModeSet = {
+        "0x2",
+        "0x3",
+        "0x6",
+        "0x7",
+        "0xa",
+        "0xe",
+        "0xf",
+    };
+    auto mode = OHOS::system::GetParameter("ohos.boot.bopd.mode", "NA");
+    return bopdModeSet.find(mode) != bopdModeSet.end();
+}
+
+bool AdvancedNotificationServiceAbility::IsBopdOrRescueMode()
+{
+    bool isBopdOrRescue = (IsBopdMode() || OHOS::system::GetParameter("soc.boot.mode", "") == "rescue");
+    return isBopdOrRescue;
 }
 }  // namespace Notification
 }  // namespace OHOS
