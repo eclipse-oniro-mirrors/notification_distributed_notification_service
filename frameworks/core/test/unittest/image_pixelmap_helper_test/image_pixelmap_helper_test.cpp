@@ -1066,6 +1066,46 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00049, Function | SmallTest | Leve
 }
 
 /**
+ * @tc.name: GetPixelMap_00050
+ * @tc.desc: Test GetPixelMap when OH_ImageSourceNative_SetSvgResourceLimitLevel fails.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00050, Function | SmallTest | Level1)
+{
+    Notification::Mock::MockOHImageSourceNativeSetSvgResourceLimitLevelFail(true);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    ImagePixelmapHelper helper(request, "test.svg");
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    ErrCode ret = helper.GetPixelMap(pixelMap);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+    EXPECT_EQ(pixelMap, nullptr);
+    EXPECT_EQ(Notification::Mock::MockGetSvgResourceLimitLevelCallCount(), 1u);
+}
+
+/**
+ * @tc.name: GetPixelMap_00051
+ * @tc.desc: Test GetPixelMap sets svg resource limit level on the created image source.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00051, Function | SmallTest | Level1)
+{
+    Notification::Mock::MockSetImageWidth(100);
+    Notification::Mock::MockSetImageHeight(100);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    ImagePixelmapHelper helper(request, "test.svg");
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    ErrCode ret = helper.GetPixelMap(pixelMap);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(pixelMap, nullptr);
+    EXPECT_EQ(Notification::Mock::MockGetSvgResourceLimitLevelCallCount(), 1u);
+    EXPECT_EQ(Notification::Mock::MockGetLastSvgResourceLimitLevelSource(), helper.imageSource_);
+}
+
+/**
  * @tc.name: Constructor_00001
  * @tc.desc: Test constructor initializes member variables correctly.
  * @tc.type: FUNC
@@ -1415,6 +1455,47 @@ HWTEST_F(ImagePixelmapHelperTest, CreateImageSource_00004, Function | SmallTest 
     
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_NE(helper.imageSource_, nullptr);
+}
+
+/**
+ * @tc.name: CreateImageSource_00005
+ * @tc.desc: Test CreateImageSource when OH_ImageSourceNative_SetSvgResourceLimitLevel fails.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(ImagePixelmapHelperTest, CreateImageSource_00005, Function | SmallTest | Level1)
+{
+    Notification::Mock::MockOHImageSourceNativeSetSvgResourceLimitLevelFail(true);
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    ImagePixelmapHelper helper(request, "test.svg");
+    
+    helper.InitRawfileData();
+    ErrCode ret = helper.CreateImageSource();
+    
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+    EXPECT_EQ(Notification::Mock::MockGetSvgResourceLimitLevelCallCount(), 1u);
+}
+
+/**
+ * @tc.name: CreateImageSource_00006
+ * @tc.desc: Test CreateImageSource sets svg resource limit level on the created image source.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(ImagePixelmapHelperTest, CreateImageSource_00006, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    ImagePixelmapHelper helper(request, "test.svg");
+    
+    helper.InitRawfileData();
+    ErrCode ret = helper.CreateImageSource();
+    
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(helper.imageSource_, nullptr);
+    EXPECT_EQ(Notification::Mock::MockGetSvgResourceLimitLevelCallCount(), 1u);
+    EXPECT_EQ(Notification::Mock::MockGetLastSvgResourceLimitLevelSource(), helper.imageSource_);
 }
 
 /**

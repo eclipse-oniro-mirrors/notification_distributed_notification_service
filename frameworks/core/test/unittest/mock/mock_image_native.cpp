@@ -33,6 +33,9 @@ bool g_mockImageSourceInfoCreateReturnNull = false;
 bool g_mockDecodingOptionsCreateReturnNull = false;
 bool g_mockGetInnerPixelmapFail = false;
 bool g_mockGetInnerPixelmapReturnNull = false;
+bool g_mockSetSvgResourceLimitLevelFail = false;
+uint32_t g_mockSvgResourceLimitLevelCallCount = 0;
+OH_ImageSourceNative* g_mockLastSvgResourceLimitLevelSource = nullptr;
 uint32_t g_mockImageWidth = DEFAULT_IMAGE_SIZE;
 uint32_t g_mockImageHeight = DEFAULT_IMAGE_SIZE;
 
@@ -165,6 +168,32 @@ void MockSetImageHeight(uint32_t height)
     g_mockImageHeight = height;
 }
 
+void MockOHImageSourceNativeSetSvgResourceLimitLevelFail(bool fail)
+{
+    g_mockSetSvgResourceLimitLevelFail = fail;
+}
+
+bool MockIsSvgResourceLimitLevelFail()
+{
+    return g_mockSetSvgResourceLimitLevelFail;
+}
+
+void MockRecordSvgResourceLimitLevelCall(OH_ImageSourceNative* source)
+{
+    g_mockSvgResourceLimitLevelCallCount++;
+    g_mockLastSvgResourceLimitLevelSource = source;
+}
+
+uint32_t MockGetSvgResourceLimitLevelCallCount()
+{
+    return g_mockSvgResourceLimitLevelCallCount;
+}
+
+OH_ImageSourceNative* MockGetLastSvgResourceLimitLevelSource()
+{
+    return g_mockLastSvgResourceLimitLevelSource;
+}
+
 void MockResetImageNativeState()
 {
     g_mockCreateFromRawFileFail = false;
@@ -180,6 +209,9 @@ void MockResetImageNativeState()
     g_mockDecodingOptionsCreateReturnNull = false;
     g_mockGetInnerPixelmapFail = false;
     g_mockGetInnerPixelmapReturnNull = false;
+    g_mockSetSvgResourceLimitLevelFail = false;
+    g_mockSvgResourceLimitLevelCallCount = 0;
+    g_mockLastSvgResourceLimitLevelSource = nullptr;
     g_mockImageWidth = DEFAULT_IMAGE_SIZE;
     g_mockImageHeight = DEFAULT_IMAGE_SIZE;
     if (g_mockImageSourceNative != nullptr) {

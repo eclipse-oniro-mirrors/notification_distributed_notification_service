@@ -35,6 +35,12 @@ void MockOHImageSourceInfoCreateFail(bool fail);
 void MockOHImageSourceInfoCreateReturnNull(bool returnNull);
 void MockOHDecodingOptionsCreateReturnNull(bool returnNull);
 
+void MockOHImageSourceNativeSetSvgResourceLimitLevelFail(bool fail);
+bool MockIsSvgResourceLimitLevelFail();
+void MockRecordSvgResourceLimitLevelCall(OH_ImageSourceNative* source);
+uint32_t MockGetSvgResourceLimitLevelCallCount();
+OH_ImageSourceNative* MockGetLastSvgResourceLimitLevelSource();
+
 void MockGetInnerPixelmapFail(bool fail);
 void MockGetInnerPixelmapReturnNull(bool returnNull);
 

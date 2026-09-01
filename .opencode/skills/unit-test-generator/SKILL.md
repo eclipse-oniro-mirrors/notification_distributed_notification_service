@@ -1,6 +1,6 @@
 ---
 name: unit-test-generator
-description: Generate comprehensive unit tests for OpenHarmony Distributed Notification Service that follow project standards include proper assertions use appropriate mocks and achieve 90% branch coverage. Use when adding tests for new code commits files or improving coverage.
+description: Generate comprehensive unit tests for OpenHarmony Distributed Notification Service that follow project standards include proper assertions use appropriate mocks and achieve 90% branch coverage. Use when adding tests for new code commits files or improving coverage. Also triggered when a command contains both "补充" and "tdd" keywords simultaneously (e.g., "补充tdd单测", "为该文件补充 tdd 测试"), in which case the TDD test-only workflow below applies.
 ---
 
 # Unit Test Generator for Distributed Notification Service
