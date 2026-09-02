@@ -36,6 +36,7 @@ ohos_shared_library("ans_base") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
+  version_script = "libans_base.map"
 
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags

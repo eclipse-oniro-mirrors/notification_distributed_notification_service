@@ -44,6 +44,7 @@ ohos_shared_library("ohnotification") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
+  version_script = "libohnotification.map"
 
   configs = [ ":notification_ndk_config" ]
 

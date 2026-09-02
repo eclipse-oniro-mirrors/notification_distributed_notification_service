@@ -3699,9 +3699,9 @@ ohos_unittest("notification_preferences_database_branch_test") {
   ]
 
   sources = [
+    "mock/mock_notification_rdb_data_mgr.cpp",
     "${services_path}/ans/test/unittest/mock/mock_notification_analytics_util.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
-    "mock/mock_notification_rdb_data_mgr.cpp",
     "notification_preferences_database_branch_test/notification_preferences_database_branch_test.cpp",
   ]
 
@@ -4028,6 +4028,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
   ]
 
   sources = [
+    "mock/mock_notification_rdb_data_mgr.cpp",
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_service_test/advanced_notification_distributed_manager_service_test.cpp",
     "advanced_notification_service_test/advanced_notification_service_unit_test.cpp",
@@ -4043,7 +4044,6 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_time_service_client.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
-    "mock/mock_notification_rdb_data_mgr.cpp",
   ]
 
   defines = []
