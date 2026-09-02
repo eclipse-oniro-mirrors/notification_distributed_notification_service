@@ -2803,5 +2803,186 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_NotObject_001
     EXPECT_EQ(result, false);
     EXPECT_EQ(notificationRequest.GetNotificationTrigger(), nullptr);
 }
+
+
+/**
+ * @tc.name: CheckNotificationRequest_NullNewContent_001
+ * @tc.desc: Test CheckNotificationRequest when new request is common live view but
+ *           notificationContent_ is nullptr (IPC/JSON inconsistent state: type set, content absent).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, CheckNotificationRequest_NullNewContent_001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    notificationRequest.notificationContent_ = nullptr;
+    notificationRequest.notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    EXPECT_TRUE(notificationRequest.IsCommonLiveView());
+ 
+    ErrCode result = notificationRequest.CheckNotificationRequest(nullptr);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
+}
+ 
+/**
+ * @tc.name: CheckNotificationRequest_NullNewContent_002
+ * @tc.desc: Test CheckNotificationRequest when new request is common live view with null
+ *           notificationContent_ and oldRequest is a valid live view request.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, CheckNotificationRequest_NullNewContent_002, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    notificationRequest.notificationContent_ = nullptr;
+    notificationRequest.notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+ 
+    sptr<NotificationRequest> oldRequest(new (std::nothrow) NotificationRequest());
+    oldRequest->SetNotificationId(myNotificationId);
+    oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    oldLiveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldRequest->SetContent(oldContent);
+ 
+    ErrCode result = notificationRequest.CheckNotificationRequest(oldRequest);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
+}
+ 
+/**
+ * @tc.name: CheckNotificationRequest_NullNewInnerContent_001
+ * @tc.desc: Test CheckNotificationRequest when new request is common live view, notificationContent_
+ *           is non-null but its inner content is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, CheckNotificationRequest_NullNewInnerContent_001, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    notificationRequest.notificationContent_ = std::make_shared<NotificationContent>();
+    notificationRequest.notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    EXPECT_EQ(notificationRequest.GetContent()->GetNotificationContent(), nullptr);
+ 
+    ErrCode result = notificationRequest.CheckNotificationRequest(nullptr);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
+}
+ 
+/**
+ * @tc.name: CheckNotificationRequest_NullNewInnerContent_002
+ * @tc.desc: Test CheckNotificationRequest when new request inner content is nullptr and
+ *           oldRequest is a valid live view request.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, CheckNotificationRequest_NullNewInnerContent_002, Level1)
+{
+    int32_t myNotificationId = 10;
+    NotificationRequest notificationRequest(myNotificationId);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    notificationRequest.notificationContent_ = std::make_shared<NotificationContent>();
+    notificationRequest.notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+ 
+    sptr<NotificationRequest> oldRequest(new (std::nothrow) NotificationRequest());
+    oldRequest->SetNotificationId(myNotificationId);
+    oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    oldLiveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+    auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
+    oldRequest->SetContent(oldContent);
+ 
+    ErrCode result = notificationRequest.CheckNotificationRequest(oldRequest);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
+}
+ 
+/**
+ * @tc.name: ConvertJsonToEnum_ValidContentType_001
+ * @tc.desc: Test ConvertJsonToEnum accepts valid notificationContentType values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToEnum_ValidContentType_001, Level1)
+{
+    NotificationRequest notificationRequest(10);
+    nlohmann::json jsonObject = nlohmann::json{
+        {"notificationContentType", static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW)},
+    };
+    NotificationRequest::ConvertJsonToEnum(&notificationRequest, jsonObject);
+    EXPECT_EQ(notificationRequest.GetNotificationType(), NotificationContent::Type::LIVE_VIEW);
+}
+ 
+/**
+ * @tc.name: FromJson_ContentTypeSyncWithContent_001
+ * @tc.desc: Test FromJson syncs notificationContentType_ from the actual content object,
+ *           preventing LIVE_VIEW type confusion when content is another type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, FromJson_ContentTypeSyncWithContent_001, Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"slotType", static_cast<int32_t>(NotificationConstant::SlotType::LIVE_VIEW)},
+        {"notificationContentType", static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW)},
+        {"content", {
+            {"contentType", static_cast<int32_t>(NotificationContent::Type::BASIC_TEXT)},
+            {"content", {{"text", "test text"}, {"title", "test title"}}}
+        }},
+    };
+ 
+    auto *request = NotificationRequest::FromJson(jsonObject);
+    ASSERT_NE(request, nullptr);
+    EXPECT_NE(request->GetContent(), nullptr);
+    EXPECT_EQ(request->GetContent()->GetContentType(), NotificationContent::Type::BASIC_TEXT);
+    EXPECT_EQ(request->GetNotificationType(), NotificationContent::Type::LIVE_VIEW);
+    EXPECT_TRUE(request->IsCommonLiveView());
+    delete request;
+}
+ 
+/**
+ * @tc.name: FromJson_LiveViewContentConsistent_001
+ * @tc.desc: Test FromJson keeps LIVE_VIEW type when content is a real live view content
+ *           and CheckNotificationRequest works on the parsed request.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, FromJson_LiveViewContentConsistent_001, Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"slotType", static_cast<int32_t>(NotificationConstant::SlotType::LIVE_VIEW)},
+        {"notificationContentType", static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW)},
+        {"content", {
+            {"contentType", static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW)},
+            {"content", {{"text", "test text"}, {"title", "test title"},
+                {"status", static_cast<int32_t>(
+                    NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE)}}}
+        }},
+    };
+ 
+    auto *request = NotificationRequest::FromJson(jsonObject);
+    ASSERT_NE(request, nullptr);
+    EXPECT_EQ(request->GetNotificationType(), NotificationContent::Type::LIVE_VIEW);
+    EXPECT_TRUE(request->IsCommonLiveView());
+    EXPECT_EQ(request->CheckNotificationRequest(nullptr), ERR_OK);
+    delete request;
+}
+ 
+/**
+ * @tc.name: FromJson_LiveViewWithoutContent_001
+ * @tc.desc: Test CheckNotificationRequest on a request parsed from JSON which declares
+ *           LIVE_VIEW type but carries no content object (no crash, invalid param).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, FromJson_LiveViewWithoutContent_001, Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"slotType", static_cast<int32_t>(NotificationConstant::SlotType::LIVE_VIEW)},
+        {"notificationContentType", static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW)},
+        {"content", nullptr},
+    };
+ 
+    auto *request = NotificationRequest::FromJson(jsonObject);
+    ASSERT_NE(request, nullptr);
+    EXPECT_EQ(request->GetContent(), nullptr);
+    EXPECT_TRUE(request->IsCommonLiveView());
+    EXPECT_EQ(request->CheckNotificationRequest(nullptr), ERR_ANS_INNER_INVALID_PARAM);
+    delete request;
+}
 } // namespace Notification
 } // namespace OHOS
