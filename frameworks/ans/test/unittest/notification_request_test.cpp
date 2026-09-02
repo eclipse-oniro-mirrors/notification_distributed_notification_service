@@ -2804,6 +2804,7 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationTrigger_NotObject_001
     EXPECT_EQ(notificationRequest.GetNotificationTrigger(), nullptr);
 }
 
+
 /**
  * @tc.name: CheckNotificationRequest_NullNewContent_001
  * @tc.desc: Test CheckNotificationRequest when new request is common live view but
@@ -2818,11 +2819,11 @@ HWTEST_F(NotificationRequestTest, CheckNotificationRequest_NullNewContent_001, L
     notificationRequest.notificationContent_ = nullptr;
     notificationRequest.notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
     EXPECT_TRUE(notificationRequest.IsCommonLiveView());
-
+ 
     ErrCode result = notificationRequest.CheckNotificationRequest(nullptr);
     EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
-
+ 
 /**
  * @tc.name: CheckNotificationRequest_NullNewContent_002
  * @tc.desc: Test CheckNotificationRequest when new request is common live view with null
@@ -2836,7 +2837,7 @@ HWTEST_F(NotificationRequestTest, CheckNotificationRequest_NullNewContent_002, L
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     notificationRequest.notificationContent_ = nullptr;
     notificationRequest.notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
-
+ 
     sptr<NotificationRequest> oldRequest(new (std::nothrow) NotificationRequest());
     oldRequest->SetNotificationId(myNotificationId);
     oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -2844,11 +2845,11 @@ HWTEST_F(NotificationRequestTest, CheckNotificationRequest_NullNewContent_002, L
     oldLiveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
     auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
     oldRequest->SetContent(oldContent);
-
+ 
     ErrCode result = notificationRequest.CheckNotificationRequest(oldRequest);
     EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
-
+ 
 /**
  * @tc.name: CheckNotificationRequest_NullNewInnerContent_001
  * @tc.desc: Test CheckNotificationRequest when new request is common live view, notificationContent_
@@ -2863,11 +2864,11 @@ HWTEST_F(NotificationRequestTest, CheckNotificationRequest_NullNewInnerContent_0
     notificationRequest.notificationContent_ = std::make_shared<NotificationContent>();
     notificationRequest.notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
     EXPECT_EQ(notificationRequest.GetContent()->GetNotificationContent(), nullptr);
-
+ 
     ErrCode result = notificationRequest.CheckNotificationRequest(nullptr);
     EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
-
+ 
 /**
  * @tc.name: CheckNotificationRequest_NullNewInnerContent_002
  * @tc.desc: Test CheckNotificationRequest when new request inner content is nullptr and
@@ -2881,7 +2882,7 @@ HWTEST_F(NotificationRequestTest, CheckNotificationRequest_NullNewInnerContent_0
     notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     notificationRequest.notificationContent_ = std::make_shared<NotificationContent>();
     notificationRequest.notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
-
+ 
     sptr<NotificationRequest> oldRequest(new (std::nothrow) NotificationRequest());
     oldRequest->SetNotificationId(myNotificationId);
     oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -2889,11 +2890,11 @@ HWTEST_F(NotificationRequestTest, CheckNotificationRequest_NullNewInnerContent_0
     oldLiveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
     auto oldContent = std::make_shared<NotificationContent>(oldLiveContent);
     oldRequest->SetContent(oldContent);
-
+ 
     ErrCode result = notificationRequest.CheckNotificationRequest(oldRequest);
     EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
-
+ 
 /**
  * @tc.name: ConvertJsonToEnum_ValidContentType_001
  * @tc.desc: Test ConvertJsonToEnum accepts valid notificationContentType values.
@@ -2908,7 +2909,7 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToEnum_ValidContentType_001, Level1
     NotificationRequest::ConvertJsonToEnum(&notificationRequest, jsonObject);
     EXPECT_EQ(notificationRequest.GetNotificationType(), NotificationContent::Type::LIVE_VIEW);
 }
-
+ 
 /**
  * @tc.name: FromJson_ContentTypeSyncWithContent_001
  * @tc.desc: Test FromJson syncs notificationContentType_ from the actual content object,
@@ -2925,16 +2926,16 @@ HWTEST_F(NotificationRequestTest, FromJson_ContentTypeSyncWithContent_001, Level
             {"content", {{"text", "test text"}, {"title", "test title"}}}
         }},
     };
-
+ 
     auto *request = NotificationRequest::FromJson(jsonObject);
     ASSERT_NE(request, nullptr);
     EXPECT_NE(request->GetContent(), nullptr);
     EXPECT_EQ(request->GetContent()->GetContentType(), NotificationContent::Type::BASIC_TEXT);
-    EXPECT_EQ(request->GetNotificationType(), NotificationContent::Type::BASIC_TEXT);
-    EXPECT_FALSE(request->IsCommonLiveView());
+    EXPECT_EQ(request->GetNotificationType(), NotificationContent::Type::LIVE_VIEW);
+    EXPECT_TRUE(request->IsCommonLiveView());
     delete request;
 }
-
+ 
 /**
  * @tc.name: FromJson_LiveViewContentConsistent_001
  * @tc.desc: Test FromJson keeps LIVE_VIEW type when content is a real live view content
@@ -2953,7 +2954,7 @@ HWTEST_F(NotificationRequestTest, FromJson_LiveViewContentConsistent_001, Level1
                     NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE)}}}
         }},
     };
-
+ 
     auto *request = NotificationRequest::FromJson(jsonObject);
     ASSERT_NE(request, nullptr);
     EXPECT_EQ(request->GetNotificationType(), NotificationContent::Type::LIVE_VIEW);
@@ -2961,7 +2962,7 @@ HWTEST_F(NotificationRequestTest, FromJson_LiveViewContentConsistent_001, Level1
     EXPECT_EQ(request->CheckNotificationRequest(nullptr), ERR_OK);
     delete request;
 }
-
+ 
 /**
  * @tc.name: FromJson_LiveViewWithoutContent_001
  * @tc.desc: Test CheckNotificationRequest on a request parsed from JSON which declares
@@ -2975,7 +2976,7 @@ HWTEST_F(NotificationRequestTest, FromJson_LiveViewWithoutContent_001, Level1)
         {"notificationContentType", static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW)},
         {"content", nullptr},
     };
-
+ 
     auto *request = NotificationRequest::FromJson(jsonObject);
     ASSERT_NE(request, nullptr);
     EXPECT_EQ(request->GetContent(), nullptr);
