@@ -176,6 +176,7 @@ ErrCode __attribute__((weak)) AesGcmHelper::Decrypt(std::string &plainText, cons
         return ERR_ANS_INNER_DECRYPT_FAIL;
     }
     ret = DecryptAesGcm(plainText, cipherText, key);
+    OPENSSL_cleanse(key.data(), key.size());
     if (!ret) {
         ANS_LOGE("Fail to decrypt with AES-GCM.");
         return ERR_ANS_INNER_DECRYPT_FAIL;
@@ -303,7 +304,6 @@ bool AesGcmHelper::DecryptAesGcm(std::string &plainText, const std::string &ciph
     OPENSSL_cleanse(tag.data(), tag.size());
     OPENSSL_cleanse(cipherByte.data(), cipherByte.size());
     OPENSSL_cleanse(cipherBytes.data(), cipherBytes.size());
-    OPENSSL_cleanse(key.data(), key.size());
     return ret;
 }
 
