@@ -214,6 +214,7 @@ bool ReminderDataShareHelper::Query(Uri& uri, const std::string& key, std::strin
     auto result = helper->Query(uri, predicates, columns);
     if (result == nullptr) {
         ANSR_LOGE("Query failed, result is null");
+        helper->Release();
         return false;
     }
     if (result->GoToFirstRow() != DataShare::E_OK) {

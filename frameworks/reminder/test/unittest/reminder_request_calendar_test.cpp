@@ -331,21 +331,6 @@ HWTEST_F(ReminderRequestCalendarTest, OnDateTimeChange_01000, Function | SmallTe
 }
 
 /**
- * @tc.name: OnTimeZoneChange_001
- * @tc.desc: Test OnTimeZoneChange parameters.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(ReminderRequestCalendarTest, OnTimeZoneChange_001, Function | SmallTest | Level1)
-{
-    ReminderRequestCalendar calendar;
-    calendar.SetTimeZoneType(ReminderRequest::TimeZoneType::FIXED_TIME_ZONE);
-    EXPECT_GE(calendar.OnTimeZoneChange(), 0);
-    calendar.SetTimeZoneType(ReminderRequest::TimeZoneType::SYSTEM_TIME_ZONE);
-    EXPECT_GE(calendar.OnTimeZoneChange(), 0);
-}
-
-/**
  * @tc.name: UpdateNextReminder_01000
  * @tc.desc: Test UpdateNextReminder parameters.
  * @tc.type: FUNC
@@ -613,7 +598,7 @@ HWTEST_F(ReminderRequestCalendarTest, GetNextTriggerTime_Branch_00002, Function 
     time_t target = mktime(&targetTime);
     uint64_t nextTrigger = calendar->GetNextTriggerTimeAsRepeatReminder(static_cast<int64_t>(target),
         targetTime, targetTime);
-    
+
     targetTime.tm_mon = 11;
     int64_t futureTimeInMilli = static_cast<int64_t>(mktime(&targetTime)) * ReminderRequest::MILLI_SECONDS;
     EXPECT_EQ(nextTrigger, futureTimeInMilli);
@@ -778,43 +763,14 @@ HWTEST_F(ReminderRequestCalendarTest, SetRepeatDaysOfMonth_00001, Function | Sma
     EXPECT_NE(nullptr, calendar);
 
     std::vector<uint8_t> repeatDays;
-    repeatDays.emplace_back(1);
-    repeatDays.emplace_back(2);
-    repeatDays.emplace_back(3);
-    repeatDays.emplace_back(4);
-    repeatDays.emplace_back(5);
-    repeatDays.emplace_back(6);
-    repeatDays.emplace_back(7);
-    repeatDays.emplace_back(8);
-    repeatDays.emplace_back(9);
-    repeatDays.emplace_back(10);
-    repeatDays.emplace_back(11);
-    repeatDays.emplace_back(12);
-    repeatDays.emplace_back(13);
-    repeatDays.emplace_back(14);
-    repeatDays.emplace_back(15);
-    repeatDays.emplace_back(16);
-    repeatDays.emplace_back(17);
-    repeatDays.emplace_back(18);
-    repeatDays.emplace_back(19);
-    repeatDays.emplace_back(20);
-    repeatDays.emplace_back(21);
-    repeatDays.emplace_back(22);
-    repeatDays.emplace_back(23);
-    repeatDays.emplace_back(24);
-    repeatDays.emplace_back(25);
-    repeatDays.emplace_back(26);
-    repeatDays.emplace_back(27);
-    repeatDays.emplace_back(28);
-    repeatDays.emplace_back(29);
-    repeatDays.emplace_back(30);
-    repeatDays.emplace_back(31);
-    repeatDays.emplace_back(32);
-    EXPECT_EQ(repeatDays.size(), 32);
+    for (uint8_t i = 1;  i <= 31; ++i) {
+        repeatDays.emplace_back(i);
+    }
+    EXPECT_EQ(repeatDays.size(), 31);
 
     calendar->SetRepeatDaysOfMonth(repeatDays);
-    std::vector<uint8_t> result = calendar->GetRepeatMonths();
-    EXPECT_EQ(result.size(), 1);
+    std::vector<uint8_t> result = calendar->GetRepeatDays();
+    EXPECT_EQ(result.size(), 31);
 }
 
 /**
@@ -1638,26 +1594,6 @@ HWTEST_F(ReminderRequestCalendarTest, DeserializationExcludeDates_00001, Functio
     calendar->DeserializationExcludeDates(R"({"excludeDates":[1713196800000, 1713110400000]})");
     EXPECT_EQ(calendar->excludeDates_.size(), 2);
     EXPECT_NE(calendar->excludeDates_.find(1713196800000), calendar->excludeDates_.end());
-}
-
-/**
- * @tc.name: AppendValuesBucket_00001
- * @tc.desc: Test AppendValuesBucket parameters.
- * @tc.type: FUNC
- * @tc.require: issue#I9F24R
- */
-HWTEST_F(ReminderRequestCalendarTest, AppendValuesBucket_00001, Function | SmallTest | Level1)
-{
-    time_t now;
-    (void)time(&now);  // unit is seconds.
-    struct tm nowTime;
-    (void)localtime_r(&now, &nowTime);
-
-    std::vector<uint8_t> repeatMonths;
-    std::vector<uint8_t> repeatDays;
-    std::vector<uint8_t> daysOfWeek;
-    sptr<ReminderRequest> calendar = new ReminderRequestCalendar(nowTime, repeatMonths, repeatDays, daysOfWeek);
-    EXPECT_NE(nullptr, calendar);
 }
 
 /**

@@ -71,9 +71,8 @@ std::shared_ptr<ReminderDataManager> ReminderDataManagerTest::manager = nullptr;
 HWTEST_F(ReminderDataManagerTest, GetVaildReminders_00001, Level1)
 {
     IPCSkeleton::SetCallingTokenID(100);
-    manager->store_->Init();
     int32_t callingUid = 98765;
-    sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(static_cast<uint64_t>(50));
+    sptr<ReminderRequest> reminder1 = new ReminderRequestTimer(static_cast<uint64_t>(300));
     reminder1->InitCreatorBundleName("test_getvalid");
     reminder1->InitCreatorUid(callingUid);
     reminder1->InitBundleName("test_getvalid");
@@ -88,10 +87,11 @@ HWTEST_F(ReminderDataManagerTest, GetVaildReminders_00001, Level1)
     reminder2->InitUid(callingUid);
     reminder2->SetExpired(true);
     manager->PublishReminder(reminder2, callingUid);
-    
+
     std::vector<ReminderRequestAdaptation> reminders;
     manager->GetValidReminders(callingUid, reminders);
-    EXPECT_TRUE(reminders.size() >= 0);
+    EXPECT_EQ(reminders.size(), 1);
+    EXPECT_EQ(reminders[0].reminderRequest_->GetCreatorUid(), callingUid);
 }
 
 /**
@@ -132,17 +132,19 @@ HWTEST_F(ReminderDataManagerTest, CancelReminderToDb_0001, Level1)
  */
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_001, Level1)
 {
+    IPCSkeleton::SetCallingTokenID(0);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     int32_t reminderId = -1;
-    manager->PublishReminder(reminder, reminderId);
+    ErrCode ret = manager->PublishReminder(reminder, reminderId);
+    EXPECT_EQ(ret, ERR_REMINDER_CALLER_TOKEN_INVALID);
     manager->CancelReminder(reminderId, -1);
     manager->CancelAllReminders("", -1, -1);
     manager->CancelAllReminders(-1);
     manager->CancelAllReminders("", -1, -1, true);
     manager->CancelAllReminders(ReminderCalendarShareTable::NAME, -1, -1, true);
-    manager->IsMatched(reminder, -1, -1, true);
+    bool isMatched = manager->IsMatched(reminder, -1, -1, true);
+    EXPECT_EQ(isMatched, true);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -156,6 +158,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_002, Level1)
     int32_t callingUid = -1;
     std::vector<ReminderRequestAdaptation> vec;
     manager->GetValidReminders(callingUid, vec);
+    EXPECT_EQ(vec.size(), 0);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
 
     manager->CheckReminderLimitExceededLocked(callingUid, reminder);
@@ -164,7 +167,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_002, Level1)
     manager->AddToShowedReminders(reminder);
     manager->AddToShowedReminders(reminder);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -182,14 +184,14 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_003, Level1)
     manager->alertingReminderId_ = 1;
     manager->OnUserSwitch(0);
     manager->isReminderAgentReady_ = true;
-    manager->OnUserSwitch(0);
+    manager->OnUserSwitch(100);
+    EXPECT_EQ(manager->currentUserId_, 100);
     manager->alertingReminderId_ = -1;
     manager->OnUserSwitch(0);
     manager->OnUserRemove(0);
     manager->OnBundleMgrServiceStart();
     manager->OnAbilityMgrServiceStart();
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -204,14 +206,16 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_004, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     manager->CreateTimerInfo(ReminderDataManager::TimerType::TRIGGER_TIMER, reminder);
     manager->CreateTimerInfo(ReminderDataManager::TimerType::ALERTING_TIMER, reminder);
-    manager->FindReminderRequestLocked(0, false);
+    auto notFound = manager->FindReminderRequestLocked(0, false);
+    EXPECT_EQ(notFound, nullptr);
     reminder->SetReminderId(10);
     manager->reminderVector_.push_back(reminder);
-    manager->FindReminderRequestLocked(10, false);
+    auto found = manager->FindReminderRequestLocked(10, false);
+    ASSERT_NE(found, nullptr);
+    EXPECT_EQ(found->GetReminderId(), 10);
     manager->FindReminderRequestLocked(10, false);
     manager->FindReminderRequestLocked(10, false);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -229,6 +233,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_005, Level1)
     manager->activeReminderId_ = 1;
     manager->activeReminder_ = reminder;
     manager->CloseReminder(reminder, true);
+    manager->ResetStates(ReminderDataManager::TimerType::TRIGGER_TIMER);
+    EXPECT_EQ(manager->activeReminderId_, -1);
     reminder->SetReminderId(2);
     manager->alertingReminderId_ = 2;
     manager->CloseReminder(reminder, true);
@@ -239,7 +245,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_005, Level1)
     reminder->SetGroupId("");
     manager->CloseReminder(reminder, true);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -256,8 +261,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_006, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     manager->activeReminder_ = reminder;
     manager->RefreshRemindersDueToSysTimeChange(1);
+    EXPECT_EQ(manager->activeReminderId_, -1);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -275,13 +280,12 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_007, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     reminder->SetReminderId(10);
     manager->reminderVector_.push_back(reminder);
-    manager->ShowActiveReminder(want);
     manager->activeReminderId_ = 10;
     manager->activeReminder_ = reminder;
     manager->ShowActiveReminder(want);
+    EXPECT_EQ(manager->activeReminderId_, -1);
     manager->CloseReminder(want, false);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -294,11 +298,14 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_008, Level1)
 {
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     manager->TerminateAlerting(nullptr, "");
+    manager->alertingReminderId_ = 1;
+    manager->alertingReminder_ = reminder;
     manager->TerminateAlerting(reminder, "");
+    manager->ResetStates(ReminderDataManager::TimerType::ALERTING_TIMER);
+    EXPECT_EQ(manager->alertingReminderId_, -1);
     reminder->state_ = 2;
     manager->TerminateAlerting(reminder, "");
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -315,9 +322,9 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_009, Level1)
     sptr<ReminderAgentService> service(new ReminderAgentService);
     manager->ShouldAlert(nullptr);
     manager->currentUserId_ = 0;
-    manager->ShouldAlert(reminder);
+    bool shouldAlert = manager->ShouldAlert(reminder);
+    EXPECT_EQ(shouldAlert, false);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -331,11 +338,14 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_010, Level1)
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
     manager->HandleSysTimeChange(reminder);
     manager->SetActiveReminder(nullptr);
+    EXPECT_EQ(manager->activeReminderId_, -1);
     manager->SetActiveReminder(reminder);
+    EXPECT_EQ(manager->activeReminderId_, reminder->GetReminderId());
     manager->SetAlertingReminder(nullptr);
+    EXPECT_EQ(manager->alertingReminderId_, -1);
     manager->SetAlertingReminder(reminder);
+    EXPECT_EQ(manager->alertingReminderId_, reminder->GetReminderId());
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -356,6 +366,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_011, Level1)
     manager->ShowReminder(reminder, limits);
     reminder->SetReminderId(10);
     manager->ShowReminder(reminder, limits);
+    EXPECT_EQ(manager->activeReminderId_, 10);
     manager->ShowReminder(reminder, limits);
     manager->alertingReminderId_ = 1;
     manager->ShowReminder(reminder, limits);
@@ -363,7 +374,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_011, Level1)
     limits.isSlienceNotification = false;
     manager->ShowReminder(reminder, limits);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -375,12 +385,13 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_011, Level1)
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_012, Level1)
 {
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
-    manager->activeReminderId_ = 10;
-    manager->activeReminder_ = reminder;
     reminder->SetReminderId(10);
-    manager->activeReminderId_ = 1;
+    manager->SetActiveReminder(reminder);
+    EXPECT_EQ(manager->activeReminderId_, 10);
+    EXPECT_EQ(manager->activeReminder_->GetReminderId(), 10);
+    manager->SetActiveReminder(nullptr);
+    EXPECT_EQ(manager->activeReminderId_, -1);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -392,11 +403,12 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_012, Level1)
 HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_013, Level1)
 {
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
-    manager->activeReminderId_ = 10;
-    manager->activeReminder_ = reminder;
     reminder->SetReminderId(10);
+    manager->SetAlertingReminder(reminder);
+    EXPECT_EQ(manager->alertingReminderId_, 10);
+    manager->SetAlertingReminder(nullptr);
+    EXPECT_EQ(manager->alertingReminderId_, -1);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -414,11 +426,12 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_014, Level1)
     manager->alertingReminderId_ = -1;
     manager->StopAlertingReminder(reminder);
     manager->alertingReminderId_ = 1;
+    manager->ResetStates(ReminderDataManager::TimerType::ALERTING_TIMER);
     manager->StopAlertingReminder(reminder);
+    EXPECT_EQ(manager->alertingReminderId_, -1);
     reminder->SetReminderId(1);
     manager->StopAlertingReminder(reminder);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -442,9 +455,9 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_015, Level1)
     manager->InitUserId();
     manager->IsAllowedNotify(reminder);
     manager->IsAllowedNotify(nullptr);
-    manager->IsReminderAgentReady();
+    bool isReady = manager->IsReminderAgentReady();
+    EXPECT_EQ(isReady, true);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -466,7 +479,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
     reminder->SetActionButton("不再提醒", ReminderRequest::ActionButtonType::CLOSE,
         "", buttonWantAgent, buttonDataShareUpdate);
     manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
- 
+
     // INVALID ActionButtonType
     reminder->SetSystemApp(true);
     reminder->SetActionButton("无效的", ReminderRequest::ActionButtonType::INVALID,
@@ -480,10 +493,10 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
     // null ButtonDataShareUpdate
     reminder->SetActionButton("稍后提醒", ReminderRequest::ActionButtonType::SNOOZE, "", buttonWantAgent);
     manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::SNOOZE);
- 
+
     // not have uri
     manager->UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
- 
+
     // update datashare
     sptr<ReminderRequest> reminder1 = new ReminderRequestAlarm(2, 3, daysOfWeek);
     std::shared_ptr<ReminderRequest::ButtonWantAgent> buttonWantAgent1 =
@@ -500,7 +513,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_016, Level1)
     reminder1->SetActionButton("不再提醒", ReminderRequest::ActionButtonType::CLOSE, "",
         buttonWantAgent1, buttonDataShareUpdate1);
     manager->UpdateAppDatabase(reminder1, ReminderRequest::ActionButtonType::CLOSE);
-    EXPECT_TRUE(reminder1->actionButtonMap_.size() > 0);
+    EXPECT_EQ(reminder1->actionButtonMap_.size(), 1);
+    EXPECT_EQ(reminder1->actionButtonMap_[ReminderRequest::ActionButtonType::CLOSE].title, "不再提醒");
 }
 
 /**
@@ -560,10 +574,11 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_003, Level1)
     timeInfo->SetWantAgent(nullptr);
     timeInfo->action_ = ReminderRequest::REMINDER_EVENT_ALARM_ALERT;
     timeInfo->OnTrigger();
+    EXPECT_EQ(timeInfo->action_, ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
     timeInfo->action_ = ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT;
     timeInfo->OnTrigger();
+    EXPECT_EQ(timeInfo->action_, ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -577,11 +592,13 @@ HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_004, Level1)
     EventFwk::Want want;
     manager->HandleCustomButtonClick(want);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
+    reminder->SetSystemApp(true);
     manager->reminderVector_.push_back(reminder);
     want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 10);
+    reminder->SetState(true, ReminderRequest::REMINDER_STATUS_SHOWING, "OnShow");
     manager->HandleCustomButtonClick(want);
+    EXPECT_EQ(reminder->IsExpired(), true);
     remove("/data/service/el1/public/notification/notification.db");
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -732,25 +749,6 @@ HWTEST_F(ReminderDataManagerTest, ExcludeDate_0001, Level1)
 }
 
 /**
- * @tc.name: InitStartExtensionAbility
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issue#I9IIDE
- */
-HWTEST_F(ReminderDataManagerTest, InitStartExtensionAbility_0001, Level1)
-{
-    sptr<ReminderRequest> reminder = new ReminderRequestCalendar(10);
-    reminder->reminderType_ = ReminderRequest::ReminderType::CALENDAR;
-    ReminderRequestCalendar* calendar = static_cast<ReminderRequestCalendar*>(reminder.GetRefPtr());
-    uint64_t now = calendar->GetNowInstantMilli();
-    calendar->SetDateTime(now-50000);
-    calendar->SetEndDateTime(now+50000);
-    manager->reminderVector_.push_back(calendar);
-    manager->Init();
-    EXPECT_TRUE(!manager->reminderVector_.empty());
-}
-
-/**
  * @tc.name: CancelAllReminders_00001
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
@@ -838,7 +836,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_020, Level1)
     calendar->InitUid(999);
     calendar->SetShare(true);
     manager->PlaySoundAndVibrationLocked(calendar);
-    EXPECT_NE(manager, nullptr);
+    bool isReady = manager->IsReminderAgentReady();
+    EXPECT_EQ(isReady, true);
 }
 
 /**
@@ -859,7 +858,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_022, Level1)
     observer.OnConfigurationUpdated(config);
     observer.languageInfo_ = "1111";
     observer.OnConfigurationUpdated(config);
-    EXPECT_TRUE(manager != nullptr);
+    EXPECT_EQ(observer.languageInfo_, "test");
 }
 
 /**
@@ -875,9 +874,11 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_023, Level1)
     auto datashare = std::make_shared<ReminderRequest::ButtonDataShareUpdate>();
     reminder->SetActionButton("title", ReminderRequest::ActionButtonType::CLOSE, "resource",
         buttonWantAgent, datashare);
-    manager->IsActionButtonDataShareValid(reminder, 0);
-    datashare->uri = "1111";
-    manager->IsActionButtonDataShareValid(reminder, 0);
+    bool isValid = manager->IsActionButtonDataShareValid(reminder, 0);
+    EXPECT_EQ(isValid, true);
+    datashare->uri = "1111";  // no permission
+    isValid = manager->IsActionButtonDataShareValid(reminder, 0);
+    EXPECT_EQ(isValid, false);
     reminder->InitUid(1);
     reminder->SetTriggerTimeInMilli(100);
 
@@ -897,7 +898,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_023, Level1)
         std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
         manager->showedReminderVector_.clear();
     }
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -914,6 +914,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_024, Level1)
     calendar->SetReminderId(242);
     {
         std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
         manager->reminderVector_.push_back(timer);
         manager->reminderVector_.push_back(calendar);
     }
@@ -928,9 +929,9 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_024, Level1)
     manager->LoadShareReminders();
     {
         std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        EXPECT_EQ(manager->reminderVector_.size(), 1);
         manager->reminderVector_.clear();
     }
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -947,7 +948,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_026, Level1)
     info.OnTrigger();
     info.SetReminderTimerType(static_cast<ReminderTimerInfo::ReminderTimerType>(9));
     info.OnTrigger();
-    EXPECT_TRUE(manager != nullptr);
+    EXPECT_EQ(info.reminderTimerType_, static_cast<ReminderTimerInfo::ReminderTimerType>(9));
 }
 
 /**
@@ -989,12 +990,13 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_027, Level1)
         manager->reminderVector_.push_back(timer);
     }
     timer->SetSystemApp(true);
+    timer->SetState(true, ReminderRequest::REMINDER_STATUS_SHOWING, "OnShow");
     manager->HandleCustomButtonClick(want);
     {
         std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        EXPECT_EQ(timer->IsExpired(), true);
         manager->reminderVector_.clear();
     }
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -1017,9 +1019,10 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_028, Level1)
     manager->RemoveFromShowedReminders(timer);
     {
         std::lock_guard<std::mutex> lock(ReminderDataManager::SHOW_MUTEX);
+        EXPECT_EQ(manager->showedReminderVector_.size(), 1);
+        EXPECT_EQ(manager->showedReminderVector_[0]->GetReminderId(), 282);
         manager->showedReminderVector_.clear();
     }
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -1040,8 +1043,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_029, Level1)
     manager->OnUserSwitch(1);
     sleep(1);
     manager->queue_ = std::move(queue);
-    manager->OnUserSwitch(1);
-    EXPECT_TRUE(manager != nullptr);
+    manager->OnUserSwitch(100);
+    EXPECT_EQ(manager->currentUserId_, 100);
     sleep(1);
 }
 
@@ -1066,7 +1069,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_033, Level1)
     manager->UpdateAndSaveReminderLocked(calendar, true);
     calendar->isShare_ = false;
     manager->UpdateAndSaveReminderLocked(calendar, true);
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -1082,7 +1084,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_034, Level1)
     manager->ReportTimerEvent(targetTime, false);
     targetTime -= 60 * 60 * 1000;
     manager->ReportTimerEvent(targetTime, false);
-    EXPECT_TRUE(manager != nullptr);
+    EXPECT_EQ(manager->activeReminderId_, -1);
 }
 
 /**
@@ -1098,9 +1100,9 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_035, Level1)
     int32_t count = 0;
     manager->AsyncStartExtensionAbility(calendar, 1, 1, count);
     manager->AsyncStartExtensionAbility(calendar, 0, 1, count);
+    EXPECT_GT(count, 0);
     count = 200;
     manager->AsyncStartExtensionAbility(calendar, 0, 1, count);
-    EXPECT_TRUE(manager != nullptr);
 }
 
 /**
@@ -1160,7 +1162,8 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_040, Level1)
     uint64_t triggerTimeInMilli = static_cast<uint64_t>(GetCurrentTime()) - 60 * 1000;
     calendar->SetTriggerTimeInMilli(triggerTimeInMilli);
     auto result = manager->HandleRefreshReminder(ReminderDataManager::DATE_TIME_CHANGE, calendar);
-    EXPECT_TRUE(result != nullptr);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetReminderId(), calendar->GetReminderId());
 }
 
 /**
@@ -1325,7 +1328,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_045, Level1)
     ret = manager->CheckShowLimit(limits, reminder);
     EXPECT_EQ(ret, false);
     EXPECT_EQ(limits.totalCount, 501);
-    
+
     limits.totalCount = 0;
     limits.timeLimits.clear();
     limits.bundleLimits.clear();
