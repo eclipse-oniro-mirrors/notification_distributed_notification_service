@@ -74,8 +74,10 @@ ErrCode AdvancedNotificationService::SetPriorityEnabledByBundle(
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_26);
-        message.Message("bundle: " + bundleOption->GetBundleName() + ", id: " +
-            std::to_string(bundleOption->GetUid()) + ", en:" + std::to_string(enableStatusInt));
+        if (bundleOption != nullptr) {
+            message.Message("bundle: " + bundleOption->GetBundleName() + ", id: " +
+                std::to_string(bundleOption->GetUid()) + ", en:" + std::to_string(enableStatusInt));
+        }
         message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE);
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INNER_INVALID_BUNDLE;
@@ -203,7 +205,10 @@ ErrCode AdvancedNotificationService::SetBundlePriorityConfig(
     if (bundle == nullptr) {
         ANS_LOGE("bundle is nullptr");
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_28);
-        message.Message("bundle: " + bundleOption->GetBundleName() + ", id: " + std::to_string(bundleOption->GetUid()));
+        if (bundleOption != nullptr) {
+            message.Message("bundle: " + bundleOption->GetBundleName() +
+                ", id: " + std::to_string(bundleOption->GetUid()));
+        }
         message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE).Append(" bundle name is empty");
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INNER_INVALID_BUNDLE;
@@ -302,10 +307,12 @@ ErrCode AdvancedNotificationService::GetValidMapByBundle(const EventBranchId bra
     for (auto &iter : originMap) {
         sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(iter.first);
         if (bundle == nullptr) {
+            std::string bundleName = iter.first != nullptr ? iter.first->GetBundleName() : "";
+            int32_t uid = iter.first != nullptr ? iter.first->GetUid() : -1;
             ANS_LOGW("GetValidMapByBundle invalid bundleOption name: %{public}s, uid: %{public}d.",
-                iter.first->GetBundleName().c_str(), iter.first->GetUid());
+                bundleName.c_str(), uid);
             HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, branchId);
-            message.Message("bundle:" + iter.first->GetBundleName() + ", id:" + std::to_string(iter.first->GetUid()));
+            message.Message("bundle:" + bundleName + ", id:" + std::to_string(uid));
             message.ErrorCode(ERR_ANS_INNER_INVALID_BUNDLE).Append(" bundle name is empty");
             NotificationAnalyticsUtil::ReportModifyEvent(message);
             continue;
@@ -332,8 +339,10 @@ ErrCode AdvancedNotificationService::GetValidBundles(
     for (auto &bundleOption : bundleOptions) {
         sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
         if (bundle == nullptr) {
+            std::string bundleName = bundleOption != nullptr ? bundleOption->GetBundleName() : "";
+            int32_t uid = bundleOption != nullptr ? bundleOption->GetUid() : -1;
             ANS_LOGW("GetValidBundles invalid bundleOption name: %{public}s, uid: %{public}d.",
-                bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+                bundleName.c_str(), uid);
             continue;
         }
         std::string bundleName = BundleManagerHelper::GetInstance()->GetBundleNameByUid(bundle->GetUid());

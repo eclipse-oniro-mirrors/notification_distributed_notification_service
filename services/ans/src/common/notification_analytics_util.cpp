@@ -17,6 +17,7 @@
 #include "singleton.h"
 
 #include <regex>
+#include <atomic>
 
 #include "want_params_wrapper.h"
 #include "string_wrapper.h"
@@ -109,7 +110,7 @@ static ffrt::mutex badgeInfosMutex_;
 static ffrt::mutex reportSuccessCacheMutex_;
 static uint64_t reportAggregateTimeId = 0;
 static std::list<ReportCache> successReportCacheList;
-static bool g_successReportFlag = false;
+static std::atomic<bool> g_successReportFlag = false;
 static std::shared_ptr<ReportTimerInfo> reportAggregateTimeInfo = std::make_shared<ReportTimerInfo>();
 static ffrt::mutex reportAggListMutex_;
 static std::list<ReportCache> reportAggList;
@@ -139,7 +140,7 @@ static uint64_t reportLiveViewMessageTimerId_ = 0;
 static std::shared_ptr<ReportTimerInfo> liveViewTimeInfo = std::make_shared<ReportTimerInfo>();
 static int32_t LIVEVIEW_REPORT_INTERVAL = 2 * NotificationConstant::HOUR_TO_MS;
 static const int32_t LIVE_VIEW_CREATE = 0;
-static bool g_reportLiveViewFlag = false;
+static std::atomic<bool> g_reportLiveViewFlag = false;
 OperationalData HaOperationMessage::notificationData = OperationalData();
 OperationalData HaOperationMessage::liveViewData = OperationalData();
 static ffrt::mutex haOperationDataMutex_;
@@ -1616,6 +1617,10 @@ void NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute()
     }
     if (g_cleanExperDataTimerId == 0) {
         g_cleanExperDataTimerId = timer->CreateTimer(cleanExperInfo);
+        if (g_cleanExperDataTimerId == 0) {
+            ANS_LOGE("CreateTimer failed for clean exper data");
+            return;
+        }
     }
 
     auto triggerFunc = [] {
@@ -1623,7 +1628,13 @@ void NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute()
     };
 
     cleanExperInfo->SetCallbackInfo(triggerFunc);
-    timer->StartTimer(g_cleanExperDataTimerId, GetMsToNextMidnight());
+    bool startRet = timer->StartTimer(g_cleanExperDataTimerId, GetMsToNextMidnight());
+    if (!startRet) {
+        ANS_LOGE("StartTimer failed, will destroy clean exper data timer");
+        timer->DestroyTimer(g_cleanExperDataTimerId);
+        g_cleanExperDataTimerId = 0;
+        return;
+    }
 }
 
 void NotificationAnalyticsUtil::UpdateCleanExperDataTimer()

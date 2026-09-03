@@ -169,6 +169,23 @@ HWTEST_F(AdvancedNotificationBadgeManagerTest, SetShowBadgeEnabledForBundles_050
 }
 
 /**
+ * @tc.number    : SetShowBadgeEnabledForBundles_0600
+ * @tc.name      : SetShowBadgeEnabledForBundles_0600
+ * @tc.desc      : Test SetShowBadgeEnabledForBundles returns the error code of SetShowBadge
+ */
+HWTEST_F(AdvancedNotificationBadgeManagerTest, SetShowBadgeEnabledForBundles_0600, Function | MediumTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, bool> bundleOptions;
+    // bundle with empty name passes GenerateValidBundleOption but fails in SetShowBadge
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("", 100);
+    bundleOptions[bundleOption] = true;
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundles(bundleOptions);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
  * @tc.number    : GetShowBadgeEnabledForBundles_0100
  * @tc.name      : SetShowBadgeEnabledForBundles_0100
  * @tc.desc      : Test SetShowBadgeEnabledForBundles function

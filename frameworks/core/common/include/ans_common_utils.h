@@ -105,6 +105,9 @@ public:
 
     static bool IsCollaborationNotification(const sptr<NotificationRequest> &request)
     {
+        if (request == nullptr) {
+            return false;
+        }
         auto extendInfo = request->GetExtendInfo();
         AAFwk::IBoolean* ao = nullptr;
         if (extendInfo != nullptr) {

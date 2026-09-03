@@ -462,7 +462,7 @@ void DistributedDeviceService::SyncDeviceStatus(int32_t type, int32_t status,
         std::shared_ptr<PackageInfo> packageInfo = std::make_shared<PackageInfo>(stateBox, peer.second,
             TransDataType::DATA_TYPE_MESSAGE, MODIFY_ERROR_EVENT_CODE);
         DistributedSendAdapter::GetInstance().SendPackage(packageInfo);
-        ANS_LOGI("DeviceState %{public}d %{public}d %{public}d %{public}d %{public}lu.",
+        ANS_LOGI("DeviceState %{public}d %{public}d %{public}d %{public}d %{public}zu.",
             type, status, liveViewEnable, notificationEnable, peerDevice_.size());
     }
 }

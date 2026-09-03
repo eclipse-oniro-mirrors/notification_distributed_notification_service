@@ -510,5 +510,82 @@ HWTEST_F(NotificationConfigParseTest, GetNotificationServiceNotObject_00001, Fun
     EXPECT_EQ(timeout, 0u);
     inst->notificationConfigJsons_ = saved;
 }
+
+/**
+ * @tc.name: GetAppPrivileges_00001
+ * @tc.desc: Test GetAppPrivileges when appPrivileges value is not an object, should return nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetAppPrivileges_00001, Function | SmallTest | Level1)
+{
+    auto inst = NotificationConfigParse::GetInstance();
+    auto saved = inst->notificationConfigJsons_;
+    inst->notificationConfigJsons_.clear();
+    nlohmann::json badJson = nlohmann::json{
+        {"appPrivileges", "not_an_object"}
+    };
+    inst->notificationConfigJsons_.push_back(badJson);
+    EXPECT_EQ(inst->GetAppPrivileges("com.test.bundle"), nullptr);
+
+    nlohmann::json numberJson = nlohmann::json{
+        {"appPrivileges", 123}
+    };
+    inst->notificationConfigJsons_.clear();
+    inst->notificationConfigJsons_.push_back(numberJson);
+    EXPECT_EQ(inst->GetAppPrivileges("com.test.bundle"), nullptr);
+
+    nlohmann::json arrayJson = nlohmann::json{
+        {"appPrivileges", nlohmann::json::array({"bundle1", "bundle2"})}
+    };
+    inst->notificationConfigJsons_.clear();
+    inst->notificationConfigJsons_.push_back(arrayJson);
+    EXPECT_EQ(inst->GetAppPrivileges("bundle1"), nullptr);
+
+    nlohmann::json nullJson = nlohmann::json{
+        {"appPrivileges", nullptr}
+    };
+    inst->notificationConfigJsons_.clear();
+    inst->notificationConfigJsons_.push_back(nullJson);
+    EXPECT_EQ(inst->GetAppPrivileges("com.test.bundle"), nullptr);
+
+    nlohmann::json emptyJson = nlohmann::json{
+        {"appPrivileges", nlohmann::json::object()}
+    };
+    inst->notificationConfigJsons_.clear();
+    inst->notificationConfigJsons_.push_back(emptyJson);
+    EXPECT_EQ(inst->GetAppPrivileges("com.test.bundle"), nullptr);
+
+    inst->notificationConfigJsons_ = saved;
+}
+
+/**
+ * @tc.name: GetAppPrivileges_00002
+ * @tc.desc: Test GetAppPrivileges with valid appPrivileges object.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationConfigParseTest, GetAppPrivileges_00002, Function | SmallTest | Level1)
+{
+    auto inst = NotificationConfigParse::GetInstance();
+    auto saved = inst->notificationConfigJsons_;
+    inst->notificationConfigJsons_.clear();
+    nlohmann::json goodJson = nlohmann::json{
+        {"appPrivileges", {
+            {"com.test.bundle", "11111"},
+            {"com.other.bundle", "00000"}
+        }}
+    };
+    inst->notificationConfigJsons_.push_back(goodJson);
+    auto privileges = inst->GetAppPrivileges("com.test.bundle");
+    EXPECT_NE(privileges, nullptr);
+    EXPECT_TRUE(privileges->IsLiveViewEnabled());
+    EXPECT_TRUE(privileges->IsBannerEnabled());
+    EXPECT_TRUE(privileges->IsReminderEnabled());
+    EXPECT_TRUE(privileges->IsDistributedReplyEnabled());
+    // bundle not in privileges
+    EXPECT_EQ(inst->GetAppPrivileges("com.not.exist.bundle"), nullptr);
+    inst->notificationConfigJsons_ = saved;
+}
 }   //namespace Notification
 }   //namespace OHOS

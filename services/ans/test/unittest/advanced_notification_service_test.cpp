@@ -5568,6 +5568,28 @@ HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00002, Function
 }
 
 /**
+ * @tc.number    : SetBadgeNumberByBundle_00003
+ * @tc.name      : SetBadgeNumberByBundle
+ * @tc.desc      : Test SetBadgeNumberByBundle with empty client bundle name, expect error code
+ * @tc.desc      : ERR_ANS_INNER_INVALID_PARAM.
+ */
+HWTEST_F(AdvancedNotificationServiceTest, SetBadgeNumberByBundle_00003, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    MockIsNonBundleName(true);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
+    ASSERT_NE(bundleOption, nullptr);
+    bundleOption->SetBundleName("invalidBundleName");
+    int32_t badgeNumber = 1;
+    ASSERT_EQ(advancedNotificationService_->SetBadgeNumberByBundle(bundleOption, badgeNumber),
+        ERR_ANS_INNER_INVALID_PARAM);
+    MockIsNonBundleName(false);
+    MockIsVerfyPermisson(true);
+}
+
+/**
  * @tc.name: DoNotDisturbUpdataReminderFlags_0100
  * @tc.desc: test DoNotDisturbUpdataReminderFlags can turn off all reminders.
  * @tc.type: FUNC

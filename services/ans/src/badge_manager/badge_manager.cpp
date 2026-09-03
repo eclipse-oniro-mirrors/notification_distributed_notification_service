@@ -102,7 +102,7 @@ ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundles(
     message.ErrorCode(result).Message("SetShowBadgeEnabledForBundles end").BranchId(BRANCH_5);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     ANS_LOGD("SetShowBadgeEnabledForBundles end");
-    return ERR_OK;
+    return result;
 }
 
 ErrCode AdvancedNotificationService::SetShowBadgeEnabledForBundle(
@@ -436,7 +436,7 @@ ErrCode AdvancedNotificationService::SetBadgeNumberByBundle(
         std::string bundleName = GetClientBundleName();
         if (bundleName.empty()) {
             ANS_LOGE("Failed to get client bundle name.");
-            return result;
+            return ERR_ANS_INNER_INVALID_PARAM;
         }
         bool isAgent = false;
         isAgent = IsAgentRelationship(bundleName, bundle->GetBundleName());

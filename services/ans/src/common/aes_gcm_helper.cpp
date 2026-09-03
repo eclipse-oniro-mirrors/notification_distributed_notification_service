@@ -37,6 +37,7 @@ namespace Notification {
     static const uint32_t G_AES_GCM_KEY_LEN{32};
 static const uint32_t G_AES_GCM_IV_LEN{12};
 static const uint32_t G_AES_GCM_TAG_LEN{16};
+static const size_t G_MAX_CIPHER_TEXT_LEN{16 * 1024 * 1024};
 static const std::string G_DIR_PATH{"/data/service/el1/public/database/notification_service/keyfile"};
 static const std::string G_KEY_PATH{"/data/service/el1/public/database/notification_service"};
 static const int STEP = 2;
@@ -104,9 +105,14 @@ bool AesGcmHelper::GenerateKey(std::string &key)
         if (keyFile.is_open()) {
             std::string keyHex;
             std::getline(keyFile, keyHex);
-            key = Hex2Byte(keyHex);
             keyFile.close();
-            return true;
+            std::string keyFromHex = Hex2Byte(keyHex);
+            OPENSSL_cleanse(keyHex.data(), keyHex.size());
+            if (keyFromHex.size() == G_AES_GCM_KEY_LEN) {
+                key = keyFromHex;
+                return true;
+            }
+            ANS_LOGE("Key file is corrupted, regenerate a new key.");
         }
     }
     unsigned char aes_key[G_AES_GCM_KEY_LEN];
@@ -120,15 +126,18 @@ bool AesGcmHelper::GenerateKey(std::string &key)
     std::string keyHex = Byte2Hex(key);
     if (!std::filesystem::exists(keyPath.parent_path())) {
         ANS_LOGE("Fail to save the key");
+        OPENSSL_cleanse(keyHex.data(), keyHex.size());
         return false;
     }
     std::ofstream keyFile(keyDir);
     if (keyFile.is_open()) {
         keyFile << keyHex;
         keyFile.close();
+        OPENSSL_cleanse(keyHex.data(), keyHex.size());
         ANS_LOGI("Generate new key.");
     } else {
         ANS_LOGE("Fail to save the key");
+        OPENSSL_cleanse(keyHex.data(), keyHex.size());
         return false;
     }
     return true;
@@ -176,6 +185,10 @@ ErrCode __attribute__((weak)) AesGcmHelper::Decrypt(std::string &plainText, cons
 
 bool AesGcmHelper::EncryptAesGcm(const std::string &plainText, std::string &cipherText, std::string &key)
 {
+    if (key.size() != G_AES_GCM_KEY_LEN) {
+        ANS_LOGE("EncryptAesGcm key length error: %{public}zu", key.size());
+        return false;
+    }
     const unsigned int bufferLen = plainText.size();
     std::vector<unsigned char> buffer(bufferLen);
     std::vector<unsigned char> iv(G_AES_GCM_IV_LEN);
@@ -226,6 +239,14 @@ bool AesGcmHelper::EncryptAesGcm(const std::string &plainText, std::string &ciph
 
 bool AesGcmHelper::DecryptAesGcm(std::string &plainText, const std::string &cipherText, std::string &key)
 {
+    if (key.size() != G_AES_GCM_KEY_LEN) {
+        ANS_LOGE("DecryptAesGcm key length error: %{public}zu", key.size());
+        return false;
+    }
+    if (cipherText.size() > G_MAX_CIPHER_TEXT_LEN) {
+        ANS_LOGE("DecryptAesGcm cipher text too long: %{public}zu", cipherText.size());
+        return false;
+    }
     std::string cipherBytes = Hex2Byte(cipherText);
     if (cipherBytes.empty()) {
         ANS_LOGE("DecryptAesGcm hex to byte error.");
@@ -234,9 +255,10 @@ bool AesGcmHelper::DecryptAesGcm(std::string &plainText, const std::string &ciph
 
     if (cipherBytes.size() <= G_AES_GCM_IV_LEN + G_AES_GCM_TAG_LEN) {
         ANS_LOGE("DecryptAesGcm cipher too short: %zu bytes", cipherBytes.size());
+        OPENSSL_cleanse(cipherBytes.data(), cipherBytes.size());
         return false;
     }
-    const unsigned int bufferLen = cipherBytes.size() - G_AES_GCM_IV_LEN - G_AES_GCM_TAG_LEN;
+    const size_t bufferLen = cipherBytes.size() - G_AES_GCM_IV_LEN - G_AES_GCM_TAG_LEN;
     std::vector<unsigned char> buffer(bufferLen);
     std::vector<unsigned char> iv(G_AES_GCM_IV_LEN);
     std::vector<unsigned char> cipherByte(bufferLen);
@@ -276,6 +298,12 @@ bool AesGcmHelper::DecryptAesGcm(std::string &plainText, const std::string &ciph
         plainText = std::string(buffer.begin(), buffer.end());
     } while (0);
     EVP_CIPHER_CTX_free(ctx);
+    OPENSSL_cleanse(buffer.data(), buffer.size());
+    OPENSSL_cleanse(iv.data(), iv.size());
+    OPENSSL_cleanse(tag.data(), tag.size());
+    OPENSSL_cleanse(cipherByte.data(), cipherByte.size());
+    OPENSSL_cleanse(cipherBytes.data(), cipherBytes.size());
+    OPENSSL_cleanse(key.data(), key.size());
     return ret;
 }
 

@@ -26,6 +26,8 @@
 using namespace testing::ext;
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
+extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
+
 namespace OHOS {
 namespace Notification {
 class AdvancedNotificationQueryTest : public testing::Test {
@@ -165,6 +167,64 @@ HWTEST_F(AdvancedNotificationQueryTest, QueryNotificationParameters_InvalidUserI
     auto result = service->QueryNotificationParameters(1, "testLabel", bundle, parameters);
     EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
     MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: GetActiveNotificationByFilter_NullBundleOption_00001
+ * @tc.desc: Test GetActiveNotificationByFilter with nullptr bundleOption
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationQueryTest, GetActiveNotificationByFilter_NullBundleOption_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request;
+    std::vector<std::string> extraInfoKeys;
+
+    auto result = service->GetActiveNotificationByFilter(nullptr, 1, "label", 0, extraInfoKeys, request);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: GetActiveNotificationByFilter_InvalidBundleWithUserIdInit_00001
+ * @tc.desc: Test GetActiveNotificationByFilter with invalid bundleOption and userId -1
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationQueryTest, GetActiveNotificationByFilter_InvalidBundleWithUserIdInit_00001,
+    Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(false, 0);
+    auto service = GetService();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundleName", 0);
+    sptr<NotificationRequest> request;
+    std::vector<std::string> extraInfoKeys;
+
+    auto result = service->GetActiveNotificationByFilter(bundleOption, 1, "label", -1, extraInfoKeys, request);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_BUNDLE);
+    MockQueryForgroundOsAccountId(true, 0);
+}
+
+/**
+ * @tc.name: GetActiveNotificationByFilter_FallbackBundleCreated_00001
+ * @tc.desc: Test GetActiveNotificationByFilter creates fallback bundle when bundleOption is valid
+ *           but GenerateValidBundleOption fails
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationQueryTest, GetActiveNotificationByFilter_FallbackBundleCreated_00001,
+    Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(false, 0);
+    auto service = GetService();
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("testBundleName", 0);
+    sptr<NotificationRequest> request;
+    std::vector<std::string> extraInfoKeys;
+
+    auto result = service->GetActiveNotificationByFilter(bundleOption, 1, "label", 0, extraInfoKeys, request);
+    EXPECT_NE(result, ERR_ANS_INNER_INVALID_BUNDLE);
+    MockQueryForgroundOsAccountId(true, 0);
 }
 
 }  // namespace Notification

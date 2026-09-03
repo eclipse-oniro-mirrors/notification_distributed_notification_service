@@ -286,7 +286,7 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
 {
     ANS_LOGD("called");
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr && userId != -1 && !bundleOption->GetBundleName().empty()) {
+    if (bundle == nullptr && bundleOption != nullptr && userId != -1 && !bundleOption->GetBundleName().empty()) {
         bundle = new (std::nothrow) NotificationBundleOption(bundleOption->GetBundleName(), 0);
     }
     if (bundle == nullptr) {

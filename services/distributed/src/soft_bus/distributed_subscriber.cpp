@@ -156,8 +156,17 @@ bool DistribuedSubscriber::IsDistributedRemoveReason(const int32_t deleteReason)
 
 ErrCode DistribuedSubscriber::OnOperationResponse(const std::shared_ptr<NotificationOperationInfo> &operationInfo)
 {
+    if (operationInfo == nullptr) {
+        ANS_LOGE("Invalid operationInfo.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     DistributedDeviceInfo operRespDevice;
-    DistributedDeviceService::GetInstance().GetDeviceInfoByUdid(operationInfo->GetNotificationUdid(), operRespDevice);
+    if (!DistributedDeviceService::GetInstance().GetDeviceInfoByUdid(
+        operationInfo->GetNotificationUdid(), operRespDevice)) {
+        ANS_LOGE("GetDeviceInfoByUdid failed, udid: %{public}s",
+            StringAnonymous(operationInfo->GetNotificationUdid()).c_str());
+        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
+    }
     ANS_LOGI("Subscriber on response %{public}d %{public}s %{public}d %{public}s, OperRespDeviceId: %{public}s.",
         peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
         StringAnonymous(localDevice_.deviceId_).c_str(), StringAnonymous(operRespDevice.deviceId_).c_str());
