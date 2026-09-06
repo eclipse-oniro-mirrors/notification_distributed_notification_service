@@ -35,6 +35,7 @@ ohos_unittest("subscriber_image_util_test") {
     "../mock/mock_application_context_full.cpp",
     "../mock/mock_resource_manager.cpp",
     "../mock/mock_image_native.cpp",
+    "../mock/mock_image_native_svg.cpp",
     "subscriber_image_util_test.cpp",
   ]
 
