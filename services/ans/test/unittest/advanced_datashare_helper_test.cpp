@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 #include "advanced_aggregation_data_roaming_observer.h"
+#include "ans_service_errors.h"
 #define private public
 #include "advanced_datashare_helper.h"
 #include "ans_const_define.h"
@@ -738,6 +739,414 @@ HWTEST_F(AdvancedDatashareHelperTest, DealWithContactResult_ContactPolicyValues_
     ret = advancedDatashareHelper.dealWithContactResult(resultSet, "5");
     EXPECT_EQ(ret, false);
     MockGoToGetNextRow(0); // reset to default for subsequent tests
+}
+
+/**
+ * @tc.name: SetPhoneNumQueryConditionExact_001
+ * @tc.desc: Test SetPhoneNumQueryConditionExact with normal phone number
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, SetPhoneNumQueryConditionExact_001, Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    DataShare::DataSharePredicates predicates;
+    std::string phoneNumber = "13800138000";
+
+    advancedDatashareHelper.SetPhoneNumQueryConditionExact(predicates, phoneNumber);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: SetPhoneNumQueryConditionExact_002
+ * @tc.desc: Test SetPhoneNumQueryConditionExact with short phone number
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, SetPhoneNumQueryConditionExact_002, Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    DataShare::DataSharePredicates predicates;
+    std::string phoneNumber = "1111";
+
+    advancedDatashareHelper.SetPhoneNumQueryConditionExact(predicates, phoneNumber);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: QueryContactInnerExact_001
+ * @tc.desc: Test QueryContactInnerExact returns error when resultSet is null
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactInnerExact_001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToCreateDataShareHelper(true);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "11111111111";
+
+    int ret = advancedDatashareHelper.QueryContactInnerExact(
+        contactUri, phoneNumber, "6", "1", "true");
+    EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: QueryContactInnerExact_002
+ * @tc.desc: Test QueryContactInnerExact with rowCount 0 and FORBID_SPECIFIED_CONTACTS policy
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactInnerExact_002, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockSetRowCount(0);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "11111111111";
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    int ret = advancedDatashareHelper.QueryContactInnerExact(
+        contactUri, phoneNumber, "6", "1", "true");
+    EXPECT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: QueryContactInnerExact_003
+ * @tc.desc: Test QueryContactInnerExact with rowCount 0 and non-forbid policy
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactInnerExact_003, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockSetRowCount(0);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "11111111111";
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    int ret = advancedDatashareHelper.QueryContactInnerExact(
+        contactUri, phoneNumber, "5", "1", "true");
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: QueryContactInnerExact_004
+ * @tc.desc: Test QueryContactInnerExact with row found and whitelist contact
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactInnerExact_004, Function | SmallTest | Level1)
+{
+    std::string str = "1";
+    MockGetStringValue(str);
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToQueryDataShareResultSet(false);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockSetRowCount(1);
+    MockGoToGetNextRow(-1);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = advancedDatashareHelper.GetFocusModeRepeatCallUri(0);
+    Uri contactUri(uri);
+    std::string phoneNumber = "1111";
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    int ret = advancedDatashareHelper.QueryContactInnerExact(
+        contactUri, phoneNumber, "5", "1", "true");
+    EXPECT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: QueryContactInnerExact_005
+ * @tc.desc: Test QueryContactInnerExact with row found but not in whitelist
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactInnerExact_005, Function | SmallTest | Level1)
+{
+    std::string str = "0";
+    MockGetStringValue(str);
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToQueryDataShareResultSet(false);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockSetRowCount(1);
+    MockGoToGetNextRow(-1);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = advancedDatashareHelper.GetFocusModeRepeatCallUri(0);
+    Uri contactUri(uri);
+    std::string phoneNumber = "1111";
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    int ret = advancedDatashareHelper.QueryContactInnerExact(
+        contactUri, phoneNumber, "5", "1", "true");
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: QueryContactInnerExact_006
+ * @tc.desc: Test QueryContactInnerExact when GoToFirstRow fails
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactInnerExact_006, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToQueryDataShareResultSet(false);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockSetRowCount(1);
+    MockIsFailedGoToFirstRow(1);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "11111111111";
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    int ret = advancedDatashareHelper.QueryContactInnerExact(
+        contactUri, phoneNumber, "4", "1", "true");
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: QueryContactInnerExact_007
+ * @tc.desc: Test QueryContactInnerExact with valid userId
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactInnerExact_007, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockSetRowCount(0);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "11111111111";
+    int32_t userId = 100;
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    int ret = advancedDatashareHelper.QueryContactInnerExact(
+        contactUri, phoneNumber, "6", "1", "true", userId);
+    EXPECT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: QueryContactInnerExact_008
+ * @tc.desc: Test QueryContactInnerExact with intelligent scene and blacklist contact
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactInnerExact_008, Function | SmallTest | Level1)
+{
+    std::string str = "2";
+    MockGetStringValue(str);
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToQueryDataShareResultSet(false);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockSetRowCount(1);
+    MockGoToGetNextRow(-1);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = advancedDatashareHelper.GetFocusModeRepeatCallUri(0);
+    Uri contactUri(uri);
+    std::string phoneNumber = "1111";
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    int ret = advancedDatashareHelper.QueryContactInnerExact(
+        contactUri, phoneNumber, "5", "1", "true");
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: QueryContactExact_001
+ * @tc.desc: Test QueryContact returns error when user does not exist
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactExact_001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "11111111111";
+    int32_t userId = 1099;
+
+    int ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "6", "1", "true", userId);
+    EXPECT_EQ(ret, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+}
+
+/**
+ * @tc.name: QueryContactExact_002
+ * @tc.desc: Test QueryContact routes to QueryContactInnerExact without telephony cust wrapper
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactExact_002, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockSetRowCount(0);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "11111111111";
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    int ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "6", "1", "true");
+    EXPECT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: QueryContactExact_003
+ * @tc.desc: Test QueryContact with userId routes to QueryContactInnerExact
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, QueryContactExact_003, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockSetRowCount(0);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "11111111111";
+    int32_t userId = 100;
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    int ret = advancedDatashareHelper.QueryContact(
+        contactUri, phoneNumber, "6", "1", "true", userId);
+    EXPECT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: GetContactResultSetInnerExact_001
+ * @tc.desc: Test GetContactResultSetInner uses exact phone query for contact uri
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetContactResultSetInnerExact_001, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockIsFailedToQueryDataShareResultSet(false);
+    MockSetRowCount(1);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "13800138000";
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    auto resultSet = advancedDatashareHelper.GetContactResultSetInner(
+        contactUri, phoneNumber, "4", "1", "false");
+    EXPECT_NE(resultSet, nullptr);
+}
+
+/**
+ * @tc.name: GetContactResultSetInnerExact_002
+ * @tc.desc: Test GetContactResultSetInner uses exact phone query for intelligent scene
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetContactResultSetInnerExact_002, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToCreateDataShareHelper(false);
+    MockIsFailedToQueryDataShareResultSet(false);
+    MockSetRowCount(1);
+    MockIsFailedGoToFirstRow(0);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = advancedDatashareHelper.GetFocusModeRepeatCallUri(0);
+    Uri contactUri(uri);
+    std::string phoneNumber = "13800138000";
+    AdvancedDatashareHelper::SetIsDataShareReady(true);
+
+    auto resultSet = advancedDatashareHelper.GetContactResultSetInner(
+        contactUri, phoneNumber, "5", "1", "true");
+    EXPECT_NE(resultSet, nullptr);
+}
+
+/**
+ * @tc.name: GetContactResultSetInnerExact_003
+ * @tc.desc: Test GetContactResultSetInner returns null when helper creation fails
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, GetContactResultSetInnerExact_003, Function | SmallTest | Level1)
+{
+    MockGetSystemAbilityManager(false);
+    MockIsFailedToCreateDataShareHelper(true);
+
+    AdvancedDatashareHelper advancedDatashareHelper;
+    std::string uri = "datashare:///com.ohos.contactsdataability/contacts/contact_data?Proxy=true";
+    Uri contactUri(uri);
+    std::string phoneNumber = "13800138000";
+
+    auto resultSet = advancedDatashareHelper.GetContactResultSetInner(
+        contactUri, phoneNumber, "4", "1", "false");
+    EXPECT_EQ(resultSet, nullptr);
+}
+
+/**
+ * @tc.name: SetPhoneNumQueryCondition_001
+ * @tc.desc: Test SetPhoneNumQueryCondition with long phone number
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, SetPhoneNumQueryCondition_001, Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    DataShare::DataSharePredicates predicates;
+    std::string phoneNumber = "13800138000";
+
+    advancedDatashareHelper.SetPhoneNumQueryCondition(predicates, phoneNumber);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: SetPhoneNumQueryCondition_002
+ * @tc.desc: Test SetPhoneNumQueryCondition with short phone number
+ * @tc.type: FUNC
+ * @tc.require: issueI00001
+ */
+HWTEST_F(AdvancedDatashareHelperTest, SetPhoneNumQueryCondition_002, Function | SmallTest | Level1)
+{
+    AdvancedDatashareHelper advancedDatashareHelper;
+    DataShare::DataSharePredicates predicates;
+    std::string phoneNumber = "1111";
+
+    advancedDatashareHelper.SetPhoneNumQueryCondition(predicates, phoneNumber);
+    SUCCEED();
 }
 
 }

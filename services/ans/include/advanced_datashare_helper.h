@@ -100,6 +100,7 @@ private:
     std::string GetIntelligentData(const std::string &uri, const std::string &key);
     std::string GetIntelligentData(const std::string &uri, const std::string &key, const int32_t userId);
     void SetPhoneNumQueryCondition(DataShare::DataSharePredicates &predicates, const std::string &phoneNumber);
+    void SetPhoneNumQueryConditionExact(DataShare::DataSharePredicates &predicates, const std::string &phoneNumber);
     void RegisterObserver(const int32_t userId, const std::string &uri, const std::vector<std::string> &keys);
     void UnregisterObserver();
     void AddDataShareItems(Uri &uri, const std::string &key, const std::string &value);
@@ -107,6 +108,9 @@ private:
     ErrCode QueryContactInner(Uri &uri, const std::string &phoneNumber,
         const std::string &policy, const std::string &profileId,
         const std::string isSupportIntelligentScene, int32_t userId = -1);
+    ErrCode QueryContactInnerExact(Uri &uri, const std::string &phoneNumber,
+ 	    const std::string &policy, const std::string &profileId,
+ 	    const std::string isSupportIntelligentScene, int32_t userId = -1);
 private:
     static std::atomic<bool> isDataShareReady_;
     ffrt::mutex datashareHelperMutex_;
