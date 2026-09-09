@@ -1329,6 +1329,18 @@ bool __attribute__((weak)) NotificationPreferences::GetEnabledForBundleSlots(
     return preferncesDB_->GetEnabledForBundleSlots(bundleOptions, slotType, slotEnabled, userId);
 }
 
+bool __attribute__((weak)) NotificationPreferences::GetShowBadgeEnabledForBundles(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    std::map<sptr<NotificationBundleOption>, bool> &bundleEnable, int32_t userId)
+{
+    ANS_LOGD("called");
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        return false;
+    }
+    return preferncesDB_->GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable, userId);
+}
+
 ErrCode NotificationPreferences::ClearNotificationInRestoreFactorySettings()
 {
     ErrCode result = ERR_OK;

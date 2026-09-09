@@ -1985,6 +1985,8 @@ public:
     static sptr<NotificationBundleOption> GenerateBundleOption();
     static sptr<NotificationBundleOption> GenerateValidBundleOption(
         const sptr<NotificationBundleOption> &bundleOption);
+    static std::vector<sptr<NotificationBundleOption>> ResolveBundleOptionUids(
+        const std::vector<sptr<NotificationBundleOption>> &bundleOptions);
     void UpdateCloneBundleInfoForRingtone(NotificationRingtoneInfo ringtoneInfo, int32_t userId,
         const sptr<NotificationBundleOption> bundle, const NotificationCloneBundleInfo cloneBundleInfo);
 

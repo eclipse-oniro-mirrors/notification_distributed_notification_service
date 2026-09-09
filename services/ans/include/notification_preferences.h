@@ -157,6 +157,17 @@ public:
     ErrCode IsShowBadge(const sptr<NotificationBundleOption> &bundleOption, bool &enable);
 
     /**
+     * @brief Batch query show badge enabled state for multiple bundles.
+     *
+     * @param bundleOptions Indicates the bundle options to query.
+     * @param bundleEnable Indicates the output map from bundle option to badge enabled state.
+     * @param userId Indicates the user id for table routing.
+     * @return Return true on success, false on failure.
+     */
+    bool GetShowBadgeEnabledForBundles(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        std::map<sptr<NotificationBundleOption>, bool> &bundleEnable, int32_t userId);
+        
+    /**
      * @brief Set show badge in the of bunlde from DB.
      *
      * @param bundleOption Indicates bunlde info label.

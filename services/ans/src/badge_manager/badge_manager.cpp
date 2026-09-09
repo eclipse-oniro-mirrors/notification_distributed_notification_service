@@ -256,36 +256,39 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
             message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_1));
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
-
+    if (bundleOptions.empty()) {
+        ANS_LOGE("Invalid bundle options.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    auto resolvedBundles = ResolveBundleOptionUids(bundleOptions);
+    int32_t userId = -1;
+    if (OsAccountManagerHelper::GetInstance().GetCurrentCallingUserId(userId) != ERR_OK) {
+        ANS_LOGW("GetCurrentCallingUserId failed, query shared table only.");
+    }
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
-        for (sptr<NotificationBundleOption> bundleOption : bundleOptions) {
-            sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-            if (bundle == nullptr) {
-                continue;
-            }
-            bool enable = false;
-            result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enable);
-            if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-                result = ERR_OK;
-                enable = true;
-            }
-            if (result != ERR_OK) {
-                ANS_LOGE("%{public}s_%{public}d, get showbadge failed.",
-                    bundle->GetBundleName().c_str(), bundle->GetUid());
-                message.Message(bundle->GetBundleName() + "_" + std::to_string(bundle->GetUid()) +
-                    " get showbadge failed.");
-                NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_3));
-                continue;
-            }
-            bundleEnable.insert(std::make_pair(bundle, enable));
+        if (resolvedBundles.empty()) {
+            ANS_LOGD("No valid bundle options after uid resolution.");
+            return;
         }
+        bool dbResult = NotificationPreferences::GetInstance()->GetShowBadgeEnabledForBundles(
+            resolvedBundles, bundleEnable, userId);
+        if (!dbResult) {
+            result = ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+            return;
+        }
+        for (const auto &bundle : resolvedBundles) {
+            if (bundleEnable.find(bundle) == bundleEnable.end()) {
+                bundleEnable[bundle] = true;
+            }
+        }
+        result = ERR_OK;
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get badge enable for bundle.");
     message.ErrorCode(result).Message("GetShowBadgeEnabledForBundles end").BranchId(BRANCH_4);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     ANS_LOGD("GetShowBadgeEnabledForBundles end");
-    return ERR_OK;
+    return result;
 }
 
 ErrCode AdvancedNotificationService::GetShowBadgeEnabled(const sptr<IAnsResultDataSynchronizer> &synchronizer)

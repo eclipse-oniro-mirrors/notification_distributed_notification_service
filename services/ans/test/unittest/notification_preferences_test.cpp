@@ -609,6 +609,59 @@ HWTEST_F(NotificationPreferencesTest, IsShowBadge_00300, Function | SmallTest | 
 }
 
 /**
+ * @tc.number    : GetShowBadgeEnabledForBundles_00100
+ * @tc.name      : GetShowBadgeEnabledForBundles_00100
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles when preferncesDB_ is null, return false.
+ */
+HWTEST_F(NotificationPreferencesTest, GetShowBadgeEnabledForBundles_00100, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = nullptr;
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(bundleOption_);
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    EXPECT_FALSE(notificationPreferences.GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable, 100));
+    EXPECT_EQ(0u, bundleEnable.size());
+}
+
+/**
+ * @tc.number    : GetShowBadgeEnabledForBundles_00200
+ * @tc.name      : GetShowBadgeEnabledForBundles_00200
+ * @tc.desc      : Test GetShowBadgeEnabledForBundles when rdb data manager is null, return false.
+ */
+HWTEST_F(NotificationPreferencesTest, GetShowBadgeEnabledForBundles_00200, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
+    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(bundleOption_);
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    EXPECT_FALSE(notificationPreferences.GetShowBadgeEnabledForBundles(bundleOptions, bundleEnable, 100));
+    EXPECT_EQ(0u, bundleEnable.size());
+}
+
+/**
+ * @tc.number    : GetShowBadgeEnabledForBundles_00300
+ * @tc.name      : GetShowBadgeEnabledForBundles_00300
+ * @tc.desc      : Set show badge false for bundle, then batch query returns true with
+ *                 the persisted false value.
+ */
+HWTEST_F(NotificationPreferencesTest, GetShowBadgeEnabledForBundles_00300, Function | SmallTest | Level1)
+{
+    MockGetOsAccountLocalIdFromUid(true);
+    EXPECT_EQ((int)NotificationPreferences::GetInstance()->SetShowBadge(bundleOption_, false), (int)ERR_OK);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(bundleOption_);
+    std::map<sptr<NotificationBundleOption>, bool> bundleEnable;
+    EXPECT_TRUE(NotificationPreferences::GetInstance()->GetShowBadgeEnabledForBundles(
+        bundleOptions, bundleEnable, 100));
+    EXPECT_EQ(1u, bundleEnable.size());
+    EXPECT_NE(bundleEnable.end(), bundleEnable.find(bundleOption_));
+    EXPECT_FALSE(bundleEnable[bundleOption_]);
+}
+
+/**
  * @tc.number    : SetImportance_00100
  * @tc.name      :
  * @tc.desc      : Set bundle importance into disturbe DB, return is ERR_OK.
