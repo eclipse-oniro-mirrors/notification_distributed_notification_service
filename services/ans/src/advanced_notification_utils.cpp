@@ -2176,6 +2176,11 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
 
 bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName)
 {
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem) {
+        ANS_LOGE("AllowUseReminder not nativeToken, bundleName = %{public}s", bundleName.c_str());
+        return false;
+    }
     int32_t userId = DEFAULT_UID;
     OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId);
     int32_t uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId);
@@ -2195,6 +2200,12 @@ bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName
 
 bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName, const int32_t userId)
 {
+    bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubSystem) {
+        ANS_LOGE("AllowUseReminder not nativeToken, bundleName = %{public}s userId = %{public}d",
+            bundleName.c_str(), userId);
+        return false;
+    }
     if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
         ANS_LOGE("Check user exists failed.");
         return false;

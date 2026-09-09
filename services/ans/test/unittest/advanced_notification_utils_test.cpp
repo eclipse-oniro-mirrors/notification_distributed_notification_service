@@ -1472,6 +1472,68 @@ HWTEST_F(AnsUtilsTest, AllowUseReminder_00008, Function | SmallTest | Level1)
 }
 
 /**
+ * @tc.name: AllowUseReminder_00009
+ * @tc.desc: Test AllowUseReminder return false when caller token is not native
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00009, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    std::string str = "test1";
+    EXPECT_FALSE(advancedNotificationService_->AllowUseReminder(str));
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+}
+
+/**
+ * @tc.name: AllowUseReminder_00010
+ * @tc.desc: Test AllowUseReminder with userId return false when caller token is not native
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00010, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    std::string str = "test1";
+    int32_t userId = 100;
+    EXPECT_FALSE(advancedNotificationService_->AllowUseReminder(str, userId));
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+}
+
+/**
+ * @tc.name: AllowUseReminder_00011
+ * @tc.desc: Test AllowUseReminder out param is false when caller token is not native
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00011, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    std::string str = "test1";
+    bool isAllowUseReminder = true;
+    EXPECT_EQ(advancedNotificationService_->AllowUseReminder(str, isAllowUseReminder), (int)ERR_OK);
+    EXPECT_FALSE(isAllowUseReminder);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+}
+
+/**
+ * @tc.name: AllowUseReminder_00012
+ * @tc.desc: Test AllowUseReminder with userId out param is false when caller token is not native
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, AllowUseReminder_00012, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    std::string str = "test1";
+    int32_t userId = 100;
+    bool isAllowUseReminder = true;
+    EXPECT_EQ(advancedNotificationService_->AllowUseReminder(str, userId, isAllowUseReminder), (int)ERR_OK);
+    EXPECT_FALSE(isAllowUseReminder);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+}
+
+/**
  * @tc.name: CloseAlert_00001
  * @tc.desc: Test CloseAlert
  * @tc.type: FUNC
