@@ -3179,6 +3179,11 @@ ErrCode NotificationRequest::CheckVersion(const sptr<NotificationRequest> &oldRe
     }
 
     auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        ANS_LOGE("Invalid content, bundle name %{public}s, id %{public}d.",
+            GetCreatorBundleName().c_str(), GetNotificationId());
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     auto liveView = std::static_pointer_cast<NotificationLiveViewContent>(content);
     auto oldContent = oldRequest->GetContent()->GetNotificationContent();
     auto oldLiveView = std::static_pointer_cast<NotificationLiveViewContent>(oldContent);
@@ -3294,7 +3299,18 @@ void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> 
         wantAgent_ = oldRequest->wantAgent_;
     }
 
+    if (notificationContent_ == nullptr) {
+        ANS_LOGE("notificationContent_ is nullptr, bundle name %{public}s, id %{public}d.",
+            GetCreatorBundleName().c_str(), GetNotificationId());
+        return;
+    }
+
     auto content = notificationContent_->GetNotificationContent();
+    if (content == nullptr) {
+        ANS_LOGE("Invalid content, bundle name %{public}s, id %{public}d.",
+            GetCreatorBundleName().c_str(), GetNotificationId());
+        return;
+    }
     auto newLiveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(content);
     if (newLiveViewContent->GetLiveViewStatus() ==
         NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE) {
