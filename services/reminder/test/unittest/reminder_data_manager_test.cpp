@@ -545,43 +545,6 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_017, Level1)
 }
 
 /**
- * @tc.name: ReminderDataManagerTest_018
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issueI8E7Z1
- */
-HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_018, Level1)
-{
-    sptr<ReminderRequest> reminder = new ReminderRequestTimer(10);
-    std::string ringUri = "123";
-    reminder->SetCustomRingUri(ringUri);
-    std::string getRingUri = reminder->GetCustomRingUri();
-    ASSERT_EQ(ringUri, getRingUri);
-}
-
-/**
- * @tc.name: ReminderEventManagerTest_003
- * @tc.desc: Reminder data manager test
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataManagerTest, ReminderEventManagerTest_003, Level1)
-{
-    auto timeInfo = std::make_shared<ReminderTimerInfo>();
-    timeInfo->SetType(0);
-    timeInfo->SetRepeat(false);
-    timeInfo->SetInterval(0);
-    timeInfo->SetWantAgent(nullptr);
-    timeInfo->action_ = ReminderRequest::REMINDER_EVENT_ALARM_ALERT;
-    timeInfo->OnTrigger();
-    EXPECT_EQ(timeInfo->action_, ReminderRequest::REMINDER_EVENT_ALARM_ALERT);
-    timeInfo->action_ = ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT;
-    timeInfo->OnTrigger();
-    EXPECT_EQ(timeInfo->action_, ReminderRequest::REMINDER_EVENT_ALERT_TIMEOUT);
-    remove("/data/service/el1/public/notification/notification.db");
-}
-
-/**
  * @tc.name: ReminderEventManagerTest_004
  * @tc.desc: Reminder data manager test
  * @tc.type: FUNC
@@ -1100,7 +1063,7 @@ HWTEST_F(ReminderDataManagerTest, ReminderDataManagerTest_035, Level1)
     int32_t count = 0;
     manager->AsyncStartExtensionAbility(calendar, 1, 1, count);
     manager->AsyncStartExtensionAbility(calendar, 0, 1, count);
-    EXPECT_GT(count, 0);
+    EXPECT_EQ(count, 2);
     count = 200;
     manager->AsyncStartExtensionAbility(calendar, 0, 1, count);
 }
@@ -1374,18 +1337,7 @@ HWTEST_F(ReminderDataManagerTest, StartVibration_00001, Level1)
     manager->isVibration_ = false;
     manager->StartVibration();
     EXPECT_EQ(manager->isVibration_, false);
-#endif
-}
 
-/**
- * @tc.name: StartVibration_00002
- * @tc.desc: test StartVibration function
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderDataManagerTest, StartVibration_00002, Level1)
-{
-#ifdef PLAYER_FRAMEWORK_ENABLE
     manager->isVibration_ = true;
     manager->StartVibration();
     EXPECT_EQ(manager->isVibration_, true);

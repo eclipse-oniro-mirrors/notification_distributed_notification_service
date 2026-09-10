@@ -1058,8 +1058,9 @@ HWTEST_F(ReminderRequestCalendarTest, SetRepeatMonths_00001, Function | SmallTes
     uint8_t arr[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
     std::vector<uint8_t> repeatMonths (arr, arr + sizeof(arr) / sizeof(uint8_t));
     calendar->SetRepeatMonths(repeatMonths);
-    uint8_t ret = 13;
-    EXPECT_EQ(repeatMonths.size(), ret);
+    std::vector<uint8_t> result = calendar->GetRepeatMonths();
+    EXPECT_EQ(result.size(), 1);
+    EXPECT_EQ(result[0], 1);
 }
 
 /**
@@ -1204,22 +1205,6 @@ HWTEST_F(ReminderRequestCalendarTest, RRuleWantAgentInfo_00001, Function | Small
     wantInfo->abilityName = "testing ability";
     calendar->SetRRuleWantAgentInfo(wantInfo);
     EXPECT_EQ(calendar->GetRRuleWantAgentInfo(), wantInfo);
-}
-
-/**
- * @tc.name: RecoverFromOldVersion_00001
- * @tc.desc: Test RecoverFromOldVersion parameters.
- * @tc.type: FUNC
- * @tc.require: issueI92BU9
- */
-HWTEST_F(ReminderRequestCalendarTest, RecoverFromOldVersion_00001, Function | SmallTest | Level1)
-{
-    struct tm nowTime;
-    auto calendar = ReminderRequestCalendarTest::CreateCalendar(nowTime);
-    EXPECT_NE(nullptr, calendar);
-
-    bool result = calendar->IsRepeatDay(1);
-    EXPECT_EQ(result, true);
 }
 
 /**

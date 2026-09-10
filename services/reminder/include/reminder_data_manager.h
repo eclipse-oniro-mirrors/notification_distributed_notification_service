@@ -838,7 +838,6 @@ private:
     std::shared_ptr<Media::Player> soundPlayer_;
     std::shared_ptr<Media::SystemSoundManager> systemSoundClient_;
     std::shared_ptr<Global::Resource::ResourceManager> soundResource_;
-    std::shared_ptr<Global::Resource::ResourceManager> vibrationResource_;
     int32_t soundFd_ {-1};
     int32_t vibrationFd_ {-1};
     int64_t vibrationFileSize_ {-1};
