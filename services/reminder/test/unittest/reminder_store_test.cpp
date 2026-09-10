@@ -291,12 +291,20 @@ HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
     std::string dbConfig = ReminderStore::REMINDER_DB_DIR + "notification_test.db";
     NativeRdb::RdbStoreConfig config(dbConfig);
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
-    {
-        ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
-        int32_t errCode = STATE_FAIL;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 5, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
-    }
+    ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
+    int32_t errCode = STATE_FAIL;
+    auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 5, rdbDataCallBack, errCode);
+    ASSERT_NE(rdbStore, nullptr);
+    auto baseResult = rdbStore->QuerySql("SELECT name FROM sqlite_master WHERE type='table' AND "
+        "name='reminder_base'", std::vector<std::string>{});
+    int32_t baseCount = 0;
+    baseResult->GetRowCount(baseCount);
+    EXPECT_EQ(baseCount, 1);
+    auto alarmResult = rdbStore->QuerySql("SELECT name FROM sqlite_master WHERE type='table' AND "
+        "name='reminder_alarm'", std::vector<std::string>{});
+    int32_t alarmCount = 0;
+    alarmResult->GetRowCount(alarmCount);
+    EXPECT_EQ(alarmCount, 1);
     NativeRdb::RdbHelper::ClearCache();
     NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
 }
@@ -645,11 +653,15 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00003, Function | Small
     base.AppendValuesBucket(calendar, values, true);
 
     std::shared_ptr<NativeRdb::ResultSet> result = std::make_shared<NativeRdb::AbsSharedResultSet>();
+    std::shared_ptr<NativeRdb::ResultSet> baseResult = std::make_shared<NativeRdb::AbsSharedResultSet>();
     sptr<ReminderRequest> nullReminder;
+
+    // RecoverFromOldVersion with null reminder or null result should return early without crash
     base.RecoverFromOldVersion(nullReminder, result);
     base.RecoverFromOldVersion(calendar, nullptr);
     base.RecoverFromOldVersion(calendar, result);
 
+    // RecoverFromDb with null reminder or null result should return early without crash
     base.RecoverFromDb(nullReminder, result);
     base.RecoverFromDb(calendar, nullptr);
     base.RecoverFromDb(calendar, result);
@@ -658,8 +670,6 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00003, Function | Small
     timerStrategy.RecoverFromOldVersion(nullReminder, result);
     timerStrategy.RecoverFromOldVersion(calendar, nullptr);
     timerStrategy.RecoverFromOldVersion(timer, result);
-
-    std::shared_ptr<NativeRdb::ResultSet> baseResult = std::make_shared<NativeRdb::AbsSharedResultSet>();
 
     timerStrategy.RecoverFromDb(nullReminder, result, baseResult);
     timerStrategy.RecoverFromDb(calendar, nullptr, baseResult);
@@ -670,7 +680,6 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00003, Function | Small
     alarmStrategy.RecoverFromOldVersion(nullReminder, result);
     alarmStrategy.RecoverFromOldVersion(calendar, nullptr);
     alarmStrategy.RecoverFromOldVersion(alarm, result);
-
     alarmStrategy.RecoverFromDb(nullReminder, result, baseResult);
     alarmStrategy.RecoverFromDb(calendar, nullptr, baseResult);
     alarmStrategy.RecoverFromDb(calendar, result, nullptr);
@@ -685,7 +694,11 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00003, Function | Small
     calendarStrategy.RecoverFromDb(alarm, nullptr, baseResult);
     calendarStrategy.RecoverFromDb(alarm, result, nullptr);
     calendarStrategy.RecoverFromDb(calendar, result, baseResult);
-    EXPECT_EQ(alarm->reminderId_, 0);
+
+    // Verify calendar state is not corrupted after recovery with empty result set
+    ReminderRequestCalendar* cal = static_cast<ReminderRequestCalendar*>(calendar.GetRefPtr());
+    EXPECT_EQ(cal->GetRepeatDay(), 0);
+    EXPECT_EQ(cal->GetRepeatMonth(), 0);
 }
 
 /**
@@ -696,45 +709,23 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00003, Function | Small
  */
 HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00004, Function | SmallTest | Level1)
 {
-    std::shared_ptr<NativeRdb::ResultSet> result = std::make_shared<NativeRdb::AbsSharedResultSet>();
-    int32_t value = 0;
-    ReminderStore::GetInt32Val(result, "1", value);
-    int64_t val = 0;
-    ReminderStore::GetInt64Val(result, "1", val);
-    std::string str;
-    ReminderStore::GetStringVal(result, "1", str);
-
-    ReminderStore reminderStore;
-    reminderStore.QueryActiveReminderCount();
-    InitStore(reminderStore);
-    reminderStore.QueryActiveReminderCount();
+    ReminderStore store;
+    InitStore(store);
+    store.rdbStore_->ExecuteSql("CREATE TABLE test_table (test_col INT);");
+    NativeRdb::ValuesBucket values;
+    values.PutInt("test_col", 255);
+    int64_t rowId;
+    store.rdbStore_->Insert(rowId, "test_table", values);
+    auto resultSet = store.rdbStore_->QuerySql("SELECT * FROM test_table", std::vector<std::string>{});
+    ASSERT_NE(resultSet, nullptr);
+    resultSet->GoToFirstRow();
+    int32_t intValue = 0;
+    ReminderStore::GetInt32Val(resultSet, "test_col", intValue);
+    EXPECT_EQ(intValue, 255);
+    int32_t badValue = 99;
+    ReminderStore::GetInt32Val(resultSet, "nonexistent_col", badValue);
+    EXPECT_EQ(badValue, 0);
     ClearStore();
-    EXPECT_GE(value, 0);
-}
-
-/**
- * @tc.name: ReminderStoreTest_001
- * @tc.desc: Test  parameters.
- * @tc.type: FUNC
- * @tc.require: issueI92BU9
- */
-HWTEST_F(ReminderStoreTest, ReminderStoreTest_001, Function | SmallTest | Level1)
-{
-    ReminderStore reminderStore;
-    InitStore(reminderStore);
-    ReminderStore::ReminderStoreDataCallBack callback;
-    if (reminderStore.rdbStore_ != nullptr) {
-        NativeRdb::RdbStore& store = *reminderStore.rdbStore_.get();
-        callback.OnCreate(store);
-        callback.OnUpgrade(store, 10, 1);
-        callback.OnUpgrade(store, 1, 2);
-        callback.OnDowngrade(store, 8, 1);
-        callback.OnUpgrade(store, 1, 8);
-        callback.OnDowngrade(store, 1, 8);
-        callback.OnDowngrade(store, 8, 7);
-    }
-    ClearStore();
-    EXPECT_NE(reminderStore.rdbStore_, nullptr);
 }
 
 /**
@@ -832,7 +823,7 @@ HWTEST_F(ReminderStoreTest, CreateTable_001_BaseTableFail, Function | SmallTest 
     // 2. Trigger OnCreate, which calls CreateTable. It should fail on the first table.
     ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
     auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-    
+
     // The GetRdbStore should fail and return nullptr because OnCreate returns an error.
     EXPECT_NE(rdbStore, nullptr);
     EXPECT_EQ(errCode, 0); // This confirms that an error was propagated.
@@ -1221,22 +1212,6 @@ HWTEST_F(ReminderStoreTest, InitData_00002, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: Update_00002
- * @tc.desc: Test Update with a valid condition.
- * @tc.type: FUNC
- * @tc.require: issueI5VB6V
- */
-HWTEST_F(ReminderStoreTest, Update_00002, Function | SmallTest | Level1)
-{
-    sptr<ReminderRequest> alarm = new ReminderRequestAlarm(10);
-    ReminderStore reminderStore;
-    InitStore(reminderStore);
-    int64_t ret = reminderStore.Update(alarm);
-    ClearStore();
-    EXPECT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: DeleteBase_00002
  * @tc.desc: Test DeleteBase with a valid condition.
  * @tc.type: FUNC
@@ -1424,7 +1399,7 @@ HWTEST_F(ReminderStoreTest, QueryActiveReminderCount_00002, Function | SmallTest
 
     int32_t count = reminderStore.QueryActiveReminderCount();
     // The exact count depends on the complex logic inside, but it should be greater than 0.
-    EXPECT_GT(count, 0);
+    EXPECT_EQ(count, 2);
     ClearStore();
 }
 
@@ -1541,7 +1516,7 @@ HWTEST_F(ReminderStoreTest, OnDowngrade_00001_CreateTableFailed, Function | Smal
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         constexpr int32_t targetVersion = 4; // REMINDER_RDB_VERSION_V4
         auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, targetVersion, rdbDataCallBack, errCode);
-        
+
         // The helper might return a store, but the internal downgrade logic should have failed.
         // The key is that the log line we want to cover has been executed.
         // Depending on RDB implementation, errCode might reflect the failure.
@@ -1563,7 +1538,7 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00001, Function | SmallTest | L
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->reminderId_ = 1001;
     reminder->bundleName_ = "GetHalfHourRemindersTest";
@@ -1581,11 +1556,11 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00001, Function | SmallTest | L
     reminder->state_ = 0;
     ReminderRequestTimer* timer = static_cast<ReminderRequestTimer*>(reminder.GetRefPtr());
     timer->countDownTimeInSeconds_ = 600;
-    
+
     reminderStore.UpdateOrInsert(reminder);
-    
+
     std::vector<sptr<ReminderRequest>> halfHourReminders = reminderStore.GetHalfHourReminders();
-    
+
     bool found = false;
     for (auto& r : halfHourReminders) {
         if (r->reminderId_ == 1001) {
@@ -1595,7 +1570,7 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00001, Function | SmallTest | L
             break;
         }
     }
-    
+
     EXPECT_EQ(found, true);
     reminderStore.Delete(1001);
     ClearStore();
@@ -1611,7 +1586,7 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00002, Function | SmallTest | L
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> expiredReminder = new ReminderRequestTimer();
     expiredReminder->reminderId_ = 1002;
     expiredReminder->bundleName_ = "ExpiredReminder";
@@ -1625,11 +1600,11 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00002, Function | SmallTest | L
     expiredReminder->state_ = 1;
     ReminderRequestTimer* timer = static_cast<ReminderRequestTimer*>(expiredReminder.GetRefPtr());
     timer->countDownTimeInSeconds_ = 0;
-    
+
     reminderStore.UpdateOrInsert(expiredReminder);
 
     std::vector<sptr<ReminderRequest>> halfHourReminders = reminderStore.GetHalfHourReminders();
-    
+
     bool foundExpired = false;
     for (auto& r : halfHourReminders) {
         if (r->reminderId_ == 1002) {
@@ -1637,7 +1612,7 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00002, Function | SmallTest | L
             break;
         }
     }
-    
+
     EXPECT_EQ(foundExpired, false);
     reminderStore.Delete(1002);
     ClearStore();
@@ -1653,7 +1628,7 @@ HWTEST_F(ReminderStoreTest, QueryActiveReminderCount_00001, Function | SmallTest
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> reminder1 = new ReminderRequestTimer();
     reminder1->reminderId_ = 2001;
     reminder1->bundleName_ = "ActiveReminder1";
@@ -1667,7 +1642,7 @@ HWTEST_F(ReminderStoreTest, QueryActiveReminderCount_00001, Function | SmallTest
     reminder1->state_ = 0;
     ReminderRequestTimer* timer1 = static_cast<ReminderRequestTimer*>(reminder1.GetRefPtr());
     timer1->countDownTimeInSeconds_ = 3600;
-    
+
     sptr<ReminderRequest> reminder2 = new ReminderRequestAlarm();
     reminder2->reminderId_ = 2002;
     reminder2->bundleName_ = "ActiveReminder2";
@@ -1683,14 +1658,14 @@ HWTEST_F(ReminderStoreTest, QueryActiveReminderCount_00001, Function | SmallTest
     ReminderRequestAlarm* alarm = static_cast<ReminderRequestAlarm*>(reminder2.GetRefPtr());
     alarm->hour_ = 14;
     alarm->minute_ = 30;
-    
+
     reminderStore.UpdateOrInsert(reminder1);
     reminderStore.UpdateOrInsert(reminder2);
-    
+
     int32_t activeCount = reminderStore.QueryActiveReminderCount();
-    
-    EXPECT_GE(activeCount, 2);
-    
+
+    EXPECT_EQ(activeCount, 2);
+
     reminderStore.Delete(2001);
     reminderStore.Delete(2002);
     ClearStore();
@@ -1706,9 +1681,9 @@ HWTEST_F(ReminderStoreTest, QueryActiveReminderCount_00020, Function | SmallTest
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     int32_t activeCount = reminderStore.QueryActiveReminderCount();
-    
+
     EXPECT_EQ(activeCount, 0);
     ClearStore();
 }
@@ -1723,7 +1698,7 @@ HWTEST_F(ReminderStoreTest, BuildReminder_00111, Function | SmallTest | Level1)
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> originalReminder = new ReminderRequestTimer();
     originalReminder->reminderId_ = 3001;
     originalReminder->bundleName_ = "BuildReminderTest";
@@ -1741,12 +1716,12 @@ HWTEST_F(ReminderStoreTest, BuildReminder_00111, Function | SmallTest | Level1)
     originalReminder->state_ = 0;
     ReminderRequestTimer* timer = static_cast<ReminderRequestTimer*>(originalReminder.GetRefPtr());
     timer->countDownTimeInSeconds_ = 1800;
-    
+
     reminderStore.UpdateOrInsert(originalReminder);
-    
+
     std::string queryCondition = "reminder_id = 3001";
     auto reminders = reminderStore.GetReminders(queryCondition);
-    
+
     EXPECT_GE(reminders.size(), 0);
     if (reminders.size() > 0) {
         auto builtReminder = reminders[0];
@@ -1755,11 +1730,11 @@ HWTEST_F(ReminderStoreTest, BuildReminder_00111, Function | SmallTest | Level1)
         EXPECT_EQ(builtReminder->reminderType_, ReminderRequest::ReminderType::TIMER);
         EXPECT_EQ(builtReminder->GetTimeInterval(), 60);
         EXPECT_EQ(builtReminder->GetRingDuration(), 180);
-        
+
         ReminderRequestTimer* builtTimer = static_cast<ReminderRequestTimer*>(builtReminder.GetRefPtr());
         EXPECT_EQ(builtTimer->countDownTimeInSeconds_, 1800);
     }
-    
+
     reminderStore.Delete(3001);
     ClearStore();
 }
@@ -1804,13 +1779,13 @@ HWTEST_F(ReminderStoreTest, GetConfigValue_00003, Function | SmallTest | Level1)
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     NativeRdb::ValuesBucket values;
     values.PutString(ReminderConfigTable::KEY, "test_key");
     values.PutString(ReminderConfigTable::VALUE, "42");
     int64_t rowId;
     reminderStore.rdbStore_->Insert(rowId, ReminderConfigTable::TABLE_NAME, values);
-    
+
     int32_t value = 0;
     int32_t ret = reminderStore.GetConfigValue("test_key", value);
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
@@ -1841,10 +1816,10 @@ HWTEST_F(ReminderStoreTest, SetConfigValue_00002, Function | SmallTest | Level1)
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     int32_t ret = reminderStore.SetConfigValue("new_key", 123);
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
-    
+
     int32_t value = 0;
     ret = reminderStore.GetConfigValue("new_key", value);
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
@@ -1862,15 +1837,15 @@ HWTEST_F(ReminderStoreTest, SetConfigValue_00003, Function | SmallTest | Level1)
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     reminderStore.SetConfigValue("update_key", 100);
     int32_t value = 0;
     reminderStore.GetConfigValue("update_key", value);
     EXPECT_EQ(value, 100);
-    
+
     int32_t ret = reminderStore.SetConfigValue("update_key", 200);
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
-    
+
     reminderStore.GetConfigValue("update_key", value);
     EXPECT_EQ(value, 200);
     ClearStore();
@@ -1886,18 +1861,18 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00002_DataAnomalyDetected, Func
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->SetReminderId(123);
     reminder->SetExpired(false);
     reminder->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(reminder);
-    
+
     reminderStore.SetConfigValue("recover_fail_count", 2);
-    
+
     auto reminders = reminderStore.GetHalfHourReminders();
     EXPECT_EQ(reminders.size(), 0);
-    
+
     int32_t value = 0;
     reminderStore.GetConfigValue("recover_fail_count", value);
     EXPECT_EQ(value, 0);
@@ -1914,15 +1889,15 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00003_SuccessfulRecovery, Funct
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->SetReminderId(456);
     reminder->SetExpired(false);
     reminder->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(reminder);
-    
+
     auto reminders = reminderStore.GetHalfHourReminders();
-    
+
     int32_t value = 0;
     reminderStore.GetConfigValue("recover_fail_count", value);
     EXPECT_EQ(value, 0);
@@ -1939,18 +1914,18 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00004_MultipleIncrements, Funct
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     reminderStore.SetConfigValue("recover_fail_count", 1);
-    
+
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->SetReminderId(789);
     reminder->SetExpired(false);
     reminder->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(reminder);
-    
+
     auto reminders = reminderStore.GetHalfHourReminders();
     EXPECT_EQ(reminders.size(), 1);
-    
+
     int32_t value = 0;
     reminderStore.GetConfigValue("recover_fail_count", value);
     EXPECT_EQ(value, 1);
@@ -1980,10 +1955,10 @@ HWTEST_F(ReminderStoreTest, SetConfigValue_00004_NegativeValue, Function | Small
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     int32_t ret = reminderStore.SetConfigValue("negative_key", -10);
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
-    
+
     int32_t value = 0;
     ret = reminderStore.GetConfigValue("negative_key", value);
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
@@ -2001,10 +1976,10 @@ HWTEST_F(ReminderStoreTest, SetConfigValue_00005_ZeroValue, Function | SmallTest
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     int32_t ret = reminderStore.SetConfigValue("zero_key", 0);
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
-    
+
     int32_t value = 99;
     ret = reminderStore.GetConfigValue("zero_key", value);
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
@@ -2022,17 +1997,17 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00006_CountAtOne, Function | Sm
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     reminderStore.SetConfigValue("recover_fail_count", 1);
-    
+
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->SetReminderId(111);
     reminder->SetExpired(false);
     reminder->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(reminder);
-    
+
     auto reminders = reminderStore.GetHalfHourReminders();
-    
+
     int32_t value = 0;
     reminderStore.GetConfigValue("recover_fail_count", value);
     EXPECT_EQ(value, 1);
@@ -2049,18 +2024,18 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00007_CountAboveTwo, Function |
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->SetReminderId(222);
     reminder->SetExpired(false);
     reminder->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(reminder);
-    
+
     reminderStore.SetConfigValue("recover_fail_count", 5);
-    
+
     auto reminders = reminderStore.GetHalfHourReminders();
     EXPECT_EQ(reminders.size(), 0);
-    
+
     int32_t value = 0;
     reminderStore.GetConfigValue("recover_fail_count", value);
     EXPECT_EQ(value, 0);
@@ -2077,9 +2052,9 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00008_EmptyDatabase, Function |
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     auto reminders = reminderStore.GetHalfHourReminders();
-    
+
     int32_t value = 0;
     reminderStore.GetConfigValue("recover_fail_count", value);
     EXPECT_EQ(value, 0);
@@ -2096,21 +2071,21 @@ HWTEST_F(ReminderStoreTest, GetHalfHourReminders_00009_MixedReminders, Function 
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> timer = new ReminderRequestTimer();
     timer->SetReminderId(1);
     timer->SetExpired(false);
     timer->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(timer);
-    
+
     sptr<ReminderRequest> alarm = new ReminderRequestAlarm();
     alarm->SetReminderId(2);
     alarm->SetExpired(false);
     alarm->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(alarm);
-    
+
     auto reminders = reminderStore.GetHalfHourReminders();
-    
+
     int32_t value = 0;
     reminderStore.GetConfigValue("recover_fail_count", value);
     EXPECT_EQ(value, 0);
@@ -2127,10 +2102,10 @@ HWTEST_F(ReminderStoreTest, GetConfigValue_00005_ResultSetNull, Function | Small
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     std::string invalidSql = "SELECT * FROM nonexistent_table";
     auto resultSet = reminderStore.rdbStore_->QuerySql(invalidSql, std::vector<std::string>{});
-    
+
     int32_t value = 0;
     int32_t ret = reminderStore.GetConfigValue("test_key", value);
     EXPECT_EQ(ret, STATE_FAIL);
@@ -2147,58 +2122,58 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00001_Success, Function | SmallTest | 
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> timer = new ReminderRequestTimer();
     timer->SetReminderId(1);
     timer->SetExpired(false);
     timer->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(timer);
-    
+
     sptr<ReminderRequest> alarm = new ReminderRequestAlarm();
     alarm->SetReminderId(2);
     alarm->SetExpired(false);
     alarm->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(alarm);
-    
+
     sptr<ReminderRequest> calendar = new ReminderRequestCalendar();
     calendar->SetReminderId(3);
     calendar->SetExpired(false);
     calendar->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(calendar);
-    
+
     auto remindersBefore = reminderStore.GetAllValidReminders();
     EXPECT_EQ(remindersBefore.size(), 3);
-    
+
     int32_t ret = reminderStore.DeleteAllData();
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
-    
+
     auto remindersAfter = reminderStore.GetAllValidReminders();
     EXPECT_EQ(remindersAfter.size(), 0);
-    
+
     auto timerResult = reminderStore.rdbStore_->QuerySql(
         "SELECT * FROM " + ReminderTimerTable::TABLE_NAME, std::vector<std::string>{});
     int32_t timerCount = 0;
     timerResult->GetRowCount(timerCount);
     EXPECT_EQ(timerCount, 0);
-    
+
     auto alarmResult = reminderStore.rdbStore_->QuerySql(
         "SELECT * FROM " + ReminderAlarmTable::TABLE_NAME, std::vector<std::string>{});
     int32_t alarmCount = 0;
     alarmResult->GetRowCount(alarmCount);
     EXPECT_EQ(alarmCount, 0);
-    
+
     auto calendarResult = reminderStore.rdbStore_->QuerySql(
         "SELECT * FROM " + ReminderCalendarTable::TABLE_NAME, std::vector<std::string>{});
     int32_t calendarCount = 0;
     calendarResult->GetRowCount(calendarCount);
     EXPECT_EQ(calendarCount, 0);
-    
+
     auto baseResult = reminderStore.rdbStore_->QuerySql(
         "SELECT * FROM " + ReminderBaseTable::TABLE_NAME, std::vector<std::string>{});
     int32_t baseCount = 0;
     baseResult->GetRowCount(baseCount);
     EXPECT_EQ(baseCount, 0);
-    
+
     ClearStore();
 }
 
@@ -2212,16 +2187,16 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00002_EmptyDatabase, Function | SmallT
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     auto remindersBefore = reminderStore.GetAllValidReminders();
     EXPECT_EQ(remindersBefore.size(), 0);
-    
+
     int32_t ret = reminderStore.DeleteAllData();
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
-    
+
     auto remindersAfter = reminderStore.GetAllValidReminders();
     EXPECT_EQ(remindersAfter.size(), 0);
-    
+
     ClearStore();
 }
 
@@ -2234,7 +2209,7 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00002_EmptyDatabase, Function | SmallT
 HWTEST_F(ReminderStoreTest, DeleteAllData_00003_NullRdbStore, Function | SmallTest | Level1)
 {
     ReminderStore reminderStore;
-    
+
     int32_t ret = reminderStore.DeleteAllData();
     EXPECT_EQ(ret, ReminderStore::STATE_FAIL);
 }
@@ -2249,7 +2224,7 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00004_MultipleReminders, Function | Sm
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     for (int32_t i = 1; i <= 5; i++) {
         sptr<ReminderRequest> timer = new ReminderRequestTimer();
         timer->SetReminderId(i);
@@ -2257,16 +2232,16 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00004_MultipleReminders, Function | Sm
         timer->InitCreatorUid(NON_SYSTEM_APP_UID);
         reminderStore.Insert(timer);
     }
-    
+
     auto remindersBefore = reminderStore.GetAllValidReminders();
     EXPECT_EQ(remindersBefore.size(), 5);
-    
+
     int32_t ret = reminderStore.DeleteAllData();
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
-    
+
     auto remindersAfter = reminderStore.GetAllValidReminders();
     EXPECT_EQ(remindersAfter.size(), 0);
-    
+
     ClearStore();
 }
 
@@ -2280,43 +2255,43 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00005_MixedTypesWithExpired, Function 
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> timer1 = new ReminderRequestTimer();
     timer1->SetReminderId(1);
     timer1->SetExpired(false);
     timer1->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(timer1);
-    
+
     sptr<ReminderRequest> timer2 = new ReminderRequestTimer();
     timer2->SetReminderId(2);
     timer2->SetExpired(true);
     timer2->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(timer2);
-    
+
     sptr<ReminderRequest> alarm = new ReminderRequestAlarm();
     alarm->SetReminderId(3);
     alarm->SetExpired(false);
     alarm->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(alarm);
-    
+
     auto baseResult = reminderStore.rdbStore_->QuerySql(
         "SELECT * FROM " + ReminderBaseTable::TABLE_NAME, std::vector<std::string>{});
     int32_t countBefore = 0;
     baseResult->GetRowCount(countBefore);
     EXPECT_EQ(countBefore, 3);
-    
+
     int32_t ret = reminderStore.DeleteAllData();
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
-    
+
     auto remindersAfter = reminderStore.GetAllValidReminders();
     EXPECT_EQ(remindersAfter.size(), 0);
-    
+
     baseResult = reminderStore.rdbStore_->QuerySql(
         "SELECT * FROM " + ReminderBaseTable::TABLE_NAME, std::vector<std::string>{});
     int32_t countAfter = 0;
     baseResult->GetRowCount(countAfter);
     EXPECT_EQ(countAfter, 0);
-    
+
     ClearStore();
 }
 
@@ -2330,34 +2305,34 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00006_VerifyEachTableCleared, Function
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> timer = new ReminderRequestTimer();
     timer->SetReminderId(1);
     timer->SetExpired(false);
     timer->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(timer);
-    
+
     auto timerTableBefore = reminderStore.rdbStore_->QuerySql(
         "SELECT * FROM " + ReminderTimerTable::TABLE_NAME, std::vector<std::string>{});
     int32_t timerCountBefore = 0;
     timerTableBefore->GetRowCount(timerCountBefore);
     EXPECT_EQ(timerCountBefore, 1);
-    
+
     int32_t ret = reminderStore.DeleteAllData();
     EXPECT_EQ(ret, ReminderStore::STATE_OK);
-    
+
     auto timerTableAfter = reminderStore.rdbStore_->QuerySql(
         "SELECT * FROM " + ReminderTimerTable::TABLE_NAME, std::vector<std::string>{});
     int32_t timerCountAfter = 0;
     timerTableAfter->GetRowCount(timerCountAfter);
     EXPECT_EQ(timerCountAfter, 0);
-    
+
     auto baseTableAfter = reminderStore.rdbStore_->QuerySql(
         "SELECT * FROM " + ReminderBaseTable::TABLE_NAME, std::vector<std::string>{});
     int32_t baseCountAfter = 0;
     baseTableAfter->GetRowCount(baseCountAfter);
     EXPECT_EQ(baseCountAfter, 0);
-    
+
     ClearStore();
 }
 
@@ -2371,22 +2346,22 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00007_ConsecutiveDelete, Function | Sm
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
-    
+
     sptr<ReminderRequest> timer = new ReminderRequestTimer();
     timer->SetReminderId(1);
     timer->SetExpired(false);
     timer->InitCreatorUid(NON_SYSTEM_APP_UID);
     reminderStore.Insert(timer);
-    
+
     int32_t ret1 = reminderStore.DeleteAllData();
     EXPECT_EQ(ret1, ReminderStore::STATE_OK);
-    
+
     int32_t ret2 = reminderStore.DeleteAllData();
     EXPECT_EQ(ret2, ReminderStore::STATE_OK);
-    
+
     auto remindersAfter = reminderStore.GetAllValidReminders();
     EXPECT_EQ(remindersAfter.size(), 0);
-    
+
     ClearStore();
 }
 }

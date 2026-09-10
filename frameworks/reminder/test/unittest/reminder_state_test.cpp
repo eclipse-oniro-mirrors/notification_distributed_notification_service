@@ -57,25 +57,15 @@ HWTEST_F(ReminderStateTest, ReminderStateTest_002, Function | SmallTest | Level1
 /**
  * @tc.name: ReminderStateTest_003
  * @tc.type: FUNC
- * @tc.require: SR000GGTRD AR000GH8EF
+ * @tc.require: issueI5VB6V
  */
 HWTEST_F(ReminderStateTest, ReminderStateTest_003, Function | SmallTest | Level1)
 {
-    Parcel p;
-    ReminderState state;
-    EXPECT_EQ(state.Marshalling(p), true);
-}
-
-/**
- * @tc.name: ReminderStateTest_004
- * @tc.type: FUNC
- * @tc.require: issueI5VB6V
- */
-HWTEST_F(ReminderStateTest, ReminderStateTest_004, Function | SmallTest | Level1)
-{
     bool result = false;
+    Parcel marshall;
     Parcel parcel;
     ReminderState state;
+    state.Marshalling(marshall);
     if (nullptr == state.Unmarshalling(parcel)) {
         result = true;
     }

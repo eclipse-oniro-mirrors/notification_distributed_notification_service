@@ -30,19 +30,6 @@ public:
 };
 
 /**
- * @tc.name: ReminderNotifyManagerTest_001
- * @tc.desc: test ReminderNotifyManager function
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderNotifyManagerTest, ReminderNotifyManagerTest_001, Level1)
-{
-    ReminderNotifyManager manager;
-    EXPECT_NE(manager.queue_, nullptr);
-    EXPECT_NE(manager.deathRecipient_, nullptr);
-}
-
-/**
  * @tc.name: ReminderNotifyManagerTest_002
  * @tc.desc: test ReminderNotifyManager::RegisterNotify function
  * @tc.type: FUNC

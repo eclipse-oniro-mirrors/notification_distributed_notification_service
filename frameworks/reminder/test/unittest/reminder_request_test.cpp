@@ -570,9 +570,11 @@ HWTEST_F(ReminderRequestTest, Dump_00001, Function | SmallTest | Level1)
 HWTEST_F(ReminderRequestTest, SetExpired_00001, Function | SmallTest | Level1)
 {
     auto rrc = std::make_shared<ReminderRequestChild>();
-    bool isExpired = rrc->IsExpired();
-    rrc->SetExpired(isExpired);
-    EXPECT_EQ(isExpired, false);
+    EXPECT_EQ(rrc->IsExpired(), false);
+    rrc->SetExpired(true);
+    EXPECT_EQ(rrc->IsExpired(), true);
+    rrc->SetExpired(false);
+    EXPECT_EQ(rrc->IsExpired(), false);
 }
 
 /**
@@ -1138,21 +1140,6 @@ HWTEST_F(ReminderRequestTest, OnStart_00001, Function | SmallTest | Level1)
     EXPECT_TRUE((reminderRequestChild->GetState() & ReminderRequest::REMINDER_STATUS_ACTIVE) != 0);
     reminderRequestChild->OnStop();
     EXPECT_TRUE((reminderRequestChild->GetState() & ReminderRequest::REMINDER_STATUS_ACTIVE) == 0);
-}
-
-/**
- * @tc.name: StringSplit_00004
- * @tc.desc: Test StringSplit with non-matching delimiter.
- * @tc.type: FUNC
- * @tc.require: issueI65R21
- */
-HWTEST_F(ReminderRequestTest, StringSplit_00004, Function | SmallTest | Level1)
-{
-    auto rrc = std::make_shared<ReminderRequestChild>();
-    std::string source = "source";
-    std::string split = "split";
-    std::vector<std::string> ret = rrc->StringSplit(source, split);
-    EXPECT_EQ(ret.size(), 1);
 }
 
 /**

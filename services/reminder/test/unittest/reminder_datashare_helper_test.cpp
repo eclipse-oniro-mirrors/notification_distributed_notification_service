@@ -331,7 +331,7 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_007, Level1)
     data.name = "test";
     data.value = "1";
     moduleInfo.metadata.push_back(data);
-    data.name = "hmos.calendardata.reminderDbVersion";
+    data.name = "ohos.calendardata.reminderDbVersion";
     data.value = "1";
     moduleInfo.metadata.push_back(data);
     bundleInfo.hapModuleInfos.push_back(moduleInfo);
@@ -341,7 +341,7 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_007, Level1)
 
     moduleInfo.metadata.clear();
     bundleInfo.hapModuleInfos.clear();
-    data.name = "hmos.calendardata.reminderDbVersion";
+    data.name = "ohos.calendardata.reminderDbVersion";
     data.value = "2";
     moduleInfo.metadata.push_back(data);
     bundleInfo.hapModuleInfos.push_back(moduleInfo);

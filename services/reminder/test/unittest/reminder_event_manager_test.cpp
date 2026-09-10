@@ -37,69 +37,6 @@ public:
 };
 
 /**
- * @tc.name: ReminderEventManagerTest_001
- * @tc.desc: test ReminderEventManager::Init function
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderEventManagerTest, ReminderEventManagerTest_001, Level1)
-{
-    ReminderDataManager::InitInstance();
-    auto manager = std::make_shared<ReminderEventManager>();
-    manager->Init();
-    EXPECT_TRUE(manager != nullptr);
-}
-
-/**
- * @tc.name: ReminderEventManagerTest_002
- * @tc.desc: test ReminderEventManager::SubscribeEvent function
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderEventManagerTest, ReminderEventManagerTest_002, Level1)
-{
-    auto manager = std::make_shared<ReminderEventManager>();
-    MockNotificationHelper::MockSubscribeCommonEvent(false);
-    manager->SubscribeEvent();
-    MockNotificationHelper::MockSubscribeCommonEvent(true);
-    manager->SubscribeEvent();
-    MockNotificationHelper::MockSubscribeNotification(-1);
-    manager->SubscribeEvent();
-    MockNotificationHelper::MockSubscribeNotification(ERR_OK);
-    manager->SubscribeEvent();
-    EXPECT_TRUE(manager != nullptr);
-}
-
-/**
- * @tc.name: ReminderEventManagerTest_003
- * @tc.desc: test ReminderEventManager::SubscribeSystemAbility function
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderEventManagerTest, ReminderEventManagerTest_003, Level1)
-{
-    auto manager = std::make_shared<ReminderEventManager>();
-    MockServiceRegistry::MockGetSystemAbilityManager(true);
-    manager->SubscribeSystemAbility(APP_MGR_SERVICE_ID);
-    MockServiceRegistry::MockGetSystemAbilityManager(false);
-    manager->SubscribeSystemAbility(APP_MGR_SERVICE_ID);
-    EXPECT_TRUE(manager != nullptr);
-}
-
-/**
- * @tc.name: ReminderEventManagerTest_004
- * @tc.desc: test ReminderEventManager::SubscribeKeyEvent function
- * @tc.type: FUNC
- * @tc.require: issueI5YTF3
- */
-HWTEST_F(ReminderEventManagerTest, ReminderEventManagerTest_004, Level1)
-{
-    auto manager = std::make_shared<ReminderEventManager>();
-    manager->SubscribeKeyEvent(MMI::KeyEvent::KEYCODE_VOLUME_UP);
-    EXPECT_TRUE(manager != nullptr);
-}
-
-/**
  * @tc.name: ReminderEventManagerTest_005
  * @tc.desc: test ReminderEventSubscriber::OnReceiveEvent function
  * @tc.type: FUNC
@@ -107,6 +44,22 @@ HWTEST_F(ReminderEventManagerTest, ReminderEventManagerTest_004, Level1)
  */
 HWTEST_F(ReminderEventManagerTest, ReminderEventManagerTest_005, Level1)
 {
+    ReminderDataManager::InitInstance();
+    auto eventManager = std::make_shared<ReminderEventManager>();
+    eventManager->Init();
+    MockNotificationHelper::MockSubscribeCommonEvent(false);
+    eventManager->SubscribeEvent();
+    MockNotificationHelper::MockSubscribeCommonEvent(true);
+    eventManager->SubscribeEvent();
+    MockNotificationHelper::MockSubscribeNotification(-1);
+    eventManager->SubscribeEvent();
+    MockNotificationHelper::MockSubscribeNotification(ERR_OK);
+    eventManager->SubscribeEvent();
+    MockServiceRegistry::MockGetSystemAbilityManager(true);
+    eventManager->SubscribeSystemAbility(APP_MGR_SERVICE_ID);
+    MockServiceRegistry::MockGetSystemAbilityManager(false);
+    eventManager->SubscribeSystemAbility(APP_MGR_SERVICE_ID);
+    eventManager->SubscribeKeyEvent(MMI::KeyEvent::KEYCODE_VOLUME_UP);
     MockReminderDataManager::ResetFlag();
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);

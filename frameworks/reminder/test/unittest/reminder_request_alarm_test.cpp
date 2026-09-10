@@ -165,46 +165,42 @@ HWTEST_F(ReminderRequestAlarmTest, IsRepeatReminder_00200, Function | SmallTest 
 
 /**
  * @tc.name: IsRepeatReminder_00300
- * @tc.desc: Test IsRepeatReminder parameters.
+ * @tc.desc: Test IsRepeatReminder when no daysOfWeek but timeInterval > 0 and snoozeTimes > 0.
  * @tc.type: FUNC
  * @tc.require: issue
  */
 HWTEST_F(ReminderRequestAlarmTest, IsRepeatReminder_00300, Function | SmallTest | Level1)
 {
-    uint8_t arr[] = {1, 1, 5, 5, 7, 7, 7};
+    uint8_t arr[] = {};
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 1, daysOfWeek);
 
-    auto ret = std::make_shared<ReminderRequest>();
-    ret->SetSnoozeTimes(1);
-    EXPECT_EQ(ret->GetSnoozeTimes(), 1);
-
     uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
-    ret->SetTimeInterval(1);
-    EXPECT_EQ(ret->GetTimeInterval(), minTimeIntervalInSecond);
+    rrc->SetSnoozeTimes(1);
+    EXPECT_EQ(rrc->GetSnoozeTimes(), 1);
+    rrc->SetTimeInterval(1);
+    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
     EXPECT_EQ(rrc->IsRepeatReminder(), true);
 }
 
 /**
  * @tc.name: IsRepeatReminder_00400
- * @tc.desc: Test IsRepeatReminder parameters.
+ * @tc.desc: Test IsRepeatReminder when no daysOfWeek and snoozeTime is 0.
  * @tc.type: FUNC
  * @tc.require: issue
  */
 HWTEST_F(ReminderRequestAlarmTest, IsRepeatReminder_00400, Function | SmallTest | Level1)
 {
-    uint8_t arr[] = {1, 1, 5, 5, 7, 7, 7};
+    uint8_t arr[] = {};
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 1, daysOfWeek);
 
-    auto ret = std::make_shared<ReminderRequest>();
-    ret->SetSnoozeTimes(0);
-    EXPECT_EQ(ret->GetSnoozeTimes(), 0);
-
     uint32_t minTimeIntervalInSecond = ReminderRequest::MIN_TIME_INTERVAL_IN_MILLI / ReminderRequest::MILLI_SECONDS;
-    ret->SetTimeInterval(1);
-    EXPECT_EQ(ret->GetTimeInterval(), minTimeIntervalInSecond);
-    EXPECT_EQ(rrc->IsRepeatReminder(), true);
+    rrc->SetSnoozeTimes(0);
+    EXPECT_EQ(rrc->GetSnoozeTimes(), 0);
+    rrc->SetTimeInterval(1);
+    EXPECT_EQ(rrc->GetTimeInterval(), minTimeIntervalInSecond);
+    EXPECT_EQ(rrc->IsRepeatReminder(), false);
 }
 
 /**
@@ -280,7 +276,7 @@ HWTEST_F(ReminderRequestAlarmTest, PreGetNextTriggerTimeIgnoreSnooze_00200, Func
     uint8_t arr[] = {};
     std::vector<uint8_t> daysOfWeek (arr, arr + sizeof(arr) / sizeof(uint8_t));
     auto rrc = std::make_shared<ReminderRequestAlarm>(0, 0, daysOfWeek);
-    
+
     bool ignoreRepeat = false;
     bool forceToGetNext = false;
     uint64_t result = rrc->PreGetNextTriggerTimeIgnoreSnooze(ignoreRepeat, forceToGetNext);
