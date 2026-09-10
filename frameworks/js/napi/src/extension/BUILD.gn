@@ -24,6 +24,7 @@ ohos_shared_library("notification_subscriber_extension") {
     debug = false
   }
   branch_protector_ret = "pac_ret"
+  version_script = "libnotification_subscriber_extension.map"
 
   include_dirs = [
     "${frameworks_module_extension_path}/include",
