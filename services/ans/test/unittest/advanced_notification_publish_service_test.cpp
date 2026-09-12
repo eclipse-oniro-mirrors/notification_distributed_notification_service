@@ -44,6 +44,7 @@
 #include "string_wrapper.h"
 #include "want_params.h"
 #include "int_wrapper.h"
+#include "iremote_broker.h"
 #include "long_wrapper.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
@@ -90,7 +91,14 @@ void AnsPublishServiceTest::SetUpTestCase()
     MockInsertData(true);
 }
 
-void AnsPublishServiceTest::TearDownTestCase() {}
+void AnsPublishServiceTest::TearDownTestCase()
+{
+    BrokerRegistration &registration = BrokerRegistration::Get();
+    std::lock_guard<std::mutex> lockGuard(registration.creatorMutex_);
+    registration.isUnloading = true;
+    registration.objects_.clear();
+    registration.creators_.clear();
+}
 
 void AnsPublishServiceTest::SetUp()
 {

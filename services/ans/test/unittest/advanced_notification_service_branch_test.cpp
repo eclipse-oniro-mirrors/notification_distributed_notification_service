@@ -29,6 +29,7 @@
 #include "ans_subscriber_listener.h"
 #include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
+#include "iremote_broker.h"
 #include "iremote_object.h"
 #include "want_agent_info.h"
 #include "want_agent_helper.h"
@@ -81,6 +82,11 @@ void AnsBranchTest::TearDownTestCase()
 {
     constexpr int sleepMs = 1000;
     std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+    BrokerRegistration &registration = BrokerRegistration::Get();
+    std::lock_guard<std::mutex> lockGuard(registration.creatorMutex_);
+    registration.isUnloading = true;
+    registration.objects_.clear();
+    registration.creators_.clear();
 }
 
 void AnsBranchTest::SetUp()

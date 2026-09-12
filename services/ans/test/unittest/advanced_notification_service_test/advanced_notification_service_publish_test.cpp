@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 
-#include "errors.h"
-#include "notification_content.h"
-#include "notification_record.h"
-#include "notification_request.h"
 #include <chrono>
 #include <functional>
 #include <memory>
@@ -26,7 +22,7 @@
 #include <vector>
 
 #define private public
-
+#include "errors.h"
 #include "advanced_notification_service.h"
 #include "ans_const_define.h"
 #include "ans_inner_errors.h"
@@ -37,9 +33,13 @@
 #include "ans_ut_constant.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "iremote_broker.h"
 #include "iremote_object.h"
 #include "mock_ipc_skeleton.h"
+#include "notification_content.h"
 #include "notification_preferences.h"
+#include "notification_record.h"
+#include "notification_request.h"
 #include "notification_subscriber.h"
 #include "notification_subscriber_manager.h"
 #include "mock_push_callback_stub.h"
@@ -85,7 +85,14 @@ void AdvancedNotificationServiceTest::SetUpTestCase()
     MockIsOsAccountExists(true);
 }
 
-void AdvancedNotificationServiceTest::TearDownTestCase() {}
+void AdvancedNotificationServiceTest::TearDownTestCase()
+{
+    BrokerRegistration &registration = BrokerRegistration::Get();
+    std::lock_guard<std::mutex> lockGuard(registration.creatorMutex_);
+    registration.isUnloading = true;
+    registration.objects_.clear();
+    registration.creators_.clear();
+}
 
 void AdvancedNotificationServiceTest::SetUp()
 {
