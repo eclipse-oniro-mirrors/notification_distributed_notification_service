@@ -19,6 +19,7 @@
 #include "aes_gcm_helper.h"
 #include "nlohmann/json.hpp"
 #include "notification_content.h"
+#include "openssl/crypto.h"
 
 namespace OHOS::Notification::Domain {
 static bool UpdateContentByJsonObject(nlohmann::json &jsonObject, const std::string &wantAgent)
@@ -115,18 +116,28 @@ bool OnRdbUpgradeLiveviewMigrate(const std::string &oldValue, std::string &newVa
         ANS_LOGE("Decrypt failed");
         return false;
     }
-    // Parse JSON
-    if (decryptedValue.empty() || !nlohmann::json::accept(decryptedValue)) {
-        ANS_LOGE("Invalid json");
-        return false;
-    }
-    nlohmann::json jsonObject = nlohmann::json::parse(decryptedValue, nullptr, false);
-    if (!UpdateRequestByJsonObject(jsonObject)) {
-        ANS_LOGE("UpdateRequestByJsonObject failed");
-        return false;
-    }
-    // Encrypt the updated value
-    AesGcmHelper::Encrypt(jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), newValue);
-    return true; // Indicate successful migration
+    bool migrateResult = false;
+    do {
+        // Parse JSON
+        if (decryptedValue.empty() || !nlohmann::json::accept(decryptedValue)) {
+            ANS_LOGE("Invalid json");
+            break;
+        }
+        nlohmann::json jsonObject = nlohmann::json::parse(decryptedValue, nullptr, false);
+        if (!UpdateRequestByJsonObject(jsonObject)) {
+            ANS_LOGE("UpdateRequestByJsonObject failed");
+            break;
+        }
+        // Encrypt the updated value
+        int32_t encryptRet = AesGcmHelper::Encrypt(
+            jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), newValue);
+        if (encryptRet != ERR_OK) {
+            ANS_LOGE("Encrypt failed");
+            break;
+        }
+        migrateResult = true; // Indicate successful migration
+    } while (0);
+    OPENSSL_cleanse(decryptedValue.data(), decryptedValue.size());
+    return migrateResult;
 }
 }

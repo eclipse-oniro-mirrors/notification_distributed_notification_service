@@ -60,7 +60,7 @@ std::shared_ptr<NotificationAppPrivileges> __attribute__((weak)) NotificationCon
         return nullptr;
     }
     nlohmann::json affects = root[APP_PRIVILEGES];
-    if (affects.is_null() || affects.empty()) {
+    if (affects.is_null() || affects.empty() || !affects.is_object()) {
         ANS_LOGE("GetCcmPrivileges failed as invalid ccmPrivileges json.");
         return nullptr;
     }

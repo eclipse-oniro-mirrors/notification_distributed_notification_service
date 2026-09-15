@@ -800,5 +800,83 @@ HWTEST_F(PriorityManagerServiceTest, IsPriorityEnabled_0200, Function | SmallTes
     bool enabled = false;
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->IsPriorityEnabled(enabled), ERR_OK);
 }
+
+/**
+ * @tc.name: SetPriorityEnabledByBundle_0600
+ * @tc.desc: Test SetPriorityEnabledByBundle with nullptr bundleOption return ERR_ANS_INNER_INVALID_BUNDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundle_0600, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundle(bundleOption, 2),
+        ERR_ANS_INNER_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: SetBundlePriorityConfig_0500
+ * @tc.desc: Test SetBundlePriorityConfig with nullptr bundleOption return ERR_ANS_INNER_INVALID_BUNDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, SetBundlePriorityConfig_0500, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = nullptr;
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetBundlePriorityConfig(bundleOption, "keyword"),
+        ERR_ANS_INNER_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: SetPriorityEnabledByBundles_0500
+ * @tc.desc: Test SetPriorityEnabledByBundles with nullptr key in map return ERR_ANS_INNER_INVALID_BUNDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, SetPriorityEnabledByBundles_0500, Function | SmallTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, bool> priorityEnable;
+    priorityEnable[nullptr] = true;
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityEnabledByBundles(priorityEnable),
+        ERR_ANS_INNER_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: SetPriorityStrategyByBundles_0600
+ * @tc.desc: Test SetPriorityStrategyByBundles with nullptr key in map return ERR_ANS_INNER_INVALID_BUNDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0600, Function | SmallTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, int64_t> strategies;
+    strategies[nullptr] = 1;
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityStrategyByBundles(strategies),
+        ERR_ANS_INNER_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: GetPriorityEnabledByBundles_0500
+ * @tc.desc: Test GetPriorityEnabledByBundles with nullptr element in vector return ERR_ANS_INNER_INVALID_BUNDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, GetPriorityEnabledByBundles_0500, Function | SmallTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, bool> priorityEnable;
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.emplace_back(nullptr);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetPriorityEnabledByBundles(bundleOptions, priorityEnable),
+        ERR_ANS_INNER_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: GetPriorityStrategyByBundles_0500
+ * @tc.desc: Test GetPriorityStrategyByBundles with nullptr element in vector return ERR_ANS_INNER_INVALID_BUNDLE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, GetPriorityStrategyByBundles_0500, Function | SmallTest | Level1)
+{
+    std::map<sptr<NotificationBundleOption>, int64_t> strategies;
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.emplace_back(nullptr);
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetPriorityStrategyByBundles(bundleOptions, strategies),
+        ERR_ANS_INNER_INVALID_BUNDLE);
+}
 }
 }

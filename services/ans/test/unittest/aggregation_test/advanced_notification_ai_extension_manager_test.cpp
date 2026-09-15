@@ -131,6 +131,19 @@ HWTEST_F(AdvancedNotificationAiExtensionManagerTest, IsCollaborationNotification
 }
 
 /**
+ * @tc.name: IsCollaborationNotification_0500
+ * @tc.desc: Test AnsCommonUtils::IsCollaborationNotification returns false when request is nullptr
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationAiExtensionManagerTest, IsCollaborationNotification_0500, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    bool result = AnsCommonUtils::IsCollaborationNotification(request);
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: BuildCommandForUpdate_0100
  * @tc.desc: Test BuildCommandForUpdate with nullptr request, command should remain unchanged
  * @tc.type: FUNC

@@ -330,6 +330,10 @@ int32_t DistributedOperationService::OnOperationResponse(
     const std::shared_ptr<NotificationOperationInfo>& operationInfo, const DistributedDeviceInfo& device)
 {
     std::shared_ptr<NotificationResponseBox> responseBox = std::make_shared<NotificationResponseBox>();
+    if (responseBox == nullptr) {
+        ANS_LOGE("Failed to create responseBox");
+        return ERR_ANS_INNER_NO_MEMORY;
+    }
     if (operationInfo == nullptr) {
         ANS_LOGE("Invalid param");
         return ERR_ANS_INNER_INVALID_PARAM;

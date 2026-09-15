@@ -339,7 +339,7 @@ ErrCode DistributedNotificationManager::Publish(
 
     std::string value;
     if (!NotificationJsonConverter::ConvertToJsonString(request, value)) {
-        ANS_LOGE("convert request to json failed. key:%{public}s", key.c_str());
+        ANS_LOGE("convert request to json failed. key:%{public}s", StringAnonymous(key).c_str());
         return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
@@ -348,7 +348,7 @@ ErrCode DistributedNotificationManager::Publish(
         return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->PutToDistributedDB(key, value)) {
-        ANS_LOGE("put to distributed DB failed. key:%{public}s", key.c_str());
+        ANS_LOGE("put to distributed DB failed. key:%{public}s", StringAnonymous(key).c_str());
         return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
@@ -367,7 +367,7 @@ ErrCode DistributedNotificationManager::Update(
 
     std::string value;
     if (!NotificationJsonConverter::ConvertToJsonString(request, value)) {
-        ANS_LOGE("convert request to json failed. key:%{public}s", key.c_str());
+        ANS_LOGE("convert request to json failed. key:%{public}s", StringAnonymous(key).c_str());
         return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
 
@@ -376,7 +376,7 @@ ErrCode DistributedNotificationManager::Update(
         return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->PutToDistributedDB(key, value)) {
-        ANS_LOGE("put to distributed DB failed. key:%{public}s", key.c_str());
+        ANS_LOGE("put to distributed DB failed. key:%{public}s", StringAnonymous(key).c_str());
         return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     return ERR_OK;
@@ -397,7 +397,7 @@ ErrCode DistributedNotificationManager::Delete(const std::string &bundleName, co
         return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     if (!database_->DeleteToDistributedDB(key)) {
-        ANS_LOGE("Failed to DeleteToDistributedDB. key:%{public}s", key.c_str());
+        ANS_LOGE("Failed to DeleteToDistributedDB. key:%{public}s", StringAnonymous(key).c_str());
         return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
     }
     return ERR_OK;
@@ -461,14 +461,15 @@ ErrCode DistributedNotificationManager::GetCurrentDistributedNotification(
     for (auto index : entries) {
         ResolveKey resolveKey;
         if (!ResolveDistributedKey(index.key.ToString(), resolveKey)) {
-            ANS_LOGE("key <%{public}s> is invalid.", index.key.ToString().c_str());
+            ANS_LOGE("key <%{public}s> is invalid.", StringAnonymous(index.key.ToString()).c_str());
             continue;
         }
 
         sptr<NotificationRequest> request =
             NotificationJsonConverter::ConvertFromJsonString<NotificationRequest>(index.value.ToString());
         if (request == nullptr) {
-            ANS_LOGE("convert json to request failed. key:%{public}s", index.key.ToString().c_str());
+            ANS_LOGE("convert json to request failed. key:%{public}s",
+                StringAnonymous(index.key.ToString()).c_str());
             continue;
         }
 

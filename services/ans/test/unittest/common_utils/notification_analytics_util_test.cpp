@@ -1701,5 +1701,77 @@ HWTEST_F(NotificationAnalyticsUtilTest, HaMetaMessage_DefaultValues_001, Functio
     ASSERT_EQ(message.sceneId_, 0u);
     ASSERT_EQ(message.branchId_, 0u);
 }
+
+/**
+ * @tc.name: CreateCleanExperDataTimerExecute_CreateTimerFailed_001
+ * @tc.desc: Test CreateCleanExperDataTimerExecute when CreateTimer returns 0, should return early
+ *           without starting or destroying timer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, CreateCleanExperDataTimerExecute_CreateTimerFailed_001,
+    Function | SmallTest | Level1)
+{
+    ResetTimeServiceMock();
+    MockCreateTimerFailed(true);
+    NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute();
+    EXPECT_EQ(GetCreateTimerCallCount(), 1);
+    EXPECT_FALSE(IsDestroyTimerCalled());
+    ResetTimeServiceMock();
+}
+
+/**
+ * @tc.name: CreateCleanExperDataTimerExecute_StartTimerFailed_001
+ * @tc.desc: Test CreateCleanExperDataTimerExecute when StartTimer returns false, DestroyTimer
+ *           should be called and timer id should be reset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, CreateCleanExperDataTimerExecute_StartTimerFailed_001,
+    Function | SmallTest | Level1)
+{
+    ResetTimeServiceMock();
+    MockStartTimerFailed(true);
+    NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute();
+    EXPECT_TRUE(IsDestroyTimerCalled());
+    ResetTimeServiceMock();
+}
+
+/**
+ * @tc.name: CreateCleanExperDataTimerExecute_StartTimerSuccess_001
+ * @tc.desc: Test CreateCleanExperDataTimerExecute when StartTimer returns true, DestroyTimer
+ *           should not be called.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, CreateCleanExperDataTimerExecute_StartTimerSuccess_001,
+    Function | SmallTest | Level1)
+{
+    ResetTimeServiceMock();
+    MockStartTimerFailed(false);
+    NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute();
+    EXPECT_FALSE(IsDestroyTimerCalled());
+    ResetTimeServiceMock();
+}
+
+/**
+ * @tc.name: CreateCleanExperDataTimerExecute_SelfHealing_001
+ * @tc.desc: Test self-healing: after StartTimer fails, next CreateCleanExperDataTimerExecute
+ *           creates timer again and succeeds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, CreateCleanExperDataTimerExecute_SelfHealing_001,
+    Function | SmallTest | Level1)
+{
+    ResetTimeServiceMock();
+    MockStartTimerFailed(true);
+    NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute();
+    EXPECT_TRUE(IsDestroyTimerCalled());
+
+    // timer id was reset to 0, next call should create timer again and start successfully
+    ResetTimeServiceMock();
+    MockStartTimerFailed(false);
+    NotificationAnalyticsUtil::CreateCleanExperDataTimerExecute();
+    EXPECT_GT(GetCreateTimerCallCount(), 0);
+    EXPECT_FALSE(IsDestroyTimerCalled());
+    ResetTimeServiceMock();
+}
 }
 }

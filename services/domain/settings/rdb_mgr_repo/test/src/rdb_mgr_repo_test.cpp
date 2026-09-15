@@ -22,6 +22,7 @@
 
 #include "ans_rdb_mgr_builder.h"
 #include "aes_gcm_helper.h"
+#include "ans_service_errors.h"
 #include "event_report.h"
 #include "notification_rdb_mgr.h"
 #include "notification_content.h"
@@ -34,23 +35,33 @@ using namespace testing::ext;
 namespace {
 std::atomic<int32_t> g_modifyEventReportCount {0};
 OHOS::Notification::HaMetaMessage g_lastModifyEventMessage;
+std::atomic<bool> g_encryptShouldFail {false};
+std::atomic<bool> g_decryptShouldFail {false};
 
 void ResetCapturedState()
 {
     g_modifyEventReportCount.store(0);
     g_lastModifyEventMessage = OHOS::Notification::HaMetaMessage {};
+    g_encryptShouldFail.store(false);
+    g_decryptShouldFail.store(false);
 }
 } // namespace
 
 namespace OHOS::Notification {
 ErrCode AesGcmHelper::Encrypt(const std::string &plainText, std::string &cipherText)
 {
+    if (g_encryptShouldFail.load()) {
+        return ERR_ANS_INNER_ENCRYPT_FAIL;
+    }
     cipherText = plainText;
     return ERR_OK;
 }
 
 ErrCode AesGcmHelper::Decrypt(std::string &plainText, const std::string &cipherText)
 {
+    if (g_decryptShouldFail.load()) {
+        return ERR_ANS_INNER_DECRYPT_FAIL;
+    }
     plainText = cipherText;
     return ERR_OK;
 }
@@ -252,6 +263,46 @@ HWTEST_F(RdbMgrRepoTest, OnRdbUpgradeLiveviewMigrate_300, Function | SmallTest |
     ASSERT_TRUE(output["content"].contains("content"));
     ASSERT_TRUE(output["content"]["content"].contains("extensionWantAgent"));
     EXPECT_EQ(output["content"]["content"]["extensionWantAgent"].get<std::string>(), "want_agent_value");
+}
+
+/**
+ * @tc.name: OnRdbUpgradeLiveviewMigrate_400
+ * @tc.desc: Verify live view migration returns false when encrypt fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbMgrRepoTest, OnRdbUpgradeLiveviewMigrate_400, Function | SmallTest | Level1)
+{
+    std::string newValue;
+    const int32_t liveViewType = static_cast<int32_t>(OHOS::Notification::NotificationContent::Type::LIVE_VIEW);
+    nlohmann::json input = {
+        {"actionButtons", nlohmann::json::array({
+            nlohmann::json{{"wantAgent", "want_agent_value"}},
+            nlohmann::json{{"buttonId", 1}}
+        })},
+        {"content", nlohmann::json{
+            {"contentType", liveViewType},
+            {"content", nlohmann::json{{"foo", "bar"}}}
+        }}
+    };
+
+    g_encryptShouldFail.store(true);
+    EXPECT_FALSE(OnRdbUpgradeLiveviewMigrate(input.dump(), newValue));
+    EXPECT_TRUE(newValue.empty());
+    g_encryptShouldFail.store(false);
+}
+
+/**
+ * @tc.name: OnRdbUpgradeLiveviewMigrate_500
+ * @tc.desc: Verify live view migration returns false when decrypt fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbMgrRepoTest, OnRdbUpgradeLiveviewMigrate_500, Function | SmallTest | Level1)
+{
+    std::string newValue;
+    g_decryptShouldFail.store(true);
+    EXPECT_FALSE(OnRdbUpgradeLiveviewMigrate("any_old_value", newValue));
+    EXPECT_TRUE(newValue.empty());
+    g_decryptShouldFail.store(false);
 }
 
 /**
