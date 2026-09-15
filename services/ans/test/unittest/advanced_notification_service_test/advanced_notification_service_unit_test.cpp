@@ -36,6 +36,7 @@
 #include "bool_wrapper.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
+#include "iremote_broker.h"
 #include "long_wrapper.h"
 #include "notification_live_view_content.h"
 #include "notification_content.h"
@@ -74,7 +75,14 @@ sptr<AdvancedNotificationService> AdvancedNotificationServiceUnitTest::advancedN
 
 void AdvancedNotificationServiceUnitTest::SetUpTestCase() {}
 
-void AdvancedNotificationServiceUnitTest::TearDownTestCase() {}
+void AdvancedNotificationServiceUnitTest::TearDownTestCase()
+{
+    BrokerRegistration &registration = BrokerRegistration::Get();
+    std::lock_guard<std::mutex> lockGuard(registration.creatorMutex_);
+    registration.isUnloading = true;
+    registration.objects_.clear();
+    registration.creators_.clear();
+}
 
 void AdvancedNotificationServiceUnitTest::SetUp()
 {

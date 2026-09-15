@@ -23,6 +23,7 @@
 #include "distributed_device_data_service.h"
 #include "ans_inner_errors.h"
 #include "ans_ut_constant.h"
+#include "iremote_broker.h"
 #include "notification_subscriber_manager.h"
 #include "mock_bundle_manager_helper.h"
 #undef private
@@ -48,6 +49,11 @@ public:
     {
         constexpr int sleepMs = 1000;
         std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+        BrokerRegistration &registration = BrokerRegistration::Get();
+        std::lock_guard<std::mutex> lockGuard(registration.creatorMutex_);
+        registration.isUnloading = true;
+        registration.objects_.clear();
+        registration.creators_.clear();
     }
     void SetUp();
     void TearDown() {};

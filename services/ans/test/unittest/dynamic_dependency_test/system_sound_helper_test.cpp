@@ -20,6 +20,7 @@
 
 #define private public
 
+#include "iremote_broker.h"
 #include "system_sound_helper.h"
 #include "notification_ringtone_info.h"
 #include "notification_constant.h"
@@ -43,7 +44,14 @@ public:
 
 void SystemSoundHelperTest::SetUpTestCase() {}
 
-void SystemSoundHelperTest::TearDownTestCase() {}
+void SystemSoundHelperTest::TearDownTestCase()
+{
+    BrokerRegistration &registration = BrokerRegistration::Get();
+    std::lock_guard<std::mutex> lockGuard(registration.creatorMutex_);
+    registration.isUnloading = true;
+    registration.objects_.clear();
+    registration.creators_.clear();
+}
 
 void SystemSoundHelperTest::SetUp()
 {

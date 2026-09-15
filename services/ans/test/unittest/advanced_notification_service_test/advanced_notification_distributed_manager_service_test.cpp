@@ -21,6 +21,7 @@
 #include "advanced_notification_service.h"
 #include "ans_service_errors.h"
 #include "advanced_datashare_helper.h"
+#include "iremote_broker.h"
 #include "notification_check_request.h"
 #include "notification_constant.h"
 
@@ -49,7 +50,14 @@ sptr<AdvancedNotificationService> AdvancedNotificationDistMgrServiceTest::advanc
 
 void AdvancedNotificationDistMgrServiceTest::SetUpTestCase() {}
 
-void AdvancedNotificationDistMgrServiceTest::TearDownTestCase() {}
+void AdvancedNotificationDistMgrServiceTest::TearDownTestCase()
+{
+    BrokerRegistration &registration = BrokerRegistration::Get();
+    std::lock_guard<std::mutex> lockGuard(registration.creatorMutex_);
+    registration.isUnloading = true;
+    registration.objects_.clear();
+    registration.creators_.clear();
+}
 
 void AdvancedNotificationDistMgrServiceTest::SetUp()
 {

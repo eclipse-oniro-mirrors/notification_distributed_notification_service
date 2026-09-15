@@ -89,6 +89,7 @@ ohos_unittest("system_sound_helper_test") {
   deps = [ "${frameworks_module_ans_path}:ans_innerkits" ]
 
   external_deps = [
+    "ipc:ipc_core",
     "c_utils:utils",
     "ffrt:libffrt",
     "googletest:gmock_main",
