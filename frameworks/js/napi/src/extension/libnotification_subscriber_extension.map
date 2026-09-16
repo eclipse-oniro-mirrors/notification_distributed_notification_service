@@ -1,0 +1,59 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+1.0 {
+  global:
+    extern "C++" {
+        guard?variable?for?OHOS::Notification::AnsDialogHostClient::instanceMutex_;
+        guard?variable?for?OHOS::Notification::AnsDialogHostClient::instance_;
+        guard?variable?for?OHOS::Notification::REQUEST_STORAGE_KEY_PREFIX;
+        guard?variable?for?OHOS::Notification::REQUEST_STORAGE_SECURE_KEY_PREFIX;
+        OHOS::Notification::NotificationInfo*;
+        OHOS::Notification::AnsDialogHostClient::instanceMutex_;
+        OHOS::Notification::AnsDialogHostClient::instance_;
+        OHOS::Notification::REQUEST_STORAGE_KEY_PREFIX;
+        OHOS::Notification::NotificationExtensionContent*;
+        OHOS::Notification::NotificationSubscriberStubImpl*;
+        OHOS::Notification::NotificationSubscriberExtension*;
+        OHOS::Notification::REQUEST_STORAGE_SECURE_KEY_PREFIX;
+        OHOS::Notification::NotificationSubscriberExtensionContext*;
+        OHOS::NotificationNapi*;
+        construction?vtable?for?OHOS::Parcelable-in-OHOS::Notification::NotificationInfo;
+        construction?vtable?for?OHOS::Parcelable-in-OHOS::Notification::NotificationExtensionContent;
+        construction?vtable?for?OHOS::Notification::NotificationSubscriberStub-in-OHOS::Notification::NotificationSubscriberStubImpl;
+        construction?vtable?for?OHOS::IRemoteStub*Notification::NotificationSubscriberStubImpl;
+        construction?vtable?for?OHOS::IPCObjectStub-in-OHOS::Notification::NotificationSubscriberStubImpl;
+        construction?vtable?for?OHOS::IRemoteObject-in-OHOS::Notification::NotificationSubscriberStubImpl;
+        construction?vtable?for?OHOS::Notification::INotificationSubscriber-in-OHOS::Notification::NotificationSubscriberStubImpl;
+        construction?vtable?for?OHOS::IRemoteBroker-in-OHOS::Notification::NotificationSubscriberStubImpl;
+        construction?vtable?for?OHOS::Parcelable-in-OHOS::Notification::NotificationSubscriberStubImpl;
+        VTT?for?OHOS::Notification::NotificationInfo;
+        VTT?for?OHOS::Notification::NotificationExtensionContent;
+        VTT?for?OHOS::Notification::NotificationSubscriberStubImpl;
+        vtable?for?OHOS::Notification::NotificationInfo;
+        vtable?for?OHOS::Notification::NotificationExtensionContent;
+        vtable?for?OHOS::Notification::NotificationSubscriberStubImpl;
+        vtable?for?OHOS::Notification::NotificationSubscriberExtension;
+        vtable?for?OHOS::Notification::NotificationSubscriberExtensionContext;
+        vtable?for?OHOS::NotificationNapi::JsNotificationSubscriberExtension;
+        non-virtual?thunk?to?OHOS::Notification::NotificationSubscriberStubImpl*;
+        non-virtual?thunk?to?OHOS::Notification::NotificationInfo*;
+        non-virtual?thunk?to?OHOS::Notification::NotificationExtensionContent*;
+        OHOS::Notification::NotificationJsonConverter*;
+        OHOS::AbilityRuntime::ExtensionBase*;
+    };
+    _fini;
+    _init;
+  local:
+    *;
+};
