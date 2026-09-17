@@ -2384,6 +2384,7 @@ private:
     ErrCode RemoveNotificationFromRecordList(const std::vector<std::shared_ptr<NotificationRecord>>& recordList);
     ErrCode OnSubscriberAdd(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record,
         const int32_t userId);
+    void ReplayRecoveredNotifications(const int32_t userId);
     ErrCode OnSubscriberAddWithSilentReplay(
         const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
     bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
@@ -2726,7 +2727,7 @@ private:
     static ffrt::mutex badgeQueryMutex_;
     static std::map<int32_t, sptr<IBadgeQueryCallback>> badgeQueryCallBack_;
     bool aggregateLocalSwitch_ = false;
-    std::set<int32_t> currentUserId;
+    std::set<int32_t> recoverReplayUserIds_;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;

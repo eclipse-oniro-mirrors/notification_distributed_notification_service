@@ -33,7 +33,7 @@ std::shared_ptr<AbilityManagerClient> AbilityManagerClient::GetInstance()
     return instance_;
 }
 
-AppExecFwk::ElementName AbilityManagerClient::GetTopAbility(bool isNeedLocalDeviceId)
+AppExecFwk::ElementName AbilityManagerClient::GetTopAbility(bool isNeedLocalDeviceId, int32_t userId)
 {
     AppExecFwk::ElementName elementName = {};
     elementName.SetBundleName("topName");
