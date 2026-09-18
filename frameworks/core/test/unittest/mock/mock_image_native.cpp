@@ -36,6 +36,8 @@ bool g_mockGetInnerPixelmapReturnNull = false;
 bool g_mockSetSvgResourceLimitLevelFail = false;
 uint32_t g_mockSvgResourceLimitLevelCallCount = 0;
 OH_ImageSourceNative* g_mockLastSvgResourceLimitLevelSource = nullptr;
+int g_mockLastSvgResourceLimitLevel = -1;
+uint32_t g_mockImageSourceReleaseCallCount = 0;
 uint32_t g_mockImageWidth = DEFAULT_IMAGE_SIZE;
 uint32_t g_mockImageHeight = DEFAULT_IMAGE_SIZE;
 
@@ -178,10 +180,11 @@ bool MockIsSvgResourceLimitLevelFail()
     return g_mockSetSvgResourceLimitLevelFail;
 }
 
-void MockRecordSvgResourceLimitLevelCall(OH_ImageSourceNative* source)
+void MockRecordSvgResourceLimitLevelCall(OH_ImageSourceNative* source, int level)
 {
     g_mockSvgResourceLimitLevelCallCount++;
     g_mockLastSvgResourceLimitLevelSource = source;
+    g_mockLastSvgResourceLimitLevel = level;
 }
 
 uint32_t MockGetSvgResourceLimitLevelCallCount()
@@ -192,6 +195,16 @@ uint32_t MockGetSvgResourceLimitLevelCallCount()
 OH_ImageSourceNative* MockGetLastSvgResourceLimitLevelSource()
 {
     return g_mockLastSvgResourceLimitLevelSource;
+}
+
+int MockGetLastSvgResourceLimitLevel()
+{
+    return g_mockLastSvgResourceLimitLevel;
+}
+
+uint32_t MockGetImageSourceReleaseCallCount()
+{
+    return g_mockImageSourceReleaseCallCount;
 }
 
 void MockResetImageNativeState()
@@ -212,6 +225,8 @@ void MockResetImageNativeState()
     g_mockSetSvgResourceLimitLevelFail = false;
     g_mockSvgResourceLimitLevelCallCount = 0;
     g_mockLastSvgResourceLimitLevelSource = nullptr;
+    g_mockLastSvgResourceLimitLevel = -1;
+    g_mockImageSourceReleaseCallCount = 0;
     g_mockImageWidth = DEFAULT_IMAGE_SIZE;
     g_mockImageHeight = DEFAULT_IMAGE_SIZE;
     if (g_mockImageSourceNative != nullptr) {
@@ -335,6 +350,7 @@ Image_ErrorCode OH_PixelmapNative_ReadPixels(
 
 Image_ErrorCode OH_ImageSourceNative_Release(OH_ImageSourceNative* imageSourceNative)
 {
+    g_mockImageSourceReleaseCallCount++;
     MockImageSourceNative* mockSource = reinterpret_cast<MockImageSourceNative*>(imageSourceNative);
     if (mockSource == g_mockImageSourceNative) {
         delete g_mockImageSourceNative;

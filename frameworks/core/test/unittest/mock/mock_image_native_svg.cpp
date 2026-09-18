@@ -26,16 +26,21 @@ namespace OHOS {
 namespace Notification {
 namespace Mock {
 bool MockIsSvgResourceLimitLevelFail();
-void MockRecordSvgResourceLimitLevelCall(OH_ImageSourceNative* source);
+void MockRecordSvgResourceLimitLevelCall(OH_ImageSourceNative* source, int level);
 }  // namespace Mock
 }  // namespace Notification
 }  // namespace OHOS
 
+namespace {
+constexpr int MOCK_IMAGE_SUCCESS = 0;
+constexpr int MOCK_IMAGE_PERMISSIONS_FAILED = 202;
+}  // namespace
+
 extern "C" int OH_ImageSourceNative_SetSvgResourceLimitLevel(OH_ImageSourceNative* source, int level)
 {
-    OHOS::Notification::Mock::MockRecordSvgResourceLimitLevelCall(source);
+    OHOS::Notification::Mock::MockRecordSvgResourceLimitLevelCall(source, level);
     if (OHOS::Notification::Mock::MockIsSvgResourceLimitLevelFail()) {
-        return 401;
+        return MOCK_IMAGE_PERMISSIONS_FAILED;
     }
-    return 0;
+    return MOCK_IMAGE_SUCCESS;
 }
