@@ -37,6 +37,8 @@ napi_value NotificationSubscribeInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setUserGrantedState", NapiSetUserGrantedState),
         DECLARE_NAPI_FUNCTION("getUserGrantedEnabledBundles", NapiGetUserGrantedEnabledBundles),
         DECLARE_NAPI_FUNCTION("setUserGrantedBundleState", NapiSetUserGrantedBundleState),
+        DECLARE_NAPI_FUNCTION("getUserGrantedBundleIcon", NapiGetUserGrantedBundleIcon),
+        DECLARE_NAPI_FUNCTION("disableUserGrantedByBundle", NapiDisableUserGrantedByBundle),
         DECLARE_NAPI_FUNCTION("openSubscriptionSettings", NapiNotificationExtensionOpenSubscriptionSettings),
         DECLARE_NAPI_FUNCTION("openSubscriptionSettingsWithResult",
             NapiNotificationExtensionOpenSubscriptionSettingsWithResult),

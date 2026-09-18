@@ -105,6 +105,7 @@ ohos_shared_library("ans_innerkits") {
     "${frameworks_module_ans_path}/src/notification_action_button.cpp",
     "${frameworks_module_ans_path}/src/notification_application_change_info.cpp",
     "${frameworks_module_ans_path}/src/notification_basic_content.cpp",
+    "${frameworks_module_ans_path}/src/notification_bundle_icon_info.cpp",
     "${frameworks_module_ans_path}/src/notification_bundle_option.cpp",
     "${frameworks_module_ans_path}/src/notification_button_option.cpp",
     "${frameworks_module_ans_path}/src/notification_capsule.cpp",

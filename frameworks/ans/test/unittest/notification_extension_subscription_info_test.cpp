@@ -82,22 +82,6 @@ HWTEST_F(NotificationExtensionSubscriptionInfoTest, SetType_00001, Function | Sm
 }
 
 /**
-* @tc.name: SetHfp_00001
-* @tc.desc: Test SetHfp parameters.
-* @tc.type: FUNC
-* @tc.require: issueI5WBBH
-*/
-HWTEST_F(NotificationExtensionSubscriptionInfoTest, SetHfp_00001, Function | SmallTest | Level1)
-{
-    auto subscriptionInfo = std::make_shared<NotificationExtensionSubscriptionInfo>();
-    ASSERT_NE(subscriptionInfo, nullptr);
-
-    EXPECT_FALSE(subscriptionInfo->IsHfp());
-    subscriptionInfo->SetHfp(true);
-    EXPECT_TRUE(subscriptionInfo->IsHfp());
-}
-
-/**
  * @tc.name: Dump_00001
  * @tc.desc: Test Dump parameters.
  * @tc.type: FUNC

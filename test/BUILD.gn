@@ -27,6 +27,7 @@ group("systemtest") {
   deps = [
     #"resource\ansSTSlotGroupTest:ansSTSlotGroupTest",
     #"systemtest\acts\ansDump:ansDumpTest",
+    "//base/notification/distributed_notification_service/test/systemtest/acts/ansWearableCooperation:ansWearableCooperationTest",
   ]
 }
 

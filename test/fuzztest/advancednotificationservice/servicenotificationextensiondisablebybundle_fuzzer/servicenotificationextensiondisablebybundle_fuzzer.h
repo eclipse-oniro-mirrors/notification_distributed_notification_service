@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef BASE_NOTIFICATION_MOCK_BLUETOOTH_OBJECT_H
-#define BASE_NOTIFICATION_MOCK_BLUETOOTH_OBJECT_H
+#ifndef TEST_FUZZTEST_ADVANCEDNOTIFICATIONSERVICE_FUZZER_SERVICENOTIFICATIONEXTENSIONDISABLEBYBUNDLE_FUZZER_H
+#define TEST_FUZZTEST_ADVANCEDNOTIFICATIONSERVICE_FUZZER_SERVICENOTIFICATIONEXTENSIONDISABLEBYBUNDLE_FUZZER_H
 
-namespace OHOS {
-namespace Notification {
-void MockBluetoothRemoteDeviceGetPairStateEnabled(bool enabled);
-}
-}
-#endif
+#include "fuzz_common_base.h"
+#include <fuzzer/FuzzedDataProvider.h>
+
+#define FUZZ_PROJECT_NAME "advancednotificationserviceservicenotificationextensiondisablebybundle_fuzzer"
+
+#endif // TEST_FUZZTEST_ADVANCEDNOTIFICATIONSERVICE_FUZZER_SERVICENOTIFICATIONEXTENSIONDISABLEBYBUNDLE_FUZZER_H

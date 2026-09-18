@@ -23,13 +23,6 @@
 namespace OHOS {
 namespace Notification {
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-void HfpStateObserver::OnConnectionStateChanged(
-    const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state, int cause)
-{
-    ANS_LOGI("HFP connection state changed with state: %{public}d", state);
-    AdvancedNotificationService::GetInstance()->OnHfpDeviceConnectChanged(device, state);
-}
-
 void BluetoothAccessObserver::OnStateChanged(const int transport, const int status)
 {
     ANS_LOGI("Bluetooth state changed: transport: %{public}d, status: %{public}d", transport, status);
@@ -49,24 +42,6 @@ NotificationBluetoothHelper& NotificationBluetoothHelper::GetInstance()
     return notificationBluetoothHelper;
 }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-void NotificationBluetoothHelper::RegisterHfpObserver()
-{
-    if (hfpObserver_ == nullptr) {
-        hfpObserver_ = std::make_shared<HfpStateObserver>();
-    }
-    
-    if (isHfpObserverRegistered_.load()) {
-        return;
-    }
-
-    isHfpObserverRegistered_.store(true);
-    auto profile = OHOS::Bluetooth::HandsFreeAudioGateway::GetProfile();
-    if (profile != nullptr) {
-        profile->RegisterObserver(hfpObserver_);
-        ANS_LOGI("HFP observer registered successfully");
-    }
-}
-
 void NotificationBluetoothHelper::RegisterBluetoothAccessObserver()
 {
     if (bluetoothAccessObserver_ == nullptr) {
@@ -95,20 +70,6 @@ void NotificationBluetoothHelper::RegisterBluetoothPairedDeviceObserver()
     Bluetooth::BluetoothHost::GetDefaultHost().RegisterRemoteDeviceObserver(bluetoothPairedDeviceObserver_);
 }
 #endif
-bool NotificationBluetoothHelper::CheckHfpState(const std::string &bluetoothAddress)
-{
-    OHOS::Bluetooth::BluetoothRemoteDevice remoteDevice(bluetoothAddress, OHOS::Bluetooth::BT_TRANSPORT_NONE);
-    int32_t btConnectState = static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED);
-    auto profile = OHOS::Bluetooth::HandsFreeAudioGateway::GetProfile();
-    if (profile == nullptr) {
-        ANS_LOGE("Failed to get HandsFreeAudioGateway profile.");
-        return false;
-    }
-    int32_t ret = profile->GetDeviceState(remoteDevice, btConnectState);
-    ANS_LOGI("Bluetooth HFP device: %{public}s, connect state: %{public}d", StringAnonymous(bluetoothAddress).c_str(),
-        btConnectState);
-    return ret == ERR_OK && btConnectState == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED);
-}
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 bool NotificationBluetoothHelper::CheckBluetoothConditions(const std::string& addr)
 {

@@ -217,6 +217,15 @@ bool NotificationConfigParse::GetDataCloneBundleName(std::string& bundleName)
 {
     return false;
 }
+
+ErrCode BundleManagerHelper::GetBundleIcon(const std::string &bundleName,
+    int32_t appIndex, std::shared_ptr<Media::PixelMap> &icon)
+{
+    (void)bundleName;
+    (void)appIndex;
+    (void)icon;
+    return -1;
+}
 } // namespace Notification
 } // namespace OHOS
 

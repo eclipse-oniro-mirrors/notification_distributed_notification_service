@@ -1427,6 +1427,21 @@ ErrCode NotificationHelper::SetUserGrantedBundleState(const NotificationBundleOp
     return InnerErrorToNative(result);
 }
 
+ErrCode NotificationHelper::GetUserGrantedBundleIcon(
+    const std::string& bundleName, sptr<NotificationBundleIconInfo>& bundleIcon)
+{
+    InnerErrorCode result =
+        AnsNotification::GetInstance()->GetUserGrantedBundleIcon(bundleName, bundleIcon);
+    return InnerErrorToNative(result);
+}
+
+ErrCode NotificationHelper::DisableUserGrantedByBundle(const NotificationBundleOption& bundle)
+{
+    InnerErrorCode result =
+        AnsNotification::GetInstance()->DisableUserGrantedByBundle(bundle);
+    return InnerErrorToNative(result);
+}
+
 ErrCode NotificationHelper::GetReminderInfoByBundles(
     const std::vector<NotificationBundleOption> &bundles, std::vector<NotificationReminderInfo> &reminderInfo)
 {

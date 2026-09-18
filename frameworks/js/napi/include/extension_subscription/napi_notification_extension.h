@@ -46,6 +46,14 @@ struct AsyncCallbackInfoNotificationExtensionUserGranted {
     NotificationExtensionUserGrantedParams params;
 };
 
+struct AsyncCallbackInfoGetBundleIcon {
+    napi_env env = nullptr;
+    napi_async_work asyncWork = nullptr;
+    CallbackPromiseInfo info;
+    std::string bundleName;
+    sptr<NotificationBundleIconInfo> bundleIcon = nullptr;
+};
+
 struct OpenSettingsParams {
     std::shared_ptr<OHOS::AbilityRuntime::Context> context;
 };
@@ -73,6 +81,8 @@ napi_value NapiGetUserGrantedState(napi_env env, napi_callback_info info);
 napi_value NapiSetUserGrantedState(napi_env env, napi_callback_info info);
 napi_value NapiGetUserGrantedEnabledBundles(napi_env env, napi_callback_info info);
 napi_value NapiSetUserGrantedBundleState(napi_env env, napi_callback_info info);
+napi_value NapiGetUserGrantedBundleIcon(napi_env env, napi_callback_info info);
+napi_value NapiDisableUserGrantedByBundle(napi_env env, napi_callback_info info);
 napi_value ParseOpenSettingsParameters(const napi_env &env, const napi_callback_info &info, OpenSettingsParams &params);
 napi_value NapiNotificationExtensionOpenSubscriptionSettings(napi_env env, napi_callback_info info);
 napi_value NapiNotificationExtensionOpenSubscriptionSettingsWithResult(napi_env env, napi_callback_info info);

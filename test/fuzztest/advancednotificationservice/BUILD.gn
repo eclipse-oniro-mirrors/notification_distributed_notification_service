@@ -71,6 +71,8 @@ group("fuzztest") {
     "servicenotificationextensionsubscribe_fuzzer:ServiceNotificationExtensionSubscribeFuzzTest",
     "servicenotificationextensionsubscribenotification_fuzzer:ServiceNotificationExtensionSubscribeNotificationFuzzTest",
     "servicenotificationextensionunsubscribe_fuzzer:ServiceNotificationExtensionUnsubscribeFuzzTest",
+    "servicenotificationextensiongetbundleicon_fuzzer:ServiceNotificationExtensionGetBundleIconFuzzTest",
+    "servicenotificationextensiondisablebybundle_fuzzer:ServiceNotificationExtensionDisableByBundleFuzzTest",
     "servicepublish_fuzzer:ServicePublishFuzzTest",
     "servicepublishasbundle_fuzzer:ServicePublishAsBundleFuzzTest",
     "servicepublishasbundlewithmaxcapacity_fuzzer:ServicePublishAsBundleWithMaxCapacityFuzzTest",

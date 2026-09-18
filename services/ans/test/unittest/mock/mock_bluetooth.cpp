@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "bluetooth_hfp_ag.h"
 #include "bluetooth_remote_device.h"
 #include "mock_bluetooth.h"
 #include "ans_log_wrapper.h"
@@ -22,13 +21,7 @@ namespace OHOS {
 namespace Notification {
 
 namespace {
-bool g_isMockHandsFreeAudioGatewayGetDeviceStateEnabled = false;
 bool g_isMockBluetoothRemoteDeviceGetPairStateEnabled = false;
-}
-
-void MockHandsFreeAudioGatewayGetDeviceStateEnabled(bool enabled)
-{
-    g_isMockHandsFreeAudioGatewayGetDeviceStateEnabled = enabled;
 }
 
 void MockBluetoothRemoteDeviceGetPairStateEnabled(bool enabled)
@@ -38,13 +31,6 @@ void MockBluetoothRemoteDeviceGetPairStateEnabled(bool enabled)
 }
 
 namespace Bluetooth {
-int32_t HandsFreeAudioGateway::GetDeviceState(const BluetoothRemoteDevice &device, int32_t &state)
-{
-    state = static_cast<int32_t>(Notification::g_isMockHandsFreeAudioGatewayGetDeviceStateEnabled ?
-        Bluetooth::BTConnectState::CONNECTED : Bluetooth::BTConnectState::DISCONNECTED);
-    return 0;
-}
-
 int BluetoothRemoteDevice::GetPairState(int &pairState) const
 {
     pairState = static_cast<int32_t>(Notification::g_isMockBluetoothRemoteDeviceGetPairStateEnabled ?

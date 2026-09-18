@@ -19,11 +19,13 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <vector>
 
 #include "bundle_mgr_interface.h"
 #include "ipc_skeleton.h"
 #include "iremote_object.h"
 #include "notification_bundle_option.h"
+#include "pixel_map.h"
 #include "refbase.h"
 #include "remote_death_recipient.h"
 #include "singleton.h"
@@ -174,6 +176,17 @@ public:
      */
     ErrCode GetBundleResourceInfo(const std::string &bundleName,
         AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex);
+
+    /**
+     * @brief Get the current icon of the specified bundle and decode it to a pixel map.
+     *
+     * @param bundleName bundle name.
+     * @param appIndex app index.
+     * @param icon the decoded icon pixel map, set to nullptr when the icon is unavailable.
+     * @return Returns the query result. if succeed, retrun 0.
+     */
+    ErrCode GetBundleIcon(const std::string &bundleName, int32_t appIndex,
+        std::shared_ptr<Media::PixelMap> &icon);
 
     ErrCode GetAllBundleInfo(std::map<std::string, sptr<NotificationBundleOption>>& bundleOptions,
         int32_t userId);

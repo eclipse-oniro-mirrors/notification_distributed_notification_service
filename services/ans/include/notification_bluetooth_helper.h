@@ -20,21 +20,12 @@
 #include <memory>
 #include <string>
 
-#include "bluetooth_hfp_ag.h"
 #include "bluetooth_host.h"
 #include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-class HfpStateObserver : public OHOS::Bluetooth::HandsFreeAudioGatewayObserver {
-public:
-    HfpStateObserver() = default;
-    ~HfpStateObserver() override = default;
-    void OnConnectionStateChanged(
-        const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state, int cause) override;
-};
-
 class BluetoothAccessObserver : public OHOS::Bluetooth::BluetoothHostObserver {
 public:
     BluetoothAccessObserver() = default;
@@ -86,11 +77,6 @@ public:
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 
     /**
-     * @brief Register HFP observer.
-     */
-    void RegisterHfpObserver();
-
-    /**
      * @brief Register Bluetooth access observer.
      */
     void RegisterBluetoothAccessObserver();
@@ -101,13 +87,6 @@ public:
     void RegisterBluetoothPairedDeviceObserver();
 #endif
 
-    /**
-     * @brief Check if HFP device is connected.
-     *
-     * @param bluetoothAddress The bluetooth address.
-     * @return Returns true if connected, false otherwise.
-     */
-    bool CheckHfpState(const std::string &bluetoothAddress);
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     /**
      * @brief Check Bluetooth connection-related conditions for the given address.
@@ -133,11 +112,9 @@ private:
     NotificationBluetoothHelper(NotificationBluetoothHelper&&) = delete;
     NotificationBluetoothHelper& operator=(NotificationBluetoothHelper&&) = delete;
 
-    std::shared_ptr<HfpStateObserver> hfpObserver_ = nullptr;
     std::shared_ptr<BluetoothAccessObserver> bluetoothAccessObserver_ = nullptr;
     std::shared_ptr<BluetoothPairedDeviceObserver> bluetoothPairedDeviceObserver_ = nullptr;
     std::atomic<bool> isBluetoothObserverRegistered_ = false;
-    std::atomic<bool> isHfpObserverRegistered_ = false;
     std::atomic<bool> isBluetoothPairedDeviceObserverRegistered_ = false;
 #endif
 };

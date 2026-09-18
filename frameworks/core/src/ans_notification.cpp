@@ -3887,6 +3887,44 @@ InnerErrorCode AnsNotification::SetUserGrantedBundleState(const NotificationBund
     return static_cast<InnerErrorCode>(proxy->SetUserGrantedBundleState(bo, enabledBundles, enabled));
 }
 
+InnerErrorCode AnsNotification::GetUserGrantedBundleIcon(
+    const std::string& bundleName, sptr<NotificationBundleIconInfo>& bundleIcon)
+{
+    ANS_LOGD("called");
+    if (bundleName.empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
+    }
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
+    }
+
+    return static_cast<InnerErrorCode>(proxy->GetUserGrantedBundleIcon(bundleName, bundleIcon));
+}
+
+InnerErrorCode AnsNotification::DisableUserGrantedByBundle(const NotificationBundleOption& bundle)
+{
+    ANS_LOGD("called");
+    if (bundle.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
+    }
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Get ans manager proxy fail");
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundle));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    return static_cast<InnerErrorCode>(proxy->DisableUserGrantedByBundle(bo));
+}
+
 InnerErrorCode AnsNotification::GetAllSubscriptionBundles(std::vector<sptr<NotificationBundleOption>>& bundles)
 {
     ANS_LOGD("called");

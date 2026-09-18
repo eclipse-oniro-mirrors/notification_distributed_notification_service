@@ -811,7 +811,6 @@ HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionInfosFromJson_
     NotificationPreferencesInfo::BundleInfo bundleInfo1;
     auto info1 = new (std::nothrow) NotificationExtensionSubscriptionInfo();
     info1->SetAddr("test address");
-    info1->SetHfp(true);
     info1->SetType(NotificationConstant::SubscribeType::BLUETOOTH);
     std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos1 = { info1 };
     bundleInfo1.SetExtensionSubscriptionInfos(infos1);
@@ -825,7 +824,6 @@ HWTEST_F(NotificationPreferencesInfoTest, SetExtensionSubscriptionInfosFromJson_
     EXPECT_EQ(infos2.size(), 1);
     auto info2 = infos2[0];
     EXPECT_STREQ(info1->GetAddr().c_str(), info2->GetAddr().c_str());
-    EXPECT_EQ(info1->IsHfp(), info2->IsHfp());
     EXPECT_EQ(info1->GetType(), info2->GetType());
 }
 

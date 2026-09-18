@@ -19,6 +19,7 @@
 #include "sts_throw_erro.h"
 #include "sts_common.h"
 #include "sts_bundle_option.h"
+#include "sts_convert_other.h"
 #include "ani_notification_extension_subscription_info.h"
 
 namespace OHOS {
@@ -620,6 +621,37 @@ void HandleAsyncCallbackComplete(ani_env *env, WorkStatus status, void *data)
     DeleteCallBackInfoWithoutPromise(envCurr, asyncCallbackInfo);
 }
 
+void WrapSubscribeInfoResult(ani_env *envCurr, AsyncCallbackInfoNotificationExtension *asyncCallbackInfo)
+{
+    if (!NotificationSts::WrapNotificationExtensionSubscribeInfoArray(
+        envCurr, asyncCallbackInfo->subscriptionInfo, asyncCallbackInfo->info.result)) {
+        ANS_LOGE("WrapNotificationExtensionSubscribeInfoArray failed");
+        asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
+    }
+}
+
+void WrapBooleanResult(ani_env *envCurr, AsyncCallbackInfoNotificationExtension *asyncCallbackInfo)
+{
+    asyncCallbackInfo->info.result = NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->enabled);
+    if (asyncCallbackInfo->info.result == nullptr) {
+        ANS_LOGE("CreateBoolean failed");
+        asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
+    }
+}
+
+void WrapBundleIconResult(ani_env *envCurr, AsyncCallbackInfoNotificationExtension *asyncCallbackInfo)
+{
+    std::shared_ptr<Media::PixelMap> icon =
+        asyncCallbackInfo->bundleIcon == nullptr ? nullptr : asyncCallbackInfo->bundleIcon->GetIcon();
+    ani_object iconObject = (icon == nullptr) ? nullptr : NotificationSts::CreateAniPixelMap(envCurr, icon);
+    if (iconObject == nullptr) {
+        ANS_LOGE("CreateAniPixelMap failed");
+        asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
+    } else {
+        asyncCallbackInfo->info.result = iconObject;
+    }
+}
+
 void HandleAsyncCallbackCompleteInner(ani_env *envCurr, AsyncCallbackInfoNotificationExtension *asyncCallbackInfo)
 {
     if (asyncCallbackInfo == nullptr) {
@@ -633,14 +665,11 @@ void HandleAsyncCallbackCompleteInner(ani_env *envCurr, AsyncCallbackInfoNotific
         case NotificationExtensionFunctionType::UNSUBSCRIBE:
         case NotificationExtensionFunctionType::SET_USER_GRANTED_STATE:
         case NotificationExtensionFunctionType::SET_USER_GRANTED_BUNDLE_STATE:
+        case NotificationExtensionFunctionType::DISABLE_USER_GRANTED_BY_BUNDLE:
             // void
             break;
         case NotificationExtensionFunctionType::GET_SUBSCRIBE_INFO:
-            if (!NotificationSts::WrapNotificationExtensionSubscribeInfoArray(
-                envCurr, asyncCallbackInfo->subscriptionInfo, asyncCallbackInfo->info.result)) {
-                ANS_LOGE("WrapNotificationExtensionSubscribeInfoArray failed");
-                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
-            }
+            WrapSubscribeInfoResult(envCurr, asyncCallbackInfo);
             break;
         case NotificationExtensionFunctionType::GET_ALL_SUBSCRIPTION_BUNDLES:
         case NotificationExtensionFunctionType::GET_USER_GRANTED_ENABLED_BUNDLES:
@@ -653,11 +682,7 @@ void HandleAsyncCallbackCompleteInner(ani_env *envCurr, AsyncCallbackInfoNotific
             break;
         case NotificationExtensionFunctionType::IS_USER_GRANTED:
         case NotificationExtensionFunctionType::GET_USER_GRANTED_STATE:
-            asyncCallbackInfo->info.result = NotificationSts::CreateBoolean(envCurr, asyncCallbackInfo->enabled);
-            if (asyncCallbackInfo->info.result == nullptr) {
-                ANS_LOGE("CreateBoolean failed");
-                asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
-            }
+            WrapBooleanResult(envCurr, asyncCallbackInfo);
             break;
         case NotificationExtensionFunctionType::GET_USER_GRANTED_ENABLED_BUNDLES_FOR_SELF:
             if (!NotificationSts::SetAniArrayGrantedBundleInfo(
@@ -667,10 +692,126 @@ void HandleAsyncCallbackCompleteInner(ani_env *envCurr, AsyncCallbackInfoNotific
                 asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
             }
             break;
+        case NotificationExtensionFunctionType::GET_USER_GRANTED_BUNDLE_ICON:
+            WrapBundleIconResult(envCurr, asyncCallbackInfo);
+            break;
         default:
             ANS_LOGW("unhandled funcType");
             break;
     }
+}
+
+ani_object AniGetUserGrantedBundleIcon(ani_env *env, ani_string bundleName)
+{
+    ANS_LOGD("AniGetUserGrantedBundleIcon enter");
+    auto asyncCallbackInfo = new (std::nothrow) AsyncCallbackInfoNotificationExtension();
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+
+    // Best-effort extraction: invalid input degrades to an empty name which is rejected
+    // by the service with 1600022, no 401 is thrown by design.
+    if (bundleName != nullptr) {
+        std::string bundleNameStd;
+        if (NotificationSts::GetStringByAniString(env, bundleName, bundleNameStd) == ANI_OK) {
+            bundleNameStd = NotificationSts::GetResizeStr(bundleNameStd, STR_MAX_SIZE);
+            asyncCallbackInfo->targetBundle.SetBundleName(bundleNameStd);
+        }
+    }
+
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+
+    ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
+    if (aniStatus != ANI_OK) {
+        ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
+        NotificationSts::ThrowInternerErrorWithLogE(env, "GetVM failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+
+    asyncCallbackInfo->funcType = NotificationExtensionFunctionType::GET_USER_GRANTED_BUNDLE_ICON;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env *env, void *data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode =
+                    AnsNotification::GetInstance()->GetUserGrantedBundleIcon(
+                        asyncCallbackInfo->targetBundle.GetBundleName(), asyncCallbackInfo->bundleIcon);
+            }
+        },
+        HandleAsyncCallbackComplete, static_cast<void*>(asyncCallbackInfo), &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
+}
+
+void ParseParametersForAniDisableUserGrantedByBundle(ani_env *env, ani_object bundle,
+    OHOS::Notification::NotificationBundleOption &targetBundle)
+{
+    if (bundle == nullptr) {
+        return;
+    }
+    ani_boolean isUndefined = ANI_TRUE;
+    std::string bundleName;
+    if (NotificationSts::GetPropertyString(env, bundle, "bundleName", isUndefined, bundleName) == ANI_OK &&
+        isUndefined == ANI_FALSE && !bundleName.empty()) {
+        targetBundle.SetBundleName(bundleName);
+    }
+    ani_int appIndex = 0;
+    if (NotificationSts::GetPropertyInt(env, bundle, "appIndex", isUndefined, appIndex) == ANI_OK &&
+        isUndefined == ANI_FALSE) {
+        targetBundle.SetAppIndex(static_cast<int32_t>(appIndex));
+    }
+}
+
+ani_object AniDisableUserGrantedByBundle(ani_env *env, ani_object bundle)
+{
+    ANS_LOGD("AniDisableUserGrantedByBundle enter");
+    auto asyncCallbackInfo = new (std::nothrow) AsyncCallbackInfoNotificationExtension();
+    if (!asyncCallbackInfo) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "asyncCallbackInfo is null");
+        return nullptr;
+    }
+    ParseParametersForAniDisableUserGrantedByBundle(env, bundle, asyncCallbackInfo->targetBundle);
+    ani_object promise;
+    NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
+        asyncCallbackInfo->info, promise);
+    ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
+    if (aniStatus != ANI_OK) {
+        ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
+        NotificationSts::ThrowInternerErrorWithLogE(env, "GetVM failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    asyncCallbackInfo->funcType = NotificationExtensionFunctionType::DISABLE_USER_GRANTED_BY_BUNDLE;
+    WorkStatus status = CreateAsyncWork(env,
+        [](ani_env *env, void *data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
+            if (asyncCallbackInfo) {
+                asyncCallbackInfo->info.returnCode =
+                    AnsNotification::GetInstance()->DisableUserGrantedByBundle(
+                        asyncCallbackInfo->targetBundle);
+            }
+        },
+        HandleAsyncCallbackComplete, static_cast<void*>(asyncCallbackInfo), &(asyncCallbackInfo->asyncWork));
+    if (status != WorkStatus::OK || WorkStatus::OK != QueueAsyncWork(env, asyncCallbackInfo->asyncWork)) {
+        NotificationSts::ThrowInternerErrorWithLogE(env, "CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return nullptr;
+    }
+    if (asyncCallbackInfo->info.callback == nullptr) {
+        return promise;
+    }
+    return nullptr;
 }
 } // namespace NotificationExtensionSubScriptionSts
 } // namespace OHOS

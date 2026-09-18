@@ -23,6 +23,7 @@
 #include "ans_subscriber_listener.h"
 #include "ans_badgequery_listener.h"
 #include "ians_manager.h"
+#include "notification_bundle_icon_info.h"
 #include "notification_classification.h"
 #include "notification_extension_subscription_info.h"
 #include "notification_local_live_view_subscriber.h"
@@ -1855,6 +1856,22 @@ public:
      */
     InnerErrorCode SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled);
+
+    /**
+     * @brief Obtains the current icon of the specified bundle which is granted by self.
+     * @param bundleName The bundle name to be queried.
+     * @param bundleIcon The returned bundle icon information.
+     * @return Returns get result.
+     */
+    InnerErrorCode GetUserGrantedBundleIcon(
+        const std::string& bundleName, sptr<NotificationBundleIconInfo>& bundleIcon);
+
+    /**
+     * @brief Disables the notification cooperation switch of the specified bundle granted by self.
+     * @param bundle The bundle option to be disabled.
+     * @return Returns set result.
+     */
+    InnerErrorCode DisableUserGrantedByBundle(const NotificationBundleOption& bundle);
 
     /**
      * @brief Obtains all bundles that are available for notification extension subscription.

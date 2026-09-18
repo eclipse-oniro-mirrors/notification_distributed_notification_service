@@ -25,6 +25,7 @@
 #include "bundle_manager_helper.h"
 #include "errors.h"
 #include "notification_bluetooth_helper.h"
+#include "notification_bundle_icon_info.h"
 #include "notification_config_parse.h"
 #include "notification_preferences.h"
 #include "notification_timer_info.h"
@@ -322,11 +323,7 @@ void AdvancedNotificationService::FilterBundlesByBluetoothConnection(
             it = bundles.erase(it);
             continue;
         }
-        bool updateHfp = false;
-        bool hasValidConnection = CheckBluetoothConnectionInInfos(*it, infos, updateHfp);
-        if (updateHfp) {
-            NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(*it, infos);
-        }
+        bool hasValidConnection = CheckBluetoothConnectionInInfos(*it, infos);
         if (hasValidConnection) {
             ++it;
         } else {
@@ -347,8 +344,7 @@ void AdvancedNotificationService::FilterBundlesByBluetoothConnection(
 
 bool AdvancedNotificationService::CheckBluetoothConnectionInInfos(
     const sptr<NotificationBundleOption> &bundleOption,
-    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos,
-    bool &updateHfp)
+    const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos)
 {
     for (auto& info : infos) {
         if (info == nullptr) {
@@ -360,16 +356,6 @@ bool AdvancedNotificationService::CheckBluetoothConnectionInInfos(
         }
         if (!NotificationBluetoothHelper::GetInstance().CheckBluetoothConditions(bluetoothAddress)) {
             continue;
-        }
-        if (supportHfp_) {
-            bool hfpState = NotificationBluetoothHelper::GetInstance().CheckHfpState(bluetoothAddress);
-            if (hfpState && !info->IsHfp()) {
-                info->SetHfp(true);
-                updateHfp = true;
-            } else if (!hfpState && info->IsHfp()) {
-                continue;
-            }
-            return true;
         }
         return true;
     }
@@ -628,15 +614,6 @@ void AdvancedNotificationService::GetCachedNotificationExtensionBundles(
 #endif
 }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-void AdvancedNotificationService::OnHfpDeviceConnectChanged(
-    const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state)
-{
-    notificationSvrQueue_.Submit(std::bind([=]() {
-        ANS_LOGD("ffrt enter!");
-        ProcessHfpDeviceStateChange(state);
-    }));
-}
-
 void AdvancedNotificationService::OnBluetoothStateChanged(int status)
 {
     notificationSvrQueue_.Submit(std::bind([=]() {
@@ -654,20 +631,11 @@ void AdvancedNotificationService::OnBluetoothPairedStatusChanged(
     }));
 }
 
-void AdvancedNotificationService::CheckBleAndHfpStateChange(bool filterHfpOnly)
+void AdvancedNotificationService::CheckBluetoothStateChange()
 {
     std::vector<sptr<NotificationBundleOption>> bundles;
     GetCachedNotificationExtensionBundles(bundles);
     EnsureBundlesCanSubscribeOrUnsubscribe(bundles);
-}
-
-void AdvancedNotificationService::ProcessHfpDeviceStateChange(int state)
-{
-    ANS_LOGD("ProcessHfpDeviceStateChange: state: %{public}d", state);
-    if (state == static_cast<int32_t>(Bluetooth::BTConnectState::CONNECTED) ||
-        state == static_cast<int32_t>(Bluetooth::BTConnectState::DISCONNECTED)) {
-        CheckBleAndHfpStateChange(true);
-    }
 }
 
 void AdvancedNotificationService::ProcessBluetoothStateChanged(const int status)
@@ -691,16 +659,14 @@ void AdvancedNotificationService::ProcessBluetoothPairedStatusChange(int state)
 {
     ANS_LOGD("ProcessBluetoothPairedStatusChange: state: %{public}d", state);
     if (state == OHOS::Bluetooth::PAIR_PAIRED || state == OHOS::Bluetooth::PAIR_NONE) {
-        CheckBleAndHfpStateChange(false);
+        CheckBluetoothStateChange();
     }
 }
 
 bool AdvancedNotificationService::TryStartExtensionSubscribeService()
 {
-    NotificationConfigParse::GetInstance()->IsNotificationExtensionSubscribeSupportHfp(supportHfp_);
     notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGD("ffrt enter!");
-        NotificationBluetoothHelper::GetInstance().RegisterHfpObserver();
         NotificationBluetoothHelper::GetInstance().RegisterBluetoothPairedDeviceObserver();
         std::vector<sptr<NotificationBundleOption>> bundles;
         bool hasBundles = GetNotificationExtensionEnabledBundles(bundles) == ERR_OK && !bundles.empty();
@@ -910,14 +876,6 @@ void AdvancedNotificationService::ProcessExtensionSubscriptionInfos(
     const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos, ErrCode& result)
 {
     ANS_LOGD("ffrt enter!");
-    for (auto &info : infos) {
-        if (info == nullptr) {
-            continue;
-        }
-        if (supportHfp_ && NotificationBluetoothHelper::GetInstance().CheckHfpState(info->GetAddr())) {
-            info->SetHfp(true);
-        }
-    }
     result = NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(bundleOption, infos);
     if (result != ERR_OK) {
         ANS_LOGE("Failed to insert subscription info into db, ret: %{public}d", result);
@@ -1228,6 +1186,88 @@ ErrCode AdvancedNotificationService::GetUserGrantedEnabledBundlesForSelf(
     return result;
 }
 
+void AdvancedNotificationService::ProcessGetUserGrantedBundleIcon(
+    const sptr<NotificationBundleOption>& bundleOption, const std::string& bundleName,
+    int32_t& grantedUid, int32_t& grantedAppIndex, ErrCode& result)
+{
+    ANS_LOGD("ffrt enter GetUserGrantedBundleIcon!");
+    std::vector<sptr<NotificationBundleOption>> grantedBundles;
+    result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundleOption,
+        grantedBundles);
+    if (result != ERR_OK) {
+        ANS_LOGE("Failed to get enabled bundles from database, ret: %{public}d", result);
+        return;
+    }
+    sptr<NotificationBundleOption> grantedBundle = nullptr;
+    for (const auto& candidate : grantedBundles) {
+        if (candidate != nullptr && candidate->GetBundleName() == bundleName) {
+            grantedBundle = candidate;
+            break;
+        }
+    }
+    if (grantedBundle == nullptr) {
+        ANS_LOGE("Bundle is not in the granted list, bundleName: %{public}s", bundleName.c_str());
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
+        sptr<NotificationBundleOption> invalidBundle(
+            new (std::nothrow) NotificationBundleOption(bundleName, -1));
+        ReportInvalidBundleOption(invalidBundle, message);
+        result = ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
+        return;
+    }
+    grantedUid = grantedBundle->GetUid();
+    grantedAppIndex = grantedBundle->GetAppIndex();
+}
+
+ErrCode AdvancedNotificationService::GetUserGrantedBundleIcon(
+    const std::string& bundleName, sptr<NotificationBundleIconInfo>& bundleIcon)
+{
+    ANS_LOGD("AdvancedNotificationService::GetUserGrantedBundleIcon");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
+    }
+
+    if (bundleName.empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        sptr<NotificationBundleOption> invalidBundle(new (std::nothrow) NotificationBundleOption(bundleName, -1));
+        ReportInvalidBundleOption(invalidBundle, message);
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
+    }
+
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Failed to create NotificationBundleOption");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_5));
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
+    ErrCode result = ERR_OK;
+    int32_t grantedUid = -1;
+    int32_t grantedAppIndex = -1;
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        ProcessGetUserGrantedBundleIcon(bundleOption, bundleName, grantedUid, grantedAppIndex, result);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get user granted bundle icon.");
+    if (result != ERR_OK) {
+        return result;
+    }
+
+    std::shared_ptr<Media::PixelMap> icon = nullptr;
+    if (BundleManagerHelper::GetInstance()->GetBundleIcon(bundleName, grantedAppIndex, icon)
+        != ERR_OK || icon == nullptr) {
+        ANS_LOGE("Failed to get icon for bundle: %{public}s", bundleName.c_str());
+        return ERR_ANS_INNER_TASK_ERR;
+    }
+    bundleIcon = new (std::nothrow) NotificationBundleIconInfo(bundleName, grantedUid, grantedAppIndex, icon);
+    if (bundleIcon == nullptr) {
+        ANS_LOGE("Failed to create NotificationBundleIconInfo");
+        return ERR_ANS_INNER_TASK_ERR;
+    }
+    return ERR_OK;
+}
+
 ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
     const sptr<NotificationBundleOption>& targetBundle,
     const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled)
@@ -1277,6 +1317,71 @@ ErrCode AdvancedNotificationService::SetUserGrantedBundleState(
         ProcessSetUserGrantedBundleState(bundle, enabledBundlesProcessed, enabled, result);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set user granted bundle state.");
+    return result;
+}
+
+void AdvancedNotificationService::ProcessDisableUserGrantedByBundle(
+    const sptr<NotificationBundleOption>& bundleOption,
+    const sptr<NotificationBundleOption>& bundleProcessed, ErrCode& result)
+{
+    ANS_LOGD("ffrt enter DisableUserGrantedByBundle!");
+    std::vector<sptr<NotificationBundleOption>> grantedBundles;
+    result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionBundles(bundleOption,
+        grantedBundles);
+    if (result != ERR_OK) {
+        ANS_LOGE("Failed to get enabled bundles from database, ret: %{public}d", result);
+        return;
+    }
+    bool isGranted = false;
+    for (const auto& grantedBundle : grantedBundles) {
+        if (grantedBundle != nullptr &&
+            grantedBundle->GetBundleName() == bundleProcessed->GetBundleName() &&
+            grantedBundle->GetUid() == bundleProcessed->GetUid()) {
+            isGranted = true;
+            break;
+        }
+    }
+    if (!isGranted) {
+        ANS_LOGE("Bundle is not in the granted list, bundleName: %{public}s",
+            bundleProcessed->GetBundleName().c_str());
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
+        ReportInvalidBundleOption(bundleProcessed, message);
+        result = ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
+        return;
+    }
+    std::vector<sptr<NotificationBundleOption>> toDisable = { bundleProcessed };
+    ProcessSetUserGrantedBundleState(bundleOption, toDisable, false, result);
+}
+
+ErrCode AdvancedNotificationService::DisableUserGrantedByBundle(const sptr<NotificationBundleOption>& bundle)
+{
+    ANS_LOGD("AdvancedNotificationService::DisableUserGrantedByBundle");
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_SUBSCRIBE_NOTIFICATION)) {
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Message("Permission denied").BranchId(BRANCH_1));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundleProcessed = GenerateValidBundleOptionV2(bundle);
+    if (bundleProcessed == nullptr) {
+        ANS_LOGE("Failed to create NotificationBundleOption");
+        ReportInvalidBundleOption(bundle, message);
+        return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
+    }
+
+    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
+    if (bundleOption == nullptr) {
+        ANS_LOGE("Failed to create NotificationBundleOption");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_5));
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
+    ErrCode result = ERR_OK;
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        ProcessDisableUserGrantedByBundle(bundleOption, bundleProcessed, result);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Disable user granted by bundle.");
     return result;
 }
 

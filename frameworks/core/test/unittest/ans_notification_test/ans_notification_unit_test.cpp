@@ -2108,6 +2108,96 @@ HWTEST_F(AnsNotificationUnitTest, GetUserGrantedEnabledBundlesForSelf_0100, Func
 }
 
 /*
+ * @tc.name: AnsNotificationGetUserGrantedBundleIcon_00001
+ * @tc.desc: test GetUserGrantedBundleIcon ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, AnsNotificationGetUserGrantedBundleIcon_00001, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+
+    sptr<NotificationBundleIconInfo> bundleIcon = nullptr;
+    InnerErrorCode ret = ans_->GetUserGrantedBundleIcon("bundle.test", bundleIcon);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: AnsNotificationGetUserGrantedBundleIcon_00002
+ * @tc.desc: test GetUserGrantedBundleIcon ErrCode ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, AnsNotificationGetUserGrantedBundleIcon_00002, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    sptr<NotificationBundleIconInfo> bundleIcon = nullptr;
+    InnerErrorCode ret = ans_->GetUserGrantedBundleIcon("bundle.test", bundleIcon);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: AnsNotificationGetUserGrantedBundleIcon_00003
+ * @tc.desc: test GetUserGrantedBundleIcon ErrCode ERR_ANS_INNER_INVALID_BUNDLE_OPTION with empty bundle name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, AnsNotificationGetUserGrantedBundleIcon_00003, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    sptr<NotificationBundleIconInfo> bundleIcon = nullptr;
+    InnerErrorCode ret = ans_->GetUserGrantedBundleIcon("", bundleIcon);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
+}
+
+/*
+ * @tc.name: AnsNotificationDisableUserGrantedByBundle_00001
+ * @tc.desc: test DisableUserGrantedByBundle ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, AnsNotificationDisableUserGrantedByBundle_00001, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObject);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+
+    NotificationBundleOption bundle("bundle.test", 100);
+    InnerErrorCode ret = ans_->DisableUserGrantedByBundle(bundle);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: AnsNotificationDisableUserGrantedByBundle_00002
+ * @tc.desc: test DisableUserGrantedByBundle ErrCode ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, AnsNotificationDisableUserGrantedByBundle_00002, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    NotificationBundleOption bundle("bundle.test", 100);
+    InnerErrorCode ret = ans_->DisableUserGrantedByBundle(bundle);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: AnsNotificationDisableUserGrantedByBundle_00003
+ * @tc.desc: test DisableUserGrantedByBundle ErrCode ERR_ANS_INNER_INVALID_BUNDLE_OPTION with empty bundle name.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, AnsNotificationDisableUserGrantedByBundle_00003, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    NotificationBundleOption bundle;
+    InnerErrorCode ret = ans_->DisableUserGrantedByBundle(bundle);
+    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE_OPTION);
+}
+
+/*
  * @tc.name: GetNotificationSettings_0200
  * @tc.desc: test GetNotificationSetting.
  * @tc.type: FUNC

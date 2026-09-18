@@ -23,6 +23,8 @@
 #include "js_native_api_types.h"
 #include "napi_base_context.h"
 #include "ans_const_define.h"
+#include "notification_bundle_icon_info.h"
+#include "pixel_map_napi.h"
 #include "ws_common.h"
 
 namespace OHOS {
@@ -35,6 +37,8 @@ const int NAPI_GET_USER_GRANTED_STATE_MAX_PARA = 1;
 const int NAPI_SET_USER_GRANTED_STATE_MAX_PARA = 2;
 const int NAPI_GET_USER_GRANTED_ENABLE_BUNDLES_MAX_PARA = 1;
 const int NAPI_SET_USER_GRANTED_BUNDLE_STATE_MAX_PARA = 3;
+const int NAPI_GET_USER_GRANTED_BUNDLE_ICON_MAX_PARA = 1;
+const int NAPI_DISABLE_USER_GRANTED_BY_BUNDLE_MAX_PARA = 1;
 const int OPEN_NOTIFICATION_SETTINGS_MAX_PARA = 1;
 static napi_env subenv_ = nullptr;
 static std::unique_ptr<AsyncCallbackInfoOpenSettings> subcallbackInfo_ = nullptr;
@@ -620,6 +624,46 @@ void AsyncCompleteCallbackReturnBoolean(napi_env env, napi_status status, void *
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
     }
+}
+
+void AsyncCompleteCallbackReturnBundleIcon(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("called");
+    if (!data) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+    AsyncCallbackInfoGetBundleIcon* asynccallbackinfo =
+        static_cast<AsyncCallbackInfoGetBundleIcon*>(data);
+    if (!asynccallbackinfo) {
+        return;
+    }
+    napi_value result = nullptr;
+    if (asynccallbackinfo->info.errorCode != ERR_OK || asynccallbackinfo->bundleIcon == nullptr) {
+        if (asynccallbackinfo->info.errorCode == ERR_OK) {
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+        }
+        result = Common::NapiGetNull(env);
+    } else {
+        std::shared_ptr<Media::PixelMap> icon = asynccallbackinfo->bundleIcon->GetIcon();
+        napi_value iconResult = (icon == nullptr) ? nullptr : Media::PixelMapNapi::CreatePixelMap(env, icon);
+        napi_valuetype valuetype = napi_undefined;
+        if (iconResult == nullptr || napi_typeof(env, iconResult, &valuetype) != napi_ok ||
+            valuetype == napi_undefined) {
+            ANS_LOGE("iconResult is invalid");
+            asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+            result = Common::NapiGetNull(env);
+        } else {
+            result = iconResult;
+        }
+    }
+    Common::CreateReturnValue(env, asynccallbackinfo->info, result);
+    if (asynccallbackinfo->info.callback != nullptr) {
+        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    }
+    napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    delete asynccallbackinfo;
+    asynccallbackinfo = nullptr;
 }
 
 napi_value NapiNotificationSettingResult(napi_env env, void *data)
@@ -1797,6 +1841,230 @@ napi_value NapiSetUserGrantedBundleState(napi_env env, napi_callback_info info)
         napi_delete_async_work(env, asynccallbackinfo->asyncWork);
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
+        return promise;
+    }
+
+    return promise;
+}
+
+napi_value ParseParametersForGetUserGrantedBundleIcon(const napi_env& env, const napi_callback_info& info,
+    std::string& bundleName)
+{
+    ANS_LOGD("called");
+
+    size_t argc = NAPI_GET_USER_GRANTED_BUNDLE_ICON_MAX_PARA;
+    napi_value argv[NAPI_GET_USER_GRANTED_BUNDLE_ICON_MAX_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+
+    // argv[0]: bundleName (best-effort extraction; invalid input degrades to empty name
+    // and is rejected by the service with 1600022, no 401 is thrown by design)
+    if (argc >= 1) {
+        napi_valuetype valueType = napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valueType));
+        if (valueType == napi_string) {
+            char str[STR_MAX_SIZE] = {0};
+            size_t strLen = 0;
+            NAPI_CALL(env, napi_get_value_string_utf8(env, argv[PARAM0], str, STR_MAX_SIZE - 1, &strLen));
+            bundleName = str;
+        }
+    }
+    return Common::NapiGetNull(env);
+}
+
+napi_value ParseParametersForDisableUserGrantedByBundle(const napi_env& env, const napi_callback_info& info,
+    std::string& bundleName, int32_t& appIndex, bool& hasAppIndex)
+{
+    ANS_LOGD("called");
+
+    // argv[0]: GrantedBundleInfo (best-effort extraction of bundleName/appIndex;
+    // invalid input degrades to an empty bundle name and is rejected by the service
+    // with 1600022, no 401 is thrown by design)
+    size_t argc = NAPI_DISABLE_USER_GRANTED_BY_BUNDLE_MAX_PARA;
+    napi_value argv[NAPI_DISABLE_USER_GRANTED_BY_BUNDLE_MAX_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    if (argc >= 1) {
+        napi_valuetype valueType = napi_undefined;
+        NAPI_CALL(env, napi_typeof(env, argv[PARAM0], &valueType));
+        if (valueType == napi_object) {
+            napi_value bundleNameValue = nullptr;
+            napi_get_named_property(env, argv[PARAM0], "bundleName", &bundleNameValue);
+            NAPI_CALL(env, napi_typeof(env, bundleNameValue, &valueType));
+            if (valueType == napi_string) {
+                char str[STR_MAX_SIZE] = {0};
+                size_t strLen = 0;
+                NAPI_CALL(env, napi_get_value_string_utf8(env, bundleNameValue, str, STR_MAX_SIZE - 1, &strLen));
+                bundleName = str;
+            }
+            napi_value appIndexValue = nullptr;
+            napi_get_named_property(env, argv[PARAM0], "appIndex", &appIndexValue);
+            NAPI_CALL(env, napi_typeof(env, appIndexValue, &valueType));
+            if (valueType == napi_number) {
+                napi_get_value_int32(env, appIndexValue, &appIndex);
+                hasAppIndex = true;
+            }
+        }
+    }
+    return Common::NapiGetNull(env);
+}
+
+void ReleaseFailedBundleIconCallback(napi_env env,
+    AsyncCallbackInfoGetBundleIcon* asynccallbackinfo, bool needDeleteWork)
+{
+    asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+    Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+    if (asynccallbackinfo->info.callback != nullptr) {
+        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    }
+    if (needDeleteWork) {
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    }
+    delete asynccallbackinfo;
+}
+
+void ReleaseFailedUserGrantedCallback(napi_env env,
+    AsyncCallbackInfoNotificationExtensionUserGranted* asynccallbackinfo, bool needDeleteWork)
+{
+    asynccallbackinfo->info.errorCode = ERR_ANS_INNER_TASK_ERR;
+    Common::CreateReturnValue(env, asynccallbackinfo->info, Common::NapiGetNull(env));
+    if (asynccallbackinfo->info.callback != nullptr) {
+        napi_delete_reference(env, asynccallbackinfo->info.callback);
+    }
+    if (needDeleteWork) {
+        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+    }
+    delete asynccallbackinfo;
+}
+
+void GetUserGrantedBundleIconWorkExecute(napi_env env, void *data)
+{
+    ANS_LOGD("getUserGrantedBundleIcon work excute.");
+    AsyncCallbackInfoGetBundleIcon *asynccallbackinfo =
+        static_cast<AsyncCallbackInfoGetBundleIcon *>(data);
+    if (asynccallbackinfo) {
+        asynccallbackinfo->info.errorCode =
+            AnsNotification::GetInstance()->GetUserGrantedBundleIcon(
+                asynccallbackinfo->bundleName, asynccallbackinfo->bundleIcon);
+        ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+    }
+}
+
+void DisableUserGrantedByBundleWorkExecute(napi_env env, void *data)
+{
+    ANS_LOGD("disableUserGrantedByBundle work excute.");
+    AsyncCallbackInfoNotificationExtensionUserGranted *asynccallbackinfo =
+        static_cast<AsyncCallbackInfoNotificationExtensionUserGranted *>(data);
+    if (asynccallbackinfo) {
+        asynccallbackinfo->info.errorCode =
+            AnsNotification::GetInstance()->DisableUserGrantedByBundle(
+                asynccallbackinfo->params.targetBundle);
+        ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
+    }
+}
+
+AsyncCallbackInfoNotificationExtensionUserGranted* CreateDisableByBundleCallbackInfo(napi_env env,
+    const std::string& bundleName, int32_t appIndex, bool hasAppIndex)
+{
+    auto* asynccallbackinfo = new (std::nothrow)
+        AsyncCallbackInfoNotificationExtensionUserGranted { .env = env, .asyncWork = nullptr };
+    if (asynccallbackinfo != nullptr) {
+        asynccallbackinfo->params.targetBundle.SetBundleName(bundleName);
+        if (hasAppIndex) {
+            asynccallbackinfo->params.targetBundle.SetAppIndex(appIndex);
+        }
+    }
+    return asynccallbackinfo;
+}
+
+napi_value NapiGetUserGrantedBundleIcon(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("called");
+
+    std::string bundleName;
+    if (ParseParametersForGetUserGrantedBundleIcon(env, info, bundleName) == nullptr) {
+        return nullptr;
+    }
+
+    AsyncCallbackInfoGetBundleIcon* asynccallbackinfo = new (std::nothrow)
+        AsyncCallbackInfoGetBundleIcon { .env = env, .asyncWork = nullptr };
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
+        return Common::JSParaError(env, nullptr);
+    }
+    asynccallbackinfo->bundleName = bundleName;
+
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getUserGrantedBundleIcon", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_status status = napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        GetUserGrantedBundleIconWorkExecute,
+        AsyncCompleteCallbackReturnBundleIcon,
+        static_cast<void *>(asynccallbackinfo),
+        &asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create getUserGrantedBundleIcon async work failed.");
+        ReleaseFailedBundleIconCallback(env, asynccallbackinfo, false);
+        return promise;
+    }
+
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue getUserGrantedBundleIcon async work failed.");
+        ReleaseFailedBundleIconCallback(env, asynccallbackinfo, true);
+        return promise;
+    }
+
+    return promise;
+}
+
+napi_value NapiDisableUserGrantedByBundle(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("called");
+
+    std::string bundleName;
+    int32_t appIndex = 0;
+    bool hasAppIndex = false;
+    if (ParseParametersForDisableUserGrantedByBundle(env, info, bundleName, appIndex, hasAppIndex) ==
+        nullptr) {
+        return nullptr;
+    }
+
+    AsyncCallbackInfoNotificationExtensionUserGranted* asynccallbackinfo =
+        CreateDisableByBundleCallbackInfo(env, bundleName, appIndex, hasAppIndex);
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
+        return Common::JSParaError(env, nullptr);
+    }
+
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, nullptr, asynccallbackinfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "disableUserGrantedByBundle", NAPI_AUTO_LENGTH, &resourceName);
+    // Asynchronous function call
+    napi_status status = napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        DisableUserGrantedByBundleWorkExecute,
+        AsyncCompleteCallbackUserGrantedReturnVoid,
+        static_cast<void *>(asynccallbackinfo),
+        &asynccallbackinfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create disableUserGrantedByBundle async work failed.");
+        ReleaseFailedUserGrantedCallback(env, asynccallbackinfo, false);
+        return promise;
+    }
+
+    status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue disableUserGrantedByBundle async work failed.");
+        ReleaseFailedUserGrantedCallback(env, asynccallbackinfo, true);
         return promise;
     }
 

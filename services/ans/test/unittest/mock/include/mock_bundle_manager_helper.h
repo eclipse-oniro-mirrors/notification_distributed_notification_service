@@ -17,6 +17,7 @@
 #define ANS_MOCK_BUNDLE_MANAGER_HELPER_H
 
 #include <cstdint>
+#include <string>
 
 #include "notification_bundle_option.h"
 
@@ -27,6 +28,7 @@ public:
     static void MockSystemBundle(bool systemBundle);
     static void MockClearInstalledBundle();
     static void MockBundleInterfaceResult(const int32_t result);
+    static void MockBundleIconData(const std::string &iconData);
     static void MockInstallBundle(const NotificationBundleOption& bundleOption);
     static void MockUninstallBundle(const NotificationBundleOption& bundleOption);
     static void MockIsAncoApp(bool isAncoApp);
