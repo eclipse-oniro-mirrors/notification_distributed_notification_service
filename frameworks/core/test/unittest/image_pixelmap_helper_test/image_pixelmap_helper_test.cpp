@@ -1076,12 +1076,16 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00050, Function | SmallTest | Leve
     Notification::Mock::MockOHImageSourceNativeSetSvgResourceLimitLevelFail(true);
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetOwnerBundleName("com.test");
-    ImagePixelmapHelper helper(request, "test.svg");
     std::shared_ptr<Media::PixelMap> pixelMap;
-    ErrCode ret = helper.GetPixelMap(pixelMap);
-    EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
-    EXPECT_EQ(pixelMap, nullptr);
+    {
+        ImagePixelmapHelper helper(request, "test.svg");
+        ErrCode ret = helper.GetPixelMap(pixelMap);
+        EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+        EXPECT_EQ(pixelMap, nullptr);
+        EXPECT_EQ(helper.imageSource_, nullptr);
+    }
     EXPECT_EQ(Notification::Mock::MockGetSvgResourceLimitLevelCallCount(), 1u);
+    EXPECT_EQ(Notification::Mock::MockGetImageSourceReleaseCallCount(), 1u);
 }
 
 /**
@@ -1103,6 +1107,8 @@ HWTEST_F(ImagePixelmapHelperTest, GetPixelMap_00051, Function | SmallTest | Leve
     EXPECT_NE(pixelMap, nullptr);
     EXPECT_EQ(Notification::Mock::MockGetSvgResourceLimitLevelCallCount(), 1u);
     EXPECT_EQ(Notification::Mock::MockGetLastSvgResourceLimitLevelSource(), helper.imageSource_);
+    EXPECT_EQ(Notification::Mock::MockGetLastSvgResourceLimitLevel(),
+        static_cast<int>(OH_IMAGESOURCE_SVG_RESOURCE_LIMIT_LEVEL_HIGH));
 }
 
 /**
@@ -1468,13 +1474,15 @@ HWTEST_F(ImagePixelmapHelperTest, CreateImageSource_00005, Function | SmallTest 
     Notification::Mock::MockOHImageSourceNativeSetSvgResourceLimitLevelFail(true);
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetOwnerBundleName("com.test");
-    ImagePixelmapHelper helper(request, "test.svg");
-    
-    helper.InitRawfileData();
-    ErrCode ret = helper.CreateImageSource();
-    
-    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+    {
+        ImagePixelmapHelper helper(request, "test.svg");
+        helper.InitRawfileData();
+        ErrCode ret = helper.CreateImageSource();
+        EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+        EXPECT_EQ(helper.imageSource_, nullptr);
+    }
     EXPECT_EQ(Notification::Mock::MockGetSvgResourceLimitLevelCallCount(), 1u);
+    EXPECT_EQ(Notification::Mock::MockGetImageSourceReleaseCallCount(), 1u);
 }
 
 /**
@@ -1488,14 +1496,16 @@ HWTEST_F(ImagePixelmapHelperTest, CreateImageSource_00006, Function | SmallTest 
     sptr<NotificationRequest> request = new NotificationRequest();
     request->SetOwnerBundleName("com.test");
     ImagePixelmapHelper helper(request, "test.svg");
-    
+
     helper.InitRawfileData();
     ErrCode ret = helper.CreateImageSource();
-    
+
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_NE(helper.imageSource_, nullptr);
     EXPECT_EQ(Notification::Mock::MockGetSvgResourceLimitLevelCallCount(), 1u);
     EXPECT_EQ(Notification::Mock::MockGetLastSvgResourceLimitLevelSource(), helper.imageSource_);
+    EXPECT_EQ(Notification::Mock::MockGetLastSvgResourceLimitLevel(),
+        static_cast<int>(OH_IMAGESOURCE_SVG_RESOURCE_LIMIT_LEVEL_HIGH));
 }
 
 /**

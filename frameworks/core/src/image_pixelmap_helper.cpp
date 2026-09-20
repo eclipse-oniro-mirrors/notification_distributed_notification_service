@@ -129,6 +129,7 @@ ErrCode ImagePixelmapHelper::CreateImageSource()
     if (imageErrCode != IMAGE_SUCCESS) {
         ANS_LOGE("OH_ImageSourceNative_SetSvgResourceLimitLevel failed, errCode: %{public}d.", imageErrCode);
         OH_ImageSourceNative_Release(imageSource_);
+        imageSource_ = nullptr;
         return ERR_ANS_INNER_INVALID_PARAM;
     }
     return ERR_OK;
