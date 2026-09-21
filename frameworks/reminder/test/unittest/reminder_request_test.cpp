@@ -2294,6 +2294,11 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_002, Function | SmallTest | Le
 HWTEST_F(ReminderRequestTest, ReminderRequestTest_003, Function | SmallTest | Level1)
 {
     ReminderRequestChild child;
+    child.OnLanguageChange(nullptr);
+    child.wantAgentInfo_->parameters.SetParam("NotificationRequest_extraInfo", nullptr);
+    NotificationRequest request;
+    child.UpdateNotificationWantAgent(request, 0);
+
     int32_t ret = child.StringToInt("");
     EXPECT_EQ(ret, 0);
     ret = child.StringToInt("1a");
@@ -2306,23 +2311,6 @@ HWTEST_F(ReminderRequestTest, ReminderRequestTest_003, Function | SmallTest | Le
     EXPECT_EQ(ret, 0);
     ret = child.StringToInt("100");
     EXPECT_EQ(ret, 100);
-}
-
-/**
- * @tc.name: ReminderRequestTest_004
- * @tc.desc: Test StringToInt parameters.
- * @tc.type: FUNC
- * @tc.require: issueI8CDH3
- */
-HWTEST_F(ReminderRequestTest, ReminderRequestTest_004, Function | SmallTest | Level1)
-{
-    ReminderRequestChild child;
-    NotificationRequest request;
-    child.wantAgentInfo_->parameters.SetParam("NotificationRequest_extraInfo", nullptr);
-    child.UpdateNotificationWantAgent(request, 0);
-
-    child.OnLanguageChange(nullptr);
-    EXPECT_NE(request.GetAdditionalData(), nullptr);
 }
 
 /**

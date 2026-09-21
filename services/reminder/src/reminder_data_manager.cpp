@@ -53,9 +53,10 @@ const int INDEX_VALUE = 2;
 constexpr int8_t NORMAL_CALLBACK = 0;  // timer callback
 constexpr int8_t REISSUE_CALLBACK = 1;  // time change, boot complte callback
 constexpr int32_t FIRST_QUERY_DELAY = 5 * 1000 * 1000;  // 5s, ut: microsecond
+constexpr int32_t MAX_ONCE_TASK_SHOW_COUNT = 100;
 constexpr int64_t ONE_DAY_TIME = 24 * 60 * 60 * 1000;
 constexpr uint64_t NEXT_LOAD_TIME = 8 * 60 * 60 * 1000;  // 8h, ut: millisecond
-constexpr int32_t MAX_ONCE_TASK_SHOW_COUNT = 100;
+static constexpr uint64_t REMINDER_FDSAN_TAG = 0xC84;
 
 inline int64_t TimeDistance(int64_t first, int64_t last)
 {
@@ -132,6 +133,7 @@ ErrCode ReminderDataManager::CancelReminder(
         StopTimerLocked(TimerType::ALERTING_TIMER);
     }
     CancelNotification(reminder);
+    RemoveFromShowedReminders(reminder);
     RemoveReminderLocked(reminderId, false);
     StartRecentReminder();
     return ERR_OK;
@@ -1626,7 +1628,7 @@ void ReminderDataManager::StopSoundAndVibrationLocked(const sptr<ReminderRequest
     }
     if (isVibration_) {
         isVibration_ = false;
-        close(vibrationFd_);
+        fdsan_close_with_tag(vibrationFd_, REMINDER_FDSAN_TAG);
         vibrationFd_ = -1;
     }
 #endif

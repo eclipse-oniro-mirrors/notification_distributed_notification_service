@@ -55,8 +55,9 @@ constexpr int32_t TOTAL_MAX_NUMBER_SHOW_AT_ONCE = 500;
 // The maximun number of system that can be start extension count
 constexpr int32_t TOTAL_MAX_NUMBER_START_EXTENSION = 100;
 constexpr int32_t CONNECT_EXTENSION_INTERVAL = 100;
-static constexpr uint64_t VIBRATION_PERIOD = (uint64_t)1000 * 1000;  // 1000us
 static constexpr int32_t CONNECT_EXTENSION_MAX_RETRY_TIMES = 3;
+static constexpr uint64_t VIBRATION_PERIOD = (uint64_t)1000 * 1000;  // 1000us
+static constexpr uint64_t REMINDER_FDSAN_TAG = 0xC84;
 }
 
 static uint64_t GetRemainPartitionSize(const std::string& partitionName)
@@ -716,10 +717,11 @@ bool ReminderDataManager::CheckVibrationConfig(const int32_t userId, const bool 
         ANSR_LOGE("Open vibration file failed.");
         return false;
     }
+    fdsan_exchange_owner_tag(vibrationFd_, 0, REMINDER_FDSAN_TAG);
     struct stat statbuf = {0};
     if (fstat(vibrationFd_, &statbuf) != 0) {
         ANSR_LOGE("Get vibration file size failed.");
-        close(vibrationFd_);
+        fdsan_close_with_tag(vibrationFd_, REMINDER_FDSAN_TAG);
         vibrationFd_ = -1;
         return false;
     }
