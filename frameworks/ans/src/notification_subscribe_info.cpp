@@ -275,11 +275,6 @@ bool NotificationSubscribeInfo::ReadSlotTypesFromParcel(Parcel &parcel)
             ANS_LOGE("Can't read slotType");
             return false;
         }
-        if (slotType < static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION) ||
-            slotType >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
-            ANS_LOGE("Invalid slot type: %{public}d", slotType);
-            return false;
-        }
         slotTypes_.emplace_back(static_cast<NotificationConstant::SlotType>(slotType));
     }
     return true;
@@ -289,10 +284,6 @@ bool NotificationSubscribeInfo::ReadFromParcel(Parcel &parcel)
 {
     if (!parcel.ReadStringVector(&appNames_)) {
         ANS_LOGE("Can't read appNames_");
-        return false;
-    }
-    if (appNames_.size() > MAX_BUNDLE_LIST_SIZE) {
-        ANS_LOGE("appNames_ size exceeds limit: %{public}zu", appNames_.size());
         return false;
     }
     if (!parcel.ReadString(deviceType_)) {

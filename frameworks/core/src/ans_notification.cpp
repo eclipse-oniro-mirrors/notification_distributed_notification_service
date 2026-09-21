@@ -43,7 +43,6 @@ const int32_t SLEEP_TIME = 1000;
 const std::string DOWNLOAD_TITLE = "title";
 const std::string DOWNLOAD_FILENAME = "fileName";
 const static int MAX_SLOT_FLAGS = 0b111111;
-const int32_t MAX_BADGE_NUMBER = 99;
 }
 
 std::shared_ptr<AnsNotification> AnsNotification::GetInstance()
@@ -631,10 +630,6 @@ InnerErrorCode AnsNotification::SetNotificationBadgeNum()
 
 InnerErrorCode AnsNotification::SetNotificationBadgeNum(int32_t num)
 {
-    if (num < 0 || num > MAX_BADGE_NUMBER) {
-        ANS_LOGE("Invalid badge number: %{public}d", num);
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("GetAnsManagerProxy fail.");
@@ -2339,10 +2334,6 @@ InnerErrorCode AnsNotification::GetSyncNotificationEnabledWithoutApp(const int32
 
 InnerErrorCode AnsNotification::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)
 {
-    if (badgeNumber < 0) {
-        ANS_LOGE("Invalid badge number: %{public}d", badgeNumber);
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("SetBadgeNumber fail.");

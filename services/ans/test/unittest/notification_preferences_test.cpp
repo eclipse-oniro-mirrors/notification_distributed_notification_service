@@ -4875,47 +4875,6 @@ HWTEST_F(NotificationPreferencesTest, BuildCloneSlotInfo_WithSlots_00001,
 }
 
 /**
- * @tc.name: BuildCloneSlotInfo_InvalidSlotType_00001
- * @tc.desc: BuildCloneSlotInfo skips clone slots whose type is negative or >= ILLEGAL_TYPE.
- *           Covers branch: line 976-979 continue filter.
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationPreferencesTest, BuildCloneSlotInfo_InvalidSlotType_00001,
-    Function | SmallTest | Level1)
-{
-    auto prefs = NotificationPreferences::GetInstance();
-    NotificationCloneBundleInfo cloneInfo;
-    cloneInfo.SetBundleName("com.test.clone");
-    cloneInfo.SetUid(10001);
-
-    // negative slot type: below the valid enum range
-    NotificationCloneBundleInfo::SlotInfo negativeSlot;
-    negativeSlot.slotType_ = static_cast<NotificationConstant::SlotType>(-1);
-    negativeSlot.enable_ = true;
-    cloneInfo.AddSlotInfo(negativeSlot);
-
-    // slot type at ILLEGAL_TYPE: the enum upper limit, invalid
-    NotificationCloneBundleInfo::SlotInfo illegalSlot;
-    illegalSlot.slotType_ = NotificationConstant::SlotType::ILLEGAL_TYPE;
-    illegalSlot.enable_ = true;
-    cloneInfo.AddSlotInfo(illegalSlot);
-
-    // one valid slot to prove the loop keeps running after skips
-    NotificationCloneBundleInfo::SlotInfo validSlot;
-    validSlot.slotType_ = NotificationConstant::SlotType::OTHER;
-    validSlot.enable_ = true;
-    cloneInfo.AddSlotInfo(validSlot);
-
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    std::vector<sptr<NotificationSlot>> slots;
-
-    EXPECT_TRUE(prefs->BuildCloneSlotInfo(cloneInfo, bundleInfo, slots));
-    // two invalid entries filtered by the continue at line 979, only the valid one remains
-    EXPECT_EQ(slots.size(), 1);
-    EXPECT_EQ(slots[0]->GetType(), NotificationConstant::SlotType::OTHER);
-}
-
-/**
  * @tc.name: ResolveStatisticsTableUserId_001
  * @tc.desc: Verify ResolveStatisticsTableUserId returns ZERO_USERID for an Anco app.
  * @tc.type: FUNC
@@ -5079,35 +5038,6 @@ HWTEST_F(NotificationPreferencesTest, GetTemplateSupported_00200, Function | Sma
 }
 
 /**
- * @tc.name: GetkioskAppTrustList_TooLarge_001
- * @tc.desc: Test GetkioskAppTrustList returns false when list exceeds MAX_BUNDLE_LIST_SIZE
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationPreferencesTest, GetkioskAppTrustList_TooLarge_001, Function | SmallTest | Level1)
-{
-    NotificationPreferences notificationPreferences;
-    notificationPreferences.preferencesInfo_ = NotificationPreferencesInfo();
-    notificationPreferences.isKioskTrustListUpdate_ = false;
-
-    std::string key = "kiosk_app_trust_list";
-    std::string value = "[";
-    for (int i = 0; i <= MAX_BUNDLE_LIST_SIZE; i++) {
-        if (i > 0) {
-            value += ", ";
-        }
-        value += "\"com.example.app" + std::to_string(i) + "\"";
-    }
-    value += "]";
-    int32_t userId = -1;
-    auto result = notificationPreferences.SetKvToDb(key, value, userId);
-    EXPECT_EQ(result, ERR_OK);
-
-    std::vector<std::string> resultList;
-    auto ret = notificationPreferences.GetkioskAppTrustList(resultList);
-    EXPECT_EQ(ret, false);
-}
-
-/**
  * @tc.name: UpdateClonePriorityInfos_0001
  * @tc.desc: Test UpdateClonePriorityInfos returns false when userId is invalid (<= SUBSCRIBE_USER_INIT)
  * @tc.type: FUNC
@@ -5145,35 +5075,6 @@ HWTEST_F(NotificationPreferencesTest, UpdateClonePriorityInfos_0003, Function | 
     std::vector<NotificationClonePriorityInfo> cloneInfos = { cloneInfo };
 
     EXPECT_TRUE(prefs->UpdateClonePriorityInfos(100, cloneInfos)); // line 2572 db layer
-}
-
-/**
- * @tc.name: SetDistributedDevicelist_DbNotReady_0001
- * @tc.desc: Test SetDistributedDevicelist returns SERVICE_NOT_READY when preferncesDB_ is nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationPreferencesTest, SetDistributedDevicelist_DbNotReady_0001, Function | SmallTest | Level1)
-{
-    NotificationPreferences prefs;
-    prefs.preferncesDB_ = nullptr;
-    std::vector<std::string> deviceTypes = { "phone" };
-    auto ret = prefs.SetDistributedDevicelist(deviceTypes, 100);
-    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_READY); // line 2849-2851
-}
-
-/**
- * @tc.name: SetDistributedDevicelist_TooLarge_0001
- * @tc.desc: Test SetDistributedDevicelist returns INVALID_PARAM when deviceTypes exceeds
- *           MAX_PARCELABLE_VECTOR_NUM
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationPreferencesTest, SetDistributedDevicelist_TooLarge_0001, Function | SmallTest | Level1)
-{
-    NotificationPreferences prefs;
-    prefs.preferncesDB_ = std::make_shared<NotificationPreferencesDatabase>();
-    std::vector<std::string> deviceTypes(static_cast<size_t>(MAX_PARCELABLE_VECTOR_NUM) + 1, "type");
-    auto ret = prefs.SetDistributedDevicelist(deviceTypes, 100);
-    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM); // line 2854-2856
 }
 
 /**

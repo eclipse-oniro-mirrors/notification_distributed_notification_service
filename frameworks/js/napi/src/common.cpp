@@ -542,13 +542,6 @@ napi_value Common::GetSubscriberSlotTypes(
         return nullptr;
     }
     napi_get_array_length(env, nSlotTypes, &length);
-    if (length > MAX_SLOT_SIZE) {
-        ANS_LOGE("The array length exceeds max size, function: %{public}s, field: %{public}s",
-            __FUNCTION__, "slotTypes");
-        std::string msg = "The slotTypes array length exceeds max size.";
-        Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
-        return nullptr;
-    }
     if (length == 0) {
         ANS_LOGE("The array is empty.");
         std::string msg = "Incorrect parameters are left unspecified. The slotTypes list length is zero.";
@@ -1197,10 +1190,6 @@ napi_value Common::GetNotificationSlotByNumber(const napi_env &env, const napi_v
         }
         napi_get_value_int32(env, nobj, &lockscreenVisibility);
         ANS_LOGD("lockscreenVisibility is: %{public}d", lockscreenVisibility);
-        if (lockscreenVisibility < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
-            lockscreenVisibility > static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-            lockscreenVisibility = static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE);
-        }
         slot.SetLockscreenVisibleness(NotificationConstant::VisiblenessType(lockscreenVisibility));
     }
 
@@ -1274,10 +1263,6 @@ napi_value Common::GetVibrationValues(const napi_env &env, const napi_value &val
 
     uint32_t length = 0;
     napi_get_array_length(env, nobj, &length);
-    if (length > MAX_VIBRATION_VALUES_SIZE) {
-        ANS_LOGE("The vibrationValues array length exceeds max size.");
-        return nullptr;
-    }
 
     napi_valuetype valuetype = napi_undefined;
     std::vector<int64_t> vibrationValues;

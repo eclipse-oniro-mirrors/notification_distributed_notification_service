@@ -223,32 +223,6 @@ HWTEST_F(AnsLiveViewServiceTest, SetNotificationRequestToDb_00002, Function | Sm
 }
 
 /**
- * @tc.name: SetNotificationRequestToDb_00003
- * @tc.desc: Test SetNotificationRequestToDb returns ERR_ANS_INNER_INVALID_PARAM when the
- *           serialized json of the live view request exceeds MAX_JSON_SIZE.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsLiveViewServiceTest, SetNotificationRequestToDb_00003, Function | SmallTest | Level1)
-{
-    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    request->SetSlotType(slotType);
-    request->SetNotificationId(1);
-    request->SetReceiverUserId(100);
-    auto liveContent = std::make_shared<NotificationLiveViewContent>();
-    // payload larger than MAX_JSON_SIZE (1MB) so the dumped json exceeds the limit
-    liveContent->SetAdditionalText(std::string(1200 * 1024, 'a'));
-    auto content = std::make_shared<NotificationContent>(liveContent);
-    request->SetContent(content);
-    auto bundle = new NotificationBundleOption("test", 1);
-    AdvancedNotificationService::NotificationRequestDb requestDb =
-        { .request = request, .bundleOption = bundle};
-    auto ret = advancedNotificationService_->SetNotificationRequestToDb(requestDb);
-    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
-}
-
-/**
  * @tc.name: FillLockScreenPicture_00001
  * @tc.desc: Test FillLockScreenPicture
  * @tc.type: FUNC

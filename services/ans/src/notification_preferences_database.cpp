@@ -3582,10 +3582,15 @@ bool NotificationPreferencesDatabase::IsSilentReminderEnabled(
             }
             case NativeRdb::E_OK: {
                 result = true;
-                NotificationConstant::SWITCH_STATE enableStatus =
-                    AnsCommonUtils::StringToInt(value) ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
-                    NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
-                silentReminderInfo.enableStatus = enableStatus;
+                int32_t switchValue = AnsCommonUtils::StringToInt(value);
+                if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+                    switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+                    ANS_LOGE("Invalid silent reminder state: %{public}d", switchValue);
+                } else {
+                    silentReminderInfo.enableStatus = switchValue ?
+                        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
+                        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+                }
                 break;
             }
             default:

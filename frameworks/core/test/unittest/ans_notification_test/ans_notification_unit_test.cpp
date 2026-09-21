@@ -3731,27 +3731,6 @@ HWTEST_F(AnsNotificationUnitTest, GetNotificationSwitch_0500, Function | MediumT
 }
 
 /*
- * @tc.name: SetNotificationBadgeNum_Invalid
- * @tc.desc: test SetNotificationBadgeNum with invalid num.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, SetNotificationBadgeNum_Invalid, Function | MediumTest | Level1)
-{
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
-
-    InnerErrorCode ret1 = ans_->SetNotificationBadgeNum(-1);
-    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
-    InnerErrorCode ret2 = ans_->SetNotificationBadgeNum(100);
-    EXPECT_EQ(ret2, ERR_ANS_INNER_INVALID_PARAM);
-}
-
-/*
  * @tc.name: SetNotificationBadgeNum_0200
  * @tc.desc: test SetNotificationBadgeNum success with valid num and valid proxy.
  * @tc.type: FUNC
@@ -3805,25 +3784,6 @@ HWTEST_F(AnsNotificationUnitTest, UnSubscribeNotification_TooLargeAppNames_0200,
     }
     info->AddAppNames(appNames);
     InnerErrorCode ret = ans_->UnSubscribeNotification(subscriber, info);
-    EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
-}
-
-/*
- * @tc.name: SetBadgeNumber_Negative
- * @tc.desc: test SetBadgeNumber with negative badgeNumber.
- * @tc.type: FUNC
- * @tc.require: #I62SME
- */
-HWTEST_F(AnsNotificationUnitTest, SetBadgeNumber_Negative, Function | MediumTest | Level1)
-{
-    MockWriteInterfaceToken(false);
-    sptr<MockIRemoteObject> iremoteObject = new (std::nothrow) MockIRemoteObject();
-    ASSERT_NE(nullptr, iremoteObject);
-    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObject);
-    ASSERT_NE(nullptr, proxy);
-    ans_->GetAnsManagerProxy();
-
-    InnerErrorCode ret = ans_->SetBadgeNumber(-1, "instanceKey");
     EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
 

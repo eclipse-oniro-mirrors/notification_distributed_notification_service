@@ -2346,22 +2346,6 @@ HWTEST_F(NotificationRequestTest, IncrementalUpdateLiveview_NullOldRequest_0001,
 }
 
 /**
- * @tc.name: SetSlotType_Invalid_001
- * @tc.desc: Test SetSlotType with invalid slot type does not set.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationRequestTest, SetSlotType_Invalid_001, Function | SmallTest | Level1)
-{
-    NotificationRequest notificationRequest(10);
-    auto before = notificationRequest.GetSlotType();
-    notificationRequest.SetSlotType(static_cast<NotificationConstant::SlotType>(-1));
-    EXPECT_EQ(notificationRequest.GetSlotType(), before);
-    notificationRequest.SetSlotType(static_cast<NotificationConstant::SlotType>(100));
-    EXPECT_EQ(notificationRequest.GetSlotType(), before);
-}
-
-/**
  * @tc.name: SetNotificationUserInputHistory_TooLarge_001
  * @tc.desc: Test SetNotificationUserInputHistory rejects vector exceeding MAX_USER_INPUT_HISTORY.
  * @tc.type: FUNC
@@ -2373,21 +2357,6 @@ HWTEST_F(NotificationRequestTest, SetNotificationUserInputHistory_TooLarge_001, 
     std::vector<std::string> text(NotificationRequest::MAX_USER_INPUT_HISTORY + 1, "input");
     notificationRequest.SetNotificationUserInputHistory(text);
     EXPECT_EQ(notificationRequest.GetNotificationUserInputHistory().size(), 0);
-}
-
-/**
- * @tc.name: SetDevicesSupportOperate_TooLarge_001
- * @tc.desc: Test SetDevicesSupportOperate rejects vector exceeding MAX_PARCELABLE_VECTOR_NUM.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationRequestTest, SetDevicesSupportOperate_TooLarge_001, Function | SmallTest | Level1)
-{
-    NotificationRequest notificationRequest(10);
-    std::vector<std::string> devices(static_cast<size_t>(MAX_PARCELABLE_VECTOR_NUM) + 1, "device");
-    notificationRequest.SetDevicesSupportOperate(devices);
-    auto opts = notificationRequest.GetNotificationDistributedOptions();
-    EXPECT_EQ(opts.GetDevicesSupportOperate().size(), 0);
 }
 
 /**

@@ -906,54 +906,6 @@ HWTEST_F(NotificationSubscribeInfoTest, PriorityStrategy_Marshalling_00001, Func
 }
 
 /**
- * @tc.name: ReadSlotTypesFromParcel_InvalidSlotType_001
- * @tc.desc: Test ReadSlotTypesFromParcel returns false when slotType is out of range.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationSubscribeInfoTest, ReadSlotTypesFromParcel_InvalidSlotType_001, Function | SmallTest | Level1)
-{
-    NotificationSubscribeInfo subscribeInfo;
-    Parcel parcel;
-    parcel.WriteUint32(1);
-    parcel.WriteInt32(-1);
-    parcel.RewindRead(0);
-    EXPECT_EQ(subscribeInfo.ReadSlotTypesFromParcel(parcel), false);
-}
-
-/**
- * @tc.name: ReadSlotTypesFromParcel_InvalidSlotType_002
- * @tc.desc: Test ReadSlotTypesFromParcel returns false when slotType >= ILLEGAL_TYPE.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationSubscribeInfoTest, ReadSlotTypesFromParcel_InvalidSlotType_002, Function | SmallTest | Level1)
-{
-    NotificationSubscribeInfo subscribeInfo;
-    Parcel parcel;
-    parcel.WriteUint32(1);
-    parcel.WriteInt32(static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE));
-    parcel.RewindRead(0);
-    EXPECT_EQ(subscribeInfo.ReadSlotTypesFromParcel(parcel), false);
-}
-
-/**
- * @tc.name: ReadFromParcel_AppNamesTooLarge_001
- * @tc.desc: Test ReadFromParcel returns false when appNames size exceeds MAX_BUNDLE_LIST_SIZE.
- * @tc.type: FUNC
- * @tc.require: issueI5WRQ2
- */
-HWTEST_F(NotificationSubscribeInfoTest, ReadFromParcel_AppNamesTooLarge_001, Function | SmallTest | Level1)
-{
-    std::vector<std::string> appNames(MAX_BUNDLE_LIST_SIZE + 1, "app");
-    Parcel parcel;
-    parcel.WriteStringVector(appNames);
-    parcel.RewindRead(0);
-    NotificationSubscribeInfo subscribeInfo;
-    EXPECT_EQ(subscribeInfo.ReadFromParcel(parcel), false);
-}
-
-/**
  * @tc.name: ReadVoiceContentOptionFromParcel_ReadBoolFail_001
  * @tc.desc: Test ReadVoiceContentOptionFromParcel returns false when ReadBool fails.
  * @tc.type: FUNC

@@ -138,31 +138,10 @@ void AdvancedNotificationService::ClearRingtoneByApplication(int32_t userId,
             if (uris.count(item.GetRingtoneUri())) {
                 continue;
             }
-            if (item.GetRingtoneUri().find("..") != std::string::npos) {
-                ANS_LOGE("invalid ringtoneUri contains .., function: %{public}s", __FUNCTION__);
-                continue;
-            }
             delRingtoneInfos.push_back(item);
         }
         SystemSoundHelper::GetInstance()->RemoveCustomizedTones(delRingtoneInfos);
     });
-}
-
-std::vector<NotificationRingtoneInfo> AdvancedNotificationService::FilterValidRingtoneUris(
-    const std::vector<NotificationRingtoneInfo> &infos)
-{
-    std::vector<NotificationRingtoneInfo> validRingtoneInfos;
-    for (const auto &item : infos) {
-        if (item.GetRingtoneUri().empty()) {
-            continue;
-        }
-        if (item.GetRingtoneUri().find("..") != std::string::npos) {
-            ANS_LOGE("invalid ringtoneUri contains .., function: %{public}s", __FUNCTION__);
-            continue;
-        }
-        validRingtoneInfos.push_back(item);
-    }
-    return validRingtoneInfos;
 }
 
 void AdvancedNotificationService::ClearOverTimeRingToneInfo()
@@ -186,8 +165,7 @@ void AdvancedNotificationService::ClearOverTimeRingToneInfo()
             // clear dh data
             cloneRingtoneInfos.clear();
             NotificationPreferences::GetInstance()->GetAllCloneRingtoneInfo(ZERO_USERID, cloneRingtoneInfos);
-            std::vector<NotificationRingtoneInfo> validRingtoneInfos = FilterValidRingtoneUris(cloneRingtoneInfos);
-            SystemSoundHelper::GetInstance()->RemoveCustomizedTones(validRingtoneInfos);
+            SystemSoundHelper::GetInstance()->RemoveCustomizedTones(cloneRingtoneInfos);
             ClearRingtoneByApplication(ZERO_USERID, cloneRingtoneInfos);
             NotificationPreferences::GetInstance()->SetCloneTimeStamp(userId, 0);
             ANS_LOGI("Clear overtime ringinfo %{public}d", userId);

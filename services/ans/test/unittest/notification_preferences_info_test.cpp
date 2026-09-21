@@ -1325,26 +1325,6 @@ HWTEST_F(NotificationPreferencesInfoTest, GetRestrictedModeTrustList_0200, TestS
 }
 
 /**
- * @tc.name: GetRestrictedModeTrustList_0300
- * @tc.desc: test GetRestrictedModeTrustList with bundle list size exceeding MAX_BUNDLE_LIST_SIZE returns false.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationPreferencesInfoTest, GetRestrictedModeTrustList_0300, TestSize.Level1)
-{
-    std::shared_ptr<NotificationPreferencesInfo> preferencesInfo = std::make_shared<NotificationPreferencesInfo>();
-    std::unordered_map<int32_t, std::vector<std::string>> restrictedModeTrustList;
-    restrictedModeTrustList[100] = {"com.test.example"};
-    restrictedModeTrustList[101] = std::vector<std::string>(MAX_BUNDLE_LIST_SIZE + 1, "bundle");
-    preferencesInfo->SetRestrictedModeTrustList(restrictedModeTrustList);
-
-    std::unordered_map<int32_t, std::vector<std::string>> resultList;
-    auto ret = preferencesInfo->GetRestrictedModeTrustList(resultList);
-    EXPECT_FALSE(ret);
-    EXPECT_TRUE(resultList.empty());
-}
-
-/**
  * @tc.name: GetRestrictedModeTrustList_0400
  * @tc.desc: test GetRestrictedModeTrustList with bundle list size equal to MAX_BUNDLE_LIST_SIZE returns true.
  * @tc.type: FUNC

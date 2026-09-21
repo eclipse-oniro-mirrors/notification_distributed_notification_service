@@ -1303,5 +1303,170 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, GetClonePriorityInfos_0200,
     std::unordered_map<std::string, std::string> emptyValues;
     MockSetDataValues(emptyValues);
 }
+
+/**
+ * @tc.name      : IsSilentReminderEnabled_00100
+ * @tc.desc      : test IsSilentReminderEnabled with E_OK and value 1, enableStatus is USER_MODIFIED_ON
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_00100, Function | SmallTest | Level1)
+{
+    // set CheckRdbStore is true and QueryData returns E_OK with value 1
+    MockInit(true);
+    MockQueryData(NativeRdb::E_OK);
+    MockSetDataValue("1");
+    NotificationPreferencesInfo::SilentReminderInfo info;
+    info.bundleName = "bundleName";
+    info.uid = 2001;
+    ASSERT_TRUE(preferncesDB_->IsSilentReminderEnabled(info));
+    EXPECT_EQ(info.enableStatus, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    // reset to default for subsequent tests
+    MockSetDataValue("");
+}
+
+/**
+ * @tc.name      : IsSilentReminderEnabled_00200
+ * @tc.desc      : test IsSilentReminderEnabled with E_OK and value 0, enableStatus is USER_MODIFIED_OFF
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_00200, Function | SmallTest | Level1)
+{
+    // set CheckRdbStore is true and QueryData returns E_OK with value 0
+    MockInit(true);
+    MockQueryData(NativeRdb::E_OK);
+    MockSetDataValue("0");
+    NotificationPreferencesInfo::SilentReminderInfo info;
+    info.bundleName = "bundleName";
+    info.uid = 2001;
+    ASSERT_TRUE(preferncesDB_->IsSilentReminderEnabled(info));
+    EXPECT_EQ(info.enableStatus, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    // reset to default for subsequent tests
+    MockSetDataValue("");
+}
+
+/**
+ * @tc.name      : IsSilentReminderEnabled_00300
+ * @tc.desc      : test IsSilentReminderEnabled with E_OK and value 3 in valid range, enableStatus is ON
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_00300, Function | SmallTest | Level1)
+{
+    // set QueryData returns E_OK with value 3 (SYSTEM_DEFAULT_ON, upper bound of valid range)
+    MockInit(true);
+    MockQueryData(NativeRdb::E_OK);
+    MockSetDataValue("3");
+    NotificationPreferencesInfo::SilentReminderInfo info;
+    info.bundleName = "bundleName";
+    info.uid = 2001;
+    ASSERT_TRUE(preferncesDB_->IsSilentReminderEnabled(info));
+    EXPECT_EQ(info.enableStatus, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    // reset to default for subsequent tests
+    MockSetDataValue("");
+}
+
+/**
+ * @tc.name      : IsSilentReminderEnabled_00400
+ * @tc.desc      : test IsSilentReminderEnabled with E_OK and value 99 out of range, enableStatus unchanged
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_00400, Function | SmallTest | Level1)
+{
+    // set QueryData returns E_OK with value 99 (greater than SYSTEM_DEFAULT_ON)
+    MockInit(true);
+    MockQueryData(NativeRdb::E_OK);
+    MockSetDataValue("99");
+    NotificationPreferencesInfo::SilentReminderInfo info;
+    info.bundleName = "bundleName";
+    info.uid = 2001;
+    info.enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    ASSERT_TRUE(preferncesDB_->IsSilentReminderEnabled(info));
+    EXPECT_EQ(info.enableStatus, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    // reset to default for subsequent tests
+    MockSetDataValue("");
+}
+
+/**
+ * @tc.name      : IsSilentReminderEnabled_00500
+ * @tc.desc      : test IsSilentReminderEnabled with E_OK and value -1 out of range, enableStatus unchanged
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_00500, Function | SmallTest | Level1)
+{
+    // set QueryData returns E_OK with value -1 (less than USER_MODIFIED_OFF)
+    MockInit(true);
+    MockQueryData(NativeRdb::E_OK);
+    MockSetDataValue("-1");
+    NotificationPreferencesInfo::SilentReminderInfo info;
+    info.bundleName = "bundleName";
+    info.uid = 2001;
+    info.enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    ASSERT_TRUE(preferncesDB_->IsSilentReminderEnabled(info));
+    EXPECT_EQ(info.enableStatus, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    // reset to default for subsequent tests
+    MockSetDataValue("");
+}
+
+/**
+ * @tc.name      : IsSilentReminderEnabled_00600
+ * @tc.desc      : test IsSilentReminderEnabled with E_EMPTY_VALUES_BUCKET, enableStatus is SYSTEM_DEFAULT_OFF
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_00600, Function | SmallTest | Level1)
+{
+    // set QueryData returns E_EMPTY_VALUES_BUCKET
+    MockInit(true);
+    MockQueryData(NativeRdb::E_EMPTY_VALUES_BUCKET);
+    MockSetDataValue("");
+    NotificationPreferencesInfo::SilentReminderInfo info;
+    info.bundleName = "bundleName";
+    info.uid = 2001;
+    ASSERT_TRUE(preferncesDB_->IsSilentReminderEnabled(info));
+    EXPECT_EQ(info.enableStatus, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    // reset to default for subsequent tests
+    MockQueryData(NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : IsSilentReminderEnabled_00700
+ * @tc.desc      : test IsSilentReminderEnabled with E_ERROR, result is false
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_00700, Function | SmallTest | Level1)
+{
+    // set QueryData returns E_ERROR
+    MockInit(true);
+    MockQueryData(NativeRdb::E_ERROR);
+    NotificationPreferencesInfo::SilentReminderInfo info;
+    info.bundleName = "bundleName";
+    info.uid = 2001;
+    ASSERT_FALSE(preferncesDB_->IsSilentReminderEnabled(info));
+    // reset to default for subsequent tests
+    MockQueryData(NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name      : IsSilentReminderEnabled_00800
+ * @tc.desc      : test IsSilentReminderEnabled when RdbStore check fails, result is false
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_00800, Function | SmallTest | Level1)
+{
+    // set CheckRdbStore is false
+    MockInit(false);
+    NotificationPreferencesInfo::SilentReminderInfo info;
+    info.bundleName = "bundleName";
+    info.uid = 2001;
+    ASSERT_FALSE(preferncesDB_->IsSilentReminderEnabled(info));
+    // reset to default for subsequent tests
+    MockInit(true);
+}
 }  // namespace Notification
 }  // namespace OHOS

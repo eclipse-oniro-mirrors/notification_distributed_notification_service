@@ -541,11 +541,6 @@ void NotificationRequest::SetShowStopwatch(bool isShow)
 
 void NotificationRequest::SetSlotType(NotificationConstant::SlotType slotType)
 {
-    if (static_cast<int32_t>(slotType) < 0 ||
-        static_cast<int32_t>(slotType) >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid SlotType: %{public}d", static_cast<int32_t>(slotType));
-        return;
-    }
     slotType_ = slotType;
 }
 
@@ -748,10 +743,6 @@ void NotificationRequest::SetDevicesSupportDisplay(const std::vector<std::string
 
 void NotificationRequest::SetDevicesSupportOperate(const std::vector<std::string> &devices)
 {
-    if (devices.size() > static_cast<size_t>(MAX_PARCELABLE_VECTOR_NUM)) {
-        ANS_LOGE("devices size exceeds limit: %{public}zu", devices.size());
-        return;
-    }
     distributedOptions_.SetDevicesSupportOperate(devices);
 }
 

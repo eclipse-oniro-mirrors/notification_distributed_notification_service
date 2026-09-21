@@ -313,12 +313,6 @@ bool Notification::MarshallingString(Parcel &parcel) const
 
 bool Notification::MarshallingInt32(Parcel &parcel) const
 {
-    int32_t visibleness = static_cast<int32_t>(lockscreenVisibleness_);
-    if (visibleness < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
-        visibleness >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid visibleness: %{public}d, function: %{public}s", visibleness, __FUNCTION__);
-        return false;
-    }
     int32_t remindType = static_cast<int32_t>(remindType_);
     if (remindType < static_cast<int32_t>(NotificationConstant::RemindType::NONE) ||
         remindType > static_cast<int32_t>(NotificationConstant::RemindType::DEVICE_ACTIVE_REMIND)) {
@@ -507,11 +501,6 @@ bool Notification::ReadFromParcelInt32(Parcel &parcel)
         ANS_LOGE("ReadInt32 failed, function: %{public}s, field: %{public}s", __FUNCTION__, "visibleness");
         return false;
     }
-    if (visibleness < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
-        visibleness >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid visibleness: %{public}d, function: %{public}s", visibleness, __FUNCTION__);
-        return false;
-    }
     lockscreenVisibleness_ = static_cast<NotificationConstant::VisiblenessType>(visibleness);
 
     int32_t remindType = 0;
@@ -671,12 +660,6 @@ void Notification::SetLedLightColor(const int32_t &color)
 
 void Notification::SetLockScreenVisbleness(const NotificationConstant::VisiblenessType &visbleness)
 {
-    int32_t type = static_cast<int32_t>(visbleness);
-    if (type < static_cast<int32_t>(NotificationConstant::VisiblenessType::NO_OVERRIDE) ||
-        type >= static_cast<int32_t>(NotificationConstant::VisiblenessType::ILLEGAL_TYPE)) {
-        ANS_LOGE("Invalid visibleness: %{public}d, function: %{public}s", type, __FUNCTION__);
-        return;
-    }
     lockscreenVisibleness_ = visbleness;
 }
 

@@ -349,19 +349,9 @@ ErrCode AdvancedNotificationService::CancelAsBundle(const sptr<NotificationBundl
     ANS_LOGD("uid = %{public}d", bundleOption->GetUid());
     int32_t userId = -1;
     if (bundleOption->GetUid() != 0) {
-        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-            userId < 0) {
-            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
-                __FUNCTION__, bundleOption->GetUid());
-            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
-        }
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
     } else {
-        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId < 0) {
-            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
-                __FUNCTION__, bundleOption->GetUid());
-            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
-        }
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
     }
     return CancelAsBundle(bundleOption, notificationId, userId, synchronizer);
 }
@@ -372,19 +362,9 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     ANS_LOGD("uid = %{public}d", bundleOption->GetUid());
     int32_t userId = -1;
     if (bundleOption->GetUid() != 0) {
-        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId) != ERR_OK ||
-            userId < 0) {
-            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
-                __FUNCTION__, bundleOption->GetUid());
-            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
-        }
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
     } else {
-        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId < 0) {
-            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
-                __FUNCTION__, bundleOption->GetUid());
-            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
-        }
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
     }
     return CancelAsBundle(bundleOption, notificationId, userId);
 }
@@ -420,19 +400,9 @@ ErrCode AdvancedNotificationService::ResolveAgentUid(
 {
     int32_t userId = -1;
     if (bundleOption->GetUid() != 0) {
-        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            bundleOption->GetUid(), userId) != ERR_OK || userId < 0) {
-            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
-                __FUNCTION__, bundleOption->GetUid());
-            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
-        }
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
     } else {
-        if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId < 0) {
-            ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
-                __FUNCTION__, bundleOption->GetUid());
-            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
-        }
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
     }
     int32_t uid = -1;
     if (bundleOption->GetUid() == DEFAULT_UID) {
@@ -734,7 +704,7 @@ AnsStatus AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<No
     }
 
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
-        ExcuteRemoveAllNotificationsInner(bundle, bundle, reason);
+        ExcuteRemoveAllNotificationsInner(bundleOption, bundle, reason);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK,
         return AnsStatus(submitResult, "submit task error", EventSceneId::SCENE_6, EventBranchId::BRANCH_4),
