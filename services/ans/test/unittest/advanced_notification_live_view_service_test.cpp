@@ -419,7 +419,6 @@ HWTEST_F(AnsLiveViewServiceTest, AddToDelayNotificationList_001, Function | Smal
  */
 HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_100, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->currentUserId.clear();
     auto ret = advancedNotificationService_->OnSubscriberAdd(nullptr, 100);
 
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
@@ -434,7 +433,6 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_200, Function | SmallTest | Lev
 {
     auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
 
-    advancedNotificationService_->currentUserId.clear();
     auto ret = advancedNotificationService_->OnSubscriberAdd(record, 100);
 
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
@@ -447,7 +445,6 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_200, Function | SmallTest | Lev
  */
 HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_300, Function | SmallTest | Level1)
 {
-    advancedNotificationService_->currentUserId.clear();
     auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetSlotType(slotType);
@@ -464,6 +461,68 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_300, Function | SmallTest | Lev
     auto ret = advancedNotificationService_->OnSubscriberAdd(record, 100);
 
     ASSERT_EQ(ret, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: OnSubscriberAdd_400
+ * @tc.desc: Test OnSubscriberAdd replays notifications to every subscriber of the same user
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_400, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
+    auto notificationRecord = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(notificationRecord);
+
+    auto record1 = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
+    auto record2 = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
+
+    // Both subscribers of the same user must receive the replayed notifications.
+    // (Previously the second one was wrongly skipped by per-user deduplication.)
+    auto ret1 = advancedNotificationService_->OnSubscriberAdd(record1, 100);
+    auto ret2 = advancedNotificationService_->OnSubscriberAdd(record2, 100);
+
+    ASSERT_EQ(ret1, (int)ERR_OK);
+    ASSERT_EQ(ret2, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: ReplayRecoveredNotifications_100
+ * @tc.desc: Test ReplayRecoveredNotifications marks user as replayed and skips the second round
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, ReplayRecoveredNotifications_100, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+    advancedNotificationService_->ReplayRecoveredNotifications(100);
+    EXPECT_EQ(advancedNotificationService_->recoverReplayUserIds_.count(100), 1U);
+
+    // Second replay round for the same user must be skipped (no duplicate replay on user switch).
+    advancedNotificationService_->ReplayRecoveredNotifications(100);
+    EXPECT_EQ(advancedNotificationService_->recoverReplayUserIds_.size(), 1U);
+
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+}
+
+/**
+ * @tc.name: ReplayRecoveredNotifications_200
+ * @tc.desc: Test ReplayRecoveredNotifications does not record invalid user id
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, ReplayRecoveredNotifications_200, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+    advancedNotificationService_->ReplayRecoveredNotifications(INVALID_USER_ID);
+    EXPECT_EQ(advancedNotificationService_->recoverReplayUserIds_.size(), 0U);
+
+    advancedNotificationService_->recoverReplayUserIds_.clear();
 }
 
 /**

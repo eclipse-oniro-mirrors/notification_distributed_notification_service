@@ -164,10 +164,25 @@ void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
         OnRecoverLiveView(keys);
     }
     StartSnoozeTimer();
+    ReplayRecoveredNotifications(userId);
+    SetRecoverFailCount(userId, 0);
+}
+
+void AdvancedNotificationService::ReplayRecoveredNotifications(const int32_t userId)
+{
+    if (recoverReplayUserIds_.count(userId) > 0) {
+        ANS_LOGI("Recovered notifications already replayed for user %{public}d, skip.", userId);
+        return;
+    }
+    if (userId != INVALID_USER_ID) {
+        recoverReplayUserIds_.insert(userId);
+    }
+    // Replay recovered notifications to every online subscriber of this user.
+    // Deduplication is per user (one replay round), not per subscriber, so that
+    // each subscriber in the loop below can receive the replayed notifications.
     for (const auto &subscriber : NotificationSubscriberManager::GetInstance()->GetSubscriberRecords()) {
         OnSubscriberAdd(subscriber, userId);
     }
-    SetRecoverFailCount(userId, 0);
 }
 
 void AdvancedNotificationService::StartRecoveryTimers(const NotificationRequestDb &requestObj,
@@ -386,12 +401,9 @@ ErrCode AdvancedNotificationService::OnSubscriberAdd(
         }
     }
 
-    if (notifications.empty() || currentUserId.count(userId)) {
-        ANS_LOGI("No notification to consume %{public}d %{public}zu.", userId, currentUserId.count(userId));
+    if (notifications.empty()) {
+        ANS_LOGI("No notification to consume %{public}d.", userId);
         return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    }
-    if (userId != INVALID_USER_ID) {
-        currentUserId.insert(userId);
     }
     ANS_LOGI("Consume notification count is %{public}zu %{public}d.", notifications.size(), userId);
     NotificationSubscriberManager::GetInstance()->BatchNotifyConsumed(notifications, sortingMap, record);
