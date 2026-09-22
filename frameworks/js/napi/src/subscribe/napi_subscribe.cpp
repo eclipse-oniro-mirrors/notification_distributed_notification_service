@@ -91,13 +91,6 @@ void NapiDistributeOperationCompleteCallback(napi_env env, napi_status status, v
     }
 }
 
-static void ClearEnvCallback(void *data)
-{
-    ANS_LOGD("Env expired, need to clear env");
-    SubscriberInstance *subscriber = reinterpret_cast<SubscriberInstance *>(data);
-    subscriber->ClearEnv();
-}
-
 void SubscribeNotificationAsyncWork(napi_env env, void *data)
 {
     ANS_LOGD("NapiSubscribeNotification work excute.");
@@ -208,7 +201,7 @@ napi_value NapiSubscribeNotification(napi_env env, napi_callback_info info)
         asynccallbackinfo = nullptr;
         return promise;
     }
-    napi_add_env_cleanup_hook(env, ClearEnvCallback, objectInfo.get());
+    objectInfo->RegisterEnvCleanupHook(env);
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
         ANS_LOGE("Queue subscribeNotification async work failed.");
@@ -328,7 +321,7 @@ napi_value NapiSubscribe(napi_env env, napi_callback_info info)
         asynccallbackinfo = nullptr;
         return isCallback ? Common::NapiGetNull(env) : promise;
     }
-    napi_add_env_cleanup_hook(env, ClearEnvCallback, objectInfo.get());
+    objectInfo->RegisterEnvCleanupHook(env);
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
         ANS_LOGE("Queue subscribeNotification async work failed.");
