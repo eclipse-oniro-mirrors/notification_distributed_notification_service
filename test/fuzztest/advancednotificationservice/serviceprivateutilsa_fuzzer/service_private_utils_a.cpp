@@ -77,7 +77,10 @@ namespace Notification {
         req->SetOwnerUid(uid);
         req->SetOwnerUserId(ownerId);
         record->notification = new Notification(req);
-        service->notificationList_.push_back(record);
+        // notificationList_ is lock-free and must only be accessed on notificationSvrQueue_ (issue #4401)
+        service->notificationSvrQueue_.SyncSubmit([&]() {
+            service->notificationList_.push_back(record);
+        });
 
         auto recentNotification = std::make_shared<AdvancedNotificationService::RecentNotification>();
         recentNotification->isActive = true;
@@ -128,7 +131,9 @@ namespace Notification {
             std::shared_ptr<NotificationRecord> delRecord = service->MakeNotificationRecord(delRequest, delBundle);
             if (delRecord != nullptr) {
                 delRecord->slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-                service->notificationList_.push_back(delRecord);
+                service->notificationSvrQueue_.SyncSubmit([&]() {
+                    service->notificationList_.push_back(delRecord);
+                });
             }
         }
         // Test with zero user id notifications
@@ -142,7 +147,9 @@ namespace Notification {
             service->MakeNotificationRecord(zeroUserRequest, zeroUserBundle);
         if (zeroUserRecord != nullptr) {
             zeroUserRecord->slot = new NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-            service->notificationList_.push_back(zeroUserRecord);
+            service->notificationSvrQueue_.SyncSubmit([&]() {
+                service->notificationList_.push_back(zeroUserRecord);
+            });
         }
         service->notificationSvrQueue_.SyncSubmit([service, userId]() {
             service->DeleteAllByUserStopped(userId);

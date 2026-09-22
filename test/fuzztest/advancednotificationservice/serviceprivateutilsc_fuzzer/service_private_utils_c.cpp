@@ -240,7 +240,10 @@ namespace Notification {
         int32_t targetPid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
         NotificationConstant::SlotType targetSlotType = NotificationConstant::SlotType::LIVE_VIEW;
         NotificationContent::Type contentType = NotificationContent::Type::LIVE_VIEW;
-        service->GetTargetRecordList(targetUid, targetPid, targetSlotType, contentType, targetRecordList);
+        // notificationList_ is lock-free and must only be accessed on notificationSvrQueue_ (issue #4401)
+        service->notificationSvrQueue_.SyncSubmit([&]() {
+            service->GetTargetRecordList(targetUid, targetPid, targetSlotType, contentType, targetRecordList);
+        });
 
         // test GetTargetRecordList with matching records
         sptr<NotificationRequest> targetRequest = new NotificationRequest(fuzzData->ConsumeIntegral<int32_t>());
@@ -253,9 +256,11 @@ namespace Notification {
         std::shared_ptr<NotificationRecord> targetRecord = service->MakeNotificationRecord(targetRequest, targetBundle);
         if (targetRecord != nullptr) {
             targetRecord->slot = new NotificationSlot(targetSlotType);
-            service->notificationList_.push_back(targetRecord);
-            std::vector<std::shared_ptr<NotificationRecord>> matchRecordList;
-            service->GetTargetRecordList(targetUid, targetPid, targetSlotType, contentType, matchRecordList);
+            service->notificationSvrQueue_.SyncSubmit([&]() {
+                service->notificationList_.push_back(targetRecord);
+                std::vector<std::shared_ptr<NotificationRecord>> matchRecordList;
+                service->GetTargetRecordList(targetUid, targetPid, targetSlotType, contentType, matchRecordList);
+            });
         }
 
         // test GetCommonTargetRecordList with empty result
@@ -263,7 +268,9 @@ namespace Notification {
         int32_t commonUid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
         NotificationConstant::SlotType commonSlotType = NotificationConstant::SlotType::LIVE_VIEW;
         NotificationContent::Type commonContentType = NotificationContent::Type::LIVE_VIEW;
-        service->GetCommonTargetRecordList(commonUid, commonSlotType, commonContentType, commonRecordList);
+        service->notificationSvrQueue_.SyncSubmit([&]() {
+            service->GetCommonTargetRecordList(commonUid, commonSlotType, commonContentType, commonRecordList);
+        });
 
         // test GetCommonTargetRecordList with common live view records
         sptr<NotificationRequest> commonRequest = new NotificationRequest(fuzzData->ConsumeIntegral<int32_t>());
@@ -276,9 +283,12 @@ namespace Notification {
         std::shared_ptr<NotificationRecord> commonRecord = service->MakeNotificationRecord(commonRequest, commonBundle);
         if (commonRecord != nullptr) {
             commonRecord->slot = new NotificationSlot(commonSlotType);
-            service->notificationList_.push_back(commonRecord);
-            std::vector<std::shared_ptr<NotificationRecord>> matchCommonRecordList;
-            service->GetCommonTargetRecordList(commonUid, commonSlotType, commonContentType, matchCommonRecordList);
+            service->notificationSvrQueue_.SyncSubmit([&]() {
+                service->notificationList_.push_back(commonRecord);
+                std::vector<std::shared_ptr<NotificationRecord>> matchCommonRecordList;
+                service->GetCommonTargetRecordList(commonUid, commonSlotType, commonContentType,
+                    matchCommonRecordList);
+            });
         }
 
         // test PrepareContinuousTaskNotificationRequest
@@ -341,7 +351,9 @@ namespace Notification {
         // test GetCommonLiveViewRecordList
         std::vector<std::shared_ptr<NotificationRecord>> commonLiveViewRecordList;
         int32_t testPid = fuzzData->ConsumeIntegralInRange<int32_t>(0, 100);
-        service->GetCommonLiveViewRecordList(testPid, commonLiveViewRecordList);
+        service->notificationSvrQueue_.SyncSubmit([&]() {
+            service->GetCommonLiveViewRecordList(testPid, commonLiveViewRecordList);
+        });
 
         // test GetCommonLiveViewRecordList with common live view records
         sptr<NotificationRequest> commonLiveReq = new NotificationRequest(fuzzData->ConsumeIntegral<int32_t>());
@@ -357,9 +369,11 @@ namespace Notification {
             service->MakeNotificationRecord(commonLiveReq, commonLiveBundle);
         if (commonLiveRecord != nullptr) {
             commonLiveRecord->slot = new NotificationSlot(NotificationConstant::SlotType::LIVE_VIEW);
-            service->notificationList_.push_back(commonLiveRecord);
-            std::vector<std::shared_ptr<NotificationRecord>> matchedCommonLiveRecords;
-            service->GetCommonLiveViewRecordList(testPid, matchedCommonLiveRecords);
+            service->notificationSvrQueue_.SyncSubmit([&]() {
+                service->notificationList_.push_back(commonLiveRecord);
+                std::vector<std::shared_ptr<NotificationRecord>> matchedCommonLiveRecords;
+                service->GetCommonLiveViewRecordList(testPid, matchedCommonLiveRecords);
+            });
         }
 
         // test IsExistsPidInObservers
