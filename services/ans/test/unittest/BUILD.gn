@@ -1719,6 +1719,7 @@ ohos_unittest("notification_cancel_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "advanced_notification_manager_test/advanced_notification_cancel_test.cpp",
+    "mock/mock_bundle_manager_helper.cpp",
     "mock/blob.cpp",
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_accesstoken_kit.cpp",

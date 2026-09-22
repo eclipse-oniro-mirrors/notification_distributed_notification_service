@@ -973,12 +973,6 @@ bool NotificationPreferences::BuildCloneSlotInfo(const NotificationCloneBundleIn
     std::vector<sptr<NotificationSlot>>& slots)
 {
     for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
-        int32_t slotTypeInt = static_cast<int32_t>(cloneSlot.slotType_);
-        if (slotTypeInt < 0 ||
-            slotTypeInt >= static_cast<int32_t>(NotificationConstant::SlotType::ILLEGAL_TYPE)) {
-            ANS_LOGE("Invalid slot type: %{public}d", slotTypeInt);
-            continue;
-        }
         sptr<NotificationSlot> slotInfo = new (std::nothrow) NotificationSlot(cloneSlot.slotType_);
         if (slotInfo == nullptr) {
             return false;
@@ -2745,10 +2739,6 @@ bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kio
             kioskAppTrustList.push_back(item.get<std::string>());
         }
     }
-    if (kioskAppTrustList.size() > MAX_BUNDLE_LIST_SIZE) {
-        ANS_LOGE("kiosk app trust list size too large: %{public}zu", kioskAppTrustList.size());
-        return false;
-    }
     preferencesInfo_.SetkioskAppTrustList(kioskAppTrustList);
     isKioskTrustListUpdate_ = false;
     return true;
@@ -2859,22 +2849,10 @@ ErrCode NotificationPreferences::SetDistributedDevicelist(std::vector<std::strin
 {
     ANS_LOGD("%{public}s", __FUNCTION__);
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-    if (preferncesDB_ == nullptr) {
-        ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_INNER_SERVICE_NOT_READY;
-    }
-    std::string deviceTypesjsonString;
-    if (deviceTypes.size() > MAX_PARCELABLE_VECTOR_NUM) {
-        ANS_LOGE("deviceTypes size exceeds limit: %{public}zu", deviceTypes.size());
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-    nlohmann::json deviceTypesJson = nlohmann::json(deviceTypes);
-    if (deviceTypesJson.is_null() || !deviceTypesJson.is_array()) {
-        ANS_LOGE("Failed to create deviceTypes json array");
-        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
-    }
-    deviceTypesjsonString = deviceTypesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
-    bool storeDBResult = preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
+    bool storeDBResult = true;
+    nlohmann::json deviceTypesJson = deviceTypes;
+    std::string deviceTypesjsonString = deviceTypesJson.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+    storeDBResult = preferncesDB_->PutDistributedDevicelist(deviceTypesjsonString, userId);
     return storeDBResult ? ERR_OK : ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
 }
 

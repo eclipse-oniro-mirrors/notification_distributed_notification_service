@@ -1536,10 +1536,6 @@ napi_value Common::GetNotificationAppMessageId(
     }
 
     std::string appMessageId = AppExecFwk::UnwrapStringFromJS(env, appMessageIdValue);
-    if (appMessageId.length() > STR_MAX_SIZE) {
-        ANS_LOGE("The appMessageId string length exceeds max size.");
-        return nullptr;
-    }
     request.SetAppMessageId(appMessageId);
     return NapiGetNull(env);
 }
@@ -2182,10 +2178,6 @@ napi_value Common::GetUnifiedGroupStringProperty(const napi_env &env, const napi
         return NapiGetNull(env);
     }
     std::string strValue = AppExecFwk::UnwrapStringFromJS(env, jsValue);
-    if (strValue.length() > STR_MAX_SIZE) {
-        ANS_LOGE("The %{public}s string length exceeds max size.", propName);
-        return nullptr;
-    }
     ((*groupInfo).*setter)(strValue);
     return NapiGetNull(env);
 }

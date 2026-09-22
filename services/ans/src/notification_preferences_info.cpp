@@ -25,20 +25,6 @@ namespace Notification {
 namespace {
 using ExtensionSubscriptionVectorPtr = std::vector<sptr<NotificationExtensionSubscriptionInfo>>;
 const static std::string KEY_UNDER_LINE = "_";
-
-bool IsKeyMatchedUserId(const std::string &key, const std::string &userIdStr)
-{
-    size_t start = 0;
-    size_t end = key.find(KEY_UNDER_LINE);
-    while (end != std::string::npos) {
-        if (key.substr(start, end - start) == userIdStr) {
-            return true;
-        }
-        start = end + 1;
-        end = key.find(KEY_UNDER_LINE, start);
-    }
-    return key.substr(start) == userIdStr;
-}
 } // namespace
 
 NotificationPreferencesInfo::BundleInfo::BundleInfo()
@@ -573,10 +559,13 @@ bool NotificationPreferencesInfo::GetDoNotDisturbProfiles(
 void NotificationPreferencesInfo::GetAllDoNotDisturbProfiles(
     int32_t userId, std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
 {
-    std::string userIdStr = std::to_string(userId);
     for (const auto &doNotDisturbProfile : doNotDisturbProfiles_) {
-        if (IsKeyMatchedUserId(doNotDisturbProfile.first, userIdStr)) {
-            profiles.emplace_back(doNotDisturbProfile.second);
+        std::string key = doNotDisturbProfile.first;
+        std::string userIdStr = std::to_string(userId);
+        if (key == userIdStr || key.find(userIdStr + KEY_UNDER_LINE) == 0 ||
+            key.find(KEY_UNDER_LINE + userIdStr) != std::string::npos) {
+            auto profile = doNotDisturbProfile.second;
+            profiles.emplace_back(profile);
         }
     }
 }
@@ -775,12 +764,6 @@ bool NotificationPreferencesInfo::GetRestrictedModeTrustList(std::unordered_map<
     if (restrictedModeTrustList_.empty()) {
         ANS_LOGE("restrictedModeTrustList is empty");
         return false;
-    }
-    for (const auto &item : restrictedModeTrustList_) {
-        if (item.second.size() > MAX_BUNDLE_LIST_SIZE) {
-            ANS_LOGE("restrictedModeTrustList bundle list size exceeds limit");
-            return false;
-        }
     }
     restrictedModeTrustList = restrictedModeTrustList_;
     return true;

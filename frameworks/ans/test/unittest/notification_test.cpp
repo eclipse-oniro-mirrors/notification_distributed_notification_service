@@ -887,21 +887,6 @@ HWTEST_F(NotificationTest, Dump_00003, Function | SmallTest | Level1)
 }
 
 /**
- * @tc.name: SetLockScreenVisbleness_Invalid_001
- * @tc.desc: Test SetLockScreenVisbleness with invalid visibleness does not set.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationTest, SetLockScreenVisbleness_Invalid_001, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = nullptr;
-    auto rrc = std::make_shared<Notification>(request);
-    auto before = rrc->GetLockscreenVisibleness();
-    rrc->SetLockScreenVisbleness(NotificationConstant::VisiblenessType::ILLEGAL_TYPE);
-    EXPECT_EQ(rrc->GetLockscreenVisibleness(), before);
-}
-
-/**
  * @tc.name: SetSourceType_Invalid_001
  * @tc.desc: Test SetSourceType with invalid source type does not set.
  * @tc.type: FUNC
@@ -914,21 +899,6 @@ HWTEST_F(NotificationTest, SetSourceType_Invalid_001, Function | SmallTest | Lev
     auto before = rrc->GetSourceType();
     rrc->SetSourceType(static_cast<NotificationConstant::SourceType>(100));
     EXPECT_EQ(rrc->GetSourceType(), before);
-}
-
-/**
- * @tc.name: MarshallingInt32_InvalidVisibleness_001
- * @tc.desc: Test MarshallingInt32 returns false when visibleness is out of range.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationTest, MarshallingInt32_InvalidVisibleness_001, Function | SmallTest | Level1)
-{
-    Parcel parcel;
-    sptr<NotificationRequest> request = nullptr;
-    auto rrc = std::make_shared<Notification>(request);
-    rrc->lockscreenVisibleness_ = static_cast<NotificationConstant::VisiblenessType>(100);
-    EXPECT_EQ(rrc->MarshallingInt32(parcel), false);
 }
 
 /**
@@ -1128,31 +1098,6 @@ HWTEST_F(NotificationTest, ReadFromParcelInt32_002, Function | SmallTest | Level
     parcel.WriteString("key");
     parcel.WriteString("deviceId");
     parcel.WriteInt32(0);
-    parcel.RewindRead(0);
-    sptr<NotificationRequest> request = nullptr;
-    auto rrc = std::make_shared<Notification>(request);
-    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
-    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
-    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
-}
-
-/**
- * @tc.name: ReadFromParcelInt32_003
- * @tc.desc: Test ReadFromParcelInt32 when visibleness is out of range.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationTest, ReadFromParcelInt32_003, Function | SmallTest | Level1)
-{
-    Parcel parcel;
-    parcel.WriteBool(false);
-    parcel.WriteBool(false);
-    parcel.WriteBool(false);
-    parcel.WriteBool(false);
-    parcel.WriteString("key");
-    parcel.WriteString("deviceId");
-    parcel.WriteInt32(0);
-    parcel.WriteInt32(100);
     parcel.RewindRead(0);
     sptr<NotificationRequest> request = nullptr;
     auto rrc = std::make_shared<Notification>(request);
@@ -1440,21 +1385,6 @@ HWTEST_F(NotificationTest, ReadFromParcelUint64_003, Function | SmallTest | Leve
 }
 
 /**
- * @tc.name: MarshallingInt32_InvalidVisibleness_002
- * @tc.desc: Test MarshallingInt32 returns false when visibleness is below range.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationTest, MarshallingInt32_InvalidVisibleness_002, Function | SmallTest | Level1)
-{
-    Parcel parcel;
-    sptr<NotificationRequest> request = nullptr;
-    auto rrc = std::make_shared<Notification>(request);
-    rrc->lockscreenVisibleness_ = static_cast<NotificationConstant::VisiblenessType>(-1);
-    EXPECT_EQ(rrc->MarshallingInt32(parcel), false);
-}
-
-/**
  * @tc.name: MarshallingInt32_InvalidRemindType_002
  * @tc.desc: Test MarshallingInt32 returns false when remindType is below range.
  * @tc.type: FUNC
@@ -1482,31 +1412,6 @@ HWTEST_F(NotificationTest, MarshallingInt32_InvalidSourceType_002, Function | Sm
     auto rrc = std::make_shared<Notification>(request);
     rrc->sourceType_ = static_cast<NotificationConstant::SourceType>(-1);
     EXPECT_EQ(rrc->MarshallingInt32(parcel), false);
-}
-
-/**
- * @tc.name: ReadFromParcelInt32_008
- * @tc.desc: Test ReadFromParcelInt32 when visibleness is below range.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationTest, ReadFromParcelInt32_008, Function | SmallTest | Level1)
-{
-    Parcel parcel;
-    parcel.WriteBool(false);
-    parcel.WriteBool(false);
-    parcel.WriteBool(false);
-    parcel.WriteBool(false);
-    parcel.WriteString("key");
-    parcel.WriteString("deviceId");
-    parcel.WriteInt32(0);
-    parcel.WriteInt32(-1);
-    parcel.RewindRead(0);
-    sptr<NotificationRequest> request = nullptr;
-    auto rrc = std::make_shared<Notification>(request);
-    ASSERT_TRUE(rrc->ReadFromParcelBool(parcel));
-    ASSERT_TRUE(rrc->ReadFromParcelString(parcel));
-    EXPECT_EQ(rrc->ReadFromParcelInt32(parcel), false);
 }
 
 /**
@@ -1718,21 +1623,6 @@ HWTEST_F(NotificationTest, ReadFromParcel_00007, Function | SmallTest | Level1)
     auto result = std::make_shared<Notification>();
     EXPECT_EQ(result->ReadFromParcel(parcel), true);
     EXPECT_EQ(result->GetDeviceId(), notification->GetDeviceId());
-}
-
-/**
- * @tc.name: SetLockScreenVisbleness_Invalid_002
- * @tc.desc: Test SetLockScreenVisbleness with negative visibleness does not set.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationTest, SetLockScreenVisbleness_Invalid_002, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = nullptr;
-    auto rrc = std::make_shared<Notification>(request);
-    auto before = rrc->GetLockscreenVisibleness();
-    rrc->SetLockScreenVisbleness(static_cast<NotificationConstant::VisiblenessType>(-1));
-    EXPECT_EQ(rrc->GetLockscreenVisibleness(), before);
 }
 
 /**

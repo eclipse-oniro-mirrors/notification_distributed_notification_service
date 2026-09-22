@@ -1807,6 +1807,15 @@ public:
      */
     ErrCode CancelAsBundleWithAgent(const sptr<NotificationBundleOption> &bundleOption, const int32_t id) override;
 
+    /**
+     * @brief Resolve the uid of the agent bundle for cancel-as-bundle-with-agent.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param id Indicates the unique notification ID in the application.
+     * @param reason Indicates the cancel reason.
+     * @param outUid Indicates the resolved uid.
+     * @return Returns resolve result.
+     */
     ErrCode ResolveAgentUid(const sptr<NotificationBundleOption> &bundleOption, int32_t id,
         int32_t reason, int32_t &outUid);
 
@@ -2329,7 +2338,6 @@ private:
 
     void ClearOverTimeRingToneInfo();
     void ClearRingtoneByApplication(int32_t userId, const std::vector<NotificationRingtoneInfo> cloneRingtoneInfos);
-    std::vector<NotificationRingtoneInfo> FilterValidRingtoneUris(const std::vector<NotificationRingtoneInfo> &infos);
     ErrCode SetDoNotDisturbDateByUser(const int32_t &userId, const sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetDoNotDisturbDateByUser(const int32_t &userId, sptr<NotificationDoNotDisturbDate> &date);
     ErrCode GetHasPoppedDialog(const sptr<NotificationBundleOption> bundleOption, bool &hasPopped);

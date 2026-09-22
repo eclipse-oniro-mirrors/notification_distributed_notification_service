@@ -18,7 +18,6 @@
 #include "ans_service_errors.h"
 #include "ans_inner_errors.h"
 #include "ans_notification.h"
-#include "ans_const_define.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
 
@@ -75,13 +74,6 @@ static napi_value ParseBundlesParameters(const napi_env &env, const napi_callbac
 
     uint32_t len = 0;
     NAPI_CALL(env, napi_get_array_length(env, argv[PARAM0], &len));
-    if (len > static_cast<uint32_t>(MAX_BUNDLE_LIST_SIZE)) {
-        ANS_LOGE("The array length exceeds limit, function: %{public}s, field: %{public}s",
-            __FUNCTION__, "bundleOptions");
-        std::string msg = "The array length cannot exceed 1000.";
-        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
-        return nullptr;
-    }
     if (len == 0) {
         ANS_LOGD("The array is empty.");
         std::string msg = "Mandatory parameters are left unspecified. The array is empty.";

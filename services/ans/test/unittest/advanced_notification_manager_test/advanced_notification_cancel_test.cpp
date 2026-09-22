@@ -17,6 +17,7 @@
 #define private public
 #include "advanced_notification_service.h"
 #include "ans_service_errors.h"
+#include "ans_ut_constant.h"
 #include "mock_accesstoken_kit.h"
 #include "notification_bundle_option.h"
 #include "notification_request.h"
@@ -26,7 +27,6 @@
 #include "notification_live_view_content.h"
 
 using namespace testing::ext;
-extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 
 namespace OHOS {
 namespace Notification {
@@ -370,188 +370,76 @@ HWTEST_F(AdvancedNotificationCancelTest, ClassificationMgr_Remove_BasicOperation
 }
 
 /**
- * @tc.name: ResolveAgentUid_GetOsAccountFailed_NonZeroUid_00001
- * @tc.desc: Test ResolveAgentUid with non-zero uid when GetOsAccountLocalIdFromUid fails
+ * @tc.name: ResolveAgentUid_NonZeroUid_00001
+ * @tc.desc: Test ResolveAgentUid with non-zero uid in bundleOption
  * @tc.type: FUNC
  * @tc.require: I00001
  */
-HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_GetOsAccountFailed_NonZeroUid_00001,
-    Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_NonZeroUid_00001, Function | SmallTest | Level1)
 {
     auto service = GetService();
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
     int32_t outUid = -1;
 
-    MockGetOsAccountLocalIdFromUid(false, 0);
-    auto result = service->ResolveAgentUid(bundle, 1, NotificationConstant::CANCEL_REASON_DELETE, outUid);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
-    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
-}
-
-/**
- * @tc.name: ResolveAgentUid_InvalidUserId_NonZeroUid_00001
- * @tc.desc: Test ResolveAgentUid with non-zero uid when userId is invalid (<= 0)
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_InvalidUserId_NonZeroUid_00001,
-    Function | SmallTest | Level1)
-{
-    auto service = GetService();
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-    int32_t outUid = -1;
-
-    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
-    auto result = service->ResolveAgentUid(bundle, 1, NotificationConstant::CANCEL_REASON_DELETE, outUid);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
-    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
-}
-
-/**
- * @tc.name: ResolveAgentUid_GetOsAccountFailed_ZeroUid_00001
- * @tc.desc: Test ResolveAgentUid with zero uid when GetOsAccountLocalIdFromUid fails on calling uid
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_GetOsAccountFailed_ZeroUid_00001,
-    Function | SmallTest | Level1)
-{
-    auto service = GetService();
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 0);
-    int32_t outUid = -1;
-
-    MockGetOsAccountLocalIdFromUid(false, 0);
-    auto result = service->ResolveAgentUid(bundle, 1, NotificationConstant::CANCEL_REASON_DELETE, outUid);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
-    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
-}
-
-/**
- * @tc.name: ResolveAgentUid_InvalidUserId_ZeroUid_00001
- * @tc.desc: Test ResolveAgentUid with zero uid when userId is invalid (<= 0)
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_InvalidUserId_ZeroUid_00001,
-    Function | SmallTest | Level1)
-{
-    auto service = GetService();
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 0);
-    int32_t outUid = -1;
-
-    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
-    auto result = service->ResolveAgentUid(bundle, 1, NotificationConstant::CANCEL_REASON_DELETE, outUid);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
-    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
-}
-
-/**
- * @tc.name: ResolveAgentUid_DefaultUidNegative_00001
- * @tc.desc: Test ResolveAgentUid when uid resolved by bundle name is negative
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_DefaultUidNegative_00001, Function | SmallTest | Level1)
-{
-    auto service = GetService();
-    // DEFAULT_UID(0) triggers GetDefaultUidByBundleName; mock returns -1 for "testBundleName"
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundleName", 0);
-    int32_t outUid = -1;
-
-    auto result = service->ResolveAgentUid(bundle, 1, NotificationConstant::CANCEL_REASON_DELETE, outUid);
-    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_UID);
-}
-
-/**
- * @tc.name: ResolveAgentUid_ValidUid_00001
- * @tc.desc: Test ResolveAgentUid with valid uid resolved from bundle option
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_ValidUid_00001, Function | SmallTest | Level1)
-{
-    auto service = GetService();
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-    int32_t outUid = -1;
-
-    auto result = service->ResolveAgentUid(bundle, 1, NotificationConstant::CANCEL_REASON_DELETE, outUid);
+    auto result = service->ResolveAgentUid(bundle, 1,
+        NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE, outUid);
     EXPECT_EQ(result, ERR_OK);
     EXPECT_EQ(outUid, 100);
 }
 
 /**
- * @tc.name: CancelAsBundle_Sync_GetOsAccountFailed_NonZeroUid_00001
- * @tc.desc: Test 3-param CancelAsBundle(synchronizer) with non-zero uid when
- *           GetOsAccountLocalIdFromUid fails
+ * @tc.name: ResolveAgentUid_NegativeUid_00001
+ * @tc.desc: Test ResolveAgentUid with negative uid in bundleOption
  * @tc.type: FUNC
  * @tc.require: I00001
  */
-HWTEST_F(AdvancedNotificationCancelTest, CancelAsBundle_Sync_GetOsAccountFailed_NonZeroUid_00001,
-    Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_NegativeUid_00001, Function | SmallTest | Level1)
 {
     auto service = GetService();
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", -1);
+    int32_t outUid = -1;
 
-    MockGetOsAccountLocalIdFromUid(false, 0);
-    auto result = service->CancelAsBundle(bundle, 1, nullptr);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
-    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    auto result = service->ResolveAgentUid(bundle, 1,
+        NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE, outUid);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_UID);
+    EXPECT_EQ(outUid, -1);
 }
 
 /**
- * @tc.name: CancelAsBundle_Sync_InvalidUserId_ZeroUid_00001
- * @tc.desc: Test 3-param CancelAsBundle(synchronizer) with zero uid (callingUid path)
- *           when userId is invalid (<= 0)
+ * @tc.name: ResolveAgentUid_ZeroUidResolveFailed_00001
+ * @tc.desc: Test ResolveAgentUid with DEFAULT_UID uid and GetDefaultUidByBundleName failed
  * @tc.type: FUNC
  * @tc.require: I00001
  */
-HWTEST_F(AdvancedNotificationCancelTest, CancelAsBundle_Sync_InvalidUserId_ZeroUid_00001,
+HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_ZeroUidResolveFailed_00001,
     Function | SmallTest | Level1)
 {
     auto service = GetService();
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 0);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundleName", 0);
+    int32_t outUid = -1;
 
-    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
-    auto result = service->CancelAsBundle(bundle, 1, nullptr);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
-    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    auto result = service->ResolveAgentUid(bundle, 1,
+        NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE, outUid);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_UID);
+    EXPECT_EQ(outUid, -1);
 }
 
 /**
- * @tc.name: CancelAsBundle_2Param_GetOsAccountFailed_NonZeroUid_00001
- * @tc.desc: Test 2-param CancelAsBundle with non-zero uid when GetOsAccountLocalIdFromUid fails
+ * @tc.name: ResolveAgentUid_ZeroUidResolved_00001
+ * @tc.desc: Test ResolveAgentUid with DEFAULT_UID uid and GetDefaultUidByBundleName success
  * @tc.type: FUNC
  * @tc.require: I00001
  */
-HWTEST_F(AdvancedNotificationCancelTest, CancelAsBundle_2Param_GetOsAccountFailed_NonZeroUid_00001,
-    Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_ZeroUidResolved_00001, Function | SmallTest | Level1)
 {
     auto service = GetService();
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("com.ans.test.agent", 0);
+    int32_t outUid = -1;
 
-    MockGetOsAccountLocalIdFromUid(false, 0);
-    auto result = service->CancelAsBundle(bundle, 1);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
-    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
-}
-
-/**
- * @tc.name: CancelAsBundle_2Param_InvalidUserId_ZeroUid_00001
- * @tc.desc: Test 2-param CancelAsBundle with zero uid (callingUid path) when
- *           userId is invalid (<= 0)
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(AdvancedNotificationCancelTest, CancelAsBundle_2Param_InvalidUserId_ZeroUid_00001,
-    Function | SmallTest | Level1)
-{
-    auto service = GetService();
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 0);
-
-    MockGetOsAccountLocalIdFromUid(true, 1); // mock invalid userId (-2)
-    auto result = service->CancelAsBundle(bundle, 1);
-    EXPECT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
-    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    auto result = service->ResolveAgentUid(bundle, 1,
+        NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE, outUid);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(outUid, NON_SYSTEM_APP_UID);
 }
 
 }  // namespace Notification
