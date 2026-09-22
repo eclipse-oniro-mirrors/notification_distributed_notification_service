@@ -37,6 +37,7 @@ const std::string PriorityInfoMigrationHandler::PRIORITY_SWITCH_ENABLED_ALL = "2
 const std::string PriorityInfoMigrationHandler::PRIORITY_SWITCH_STRATEGY_INTELLIGENT = "30";
 const std::string PriorityInfoMigrationHandler::PRIORITY_SWITCH_STRATEGY_ALL = "32";
 const int32_t PriorityInfoMigrationHandler::PRIORITY_LEGACY_VERSION = 2;
+const std::string PriorityInfoMigrationHandler::KV_BUSINESS_TABLE_PREFIX = "notification_table";
 
 int32_t PriorityInfoMigrationHandler::OnUpgrade(
     NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion)
@@ -72,6 +73,9 @@ void PriorityInfoMigrationHandler::OnUpgradeFailure(NativeRdb::RdbStore &rdbStor
         return;
     }
     for (const auto &tableName : tables) {
+        if (!IsKvBusinessTable(tableName)) {
+            continue;
+        }
         NativeRdb::RdbPredicates predicates(tableName);
         predicates.BeginsWith(NOTIFICATION_KEY, PRIORITY_SWITCH_KEY)->Or()
             ->BeginsWith(NOTIFICATION_KEY, PRIORITY_INTELLIGENT_SWITCH_KEY)->Or()
@@ -89,6 +93,11 @@ void PriorityInfoMigrationHandler::OnUpgradeFailure(NativeRdb::RdbStore &rdbStor
         ANS_LOGE("Commit failed, ret=%{public}d", ret);
         rdbStore.RollBack();
     }
+}
+
+bool PriorityInfoMigrationHandler::IsKvBusinessTable(const std::string &tableName) const
+{
+    return tableName.compare(0, std::string(KV_BUSINESS_TABLE_PREFIX).size(), KV_BUSINESS_TABLE_PREFIX) == 0;
 }
 
 std::string PriorityInfoMigrationHandler::GetHandlerName() const

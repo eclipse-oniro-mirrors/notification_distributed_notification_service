@@ -70,6 +70,9 @@ private:
     /** @brief Query sqlite_master and return all table names. */
     std::set<std::string> GetTableNames(NativeRdb::RdbStore &rdbStore);
 
+    /** @brief Whether the table is a KV business table (has KEY/VALUE columns). */
+    bool IsKvBusinessTable(const std::string &tableName) const;
+
     /** @brief Process a single table and migrate all matching rows. */
     bool ProcessTable(NativeRdb::RdbStore &rdbStore, const std::string &tableName);
 
@@ -144,6 +147,9 @@ private:
 
     /** Value representing legacy priority database version (2). */
     static const int32_t PRIORITY_LEGACY_VERSION;
+
+    /** Prefix of KV business tables; non-matching tables (e.g. statistics) are skipped in cleanup. */
+    static const std::string KV_BUSINESS_TABLE_PREFIX;
 };
 } // namespace Notification::Infra
 } // namespace OHOS

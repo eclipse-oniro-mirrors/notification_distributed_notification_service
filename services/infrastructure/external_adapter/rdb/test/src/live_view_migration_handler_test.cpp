@@ -404,7 +404,7 @@ HWTEST_F(LiveViewMigrationHandlerTest, OnUpgradeFailure_200, Function | SmallTes
 
 /**
  * @tc.name: OnUpgradeFailure_300
- * @tc.desc: Verify OnUpgradeFailure executes DELETE SQL for each table when tables exist and ExecuteSql succeeds.
+ * @tc.desc: Verify OnUpgradeFailure executes DELETE for KV tables and skips non-KV tables.
  * @tc.type: FUNC
  */
 HWTEST_F(LiveViewMigrationHandlerTest, OnUpgradeFailure_300, Function | SmallTest | Level1)
@@ -416,9 +416,11 @@ HWTEST_F(LiveViewMigrationHandlerTest, OnUpgradeFailure_300, Function | SmallTes
     auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
     SetMockQuerySqlResults({mockResultSet});
     SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
-    SetMockGetStringValuesAndErrCodes({"notification_table"}, {NativeRdb::E_OK});
-    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
-    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes(
+        {"notification_statistics_100", "notification_table", "notification_table_100"},
+        {NativeRdb::E_OK, NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_OK, NativeRdb::E_OK, NativeRdb::E_ERROR});
+    SetMockDeleteErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
     EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
 }
 

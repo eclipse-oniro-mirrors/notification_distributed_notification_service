@@ -26,6 +26,7 @@ const std::string LiveViewMigrationHandler::NOTIFICATION_VALUE = "VALUE";
 const int32_t LiveViewMigrationHandler::NOTIFICATION_KEY_INDEX = 0;
 const int32_t LiveViewMigrationHandler::NOTIFICATION_VALUE_INDEX = 1;
 const std::string LiveViewMigrationHandler::LIVE_VIEW_KEY = "secure_live_view";
+const std::string LiveViewMigrationHandler::KV_BUSINESS_TABLE_PREFIX = "notification_table";
 
 int32_t LiveViewMigrationHandler::OnUpgrade(
     NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion)
@@ -63,6 +64,9 @@ void LiveViewMigrationHandler::OnUpgradeFailure(NativeRdb::RdbStore &rdbStore)
         return;
     }
     for (const auto &tableName : tables) {
+        if (!IsKvBusinessTable(tableName)) {
+            continue;
+        }
         NativeRdb::RdbPredicates predicates(tableName);
         predicates.BeginsWith(NOTIFICATION_KEY, LIVE_VIEW_KEY);
         int32_t deletedRows = 0;
@@ -78,6 +82,11 @@ void LiveViewMigrationHandler::OnUpgradeFailure(NativeRdb::RdbStore &rdbStore)
         ANS_LOGE("Commit failed, ret=%{public}d", ret);
         rdbStore.RollBack();
     }
+}
+
+bool LiveViewMigrationHandler::IsKvBusinessTable(const std::string &tableName) const
+{
+    return tableName.compare(0, std::string(KV_BUSINESS_TABLE_PREFIX).size(), KV_BUSINESS_TABLE_PREFIX) == 0;
 }
 
 std::string LiveViewMigrationHandler::GetHandlerName() const

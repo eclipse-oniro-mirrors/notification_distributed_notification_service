@@ -332,7 +332,7 @@ HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_200, Function | Smal
 
 /**
  * @tc.name: OnUpgradeFailure_300
- * @tc.desc: Verify OnUpgradeFailure executes DELETE SQL for each table when tables exist and ExecuteSql succeeds.
+ * @tc.desc: Verify OnUpgradeFailure executes DELETE for KV tables and skips non-KV tables.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_300, Function | SmallTest | Level1)
@@ -342,8 +342,10 @@ HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_300, Function | Smal
     auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
     SetMockQuerySqlResults({mockResultSet});
     SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
-    SetMockGetStringValuesAndErrCodes({"notification_table"}, {NativeRdb::E_OK});
-    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    SetMockGetStringValuesAndErrCodes(
+        {"notification_statistics_100", "notification_table"},
+        {NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_OK, NativeRdb::E_ERROR});
     SetMockDeleteErrCodes({NativeRdb::E_OK});
     EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
 }
