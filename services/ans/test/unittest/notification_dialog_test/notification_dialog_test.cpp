@@ -24,6 +24,7 @@
 #undef protected
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
+#include "mock_ability_manager_client.h"
 #include "notification_bundle_option.h"
 
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
@@ -174,6 +175,117 @@ HWTEST_F(NotificationDialogTest, NotificationDialog_00600, Function | SmallTest 
         true,
         false);
     ASSERT_NE(result, (int)ERR_ANS_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name      : NotificationDialog_00700
+ * @tc.number    :
+ * @tc.desc      : test StartEnableNotificationDialogAbility when GetOsAccountLocalIdFromUid fails
+ */
+HWTEST_F(NotificationDialogTest, NotificationDialog_00700, Function | SmallTest | Level1)
+{
+    AAFwk::MockResetTopAbility();
+    MockGetOsAccountLocalIdFromUid(false, 0); // uid-to-userId resolution fails
+
+    int32_t uid = 100;
+    sptr<IRemoteObject> callerToken = nullptr;
+    ErrCode result = NotificationDialog::StartEnableNotificationDialogAbility(
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
+        uid,
+        "topName",
+        callerToken,
+        false,
+        false);
+    ASSERT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(AAFwk::MockGetTopAbilityCallCount(), 0); // foreground check must not be reached
+
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    AAFwk::MockResetTopAbility();
+}
+
+/**
+ * @tc.name      : NotificationDialog_00800
+ * @tc.number    :
+ * @tc.desc      : test StartEnableNotificationDialogAbility when resolved userId is invalid (less than 0)
+ */
+HWTEST_F(NotificationDialogTest, NotificationDialog_00800, Function | SmallTest | Level1)
+{
+    AAFwk::MockResetTopAbility();
+    MockGetOsAccountLocalIdFromUid(true, 1); // resolved userId is -2 (invalid)
+
+    int32_t uid = 100;
+    sptr<IRemoteObject> callerToken = nullptr;
+    ErrCode result = NotificationDialog::StartEnableNotificationDialogAbility(
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
+        uid,
+        "topName",
+        callerToken,
+        false,
+        false);
+    ASSERT_EQ(result, ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+    EXPECT_EQ(AAFwk::MockGetTopAbilityCallCount(), 0); // foreground check must not be reached
+
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    AAFwk::MockResetTopAbility();
+}
+
+/**
+ * @tc.name      : NotificationDialog_00900
+ * @tc.number    :
+ * @tc.desc      : test GetTopAbility is called with the userId resolved from uid
+ */
+HWTEST_F(NotificationDialogTest, NotificationDialog_00900, Function | SmallTest | Level1)
+{
+    AAFwk::MockResetTopAbility();
+    MockGetOsAccountLocalIdFromUid(true, 2); // resolved userId is 88
+
+    int32_t uid = 1088; // arbitrary uid, mock resolves its local account id to 88
+    sptr<IRemoteObject> callerToken = nullptr;
+    ErrCode result = NotificationDialog::StartEnableNotificationDialogAbility(
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
+        uid,
+        "NotForegroundBundle", // differs from default top bundle "topName"
+        callerToken,
+        false,
+        false);
+    ASSERT_EQ(result, ERR_ANS_INNER_INVALID_BUNDLE); // not foreground, no retry for non-innerLake
+    EXPECT_EQ(AAFwk::MockGetLastTopAbilityUserId(), 88); // resolved userId must be passed to GetTopAbility
+    EXPECT_FALSE(AAFwk::MockGetLastTopAbilityNeedLocalDeviceId());
+    EXPECT_EQ(AAFwk::MockGetTopAbilityCallCount(), 1);
+
+    MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
+    AAFwk::MockResetTopAbility();
+}
+
+/**
+ * @tc.name      : NotificationDialog_01000
+ * @tc.number    :
+ * @tc.desc      : test innerLake retry path when app reaches foreground after sleep
+ */
+HWTEST_F(NotificationDialogTest, NotificationDialog_01000, Function | SmallTest | Level1)
+{
+    AAFwk::MockResetTopAbility();
+    MockGetOsAccountLocalIdFromUid(true, 0); // default resolved userId is 100
+    // first foreground check fails, retry after sleep succeeds
+    AAFwk::MockSetTopAbilityBundleNameSequence("backgroundBundle", "topName");
+
+    int32_t uid = 100;
+    sptr<IRemoteObject> callerToken = nullptr;
+    ErrCode result = NotificationDialog::StartEnableNotificationDialogAbility(
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_BUNDLE,
+        NotificationDialogManager::NOTIFICATION_DIALOG_SERVICE_ABILITY,
+        uid,
+        "topName",
+        callerToken,
+        true,
+        false);
+    EXPECT_EQ(AAFwk::MockGetTopAbilityCallCount(), 2); // first check plus one retry
+    ASSERT_NE(result, (int)ERR_ANS_INNER_INVALID_BUNDLE); // foreground check passed, connect attempted
+
+    AAFwk::MockResetTopAbility();
 }
 
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
