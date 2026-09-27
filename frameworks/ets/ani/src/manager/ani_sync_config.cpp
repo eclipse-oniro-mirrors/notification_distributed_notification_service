@@ -80,7 +80,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackConfigInf
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackConfigInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -150,7 +150,7 @@ ani_object AniSetAdditionalConfig(ani_env *env, ani_string key, ani_string value
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);

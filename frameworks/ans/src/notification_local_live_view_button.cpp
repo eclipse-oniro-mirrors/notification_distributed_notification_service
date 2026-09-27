@@ -163,6 +163,10 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::FromJson(const
     if (jsonObject.find("names") != jsonEnd && jsonObject.at("names").is_array()) {
         auto namesJson = jsonObject.at("names");
         for (const auto &name : namesJson) {
+            if (button->buttonNames_.size() >= BUTTON_MAX_SIZE) {
+                ANS_LOGW("button names already reach max size");
+                break;
+            }
             if (name.is_string()) {
                 button->buttonNames_.push_back(name.get<std::string>());
             }
@@ -172,6 +176,10 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::FromJson(const
     if (jsonObject.find("icons") != jsonEnd) {
         auto iconArr = jsonObject.at("icons");
         for (auto &iconObj : iconArr) {
+            if (button->buttonIcons_.size() >= BUTTON_MAX_SIZE) {
+                ANS_LOGW("button icons already reach max size");
+                break;
+            }
             if (!iconObj.is_string()) {
                 continue;
             }
@@ -188,6 +196,10 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::FromJson(const
     if (jsonObject.find("iconResources") != jsonEnd) {
         auto resourcesArr = jsonObject.at("iconResources");
         for (auto &resource : resourcesArr) {
+            if (button->buttonIconsResource_.size() >= BUTTON_MAX_SIZE) {
+                ANS_LOGW("button icons resource already reach max size");
+                break;
+            }
             auto resourceObj = std::make_shared<Global::Resource::ResourceManager::Resource>();
             if (ResourceFromJson(resource, resourceObj)) {
                 button->buttonIconsResource_.emplace_back(resourceObj);
@@ -200,11 +212,21 @@ NotificationLocalLiveViewButton *NotificationLocalLiveViewButton::FromJson(const
 
 bool NotificationLocalLiveViewButton::Marshalling(Parcel &parcel) const
 {
+    // Marshalling and Unmarshalling need to match: reader rejects size over BUTTON_MAX_SIZE
+    if (buttonNames_.size() > BUTTON_MAX_SIZE) {
+        ANS_LOGE("Invalid button names size: %{public}zu", buttonNames_.size());
+        return false;
+    }
     if (!parcel.WriteStringVector(buttonNames_)) {
         ANS_LOGE("Failed to write buttonNames");
         return false;
     }
 
+    // Marshalling and Unmarshalling need to match: reader rejects size over BUTTON_MAX_SIZE
+    if (buttonIcons_.size() > BUTTON_MAX_SIZE) {
+        ANS_LOGE("Invalid button icons size: %{public}zu", buttonIcons_.size());
+        return false;
+    }
     if (!parcel.WriteUint64(buttonIcons_.size())) {
         ANS_LOGE("Failed to write the size of buttonIcons");
         return false;
@@ -217,8 +239,13 @@ bool NotificationLocalLiveViewButton::Marshalling(Parcel &parcel) const
         }
     }
 
+    // Marshalling and Unmarshalling need to match: reader rejects size over BUTTON_MAX_SIZE
+    if (buttonIconsResource_.size() > BUTTON_MAX_SIZE) {
+        ANS_LOGE("Invalid button icons resource size: %{public}zu", buttonIconsResource_.size());
+        return false;
+    }
     if (!parcel.WriteUint64(buttonIconsResource_.size())) {
-        ANS_LOGE("Failed to write the size of buttonIcons");
+        ANS_LOGE("Failed to write the size of buttonIconsResource");
         return false;
     }
 
@@ -247,9 +274,17 @@ bool NotificationLocalLiveViewButton::ReadFromParcel(Parcel &parcel)
         ANS_LOGE("Failed to read button names");
         return false;
     }
+    if (buttonNames_.size() > BUTTON_MAX_SIZE) {
+        ANS_LOGE("Invalid button names size: %{public}zu", buttonNames_.size());
+        buttonNames_.clear();
+        return false;
+    }
 
     auto vsize = parcel.ReadUint64();
-    vsize = (vsize < BUTTON_MAX_SIZE) ? vsize : BUTTON_MAX_SIZE;
+    if (vsize > BUTTON_MAX_SIZE) {
+        ANS_LOGE("Invalid button icons size: %{public}llu", static_cast<unsigned long long>(vsize));
+        return false;
+    }
     for (uint64_t it = 0; it < vsize; ++it) {
         auto member = std::shared_ptr<Media::PixelMap>(parcel.ReadParcelable<Media::PixelMap>());
         if (member == nullptr) {
@@ -262,7 +297,10 @@ bool NotificationLocalLiveViewButton::ReadFromParcel(Parcel &parcel)
     }
 
     vsize = parcel.ReadUint64();
-    vsize = (vsize < BUTTON_MAX_SIZE) ? vsize : BUTTON_MAX_SIZE;
+    if (vsize > BUTTON_MAX_SIZE) {
+        ANS_LOGE("Invalid button icons resource size: %{public}llu", static_cast<unsigned long long>(vsize));
+        return false;
+    }
     for (uint64_t it = 0; it < vsize; ++it) {
         std::vector<std::string> iconsResource  = {};
         if (!parcel.ReadStringVector(&iconsResource)) {
@@ -282,7 +320,7 @@ bool NotificationLocalLiveViewButton::ReadFromParcel(Parcel &parcel)
             ANS_LOGE("Invalid input for button icons resource");
             return false;
         }
-        resource->id = atoi(iconsResource[RESOURCE_ID_INDEX].c_str());
+        resource->id = checknum;
         buttonIconsResource_.emplace_back(resource);
     }
 

@@ -2140,5 +2140,26 @@ HWTEST_F(ImagePixelmapHelperTest, CreatePixelMap_00021, Function | SmallTest | L
     EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(helper.pixelMap_, nullptr);
 }
+
+/**
+ * @tc.name: InitRawfileData_00008
+ * @tc.desc: Test InitRawfileData succeeds and CreateBundleContext is called only once.
+ * @tc.type: FUNC
+ * @tc.require: issueI8WRQ2
+ */
+HWTEST_F(ImagePixelmapHelperTest, InitRawfileData_00008, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerBundleName("com.test");
+    ImagePixelmapHelper helper(request, "test.png");
+
+    int32_t countBefore = AbilityRuntime::Mock::GetCreateBundleContextCallCount();
+    ErrCode ret = helper.InitRawfileData();
+
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(helper.resourceManager_, nullptr);
+    EXPECT_NE(helper.rawFileDesc_.fd, 0);
+    EXPECT_EQ(AbilityRuntime::Mock::GetCreateBundleContextCallCount() - countBefore, 1);
+}
 }  // namespace Notification
 }  // namespace OHOS

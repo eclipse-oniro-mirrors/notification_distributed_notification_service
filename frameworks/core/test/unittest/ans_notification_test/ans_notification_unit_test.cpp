@@ -1090,6 +1090,56 @@ HWTEST_F(AnsNotificationUnitTest, SetDoNotDisturbDate_0200, Function | MediumTes
 }
 
 /*
+ * @tc.name: SetDoNotDisturbDate_0300
+ * @tc.desc: test SetDoNotDisturbDate passes userId to proxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, SetDoNotDisturbDate_0300, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    int32_t userId = 5;
+    NotificationDoNotDisturbDate doNotDisturbDate;
+    EXPECT_CALL(*mockProxy_, SetDoNotDisturbDate(userId, testing::_))
+        .WillOnce(testing::Return(ERR_OK));
+    InnerErrorCode ret = ans_->SetDoNotDisturbDate(userId, doNotDisturbDate);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: GetDoNotDisturbDate_0300
+ * @tc.desc: test GetDoNotDisturbDate passes userId to proxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetDoNotDisturbDate_0300, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    int32_t userId = 5;
+    sptr<NotificationDoNotDisturbDate> dndDate = new (std::nothrow) NotificationDoNotDisturbDate();
+    ASSERT_NE(dndDate, nullptr);
+    EXPECT_CALL(*mockProxy_, GetDoNotDisturbDate(userId, testing::_))
+        .WillOnce(testing::DoAll(testing::SetArgReferee<1>(dndDate), testing::Return(ERR_OK)));
+    NotificationDoNotDisturbDate doNotDisturbDate;
+    InnerErrorCode ret = ans_->GetDoNotDisturbDate(userId, doNotDisturbDate);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/*
+ * @tc.name: CancelAsBundle_0200
+ * @tc.desc: test CancelAsBundle passes bundle option to proxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, CancelAsBundle_0200, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    NotificationBundleOption bundleOption;
+    bundleOption.SetBundleName("testBundle");
+    EXPECT_CALL(*mockProxy_, CancelAsBundle(testing::_, 1))
+        .WillOnce(testing::Return(ERR_OK));
+    InnerErrorCode res = ans_->CancelAsBundle(bundleOption, 1);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/*
  * @tc.name: SetEnabledForBundleSlot_0100
  * @tc.desc: test SetEnabledForBundleSlot ErrCode ERR_ANS_INNER_SERVICE_NOT_CONNECTED.
  * @tc.type: FUNC
@@ -2447,6 +2497,46 @@ HWTEST_F(AnsNotificationUnitTest, PublishNotificationForIndirectProxy_0300, Func
 }
 
 /*
+ * @tc.name: CanPublishMediaContent_00001
+ * @tc.desc: test CanPublishMediaContent returns false when shown action equals action buttons size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, CanPublishMediaContent_00001, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    auto actionButton = NotificationActionButton::Create(nullptr, "title", nullptr);
+    ASSERT_NE(actionButton, nullptr);
+    request.AddActionButton(actionButton);
+    request.AddActionButton(actionButton);
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    mediaContent->SetShownActions({2});
+    mediaContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::MEDIA));
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    request.SetContent(content);
+    EXPECT_EQ(ans_->CanPublishMediaContent(request), false);
+}
+
+/*
+ * @tc.name: CanPublishMediaContent_00002
+ * @tc.desc: test CanPublishMediaContent returns true when shown action is within action buttons size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, CanPublishMediaContent_00002, Function | MediumTest | Level1)
+{
+    NotificationRequest request;
+    auto actionButton = NotificationActionButton::Create(nullptr, "title", nullptr);
+    ASSERT_NE(actionButton, nullptr);
+    request.AddActionButton(actionButton);
+    request.AddActionButton(actionButton);
+    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
+    mediaContent->SetShownActions({1});
+    mediaContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::MEDIA));
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    request.SetContent(content);
+    EXPECT_EQ(ans_->CanPublishMediaContent(request), true);
+}
+
+/*
  * @tc.name: PublishNotificationForIndirectProxy_0400
  * @tc.desc: test PublishNotificationForIndirectProxy ErrCode ERR_ANS_INNER_INVALID_PARAM
  * cause CanPublishLiveViewContent fail
@@ -3288,11 +3378,36 @@ HWTEST_F(AnsNotificationUnitTest, GetRingtoneInfoByBundle_0100, Function | Mediu
 HWTEST_F(AnsNotificationUnitTest, GetRingtoneInfoByBundle_0200, Function | MediumTest | Level1)
 {
     SetMockProxy();
+    sptr<NotificationRingtoneInfo> ringtoneInfoSptr = new (std::nothrow) NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfoSptr, nullptr);
+    ON_CALL(*mockProxy_, GetRingtoneInfoByBundle(testing::_, testing::_))
+        .WillByDefault(testing::DoAll(testing::SetArgReferee<1>(ringtoneInfoSptr), testing::Return(ERR_OK)));
     NotificationBundleOption bundle;
     bundle.SetBundleName("testBundle");
     NotificationRingtoneInfo ringtoneInfo;
     InnerErrorCode res = ans_->GetRingtoneInfoByBundle(bundle, ringtoneInfo);
     EXPECT_EQ(res, ERR_OK);
+}
+
+/*
+ * @tc.name: GetRingtoneInfoByBundle_0300
+ * @tc.desc: test GetRingtoneInfoByBundle returns ERR_ANS_INNER_INVALID_PARAM when IPC succeeds
+ *           but ringtoneInfo out param is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationUnitTest, GetRingtoneInfoByBundle_0300, Function | MediumTest | Level1)
+{
+    SetMockProxy();
+    // The mock must clear the out param, otherwise the locally constructed sptr stays non-null
+    // and the null check after the IPC call is never taken.
+    sptr<NotificationRingtoneInfo> nullRingtoneInfo(nullptr);
+    ON_CALL(*mockProxy_, GetRingtoneInfoByBundle(testing::_, testing::_))
+        .WillByDefault(testing::DoAll(testing::SetArgReferee<1>(nullRingtoneInfo), testing::Return(ERR_OK)));
+    NotificationBundleOption bundle;
+    bundle.SetBundleName("testBundle");
+    NotificationRingtoneInfo ringtoneInfo;
+    InnerErrorCode res = ans_->GetRingtoneInfoByBundle(bundle, ringtoneInfo);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /*

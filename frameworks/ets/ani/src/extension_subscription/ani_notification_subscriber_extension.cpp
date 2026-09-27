@@ -66,7 +66,7 @@ void DeleteCallBackInfo(ani_env *env, AsyncCallbackInfoNotificationExtension *as
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackInfoNotificationExtension *asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         if (asyncCallbackInfo != nullptr) {
             delete asyncCallbackInfo;
@@ -100,7 +100,7 @@ ani_object AniSubscribe(ani_env *env, ani_object notificationInfoArrayobj)
         return nullptr;
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -144,7 +144,7 @@ ani_object AniSubscribeNotification(ani_env *env, ani_int priorityStrategy)
     }
     asyncCallbackInfo->priorityStrategy = priorityStrategy;
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -187,7 +187,7 @@ ani_object AniUnsubscribe(ani_env *env)
         return nullptr;
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -229,7 +229,7 @@ ani_object AniGetSubscribeInfo(ani_env *env)
         return nullptr;
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -272,7 +272,7 @@ ani_object AniGetAllSubscriptionBundles(ani_env *env)
         return nullptr;
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -315,7 +315,7 @@ ani_object AniIsUserGranted(ani_env *env)
         return nullptr;
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -364,7 +364,7 @@ ani_object AniGetUserGrantedState(ani_env *env, ani_object bundleOption)
         return nullptr;
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -415,7 +415,7 @@ ani_object AniSetUserGrantedState(ani_env *env, ani_object bundleOption, ani_boo
     }
     asyncCallbackInfo->enabled = NotificationSts::AniBooleanToBool(enable);
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -465,7 +465,7 @@ ani_object AniGetUserGrantedEnabledBundles(ani_env *env, ani_object bundleOption
         return nullptr;
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -508,7 +508,7 @@ ani_object AniGetUserGrantedEnabledBundlesForSelf(ani_env *env)
         return nullptr;
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -569,7 +569,7 @@ ani_object AniSetUserGrantedBundleState(ani_env *env, ani_object bundleOption, a
     }
     asyncCallbackInfo->enabled = NotificationSts::AniBooleanToBool(enabled);
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 

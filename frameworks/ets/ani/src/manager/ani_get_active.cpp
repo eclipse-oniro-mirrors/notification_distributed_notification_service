@@ -80,7 +80,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackActiveInf
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackActiveInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -194,7 +194,7 @@ ani_object AniGetActiveNotificationCount(ani_env *env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -238,7 +238,7 @@ ani_object AniGetAllActiveNotifications(ani_env *env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -282,7 +282,7 @@ ani_object AniGetActiveNotifications(ani_env *env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -352,7 +352,7 @@ ani_object AniGetActiveNotificationByFilter(ani_env *env, ani_object obj, ani_ob
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -396,7 +396,7 @@ ani_object AniGetActiveNotification(ani_env *env, ani_string hashCode)
         NotificationSts::GetResizeStr(hashCodeStr, NotificationSts::LONG_STR_MAX_SIZE);
 
     ani_ref callbackRef = nullptr;
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, callbackRef, asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
     if (aniStatus != ANI_OK) {

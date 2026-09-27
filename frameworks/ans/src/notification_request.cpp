@@ -2919,6 +2919,9 @@ bool NotificationRequest::ConvertJsonToNotificationContent(
             for (const auto &item : lineWantAgentStrs) {
                 std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent =
                     NotificationWantParamsHelper::ParseWantAgent(item, targetUid);
+                if (wantAgent == nullptr && !item.empty()) {
+                    ANS_LOGE("Failed to parse line wantAgent from json");
+                }
                 lineWantAgents.push_back(wantAgent);
             }
             content->SetLineWantAgents(lineWantAgents);

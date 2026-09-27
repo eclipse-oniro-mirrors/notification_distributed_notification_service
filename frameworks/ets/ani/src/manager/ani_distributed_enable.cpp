@@ -78,7 +78,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackDistribut
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackDistributedInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -147,7 +147,7 @@ ani_object AniIsDistributedEnabled(ani_env* env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status vmStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -196,7 +196,7 @@ ani_object AniIsDistributedEnabledByBundle(ani_env* env, ani_object obj, ani_obj
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status vmStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -253,7 +253,7 @@ ani_object AniIsDistributedEnabledByBundleType(ani_env* env, ani_object obj, ani
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status vmStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -302,7 +302,7 @@ ani_object AniSetDistributedEnable(ani_env* env, ani_boolean enabled, ani_object
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -351,7 +351,7 @@ ani_object AniSetDistributedEnableByBundle(ani_env* env, ani_object obj, ani_boo
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -410,7 +410,7 @@ ani_object AniSetDistributedEnableByBundleAndType(ani_env* env, ani_object obj, 
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -466,7 +466,7 @@ ani_object AniIsDistributedEnabledBySlot(ani_env* env, ani_enum_item slot, ani_s
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -524,7 +524,7 @@ ani_object AniSetDistributedEnableBySlot(ani_env *env, ani_enum_item slot, ani_s
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -570,7 +570,7 @@ ani_object AniIsDistributedEnabledByDeviceType(ani_env* env, ani_string deviceTy
     }
     asyncCallbackInfo->deviceTypeStr =
         NotificationSts::GetResizeStr(asyncCallbackInfo->deviceTypeStr, NotificationSts::STR_MAX_SIZE);
-    ani_object promise;
+    ani_object promise = nullptr;
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -627,7 +627,7 @@ ani_object AniSetDistributedEnabledByDeviceType(ani_env* env,
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -682,7 +682,7 @@ ani_object AniSetDistributedEnableByBundles(ani_env* env, ani_object obj, ani_st
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -725,7 +725,7 @@ ani_object AniGetDistributedDeviceList(ani_env* env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -777,7 +777,7 @@ ani_object AniSetTargetDeviceStatus(ani_env* env, ani_string deviceType, ani_lon
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -827,7 +827,7 @@ ani_object AniIsSmartReminderEnabled(ani_env* env, ani_string deviceType, ani_ob
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -879,7 +879,7 @@ ani_object AniSetSmartReminderEnable(ani_env* env, ani_string deviceType, ani_bo
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);

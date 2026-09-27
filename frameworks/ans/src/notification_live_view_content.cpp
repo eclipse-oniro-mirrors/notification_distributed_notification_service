@@ -207,6 +207,15 @@ void NotificationLiveViewContent::ConvertPictureFromJson(const nlohmann::json &j
     }
 }
 
+namespace {
+bool IsValidLiveViewStatus(int64_t statusValue)
+{
+    using LiveViewStatus = NotificationLiveViewContent::LiveViewStatus;
+    return statusValue >= static_cast<int64_t>(LiveViewStatus::LIVE_VIEW_CREATE)
+        && statusValue <= static_cast<int64_t>(LiveViewStatus::LIVE_VIEW_PENDING_END);
+}
+}
+
 NotificationLiveViewContent *NotificationLiveViewContent::FromJson(const nlohmann::json &jsonObject)
 {
     if (jsonObject.is_null() or !jsonObject.is_object()) {
@@ -222,11 +231,18 @@ NotificationLiveViewContent *NotificationLiveViewContent::FromJson(const nlohman
     pContent->ReadFromJson(jsonObject);
     const auto &jsonEnd = jsonObject.cend();
     if (jsonObject.find("status") != jsonEnd && jsonObject.at("status").is_number_integer()) {
-        auto statusValue = jsonObject.at("status").get<int32_t>();
+        auto statusValue = jsonObject.at("status").get<int64_t>();
+        if (!IsValidLiveViewStatus(statusValue)) {
+            ANS_LOGE("Invalid live view status from json: %{public}lld", static_cast<long long>(statusValue));
+        }
         pContent->liveViewStatus_ = static_cast<NotificationLiveViewContent::LiveViewStatus>(statusValue);
     }
     if (jsonObject.find("version") != jsonEnd && jsonObject.at("version").is_number_integer()) {
-        pContent->version_ = jsonObject.at("version").get<uint32_t>();
+        auto versionValue = jsonObject.at("version").get<int64_t>();
+        if (versionValue < 0 || versionValue > static_cast<int64_t>(UINT32_MAX)) {
+            ANS_LOGE("Invalid live view version from json: %{public}lld", static_cast<long long>(versionValue));
+        }
+        pContent->version_ = static_cast<uint32_t>(versionValue);
     }
     if (jsonObject.find("extraInfo") != jsonEnd && jsonObject.at("extraInfo").is_string()) {
         std::string extraInfoStr = jsonObject.at("extraInfo").get<std::string>();
@@ -250,7 +266,11 @@ NotificationLiveViewContent *NotificationLiveViewContent::FromJson(const nlohman
         ANS_LOGW("no want");
     }
     if (jsonObject.find("removeState") != jsonEnd && jsonObject.at("removeState").is_number_integer()) {
-        auto res = jsonObject.at("removeState").get<uint32_t>();
+        auto res = jsonObject.at("removeState").get<int64_t>();
+        if (res < static_cast<int64_t>(NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_INVAILD) ||
+            res > static_cast<int64_t>(NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_NO_REMOVE)) {
+                ANS_LOGE("Invalid live view removeState from json: %{public}lld", static_cast<long long>(res));
+        }
         pContent->removeOnProcessExitState_ = static_cast<NotificationLiveViewContent::LiveViewRemoveStatus>(res);
     }
     if (jsonObject.find("createPid") != jsonEnd && jsonObject.at("createPid").is_number_integer()) {

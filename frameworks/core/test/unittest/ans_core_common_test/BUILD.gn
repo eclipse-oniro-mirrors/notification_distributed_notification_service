@@ -23,6 +23,7 @@ ohos_unittest("ans_core_common_unit_test") {
   include_dirs = []
 
   sources = [
+    "ans_common_utils_test.cpp",
     "ans_log_wrapper_test.cpp",
     "ans_service_errors_test.cpp",
     "${core_path}/common/src/ans_service_errors.cpp",

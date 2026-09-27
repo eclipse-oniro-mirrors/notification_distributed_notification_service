@@ -85,7 +85,7 @@ bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackReminderInfo* asyn
         ANS_LOGE("asyncCallbackInfo is nullptr");
         return false;
     }
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         return false;
@@ -139,7 +139,7 @@ ani_object AniGetReminderInfoByBundles(ani_env *env, ani_object obj, ani_object 
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -188,7 +188,7 @@ ani_object AniSetReminderInfoByBundles(ani_env *env, ani_object obj, ani_object 
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);

@@ -79,7 +79,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackGeofenceI
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackGeofenceInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -107,7 +107,7 @@ ani_object AniSetGeofenceEnabled(ani_env *env, ani_boolean enabled, ani_object c
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -183,7 +183,7 @@ ani_object AniIsGeofenceEnabled(ani_env *env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);

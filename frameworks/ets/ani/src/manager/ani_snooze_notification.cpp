@@ -58,7 +58,7 @@ void DeleteCallBackInfo(ani_env* env, AsyncCallbackSnooze* asyncCallbackInfo)
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackSnooze* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -104,7 +104,7 @@ ani_object AniSetNotificationSnooze(ani_env *env, ani_string hashCode, ani_long 
     asyncCallbackInfo->hashCode =
         NotificationSts::GetResizeStr(asyncCallbackInfo->hashCode, NotificationSts::STR_MAX_SIZE);
     asyncCallbackInfo->delayTime = static_cast<int64_t>(delayTime);
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     env->GetVM(&asyncCallbackInfo->vm);

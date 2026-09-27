@@ -77,7 +77,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackProfileIn
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackProfileInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -133,7 +133,7 @@ ani_object AniAddDoNotDisturbProfile(ani_env *env, ani_object obj, ani_object ca
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -180,7 +180,7 @@ ani_object AniAddDoNotDisturbProfileByUserId(ani_env *env, ani_object obj, ani_i
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -227,7 +227,7 @@ ani_object AniRemoveDoNotDisturbProfile(ani_env *env, ani_object obj, ani_object
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -275,7 +275,7 @@ ani_object AniRemoveDoNotDisturbProfileByUserId(ani_env *env, ani_object obj, an
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -324,7 +324,7 @@ ani_object AniGetDoNotDisturbProfile(ani_env *env, ani_long id, ani_object callb
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -374,7 +374,7 @@ ani_object AniGetDoNotDisturbProfileByUserId(ani_env *env, ani_long id, ani_int 
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);

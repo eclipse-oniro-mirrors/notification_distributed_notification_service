@@ -137,7 +137,7 @@ ani_object AniSetSilentReminderEnabled(ani_env *env, ani_object bundleOption, an
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -186,7 +186,7 @@ ani_object AniIsSilentReminderEnabled(ani_env *env, ani_object bundleOption, ani
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);

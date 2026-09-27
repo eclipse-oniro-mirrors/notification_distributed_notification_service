@@ -868,6 +868,25 @@ HWTEST_F(NotificationTest, NotificationCopyConstructor_00002, Function | SmallTe
 }
 
 /**
+ * @tc.name: NotificationCopyConstructor_00003
+ * @tc.desc: Test copy constructor preserves triggerTimerId_ and autoDeletedTimerId_.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationTest, NotificationCopyConstructor_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetNotificationId(1);
+    auto notification = std::make_shared<Notification>(request);
+    notification->SetGeofenceTriggerTimer(10);
+    notification->SetAutoDeletedTimer(20);
+
+    Notification copy(*notification);
+    EXPECT_EQ(copy.GetGeofenceTriggerTimer(), 10);
+    EXPECT_EQ(copy.GetAutoDeletedTimer(), 20);
+}
+
+/**
  * @tc.name: Dump_00003
  * @tc.desc: Test Dump output includes notificationClassification when set.
  * @tc.type: FUNC

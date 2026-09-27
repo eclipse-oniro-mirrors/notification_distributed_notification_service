@@ -82,7 +82,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackSlotInfo*
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackSlotInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -150,7 +150,7 @@ bool SetSlotBundleCallbackObject(ani_env* env, ani_object callback, AsyncCallbac
 
 bool CheckSlotBundleCompleteEnvironment(ani_env **envCurr, AsyncCallbackSlotBundleInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -318,7 +318,7 @@ ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption, ani_object
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -368,7 +368,7 @@ ani_object AniAddSlots(ani_env *env, ani_object notificationSlotArrayObj, ani_ob
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -416,7 +416,7 @@ ani_object AniAddSlotByNotificationSlot(ani_env *env, ani_object notificationSlo
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -464,7 +464,7 @@ ani_object AniAddSlotBySlotType(ani_env *env, ani_enum_item enumObj, ani_object 
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -512,7 +512,7 @@ ani_object AniGetSlot(ani_env *env, ani_enum_item enumObj, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -556,7 +556,7 @@ ani_object AniGetSlots(ani_env *env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -605,7 +605,7 @@ ani_object AniRemoveSlot(ani_env *env, ani_enum_item enumObj, ani_object callbac
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -648,7 +648,7 @@ ani_object AniRemoveAllSlots(ani_env *env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -706,7 +706,7 @@ ani_object AniSetSlotByBundle(ani_env *env, ani_object bundleOptionObj, ani_obje
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -754,7 +754,7 @@ ani_object AniGetSlotNumByBundle(ani_env *env, ani_object bundleOption, ani_obje
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -810,7 +810,7 @@ ani_object AniSetNotificationEnableSlot(ani_env *env, ani_object bundleOption, a
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -859,7 +859,7 @@ ani_object AniSetNotificationEnableSlotWithForce(ani_env *env, ani_object parame
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -909,7 +909,7 @@ ani_object AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, a
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -959,7 +959,7 @@ ani_object AniGetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_object call
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -1009,7 +1009,7 @@ ani_object AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_long slotFl
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -1058,7 +1058,7 @@ ani_object AniGetSlotByBundle(ani_env *env, ani_object bundleOption, ani_enum_it
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -1103,7 +1103,7 @@ ani_object AniGetNotificationSetting(ani_env *env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -1143,9 +1143,6 @@ void HandleSlotBundleCallbackComplete(ani_env* env, WorkStatus status, void* dat
     }
     ani_env *envCurr = nullptr;
     if (!CheckSlotBundleCompleteEnvironment(&envCurr, asyncCallbackInfo)) {
-        if (envCurr == nullptr) {
-            DeleteSlotBundleCallBackInfoWithoutPromise(env, asyncCallbackInfo);
-        }
         return;
     }
     if (asyncCallbackInfo->functionType == IS_NOTIFICATION_SLOT_ENABLED_BY_BUNDLES) {
@@ -1194,7 +1191,7 @@ ani_object AniIsNotificationSlotEnabledByBundles(ani_env *env, ani_object bundle
         DeleteSlotBundleCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     if (env->GetVM(&asyncCallbackInfo->vm) != ANI_OK) {

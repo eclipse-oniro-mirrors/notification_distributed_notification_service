@@ -328,7 +328,7 @@ bool NotificationIconButton::ReadResourceFromParcel(Parcel &parcel,
         ANS_LOGE("Invalid input for button icons resource");
         return false;
     }
-    resource->id = atoi(iconsResource[RESOURCE_ID_INDEX].c_str());
+    resource->id = checknum;
     resourceObj = resource;
     return true;
 }

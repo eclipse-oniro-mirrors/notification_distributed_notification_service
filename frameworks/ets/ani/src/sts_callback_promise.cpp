@@ -26,10 +26,14 @@ void PaddingCallbackPromiseInfo(ani_env *env, ani_ref &callback, CallbackPromise
         info.callback = callback;
         info.isCallback = true;
     } else {
-        ani_resolver resolve = nullptr;
-        env->Promise_New(&resolve, &promise);
-        info.resolve = resolve;
         info.isCallback = false;
+        ani_resolver resolve = nullptr;
+        ani_status status = env->Promise_New(&resolve, &promise);
+        if (status != ANI_OK) {
+            ANS_LOGE("Promise_New failed, status: %{public}d", status);
+            return;
+        }
+        info.resolve = resolve;
     }
 }
 
@@ -113,9 +117,13 @@ void AniPromiseResolve(ani_env *env, const ani_resolver &resolver, const ani_obj
 
 ani_object AniGetPromiseWithReject(ani_env *env, const int32_t errorCode)
 {
-    ani_object promise;
+    ani_object promise = nullptr;
     ani_resolver resolve = nullptr;
-    env->Promise_New(&resolve, &promise);
+    ani_status status = env->Promise_New(&resolve, &promise);
+    if (status != ANI_OK) {
+        ANS_LOGE("Promise_New failed, status: %{public}d", status);
+        return nullptr;
+    }
     AniPromiseReject(env, resolve, errorCode);
     return promise;
 }

@@ -228,6 +228,10 @@ NotificationLocalLiveViewContent *NotificationLocalLiveViewContent::FromJson(con
     if (jsonObject.find("cardButtons") != jsonEnd && jsonObject.at("cardButtons").is_array()) {
         std::vector<NotificationIconButton> cardButtons;
         for (auto &item : jsonObject.at("cardButtons").items()) {
+            if (cardButtons.size() >= BUTTON_MAX_SIZE) {
+                ANS_LOGW("card buttons already reach max size");
+                break;
+            }
             nlohmann::json cardBtnObject = item.value();
             auto pButton = NotificationJsonConverter::ConvertFromJson<NotificationIconButton>(cardBtnObject);
             if (pButton != nullptr) {
@@ -302,7 +306,15 @@ bool NotificationLocalLiveViewContent::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    parcel.WriteInt32(static_cast<int>(card_button_.size()));
+    // Marshalling and Unmarshalling need to match: reader rejects size over BUTTON_MAX_SIZE
+    if (card_button_.size() > BUTTON_MAX_SIZE) {
+        ANS_LOGE("Invalid card button size: %{public}zu", card_button_.size());
+        return false;
+    }
+    if (!parcel.WriteInt32(static_cast<int>(card_button_.size()))) {
+        ANS_LOGE("Failed to write the size of card buttons");
+        return false;
+    }
     for (const auto& button : card_button_) {
         if (!parcel.WriteParcelable(&button)) {
             ANS_LOGE("Failed to write card button");
@@ -375,7 +387,10 @@ bool NotificationLocalLiveViewContent::ReadFromParcel(Parcel &parcel)
     pButton = nullptr;
 
     auto vsize = static_cast<uint32_t>(parcel.ReadInt32());
-    vsize = (vsize < BUTTON_MAX_SIZE) ? vsize : BUTTON_MAX_SIZE;
+    if (vsize > BUTTON_MAX_SIZE) {
+        ANS_LOGE("Invalid card button size: %{public}u", vsize);
+        return false;
+    }
     card_button_.clear();
     for (uint32_t i = 0; i < vsize; ++i) {
         auto btn = parcel.ReadParcelable<NotificationIconButton>();

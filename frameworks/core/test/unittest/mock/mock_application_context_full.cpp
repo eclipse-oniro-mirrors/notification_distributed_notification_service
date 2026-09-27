@@ -18,6 +18,7 @@
 
 namespace {
 bool g_mockCreateBundleContextReturnNull = false;
+int32_t g_createBundleContextCallCount = 0;
 }
 
 namespace OHOS {
@@ -32,6 +33,17 @@ void MockCreateBundleContextReturnNull(bool isNull)
 void MockResetCreateBundleContextState()
 {
     g_mockCreateBundleContextReturnNull = false;
+    g_createBundleContextCallCount = 0;
+}
+
+int32_t GetCreateBundleContextCallCount()
+{
+    return g_createBundleContextCallCount;
+}
+
+void MockResetCreateBundleContextCallCount()
+{
+    g_createBundleContextCallCount = 0;
 }
 
 MockApplicationContext::MockApplicationContext()
@@ -41,6 +53,7 @@ MockApplicationContext::MockApplicationContext()
 
 std::shared_ptr<Context> MockApplicationContext::CreateBundleContext(const std::string &bundleName)
 {
+    g_createBundleContextCallCount++;
     if (g_mockCreateBundleContextReturnNull) {
         return nullptr;
     }

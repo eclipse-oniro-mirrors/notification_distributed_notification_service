@@ -54,6 +54,9 @@ Notification::Notification(const Notification &other)
     remindType_ = other.remindType_;
     if (other.request_ != nullptr) {
         request_ = new (std::nothrow) NotificationRequest(*(other.request_));
+        if (request_ == nullptr) {
+            ANS_LOGE("Failed to allocate NotificationRequest in copy constructor");
+        }
     }
     postTime_ = other.postTime_;
     sound_ = other.sound_;
@@ -63,13 +66,18 @@ Notification::Notification(const Notification &other)
     deviceId_ = other.deviceId_;
     updateTimerId_ = other.updateTimerId_;
     finishTimerId_ = other.finishTimerId_;
+    triggerTimerId_ = other.triggerTimerId_;
     archiveTimerId_ = other.archiveTimerId_;
+    autoDeletedTimerId_ = other.autoDeletedTimerId_;
     if (other.voiceContent_ != nullptr) {
         voiceContent_ = std::make_shared<NotificationVoiceContent>(*other.voiceContent_);
     }
     if (other.notificationClassification_ != nullptr) {
         notificationClassification_ = new (std::nothrow) NotificationClassification(
             *other.notificationClassification_);
+        if (notificationClassification_ == nullptr) {
+            ANS_LOGE("Failed to allocate NotificationClassification in copy constructor");
+        }
     }
 }
 
