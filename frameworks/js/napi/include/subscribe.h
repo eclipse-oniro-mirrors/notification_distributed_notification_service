@@ -208,12 +208,22 @@ public:
     void ClearEnv();
 
     /**
+     * @brief Registers an env cleanup hook holding a strong reference to this
+     *        subscriber, so the hook never dangles. Idempotent per instance.
+     *
+     * @param env Indicates the environment that the API is invoked under.
+     */
+    void RegisterEnvCleanupHook(const napi_env &env);
+
+    /**
      * @brief delete the ref.
      *
      */
     void DeleteRef();
 
 private:
+    static void ClearEnvCallback(void *data);
+    void UnregisterEnvCleanupHook();
     void SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref);
@@ -259,6 +269,7 @@ private:
     ffrt::mutex tsfnMutex_;
     napi_threadsafe_function tsfn_ = nullptr;
     napi_env env_ = nullptr;
+    void *envCleanupHookData_ = nullptr;
     ffrt::mutex callbackMutex_;
     CallbackInfo canceCallbackInfo_;
     CallbackInfo consumeCallbackInfo_;

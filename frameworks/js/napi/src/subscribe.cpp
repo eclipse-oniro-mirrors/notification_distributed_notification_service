@@ -187,13 +187,6 @@ napi_value SetPriorityCallbackData(const napi_env &env, const bool enable, napi_
     return Common::NapiGetBoolean(env, true);
 }
 
-static void ClearEnvCallback(void *data)
-{
-    ANS_LOGD("Env expired, need to clear env");
-    SubscriberInstance *subscriber = reinterpret_cast<SubscriberInstance *>(data);
-    subscriber->ClearEnv();
-}
-
 SubscriberInstance::SubscriberInstance()
 {}
 
@@ -297,15 +290,58 @@ void SubscriberInstance::DeleteRef()
         }
     }
     SubDeleteRef();
-    if (env_ != nullptr) {
-        napi_remove_env_cleanup_hook(env_, ClearEnvCallback, this);
-    }
+    UnregisterEnvCleanupHook();
 }
 
 void SubscriberInstance::ClearEnv()
 {
     DeleteRef();
     env_ = nullptr;
+}
+
+void SubscriberInstance::RegisterEnvCleanupHook(const napi_env &env)
+{
+    if (envCleanupHookData_ != nullptr) {
+        return;
+    }
+    auto *holder = new (std::nothrow) std::shared_ptr<SubscriberInstance>(
+        std::static_pointer_cast<SubscriberInstance>(shared_from_this()));
+    if (holder == nullptr) {
+        ANS_LOGE("null env cleanup hook holder");
+        return;
+    }
+    if (napi_add_env_cleanup_hook(env, ClearEnvCallback, holder) != napi_ok) {
+        ANS_LOGE("add env cleanup hook failed");
+        delete holder;
+        return;
+    }
+    envCleanupHookData_ = holder;
+}
+
+void SubscriberInstance::UnregisterEnvCleanupHook()
+{
+    if (envCleanupHookData_ == nullptr) {
+        return;
+    }
+    if (env_ != nullptr) {
+        napi_remove_env_cleanup_hook(env_, ClearEnvCallback, envCleanupHookData_);
+    }
+    delete static_cast<std::shared_ptr<SubscriberInstance> *>(envCleanupHookData_);
+    envCleanupHookData_ = nullptr;
+}
+
+void SubscriberInstance::ClearEnvCallback(void *data)
+{
+    ANS_LOGD("Env expired, need to clear env");
+    auto *holder = static_cast<std::shared_ptr<SubscriberInstance> *>(data);
+    std::shared_ptr<SubscriberInstance> subscriber = *holder;
+    delete holder;
+    if (subscriber == nullptr) {
+        return;
+    }
+    // holder already freed: null out to avoid double free in UnregisterEnvCleanupHook
+    subscriber->envCleanupHookData_ = nullptr;
+    subscriber->ClearEnv();
 }
 
 void SubscriberInstance::CallThreadSafeFunc(void* data)
@@ -2445,7 +2481,7 @@ napi_value Subscribe(napi_env env, napi_callback_info info)
         return isCallback ? Common::NapiGetNull(env) : promise;
     }
 
-    napi_add_env_cleanup_hook(env, ClearEnvCallback, objectInfo.get());
+    objectInfo->RegisterEnvCleanupHook(env);
     status = napi_queue_async_work_with_qos(env, asynccallbackinfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
         ANS_LOGE("Queue subscribeNotification async work failed.");
