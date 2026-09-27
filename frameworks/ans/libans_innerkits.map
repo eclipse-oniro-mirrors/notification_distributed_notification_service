@@ -41,8 +41,9 @@
     *Ans*;
     # C 接口
     OHOS_*;
-    # vtable（CFI 需要）
-    _ZTV*;
+    # vtable（CFI 需要；仅导出本部件命名空间内的 vtable，
+    # 不导出 libc++/nlohmann/外部框架的 COMDAT 弱符号 vtable）
+    _ZTVN4OHOS12Notification*;
   local:
     *;
 };

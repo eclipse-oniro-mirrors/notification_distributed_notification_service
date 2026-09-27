@@ -14,18 +14,10 @@
 1.0 {
   global:
     extern "C++" {
-        guard?variable?for?OHOS::Notification::AnsDialogHostClient::instanceMutex_;
-        guard?variable?for?OHOS::Notification::AnsDialogHostClient::instance_;
-        guard?variable?for?OHOS::Notification::REQUEST_STORAGE_KEY_PREFIX;
-        guard?variable?for?OHOS::Notification::REQUEST_STORAGE_SECURE_KEY_PREFIX;
         OHOS::Notification::NotificationInfo*;
-        OHOS::Notification::AnsDialogHostClient::instanceMutex_;
-        OHOS::Notification::AnsDialogHostClient::instance_;
-        OHOS::Notification::REQUEST_STORAGE_KEY_PREFIX;
         OHOS::Notification::NotificationExtensionContent*;
         OHOS::Notification::NotificationSubscriberStubImpl*;
         OHOS::Notification::NotificationSubscriberExtension*;
-        OHOS::Notification::REQUEST_STORAGE_SECURE_KEY_PREFIX;
         OHOS::Notification::NotificationSubscriberExtensionContext*;
         OHOS::NotificationNapi*;
         construction?vtable?for?OHOS::Parcelable-in-OHOS::Notification::NotificationInfo;
@@ -49,7 +41,6 @@
         non-virtual?thunk?to?OHOS::Notification::NotificationSubscriberStubImpl*;
         non-virtual?thunk?to?OHOS::Notification::NotificationInfo*;
         non-virtual?thunk?to?OHOS::Notification::NotificationExtensionContent*;
-        OHOS::Notification::NotificationJsonConverter*;
         OHOS::AbilityRuntime::ExtensionBase*;
     };
     _fini;
