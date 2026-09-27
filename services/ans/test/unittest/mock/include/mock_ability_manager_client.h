@@ -15,6 +15,9 @@
 #ifndef MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_CLIENT_H
 #define MOCK_OHOS_ABILITY_RUNTIME_MOCK_ABILITY_MANAGER_CLIENT_H
 
+#include <cstdint>
+#include <string>
+
 #include "iremote_object.h"
 #include "iremote_stub.h"
 #include "ability_connect_callback_interface.h"
@@ -38,6 +41,15 @@ public:
     static std::shared_ptr<MockAbilityManagerClient> mockinstance_;
     static std::shared_ptr<MockAbilityManagerClient> GetInstance();
 };
+
+// Test hooks to control and inspect the GetTopAbility mock.
+// Default behavior (bundle name "topName") is preserved until overridden.
+void MockSetTopAbilityBundleName(const std::string &bundleName);
+void MockSetTopAbilityBundleNameSequence(const std::string &firstBundle, const std::string &restBundle);
+void MockResetTopAbility();
+int32_t MockGetLastTopAbilityUserId();
+bool MockGetLastTopAbilityNeedLocalDeviceId();
+int32_t MockGetTopAbilityCallCount();
 }  // namespace AAFwk
 }  // namespace OHOS
 

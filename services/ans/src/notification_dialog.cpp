@@ -16,6 +16,7 @@
 #include "notification_dialog.h"
 
 #include "ability_manager_client.h"
+#include "ans_const_define.h"
 #include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "bundle_manager_helper.h"
@@ -29,8 +30,52 @@
 
 namespace OHOS {
 namespace Notification {
+namespace {
 constexpr int32_t DEFAULT_VALUE = -1;
 const int32_t SLEEP_TIME = 200;
+constexpr const char* SCENEBOARD_BUNDLE_NAME = "com.ohos.sceneboard";
+constexpr const char* SCENEBOARD_ABILITY_NAME = "com.ohos.sceneboard.systemdialog";
+constexpr const char* SYSTEM_UI_BUNDLE_NAME = "com.ohos.systemui";
+constexpr const char* SYSTEM_UI_ABILITY_NAME = "com.ohos.systemui.dialog";
+constexpr const char* UI_EXTENSION_TYPE = "sysDialog/common";
+
+ErrCode ConnectEnableNotificationDialog(
+    int32_t uid, const std::string &appBundleName, bool innerLake, bool easyAbroad)
+{
+    AAFwk::Want want;
+    want.SetElementName(SCENEBOARD_BUNDLE_NAME, SCENEBOARD_ABILITY_NAME);
+
+    nlohmann::json root;
+    root["bundleName"] = appBundleName;
+    root["bundleUid"] = uid;
+    root["ability.want.params.uiExtensionType"] = UI_EXTENSION_TYPE;
+    root["innerLake"] = innerLake;
+    root["easyAbroad"] = easyAbroad;
+    std::string command = root.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
+
+    auto connection = sptr<SystemDialogConnectStb>(new (std::nothrow) SystemDialogConnectStb(command));
+    if (connection == nullptr) {
+        ANS_LOGE("new connection error.");
+        return ERR_NO_MEMORY;
+    }
+
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+
+    auto result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
+        want, connection, nullptr, DEFAULT_VALUE);
+    if (result != ERR_OK) {
+        ANS_LOGW("connect fail, result = %{public}d", result);
+        want.SetElementName(SYSTEM_UI_BUNDLE_NAME, SYSTEM_UI_ABILITY_NAME);
+        result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
+            want, connection, nullptr, DEFAULT_VALUE);
+    }
+
+    IPCSkeleton::SetCallingIdentity(identity);
+
+    ANS_LOGD("End, result = %{public}d", result);
+    return result;
+}
+}  // namespace
 
 int32_t NotificationDialog::GetUidByBundleName(const std::string &bundleName)
 {
@@ -49,8 +94,13 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     const bool easyAbroad)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
-
-    auto topBundleName = IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+    int userId = INVALID_USER_ID;
+    if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
+        ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
+        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
+    }
+    auto topBundleName =
+        IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(false, userId).GetBundleName());
     if (topBundleName != appBundleName) {
         ANS_LOGW("App isn't in foreground, top %{public}s.", topBundleName.c_str());
         if (!innerLake) {
@@ -58,7 +108,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
         } else {
             std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
             topBundleName = IN_PROCESS_CALL(
-                AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility().GetBundleName());
+                AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(false, userId).GetBundleName());
             if (topBundleName != appBundleName) {
                 return ERR_ANS_INNER_INVALID_BUNDLE;
             }
@@ -66,44 +116,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     }
     ANS_LOGD("called");
 
-    AAFwk::Want want;
-
-    std::string bundleName = "com.ohos.sceneboard";
-    std::string abilityName = "com.ohos.sceneboard.systemdialog";
-    want.SetElementName(bundleName, abilityName);
-
-    nlohmann::json root;
-    std::string uiExtensionType = "sysDialog/common";
-    root["bundleName"] = appBundleName;
-    root["bundleUid"] = uid;
-    root["ability.want.params.uiExtensionType"] = uiExtensionType;
-    root["innerLake"] = innerLake;
-    root["easyAbroad"] = easyAbroad;
-    std::string command  = root.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace);
-
-    auto connection_ = sptr<SystemDialogConnectStb>(new (std::nothrow) SystemDialogConnectStb(command));
-    if (connection_ == nullptr) {
-        ANS_LOGE("new connection error.");
-        return ERR_NO_MEMORY;
-    }
-
-    std::string identity = IPCSkeleton::ResetCallingIdentity();
-
-    auto result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(want,
-    connection_, nullptr, DEFAULT_VALUE);
-    if (result != ERR_OK) {
-        ANS_LOGW("connect fail, result = %{public}d", result);
-        bundleName = "com.ohos.systemui";
-        abilityName = "com.ohos.systemui.dialog";
-        want.SetElementName(bundleName, abilityName);
-        result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(want, connection_, nullptr,
-        DEFAULT_VALUE);
-    }
-
-    IPCSkeleton::SetCallingIdentity(identity);
-
-    ANS_LOGD("End, result = %{public}d", result);
-    return result;
+    return ConnectEnableNotificationDialog(uid, appBundleName, innerLake, easyAbroad);
 }
 }  // namespace Notification
 }  // namespace OHOS
