@@ -24,7 +24,6 @@
 
 #include "ans_log_wrapper.h"
 #include "nlohmann/json.hpp"
-#include "notification_clone_disturb_service.h"
 #include "notification_clone_bundle_service.h"
 #include "notification_clone_geofence_switch.h"
 #include "notification_clone_notification_switch.h"
@@ -42,12 +41,10 @@ namespace Notification {
 
 const int ANS_CLONE_ERROR = -1;
 const int32_t DEFAULT_APP_INDEX = -1;
-constexpr int32_t DEFAULT_ANCO_APP_INDEX = 0;
 constexpr uint64_t NOTIFICATION_FDSAN_TAG = 0xD001203;
 constexpr uint64_t COMMON_FDSAN_TAG = 0;
 constexpr const char* CLONE_ITEM_BUNDLE_INFO = "notificationBundle";
 constexpr const char* DH_CLONE_ITEM_BUNDLE_INFO = "dhNotificationBundle";
-constexpr const char* CLONE_ITEM_DISTURB = "notificationDisturb";
 constexpr const char* CLONE_GEOFENCE = "notificationGeofence";
 constexpr const char* CLONE_ITEM_PRIORITY_INFO = "notificationPriority";
 constexpr const char* BACKUP_CONFIG_FILE_PATH = "/data/service/el1/public/notification/backup_config.conf";
@@ -263,7 +260,6 @@ NotificationCloneManager::NotificationCloneManager()
     // not change push sequence, ensure [clone item] before [dh clone item]
     cloneTemplates.push_back(std::make_pair(CLONE_ITEM_BUNDLE_INFO, NotificationCloneBundle::GetInstance()));
     cloneTemplates.push_back(std::make_pair(DH_CLONE_ITEM_BUNDLE_INFO, DhNotificationCloneBundle::GetInstance()));
-    cloneTemplates.push_back(std::make_pair(CLONE_ITEM_DISTURB, NotificationCloneDisturb::GetInstance()));
     cloneTemplates.push_back(std::make_pair(CLONE_ITEM_PRIORITY_INFO, NotificationClonePriority::GetInstance()));
     cloneTemplates.push_back(std::make_pair(CLONE_GEOFENCE, NotificationCloneGeofenceSwitch::GetInstance()));
     cloneTemplates.push_back(std::make_pair(
@@ -383,9 +379,6 @@ void NotificationCloneManager::OnDhRestoreStart(const std::string bundleName, co
     for (auto iter = cloneTemplates.begin(); iter != cloneTemplates.end(); ++iter) {
         if (iter->second != nullptr && iter->second->isDhSource()) {
             iter->second->OnRestoreStart(bundleName, DEFAULT_APP_INDEX, ZERO_USERID, uid);
-        }
-        if (iter->first == CLONE_ITEM_DISTURB && iter->second != nullptr) {
-            iter->second->OnRestoreStart(bundleName, DEFAULT_ANCO_APP_INDEX, DEFAULT_USER_ID, uid);
         }
     }
 }

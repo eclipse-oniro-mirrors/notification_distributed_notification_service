@@ -631,12 +631,6 @@ public:
     ErrCode GetAllDistribuedEnabledBundles(int32_t userId,
         const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption);
 
-    ErrCode UpdateDoNotDisturbProfiles(int32_t userId, int64_t profileId,
-        const std::string& name, const std::vector<NotificationBundleOption>& bundleList);
-
-    void UpdateProfilesUtil(std::vector<NotificationBundleOption>& trustList,
-        const std::vector<NotificationBundleOption> bundleList);
-
     bool GetRingtoneInfoByLabel(const int32_t userId, const std::string label,
         sptr<NotificationRingtoneInfo> &ringtoneInfo);
     ErrCode SetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundleOption,
@@ -667,8 +661,6 @@ public:
     int32_t DeleteBatchKvFromDb(const std::vector<std::string> &keys, const int &userId);
     ErrCode GetDoNotDisturbProfile(int64_t profileId, int32_t userId, sptr<NotificationDoNotDisturbProfile> &profile);
     void RemoveDoNotDisturbProfileTrustList(int32_t userId, const sptr<NotificationBundleOption> &bundleOption);
-    void GetDoNotDisturbProfileListByUserId(int32_t userId,
-        std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles);
     void SetAncoApplicationUserId(int32_t userId);
     void SetAncoApplicationUserId(const sptr<NotificationBundleOption>& bundleOption, int32_t userId);
     void GetAllAncoBundlesInfo(int32_t dbUserId, int32_t userId, std::vector<sptr<NotificationBundleOption>> &bundles);
@@ -687,19 +679,12 @@ public:
     ErrCode GetBundlePriorityConfig(const sptr<NotificationBundleOption> &bundleOption, std::string &configValue);
     void UpdateCloneBundleInfo(int32_t userId, const NotificationCloneBundleInfo& cloneBundleInfo);
     bool IsNotificationSlotFlagsExists(const sptr<NotificationBundleOption> &bundleOption);
-    bool DelCloneProfileInfo(const int32_t &userId, const sptr<NotificationDoNotDisturbProfile>& info);
-    bool UpdateBatchCloneProfileInfo(const int32_t &userId,
-        const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
-    void GetAllCloneProfileInfo(const int32_t &userId,
-        std::vector<sptr<NotificationDoNotDisturbProfile>>& profilesInfo);
     void GetAllCloneBundleInfo(const int32_t &userId, std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
     bool UpdateBatchCloneBundleInfo(const int32_t &userId,
         const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
     bool DelCloneBundleInfo(const int32_t &userId, const NotificationCloneBundleInfo& cloneBundleInfo);
     bool DelBatchCloneBundleInfo(const int32_t &userId,
         const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
-    bool DelBatchCloneProfileInfo(const int32_t &userId,
-        const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo);
     ErrCode SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
     bool GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable);
