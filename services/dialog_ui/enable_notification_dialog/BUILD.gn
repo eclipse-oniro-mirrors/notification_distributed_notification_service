@@ -30,8 +30,8 @@ ohos_hap("enable_notification_dialog_hap") {
   module_install_dir = "app/com.ohos.notificationdialog"
   if (defined(sign_hap_py_path)) {
     certificate_profile = "${certificate_profile_path}"
-    key_alias = "HOS NotificationDialog Release"
-    private_key_path = "HOS NotificationDialog Release"
+    key_alias = "HOS NotificationDialog Release V2"
+    private_key_path = "HOS NotificationDialog Release V2"
     compatible_version = "9"
   }
 }
