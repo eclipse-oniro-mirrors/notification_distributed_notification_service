@@ -163,13 +163,18 @@ bool LiveViewMigrationHandler::ProcessResultSet(
         return false;
     }
 
+    bool allProcessed = true;
     do {
         if (!ProcessRow(absSharedResultSet, rdbStore, tableName)) {
-            return false;
+            // Continue with the remaining rows so one bad record does not block
+            // migration of the whole table.
+            ANS_LOGW("Failed to process one liveview row in %{public}s, continue with the rest",
+                tableName.c_str());
+            allProcessed = false;
         }
     } while (absSharedResultSet->GoToNextRow() == NativeRdb::E_OK);
 
-    return true;
+    return allProcessed;
 }
 
 bool LiveViewMigrationHandler::ProcessRow(

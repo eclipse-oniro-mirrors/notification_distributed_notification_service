@@ -371,6 +371,83 @@ HWTEST_F(LiveViewMigrationHandlerTest, OnUpgrade_MigrationFail_DeleteAlsoFails, 
 }
 
 /**
+ * @tc.name: OnUpgrade_MigrationSuccess_KeepsRowWithoutDelete
+ * @tc.desc: Verify OnUpgrade keeps the row by re-inserting it and never deletes it when
+ *           migration succeeds, e.g. a button-less live view that needs no transformation.
+ * @tc.type: FUNC
+ * @tc.require: issue#4249
+ */
+HWTEST_F(LiveViewMigrationHandlerTest, OnUpgrade_MigrationSuccess_KeepsRowWithoutDelete,
+    Function | SmallTest | Level1)
+{
+    NtfRdbHook hooks;
+    hooks.OnRdbUpgradeLiveviewMigrate = [](const std::string &oldValue, std::string &newValue) {
+        newValue = oldValue;
+        return true;
+    };
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    LiveViewMigrationHandler handler(hookMgr);
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes(
+        {"testTable", "secure_live_view_key", "buttonless_value"},
+        {NativeRdb::E_OK, NativeRdb::E_OK, NativeRdb::E_OK}
+    );
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    SetMockQueryResults({mockResultSet});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK});
+
+    int32_t ret = handler.OnUpgrade(rdbStore, 1, 2);
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(GetMockInsertWithConflictResolutionExecuteTimes(), 1);
+    EXPECT_EQ(GetMockDeleteExecuteTimes(), 0);
+}
+
+/**
+ * @tc.name: OnUpgrade_MigrationFail_ContinuesRemainingRows
+ * @tc.desc: Verify OnUpgrade continues migrating the remaining rows after one corrupt row
+ *           fails instead of aborting the whole table.
+ * @tc.type: FUNC
+ * @tc.require: issue#4249
+ */
+HWTEST_F(LiveViewMigrationHandlerTest, OnUpgrade_MigrationFail_ContinuesRemainingRows,
+    Function | SmallTest | Level1)
+{
+    NtfRdbHook hooks;
+    int32_t hookCallCount = 0;
+    hooks.OnRdbUpgradeLiveviewMigrate = [&hookCallCount](const std::string &oldValue, std::string &newValue) {
+        hookCallCount++;
+        if (hookCallCount == 1) {
+            return false;
+        }
+        newValue = oldValue;
+        return true;
+    };
+    auto hookMgr = std::make_shared<NtfRdbHookMgr>(hooks);
+    LiveViewMigrationHandler handler(hookMgr);
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes(
+        {"testTable", "secure_live_view_corrupt", "corrupt_value", "secure_live_view_valid", "valid_value"},
+        {NativeRdb::E_OK, NativeRdb::E_OK, NativeRdb::E_OK, NativeRdb::E_OK, NativeRdb::E_OK}
+    );
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR, NativeRdb::E_OK, NativeRdb::E_ERROR});
+    SetMockQueryResults({mockResultSet});
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+
+    int32_t ret = handler.OnUpgrade(rdbStore, 1, 2);
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(hookCallCount, 2);
+    EXPECT_EQ(GetMockDeleteExecuteTimes(), 1);
+    EXPECT_EQ(GetMockInsertWithConflictResolutionExecuteTimes(), 1);
+}
+
+/**
  * @tc.name: OnUpgradeFailure_100
  * @tc.desc: Verify OnUpgradeFailure handles empty table set without crash when QuerySql returns null.
  * @tc.type: FUNC

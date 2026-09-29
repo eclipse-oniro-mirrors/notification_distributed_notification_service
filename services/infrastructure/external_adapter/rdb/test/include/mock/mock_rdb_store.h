@@ -68,6 +68,8 @@ void SetMockBatchInsertErrCodes(const std::vector<int32_t> &errCodes);
 void SetMockReStoreErrCodes(const std::vector<int> &errCodes);
 void SetMockDeleteErrCodes(const std::vector<int> &errCodes);
 void SetMockQueryResults(const std::vector<MockRdbStore::AbsSharedResultSetPtr> &results);
+int GetMockInsertWithConflictResolutionExecuteTimes();
+int GetMockDeleteExecuteTimes();
 void ResetMockRdbStore();
 } // namespace OHOS::Notification::Infra
 #endif // ANS_NOTIFICATION_MOCK_RDB_STORE_H
