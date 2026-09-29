@@ -110,11 +110,6 @@ HWTEST_F(RdbMgrRepoTest, OnRdbUpgradeLiveviewMigrate_100, Function | SmallTest |
     });
     EXPECT_FALSE(OnRdbUpgradeLiveviewMigrate(arrayObject.dump(), newValue));
 
-    nlohmann::json emptyActionButtons = {
-        {"actionButtons", nlohmann::json::array()}
-    };
-    EXPECT_FALSE(OnRdbUpgradeLiveviewMigrate(emptyActionButtons.dump(), newValue));
-
     nlohmann::json actionButtonsWithWrongType = {
         {"actionButtons", nlohmann::json{{"foo", "bar"}}}
     };
@@ -303,6 +298,54 @@ HWTEST_F(RdbMgrRepoTest, OnRdbUpgradeLiveviewMigrate_500, Function | SmallTest |
     EXPECT_FALSE(OnRdbUpgradeLiveviewMigrate("any_old_value", newValue));
     EXPECT_TRUE(newValue.empty());
     g_decryptShouldFail.store(false);
+}
+
+/**
+ * @tc.name: OnRdbUpgradeLiveviewMigrate_600
+ * @tc.desc: Verify a live view published without action buttons is kept without migration
+ *           instead of being treated as corrupt data.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbMgrRepoTest, OnRdbUpgradeLiveviewMigrate_600, Function | SmallTest | Level1)
+{
+    std::string newValue;
+    const int32_t liveViewType = static_cast<int32_t>(OHOS::Notification::NotificationContent::Type::LIVE_VIEW);
+
+    nlohmann::json inputWithEmptyButtons = {
+        {"actionButtons", nlohmann::json::array()},
+        {"content", nlohmann::json{
+            {"contentType", liveViewType},
+            {"content", nlohmann::json{{"status", 1}}}
+        }}
+    };
+    EXPECT_TRUE(OnRdbUpgradeLiveviewMigrate(inputWithEmptyButtons.dump(), newValue));
+
+    nlohmann::json output = nlohmann::json::parse(newValue);
+    ASSERT_TRUE(output.contains("actionButtons"));
+    ASSERT_TRUE(output["actionButtons"].is_array());
+    EXPECT_TRUE(output["actionButtons"].empty());
+    ASSERT_TRUE(output.contains("content"));
+    ASSERT_TRUE(output["content"].is_object());
+    ASSERT_TRUE(output["content"].contains("content"));
+    ASSERT_TRUE(output["content"]["content"].is_object());
+    EXPECT_FALSE(output["content"]["content"].contains("extensionWantAgent"));
+
+    nlohmann::json inputWithoutButtons = {
+        {"content", nlohmann::json{
+            {"contentType", liveViewType},
+            {"content", nlohmann::json{{"status", 1}}}
+        }}
+    };
+    newValue.clear();
+    EXPECT_TRUE(OnRdbUpgradeLiveviewMigrate(inputWithoutButtons.dump(), newValue));
+
+    output = nlohmann::json::parse(newValue);
+    EXPECT_FALSE(output.contains("actionButtons"));
+    ASSERT_TRUE(output.contains("content"));
+    ASSERT_TRUE(output["content"].is_object());
+    ASSERT_TRUE(output["content"].contains("content"));
+    ASSERT_TRUE(output["content"]["content"].is_object());
+    EXPECT_FALSE(output["content"]["content"].contains("extensionWantAgent"));
 }
 
 /**

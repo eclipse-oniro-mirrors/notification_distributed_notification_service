@@ -185,6 +185,16 @@ void SetMockQueryResults(const std::vector<MockRdbStore::AbsSharedResultSetPtr> 
     g_mockQueryExecuteTimes = 0;
 }
 
+int GetMockInsertWithConflictResolutionExecuteTimes()
+{
+    return g_mockInsertWithConflictResolutionExecuteTimes;
+}
+
+int GetMockDeleteExecuteTimes()
+{
+    return g_mockDeleteExecuteTimes;
+}
+
 void ResetMockRdbStore()
 {
     g_mockQuerySqlResults = {nullptr};

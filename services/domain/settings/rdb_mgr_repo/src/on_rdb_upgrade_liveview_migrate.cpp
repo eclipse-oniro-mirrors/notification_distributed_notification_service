@@ -74,10 +74,21 @@ static bool UpdateRequestByJsonObject(nlohmann::json &jsonObject)
         return false;
     }
 
-    if (!jsonObject.contains("actionButtons") || jsonObject.at("actionButtons").empty() ||
-        !jsonObject.at("actionButtons").is_array()) {
-        ANS_LOGW("Invalid or missing action button json");
+    // A live view published without any action button stores an empty actionButtons array
+    // (the request writer always serializes the field). Such a record carries no extension
+    // wantAgent in actionButtons[0] and is already compatible with the new format,
+    // so keep it as is instead of treating it as corrupt data.
+    if (!jsonObject.contains("actionButtons")) {
+        ANS_LOGI("Live view without actionButtons, keep the record without migration");
+        return true;
+    }
+    if (!jsonObject.at("actionButtons").is_array()) {
+        ANS_LOGW("Invalid action button json type");
         return false;
+    }
+    if (jsonObject.at("actionButtons").empty()) {
+        ANS_LOGI("Live view with empty actionButtons, keep the record without migration");
+        return true;
     }
 
     nlohmann::json extentionWantAgent;
