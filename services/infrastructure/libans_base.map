@@ -16,11 +16,6 @@
 1.0 {
   global:
       extern "C++" {
-        guard?variable?for?OHOS::Notification::REQUEST_STORAGE_KEY_PREFIX;
-        guard?variable?for?OHOS::Notification::REQUEST_STORAGE_SECURE_KEY_PREFIX;
-        guard?variable?for?OHOS::NativeRdb::Transaction::creator_;
-        OHOS::Notification::REQUEST_STORAGE_KEY_PREFIX;
-        OHOS::Notification::REQUEST_STORAGE_SECURE_KEY_PREFIX;
         OHOS::Notification::Infra::FfrtQueueImpl*;
         OHOS::Notification::Infra::NtfRdbHookMgr*;
         OHOS::Notification::Infra::NtfRdbConstant::NOTIFICATION_RDB_NAME;
@@ -40,7 +35,6 @@
         OHOS::Notification::Infra::PriorityInfoMigrationHandler*;
         OHOS::Notification::Infra::BundleManagerRepositoryImpl*;
         OHOS::Notification::Infra::TimerImpl*;
-        OHOS::NativeRdb::Transaction::creator_;
         # void ffrt::exec_function_wrapper<std::__h::function<void ()> >(void*);
         # void ffrt::exec_function_wrapper<std::__h::function<void ()> const&>(void*);
         # void ffrt::destroy_function_wrapper<std::__h::function<void ()> >(void*);

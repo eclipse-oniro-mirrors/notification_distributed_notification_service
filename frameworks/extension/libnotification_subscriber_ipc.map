@@ -14,13 +14,9 @@
 1.0 {
   global:
     extern "C++" {
-        guard?variable?for?OHOS::Notification::REQUEST_STORAGE_KEY_PREFIX;
         guard?variable?for?OHOS::Notification::NotificationSubscriberProxy::delegator_;
-        guard?variable?for?OHOS::Notification::REQUEST_STORAGE_SECURE_KEY_PREFIX;
         OHOS::Notification::INotificationSubscriber::LABEL;
-        OHOS::Notification::REQUEST_STORAGE_KEY_PREFIX;
         OHOS::Notification::NotificationSubscriberProxy::delegator_;
-        OHOS::Notification::REQUEST_STORAGE_SECURE_KEY_PREFIX;
         OHOS::Notification::NotificationSubscriberProxy::*;
         OHOS::Notification::NotificationSubscriberStub::OnRemoteRequest*;
         VTT?for?OHOS::Notification::NotificationSubscriberStub;
@@ -28,7 +24,6 @@
         vtable?for?OHOS::Notification::NotificationSubscriberStub;
         vtable?for?OHOS::Notification::NotificationSubscriberProxy;
     };
-    __emutls_get_address;
     _fini;
     _init;
   local:
