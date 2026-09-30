@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include "notification_content.h"
 #include "notification_local_live_view_content.h"
 
 using namespace testing::ext;
@@ -490,6 +491,69 @@ HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00012, Function | SmallT
         {"flags", "not_array"}};
     auto *res = liveViewContent->FromJson(jsonObject);
     EXPECT_NE(res, nullptr);
+    delete res;
+}
+
+/**
+ * @tc.name: Marshalling_00002
+ * @tc.desc: Test Marshalling returns false when card button size exceeds BUTTON_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, Marshalling_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto liveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LOCAL_LIVE_VIEW));
+    std::vector<NotificationIconButton> buttons;
+    for (uint32_t i = 0; i <= BUTTON_MAX_SIZE; i++) {
+        buttons.push_back(NotificationIconButton());
+    }
+    liveViewContent->SetCardButton(buttons);
+    EXPECT_EQ(liveViewContent->Marshalling(parcel), false);
+}
+
+/**
+ * @tc.name: Unmarshalling_00003
+ * @tc.desc: Test Unmarshalling returns nullptr when card button size exceeds BUTTON_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, Unmarshalling_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto liveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LOCAL_LIVE_VIEW));
+    std::vector<NotificationIconButton> buttons;
+    for (uint32_t i = 0; i <= BUTTON_MAX_SIZE; i++) {
+        buttons.push_back(NotificationIconButton());
+    }
+    liveViewContent->SetCardButton(buttons);
+    // Marshalling fails on the card button size check, but leading fields are already written.
+    EXPECT_EQ(liveViewContent->Marshalling(parcel), false);
+    parcel.WriteInt32(static_cast<int32_t>(buttons.size()));
+
+    EXPECT_EQ(NotificationLocalLiveViewContent::Unmarshalling(parcel), nullptr);
+}
+
+/**
+ * @tc.name: FromJson_00013
+ * @tc.desc: Test FromJson keeps at most BUTTON_MAX_SIZE card buttons.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewContentTest, FromJson_00013, Function | SmallTest | Level1)
+{
+    nlohmann::json buttonsJson = nlohmann::json::array();
+    for (uint32_t i = 0; i < BUTTON_MAX_SIZE + 2; i++) {
+        buttonsJson.push_back(nlohmann::json::object());
+    }
+    nlohmann::json jsonObject = nlohmann::json{{"cardButtons", buttonsJson}};
+
+    auto liveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto *res = liveViewContent->FromJson(jsonObject);
+    ASSERT_NE(res, nullptr);
+    EXPECT_EQ(res->GetCardButton().size(), BUTTON_MAX_SIZE);
     delete res;
 }
 }

@@ -79,7 +79,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackBadgeInfo
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackBadgeInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -160,7 +160,7 @@ ani_object AniDisplayBadge(ani_env *env, ani_object obj, ani_boolean enable, ani
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -210,7 +210,7 @@ ani_object AniIsBadgeDisplayed(ani_env *env, ani_object obj, ani_object callback
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     asyncCallbackInfo->functionType = IS_BADGE_DISPLAYED;
@@ -258,7 +258,7 @@ ani_object AniSetBadgeNumber(ani_env *env, ani_int badgeNumber, ani_object callb
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -309,7 +309,7 @@ ani_object AniSetBadgeNumberByBundle(ani_env *env, ani_object obj, ani_int badge
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     WorkStatus workStatus = CreateAsyncWork(env,
@@ -358,7 +358,7 @@ ani_object AniSetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj, ani_o
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
 
@@ -408,7 +408,7 @@ ani_object AniGetBadgeDisplayStatusByBundles(ani_env *env, ani_object obj, ani_o
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     asyncCallbackInfo->functionType = GET_BADGE_DISPLAY_STATUS_BY_BUNDLES;
@@ -454,7 +454,7 @@ ani_object AniGetBadgeNumber(ani_env *env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     asyncCallbackInfo->functionType = GET_BADGE_NUMBER;

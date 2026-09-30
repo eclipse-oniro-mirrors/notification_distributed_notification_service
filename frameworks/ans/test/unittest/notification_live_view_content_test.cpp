@@ -563,5 +563,134 @@ HWTEST_F(NotificationLiveViewContentTest, ReadFromParcel_NullExtensionWantAgent_
     parcel.RewindRead(0);
     EXPECT_EQ(rrc->ReadFromParcel(parcel), false);
 }
+
+/**
+ * @tc.name: FromJson_00003
+ * @tc.desc: Test FromJson keeps removeState which exceeds LIVE_VIEW_NO_REMOVE and logs.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, FromJson_00003, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"removeState", static_cast<int32_t>(NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_NO_REMOVE) +
+            1}};
+    auto *ptr = NotificationLiveViewContent::FromJson(jsonObject);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(static_cast<uint32_t>(ptr->GetRemoveOnProcessExitState()),
+        static_cast<uint32_t>(NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_NO_REMOVE) + 1);
+    delete ptr;
+}
+
+/**
+ * @tc.name: FromJson_00004
+ * @tc.desc: Test FromJson keeps negative removeState (wraps to uint32 max) and logs.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{{"removeState", -1}};
+    auto *ptr = NotificationLiveViewContent::FromJson(jsonObject);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(static_cast<uint32_t>(ptr->GetRemoveOnProcessExitState()), 0xFFFFFFFFu);
+    delete ptr;
+}
+
+/**
+ * @tc.name: FromJson_00005
+ * @tc.desc: Test FromJson accepts valid removeState.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, FromJson_00005, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"removeState", static_cast<int32_t>(NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_REMOVE)}};
+    auto *ptr = NotificationLiveViewContent::FromJson(jsonObject);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(ptr->GetRemoveOnProcessExitState(),
+        NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_REMOVE);
+    delete ptr;
+}
+
+/**
+ * @tc.name: FromJson_00006
+ * @tc.desc: Test FromJson logs but keeps status which is out of the valid range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, FromJson_00006, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"status", static_cast<int32_t>(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END) + 1}};
+    auto *ptr = NotificationLiveViewContent::FromJson(jsonObject);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(ptr->GetLiveViewStatus()),
+        static_cast<int32_t>(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_PENDING_END) + 1);
+    delete ptr;
+}
+
+/**
+ * @tc.name: FromJson_00007
+ * @tc.desc: Test FromJson logs but keeps negative status (stored via enum cast).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, FromJson_00007, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{{"status", -1}};
+    auto *ptr = NotificationLiveViewContent::FromJson(jsonObject);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(static_cast<int32_t>(ptr->GetLiveViewStatus()), -1);
+    delete ptr;
+}
+
+/**
+ * @tc.name: FromJson_00008
+ * @tc.desc: Test FromJson accepts status within the valid range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, FromJson_00008, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"status", static_cast<int32_t>(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE)}};
+    auto *ptr = NotificationLiveViewContent::FromJson(jsonObject);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(ptr->GetLiveViewStatus(), NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    delete ptr;
+}
+
+/**
+ * @tc.name: FromJson_00009
+ * @tc.desc: Test FromJson logs but truncates version which exceeds uint32_t range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, FromJson_00009, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{{"version", 4294967296LL}};
+    auto *ptr = NotificationLiveViewContent::FromJson(jsonObject);
+    ASSERT_NE(ptr, nullptr);
+    // Out-of-range version is logged, then narrowed when stored.
+    EXPECT_EQ(ptr->GetVersion(), 0);
+    delete ptr;
+}
+
+/**
+ * @tc.name: FromJson_00010
+ * @tc.desc: Test FromJson accepts version within uint32_t range.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationLiveViewContentTest, FromJson_00010, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{{"version", 1}};
+    auto *ptr = NotificationLiveViewContent::FromJson(jsonObject);
+    ASSERT_NE(ptr, nullptr);
+    EXPECT_EQ(ptr->GetVersion(), 1);
+    delete ptr;
+}
 }
 }

@@ -65,7 +65,7 @@ void DeleteCallBackInfo(ani_env* env, AsyncCallbackStatistics* asyncCallbackInfo
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackStatistics* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -113,7 +113,7 @@ ani_object AniGetNotificationStatisticsByBundle(ani_env *env, ani_object obj)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, nullptr, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);

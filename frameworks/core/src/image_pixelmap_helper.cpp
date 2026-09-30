@@ -99,11 +99,12 @@ ErrCode ImagePixelmapHelper::InitRawfileData()
         ANS_LOGE("Get appContext nullptr.");
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
-    if (!appContext->CreateBundleContext(bundleName)) {
+    auto bundleContext = appContext->CreateBundleContext(bundleName);
+    if (bundleContext == nullptr) {
         ANS_LOGE("CreateBundleContext failed.");
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
-    resourceManager_ = appContext->CreateBundleContext(bundleName)->GetResourceManager();
+    resourceManager_ = bundleContext->GetResourceManager();
     if (!resourceManager_) {
         ANS_LOGE("Get resourceManager nullptr.");
         return ERR_ANS_INNER_PERMISSION_DENIED;

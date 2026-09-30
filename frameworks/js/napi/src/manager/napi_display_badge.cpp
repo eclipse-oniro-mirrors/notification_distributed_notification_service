@@ -670,7 +670,7 @@ napi_value NapiGetBadgeDisplayStatusByBundles(napi_env env, napi_callback_info i
         return Common::NapiGetUndefined(env);
     }
 
-    napi_value promise;
+    napi_value promise = nullptr;
     Common::PaddingCallbackPromiseInfo(env, nullptr, asyncCallbackInfo->info, promise);
     asyncCallbackInfo->info.isCallback = false;
 

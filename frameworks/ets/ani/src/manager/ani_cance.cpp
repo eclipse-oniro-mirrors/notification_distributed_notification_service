@@ -77,7 +77,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackCancelInf
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackCancelInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -120,7 +120,7 @@ ani_object AniCancelAll(ani_env *env, ani_object callback)
         return nullptr;
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -172,7 +172,7 @@ ani_object AniCancelWithId(ani_env *env, ani_int id, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     WorkStatus workStatus = CreateAsyncWork(env,
@@ -216,7 +216,7 @@ ani_object AniCancelWithIdLabel(ani_env *env, ani_int id, ani_string label, ani_
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -267,7 +267,7 @@ ani_object AniCancelWithBundle(ani_env *env, ani_object bundleObj, ani_int id, a
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -328,7 +328,7 @@ ani_object AniCancelAsBundle(ani_env *env, ani_int id, ani_string representative
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     WorkStatus workStatus = CreateAsyncWork(env,
@@ -378,7 +378,7 @@ ani_object AniCancelAsBundleWithBundleOption(ani_env *env, ani_object representa
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     WorkStatus workStatus = CreateAsyncWork(env,
@@ -429,7 +429,7 @@ ani_object AniCancelGroup(ani_env *env, ani_string groupName, ani_object callbac
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     WorkStatus workStatus = CreateAsyncWork(env,

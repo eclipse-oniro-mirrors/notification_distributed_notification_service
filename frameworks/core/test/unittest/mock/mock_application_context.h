@@ -28,6 +28,8 @@ void MockResetApplicationContextState();
 
 void MockCreateBundleContextReturnNull(bool isNull);
 void MockResetCreateBundleContextState();
+int32_t GetCreateBundleContextCallCount();
+void MockResetCreateBundleContextCallCount();
 
 std::shared_ptr<ApplicationContext> GetMockApplicationContext();
 

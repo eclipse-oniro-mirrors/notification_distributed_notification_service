@@ -55,8 +55,6 @@ bool CreateUiExtCallback(ani_env *env, std::shared_ptr<SettingsModalExtensionCal
 {
     if (!uiExtCallback->Init(env, info, StsAsyncCompleteCallbackOpenSettings)) {
         ANS_LOGE("Init error");
-        info->errorCode = ERR_ANS_INNER_TASK_ERR;
-        StsAsyncCompleteCallbackOpenSettings(env, info);
         return false;
     }
     uiExtCallback->SetAbilityContext(abilityContext);
@@ -263,7 +261,7 @@ ani_object AniOpenSubscribeSettings(ani_env *env, ani_object content)
         ANS_LOGE("error, code is %{public}d.", info->errorCode);
         StsAsyncCompleteCallbackOpenSettings(env, info);
         isExist.store(false);
-        return nullptr;
+        return aniPromise;
     }
     NotificationSts::HistogramBoolReport("NotificationKit.APICall.openSubscriptionSettings", true);
     return aniPromise;
@@ -316,7 +314,7 @@ ani_object AniOpenSubscribeSettingsWithResult(ani_env *env, ani_object content)
         ANS_LOGE("error, code is %{public}d.", info->errorCode);
         StsAsyncCompleteCallbackOpenSettings(env, info);
         isExist.store(false);
-        return nullptr;
+        return aniPromise;
     }
     ANS_LOGD("sts AniOpenSubscribeSettings end");
 

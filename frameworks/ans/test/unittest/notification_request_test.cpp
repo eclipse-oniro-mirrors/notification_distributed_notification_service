@@ -2154,6 +2154,44 @@ HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationContent_0400, Level1)
 }
 
 /**
+ * @tc.name: ConvertJsonToNotificationContent_0500
+ * @tc.desc: ConvertJsonToNotificationContent keeps line want agents aligned with line want agent strs,
+ *           even when a non-empty want agent string fails to parse.
+ * @tc.type: FUNC
+ * @tc.require: issueI65R21
+ */
+HWTEST_F(NotificationRequestTest, ConvertJsonToNotificationContent_0500, Level1)
+{
+    // ToJson serializes lineWantAgents_ (not lineWantAgentStrs_), so craft the json directly:
+    // a non-empty unparsable string triggers the parse-failure log, an empty string does not.
+    nlohmann::json jsonObject = nlohmann::json{
+        {"content", {
+            {"contentType", static_cast<int32_t>(NotificationContent::Type::MULTILINE)},
+            {"content", {
+                {"lineWantAgents", {"unparsable-want-agent", ""}}
+            }}
+        }}
+    };
+
+    int32_t myNotificationId = 10;
+    Notification::NotificationRequest* target = new Notification::NotificationRequest(myNotificationId);
+    target->SetOwnerUid(22);
+    bool result = Notification::NotificationRequest::ConvertJsonToNotificationContent(target, jsonObject);
+    EXPECT_EQ(result, true);
+    auto content = target->GetContent();
+    ASSERT_NE(content, nullptr);
+    auto targetMultiLine = std::static_pointer_cast<NotificationMultiLineContent>(
+        content->GetNotificationContent());
+    ASSERT_NE(targetMultiLine, nullptr);
+    EXPECT_EQ(targetMultiLine->GetLineWantAgentStrs().size(), 2);
+    // Failed parses keep a nullptr placeholder so agents stay aligned with strs.
+    EXPECT_EQ(targetMultiLine->GetLineWantAgents().size(), targetMultiLine->GetLineWantAgentStrs().size());
+    EXPECT_EQ(targetMultiLine->GetLineWantAgents()[0], nullptr);
+    EXPECT_EQ(targetMultiLine->GetLineWantAgents()[1], nullptr);
+    delete target;
+}
+
+/**
  * @tc.name: ReadFromParcel_ContentTypeSync_0100
  * @tc.desc: Test ReadFromParcel syncs notificationContentType_ from notificationContent_ with BASIC_TEXT type
  * @tc.type: FUNC

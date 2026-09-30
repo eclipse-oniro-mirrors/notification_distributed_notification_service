@@ -277,6 +277,19 @@ HWTEST_F(NotificationIconButtonTest, ReadResourceFromParcel_00003, Function | Sm
     EXPECT_EQ(button->ReadResourceFromParcel(parcel, resourceObj), false);
 }
 
+HWTEST_F(NotificationIconButtonTest, ReadResourceFromParcel_00004, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationIconButton>();
+    std::shared_ptr<ResourceManager::Resource> resourceObj;
+    parcel.WriteStringVector({"bundleName", "moduleName", "4294967295"});
+    EXPECT_EQ(button->ReadResourceFromParcel(parcel, resourceObj), true);
+    ASSERT_NE(resourceObj, nullptr);
+    EXPECT_EQ(resourceObj->id, 4294967295U);
+    EXPECT_EQ(resourceObj->bundleName, "bundleName");
+    EXPECT_EQ(resourceObj->moduleName, "moduleName");
+}
+
 HWTEST_F(NotificationIconButtonTest, Marshalling_00003, Function | SmallTest | Level1)
 {
     Parcel parcel;

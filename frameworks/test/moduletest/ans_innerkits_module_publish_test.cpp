@@ -712,6 +712,11 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_00100, Function
     messageUserPtr->SetUserAsImportant(false);
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish_00100::messageUser is::" << messageUserPtr->Dump();
     req.AddMessageUser(messageUserPtr);
+    // Shown action index must be smaller than the action buttons size, add one button for action 0.
+    std::shared_ptr<NotificationActionButton> shownActionButton =
+        NotificationActionButton::Create(nullptr, "shownAction", nullptr);
+    ASSERT_NE(shownActionButton, nullptr);
+    req.AddActionButton(shownActionButton);
     GTEST_LOG_(INFO) << "ANS_Interface_MT_Publish_00100::messageUser is::" << req.Dump();
     g_consumed_mtx.lock();
     EXPECT_EQ(0, NotificationHelper::PublishNotification(req));

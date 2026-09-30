@@ -159,7 +159,7 @@ InnerErrorCode AnsNotification::GetNotificationSlotNumAsBundle(
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->GetSlotNumAsBundle(bo, num));
 }
@@ -181,7 +181,7 @@ InnerErrorCode AnsNotification::GetNotificationSlotFlagsAsBundle(const Notificat
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->GetSlotFlagsAsBundle(bo, slotFlags));
 }
@@ -216,7 +216,7 @@ InnerErrorCode AnsNotification::SetNotificationSlotFlagsAsBundle(const Notificat
 
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     if (slotFlags > MAX_SLOT_FLAGS) {
@@ -364,7 +364,7 @@ InnerErrorCode AnsNotification::CancelNotificationNoBlockIPC(const std::string &
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     if (synchronizer == nullptr) {
         ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->Cancel(notificationId, label, instanceKey, synchronizer));
     // ERR_OK means the task is put into the ffrt queue at service layer.
@@ -406,7 +406,7 @@ InnerErrorCode AnsNotification::CancelAllNotificationsNoBlockIPC(const std::stri
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     if (synchronizer == nullptr) {
         ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->CancelAll(instanceKey, synchronizer));
     // ERR_OK means the task is put into the ffrt queue at service layer.
@@ -442,7 +442,7 @@ InnerErrorCode AnsNotification::CancelAsBundleNoBlockIPC(
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     if (synchronizer == nullptr) {
         ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     InnerErrorCode ret = static_cast<InnerErrorCode>(
         proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer));
@@ -476,11 +476,15 @@ InnerErrorCode AnsNotification::CancelAsBundleNoBlockIPC(
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INNER_NO_MEMORY;
+    }
 
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     if (synchronizer == nullptr) {
         ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->CancelAsBundle(bo, notificationId, synchronizer));
     // ERR_OK means the task is put into the ffrt queue at service layer.
@@ -501,6 +505,10 @@ InnerErrorCode AnsNotification::CancelAsBundle(
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INNER_NO_MEMORY;
+    }
     return static_cast<InnerErrorCode>(proxy->CancelAsBundle(bo, notificationId));
 }
 
@@ -526,7 +534,7 @@ InnerErrorCode AnsNotification::GetActiveNotificationsNoBlockIPC(std::vector<spt
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     if (synchronizer == nullptr) {
         ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetActiveNotifications(instanceKey, synchronizer));
     // ERR_OK means the task is put into the ffrt queue at service layer.
@@ -1044,9 +1052,9 @@ InnerErrorCode AnsNotification::TriggerLocalLiveView(const NotificationBundleOpt
 
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     sptr<NotificationButtonOption> button(new (std::nothrow) NotificationButtonOption(buttonOption));
-    if (bo == nullptr) {
-        ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+    if (bo == nullptr || button == nullptr) {
+        ANS_LOGE("null bundleOption or buttonOption");
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->TriggerLocalLiveView(bo, notificationId, button));
 }
@@ -1088,7 +1096,7 @@ InnerErrorCode AnsNotification::RemoveNotification(const NotificationBundleOptio
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->RemoveNotification(bo, notificationId, label, removeReason));
 }
@@ -1110,7 +1118,7 @@ InnerErrorCode AnsNotification::RemoveAllNotifications(const NotificationBundleO
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->RemoveAllNotifications(bo));
 }
@@ -1164,7 +1172,7 @@ InnerErrorCode AnsNotification::RemoveNotificationsByBundle(const NotificationBu
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->DeleteByBundle(bo));
 }
@@ -1196,7 +1204,7 @@ InnerErrorCode AnsNotification::GetNotificationSlotsForBundle(
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->GetSlotsByBundle(bo, slots));
 }
@@ -1219,7 +1227,7 @@ InnerErrorCode AnsNotification::GetNotificationSlotForBundle(
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->GetSlotByBundle(bo, slotType, slot));
 }
@@ -1242,7 +1250,7 @@ InnerErrorCode AnsNotification::UpdateNotificationSlots(
 
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     if (slots.empty()) {
@@ -1270,7 +1278,7 @@ InnerErrorCode AnsNotification::GetAllActiveNotificationsNoBlockIPC(std::vector<
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     if (synchronizer == nullptr) {
         ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetAllActiveNotifications(synchronizer));
     // ERR_OK means the task is put into the ffrt queue at service layer.
@@ -1330,7 +1338,7 @@ InnerErrorCode AnsNotification::GetActiveNotificationByFilter(const LiveViewFilt
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(filter.bundle));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->GetActiveNotificationByFilter(bo, filter.notificationKey.id,
         filter.notificationKey.label, filter.userId, filter.extraInfoKeys, request));
@@ -1366,7 +1374,7 @@ InnerErrorCode AnsNotification::IsAllowedNotify(const NotificationBundleOption &
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->IsSpecialBundleAllowedNotify(bo, allowed));
 }
@@ -1409,7 +1417,7 @@ InnerErrorCode AnsNotification::SetNotificationsEnabledForSpecifiedBundle(
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->SetNotificationsEnabledForSpecialBundle(deviceId, bo, enabled, true));
 }
@@ -1431,7 +1439,7 @@ InnerErrorCode AnsNotification::SetShowBadgeEnabledForBundle(
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->SetShowBadgeEnabledForBundle(bo, enabled));
 }
@@ -1479,13 +1487,13 @@ InnerErrorCode AnsNotification::GetShowBadgeEnabledForBundleNoBlockIPC(const Not
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     if (synchronizer == nullptr) {
         ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetShowBadgeEnabledForBundle(bo, synchronizer));
     // ERR_OK means the task is put into the ffrt queue at service layer.
@@ -1514,7 +1522,7 @@ InnerErrorCode AnsNotification::GetShowBadgeEnabledForBundle(
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->GetShowBadgeEnabledForBundle(bo, enabled));
 }
@@ -1558,7 +1566,7 @@ InnerErrorCode AnsNotification::GetShowBadgeEnabledNoBlockIPC(bool &enabled)
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     if (synchronizer == nullptr) {
         ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetShowBadgeEnabled(synchronizer));
     // ERR_OK means the task is put into the ffrt queue at service layer.
@@ -1873,7 +1881,7 @@ InnerErrorCode AnsNotification::EnableDistributedByBundle(
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->EnableDistributedByBundle(bo, enabled));
 }
@@ -1901,7 +1909,7 @@ InnerErrorCode AnsNotification::IsDistributedEnableByBundle(
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->IsDistributedEnableByBundle(bo, enabled));
 }
@@ -1983,7 +1991,7 @@ bool AnsNotification::CanPublishMediaContent(const NotificationRequest &request)
     auto showActions = media->GetShownActions();
     size_t size = request.GetActionButtons().size();
     for (auto it = showActions.begin(); it != showActions.end(); ++it) {
-        if (*it > size) {
+        if (*it >= size) {
             ANS_LOGE("The sequence numbers actions is: %{public}d, the assigned to added action buttons size is: "
                      "%{public}zu.", *it, size);
             return false;
@@ -2163,7 +2171,7 @@ InnerErrorCode AnsNotification::SetDoNotDisturbDate(const int32_t &userId,
         ANS_LOGE("null dndDate");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
-    return static_cast<InnerErrorCode>(proxy->SetDoNotDisturbDate(dndDate));
+    return static_cast<InnerErrorCode>(proxy->SetDoNotDisturbDate(userId, dndDate));
 }
 
 InnerErrorCode AnsNotification::GetDoNotDisturbDate(
@@ -2181,7 +2189,7 @@ InnerErrorCode AnsNotification::GetDoNotDisturbDate(
     }
 
     sptr<NotificationDoNotDisturbDate> dndDate = nullptr;
-    InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetDoNotDisturbDate(dndDate));
+    InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetDoNotDisturbDate(userId, dndDate));
     if (ret != ERR_OK) {
         ANS_LOGE("Get DoNotDisturbDate failed.");
         return ret;
@@ -2214,7 +2222,7 @@ InnerErrorCode AnsNotification::SetEnabledForBundleSlot(const NotificationBundle
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->SetEnabledForBundleSlot(bo, slotType, enabled, isForceControl));
 }
@@ -2236,7 +2244,7 @@ InnerErrorCode AnsNotification::GetEnabledForBundleSlot(
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->GetEnabledForBundleSlot(bo, slotType, enabled));
 }
@@ -2741,7 +2749,7 @@ InnerErrorCode AnsNotification::SetDistributedEnabledByBundle(const Notification
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->SetDistributedEnabledByBundle(bo, deviceType, enabled, isNotification));
 }
@@ -2827,7 +2835,7 @@ InnerErrorCode AnsNotification::SetDistributedEnabled(const std::string &deviceT
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("SetDistributedEnabled fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -2844,7 +2852,7 @@ InnerErrorCode AnsNotification::IsDistributedEnabled(const std::string &deviceTy
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("IsDistributedEnabled fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -2856,7 +2864,7 @@ InnerErrorCode AnsNotification::GetDistributedAbility(int32_t &abilityId)
     ANS_LOGD("called");
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("GetDistributedAbility fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -2874,7 +2882,7 @@ InnerErrorCode AnsNotification::GetDistributedAuthStatus(
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("GetDistributedAuthStatus fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -2892,7 +2900,7 @@ InnerErrorCode AnsNotification::SetDistributedAuthStatus(
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("SetDistributedAuthStatus fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -2909,7 +2917,7 @@ InnerErrorCode AnsNotification::UpdateDistributedDeviceList(const std::string &d
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("UpdateDistributedDeviceList fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -2934,7 +2942,7 @@ InnerErrorCode AnsNotification::IsDistributedEnabledByBundle(const NotificationB
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->IsDistributedEnabledByBundle(bo, deviceType, isNotification, enabled));
 }
@@ -2957,7 +2965,7 @@ InnerErrorCode AnsNotification::SetSilentReminderEnabled(const NotificationBundl
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("Fail: bundleOption is empty.");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->SetSilentReminderEnabled(bo, enabled));
 }
@@ -2980,7 +2988,7 @@ InnerErrorCode AnsNotification::IsSilentReminderEnabled(const NotificationBundle
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("Fail: bundleOption is empty.");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->IsSilentReminderEnabled(bo, enableStatus));
 }
@@ -2990,7 +2998,7 @@ InnerErrorCode AnsNotification::SetSmartReminderEnabled(const std::string &devic
     ANS_LOGD("called");
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("SetSmartReminderEnabled fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -3003,7 +3011,7 @@ InnerErrorCode AnsNotification::SetDistributedEnabledBySlot(
     ANS_LOGD("called");
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("SetDistributedEnabledBySlot fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -3016,7 +3024,7 @@ InnerErrorCode AnsNotification::IsDistributedEnabledBySlot(
     ANS_LOGD("called");
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("IsDistributedEnabledBySlot fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -3037,12 +3045,12 @@ InnerErrorCode AnsNotification::CancelAsBundleWithAgentNoBlockIPC(const Notifica
     sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bundle == nullptr) {
         ANS_LOGE("null bundle");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
     if (synchronizer == nullptr) {
         ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->CancelAsBundleWithAgent(bundle, id, synchronizer));
     // ERR_OK means the task is put into the ffrt queue at service layer.
@@ -3067,7 +3075,7 @@ InnerErrorCode AnsNotification::CancelAsBundleWithAgent(
     sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bundle == nullptr) {
         ANS_LOGE("null bundle");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->CancelAsBundleWithAgent(bundle, id));
 }
@@ -3077,7 +3085,7 @@ InnerErrorCode AnsNotification::IsSmartReminderEnabled(const std::string &device
     ANS_LOGD("called");
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("IsSmartReminderEnabled fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -3090,7 +3098,7 @@ InnerErrorCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceT
     ANS_LOGD("called");
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("SetTargetDeviceStatus fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -3103,7 +3111,7 @@ InnerErrorCode AnsNotification::SetTargetDeviceStatus(const std::string &deviceT
     ANS_LOGD("called");
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("SetTargetDeviceStatus fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -3198,7 +3206,7 @@ InnerErrorCode AnsNotification::GetTargetDeviceStatus(const std::string &deviceT
     ANS_LOGD("called");
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
-        ANS_LOGE("UnregisterPushCallback fail.");
+        ANS_LOGE("GetTargetDeviceStatus fail: proxy is null.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
@@ -3292,7 +3300,7 @@ InnerErrorCode AnsNotification::SetDefaultSlotForBundle(const NotificationBundle
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->SetDefaultSlotForBundle(bo, slotType, enabled, isForceControl));
 }
@@ -3354,6 +3362,7 @@ InnerErrorCode AnsNotification::RegisterSwingCallback(const std::function<void(b
         ANS_LOGE("RegisterSwingCallback fail.");
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
+
     swingCallBackService_ = new(std::nothrow) SwingCallBackService(swingCbFunc);
     if (swingCallBackService_ == nullptr) {
         ANS_LOGE("null swingCallBackService");
@@ -3531,13 +3540,13 @@ InnerErrorCode AnsNotification::SetRingtoneInfoByBundle(const NotificationBundle
     sptr<NotificationBundleOption> bundleSptr(new (std::nothrow) NotificationBundleOption(bundle));
     if (bundleSptr == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     sptr<NotificationRingtoneInfo> ringtoneInfoSptr(new (std::nothrow) NotificationRingtoneInfo(ringtoneInfo));
     if (ringtoneInfoSptr == nullptr) {
         ANS_LOGE("null ringtoneInfo");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     return static_cast<InnerErrorCode>(proxy->SetRingtoneInfoByBundle(bundleSptr, ringtoneInfoSptr));
@@ -3561,17 +3570,21 @@ InnerErrorCode AnsNotification::GetRingtoneInfoByBundle(const NotificationBundle
     sptr<NotificationBundleOption> bundleSptr(new (std::nothrow) NotificationBundleOption(bundle));
     if (bundleSptr == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     sptr<NotificationRingtoneInfo> ringtoneInfoSptr(new (std::nothrow) NotificationRingtoneInfo(ringtoneInfo));
     if (ringtoneInfoSptr == nullptr) {
         ANS_LOGE("null ringtoneInfo");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
 
     InnerErrorCode errCode = static_cast<InnerErrorCode>(proxy->GetRingtoneInfoByBundle(bundleSptr, ringtoneInfoSptr));
     if (errCode == ERR_OK) {
+        if (ringtoneInfoSptr == nullptr) {
+            ANS_LOGE("ringtoneInfoSptr is null after IPC call");
+            return ERR_ANS_INNER_INVALID_PARAM;
+        }
         ringtoneInfo = *ringtoneInfoSptr;
     }
     return errCode;
@@ -3788,7 +3801,7 @@ InnerErrorCode AnsNotification::GetUserGrantedState(const NotificationBundleOpti
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(targetBundle));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->GetUserGrantedState(bo, enabled));
 }
@@ -3810,7 +3823,7 @@ InnerErrorCode AnsNotification::SetUserGrantedState(const NotificationBundleOpti
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(targetBundle));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->SetUserGrantedState(bo, enabled));
 }
@@ -3833,7 +3846,7 @@ InnerErrorCode AnsNotification::GetUserGrantedEnabledBundles(
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(targetBundle));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->GetUserGrantedEnabledBundles(bo, enabledBundles));
 }
@@ -3873,7 +3886,7 @@ InnerErrorCode AnsNotification::SetUserGrantedBundleState(const NotificationBund
     sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(targetBundle));
     if (bo == nullptr) {
         ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_INVALID_PARAM;
+        return ERR_ANS_INNER_NO_MEMORY;
     }
     return static_cast<InnerErrorCode>(proxy->SetUserGrantedBundleState(bo, enabledBundles, enabled));
 }

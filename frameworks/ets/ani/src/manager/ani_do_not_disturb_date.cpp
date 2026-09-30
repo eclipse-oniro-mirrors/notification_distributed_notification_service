@@ -78,7 +78,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackDisturbIn
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackDisturbInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -156,7 +156,7 @@ ani_object AniSetDoNotDisturbDate(ani_env *env, ani_object date, ani_object call
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     WorkStatus workStatus = CreateAsyncWork(env,
@@ -205,7 +205,7 @@ ani_object AniSetDoNotDisturbDateWithId(ani_env *env, ani_object date, ani_int u
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     WorkStatus workStatus = CreateAsyncWork(env,
@@ -248,7 +248,7 @@ ani_object AniGetDoNotDisturbDate(ani_env *env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     asyncCallbackInfo->functionType = GET_DO_NOT_DISTURB_DATE;
@@ -293,7 +293,7 @@ ani_object AniGetDoNotDisturbDateWithId(ani_env *env, ani_int userId, ani_object
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     asyncCallbackInfo->functionType = GET_DO_NOT_DISTURB_DATE_WITH_ID;
@@ -337,7 +337,7 @@ ani_object AniIsSupportDoNotDisturbMode(ani_env *env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     asyncCallbackInfo->functionType = IS_SUPPORT_DO_NOT_DISTURB_DATE_MODE;

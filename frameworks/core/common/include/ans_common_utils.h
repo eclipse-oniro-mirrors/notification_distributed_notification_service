@@ -35,7 +35,12 @@ public:
     template<typename T>
     static bool WriteParcelableVector(const std::vector<std::shared_ptr<T>> &parcelableVector, Parcel &data)
     {
-        if (!data.WriteInt32(parcelableVector.size())) {
+        if (parcelableVector.size() > static_cast<size_t>(MAX_PARCELABLE_VECTOR_NUM)) {
+            ANS_LOGE("ParcelableVector size %{public}zu exceeds limit %{public}d",
+                parcelableVector.size(), MAX_PARCELABLE_VECTOR_NUM);
+            return false;
+        }
+        if (!data.WriteInt32(static_cast<int32_t>(parcelableVector.size()))) {
             ANS_LOGE("Failed to write ParcelableVector size.");
             return false;
         }
@@ -57,7 +62,11 @@ public:
             ANS_LOGE("Failed to read Parcelable size.");
             return false;
         }
-        infoSize = (infoSize < MAX_PARCELABLE_VECTOR_NUM) ? infoSize : MAX_PARCELABLE_VECTOR_NUM;
+        if (infoSize < 0 || infoSize > MAX_PARCELABLE_VECTOR_NUM) {
+            ANS_LOGE("Invalid Parcelable size %{public}d, exceeds limit %{public}d",
+                infoSize, MAX_PARCELABLE_VECTOR_NUM);
+            return false;
+        }
         parcelableInfos.clear();
         for (int32_t index = 0; index < infoSize; index++) {
             std::shared_ptr<T> info = std::shared_ptr<T>(data.ReadParcelable<T>());

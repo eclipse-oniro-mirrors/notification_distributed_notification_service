@@ -80,7 +80,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackPriorityI
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackPriorityInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -202,7 +202,7 @@ ani_object AniSetBundlePriorityConfig(ani_env* env, ani_object obj, ani_string v
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -251,7 +251,7 @@ ani_object AniGetBundlePriorityConfig(ani_env* env, ani_object obj, ani_object c
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -305,7 +305,7 @@ ani_object AniSetPriorityEnabledByBundle(ani_env* env, ani_object obj, ani_enum_
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -355,7 +355,7 @@ ani_object AniIsPriorityEnabledByBundle(ani_env* env, ani_object obj, ani_object
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -399,7 +399,7 @@ ani_object AniSetPriorityEnabled(ani_env* env, ani_boolean enable, ani_object ca
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -445,7 +445,7 @@ ani_object AniIsPriorityEnabled(ani_env* env, ani_object callback)
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -498,7 +498,7 @@ ani_object AniSetPriorityEnabledByBundles(ani_env *env, ani_object obj)
         }
         asyncCallbackInfo->priorityEnable.emplace(bo, enabled);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -541,7 +541,7 @@ ani_object AniGetPriorityEnabledByBundles(ani_env *env, ani_object obj)
         return nullptr;
     }
     asyncCallbackInfo->functionType = GET_PRIORITY_ENABLED;
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -577,7 +577,7 @@ ani_object AniSetPriorityIntelligentEnabled(ani_env* env, ani_boolean enable)
         return nullptr;
     }
     asyncCallbackInfo->isPriorityEnabled = NotificationSts::AniBooleanToBool(enable);
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -616,7 +616,7 @@ ani_object AniIsPriorityIntelligentEnabled(ani_env *env)
         return nullptr;
     }
     asyncCallbackInfo->functionType = IS_PRIORITY_INTELLIGENT_ENABLED;
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -666,7 +666,7 @@ ani_object AniSetPriorityStrategyByBundles(ani_env *env, ani_object obj)
         }
         asyncCallbackInfo->priorityDatas.emplace(bo, strategy);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
@@ -709,7 +709,7 @@ ani_object AniGetPriorityStrategyByBundles(ani_env *env, ani_object obj)
         return nullptr;
     }
     asyncCallbackInfo->functionType = GET_PRIORITY_STRATEGY;
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);

@@ -16,8 +16,13 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <unistd.h>
+#define private public
+#define protected public
 #include "notification_local_live_view_button.h"
+#undef private
+#undef protected
 #include "ans_image_util.h"
+#include "notification_icon_button.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -489,6 +494,157 @@ HWTEST_F(NotificationLocalLiveViewButtonTest, FromJson_00008, Function | SmallTe
     auto *res = NotificationLocalLiveViewButton::FromJson(jsonObject);
     EXPECT_NE(res, nullptr);
     delete res;
+}
+
+/**
+ * @tc.name: FromJson_00009
+ * @tc.desc: Test FromJson keeps at most BUTTON_MAX_SIZE button names.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, FromJson_00009, Function | SmallTest | Level1)
+{
+    nlohmann::json jsonObject = nlohmann::json{
+        {"names", {"button1", "button2", "button3", "button4", "button5"}}};
+    auto *res = NotificationLocalLiveViewButton::FromJson(jsonObject);
+    ASSERT_NE(res, nullptr);
+    EXPECT_EQ(res->GetAllButtonNames().size(), BUTTON_MAX_SIZE);
+    EXPECT_EQ(res->GetAllButtonNames()[0], "button1");
+    EXPECT_EQ(res->GetAllButtonNames()[BUTTON_MAX_SIZE - 1], "button3");
+    delete res;
+}
+
+/**
+ * @tc.name: FromJson_00010
+ * @tc.desc: Test FromJson keeps at most BUTTON_MAX_SIZE button icon resources.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, FromJson_00010, Function | SmallTest | Level1)
+{
+    nlohmann::json resources = nlohmann::json::array();
+    for (uint32_t i = 0; i < BUTTON_MAX_SIZE + 2; i++) {
+        resources.push_back(nlohmann::json{{"bundleName", "bundleName"}, {"moduleName", "moduleName"}, {"id", i}});
+    }
+    nlohmann::json jsonObject = nlohmann::json{{"iconResources", resources}};
+    auto *res = NotificationLocalLiveViewButton::FromJson(jsonObject);
+    ASSERT_NE(res, nullptr);
+    EXPECT_EQ(res->GetAllButtonIconResource().size(), BUTTON_MAX_SIZE);
+    delete res;
+}
+
+/**
+ * @tc.name: Marshalling_00005
+ * @tc.desc: Test Marshalling returns false when buttonNames size exceeds BUTTON_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Marshalling_00005, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    for (uint32_t i = 0; i <= BUTTON_MAX_SIZE; i++) {
+        button->buttonNames_.push_back("button" + std::to_string(i));
+    }
+    EXPECT_EQ(button->Marshalling(parcel), false);
+}
+
+/**
+ * @tc.name: Marshalling_00006
+ * @tc.desc: Test Marshalling returns false when buttonIcons size exceeds BUTTON_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Marshalling_00006, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    for (uint32_t i = 0; i <= BUTTON_MAX_SIZE; i++) {
+        button->buttonIcons_.push_back(nullptr);
+    }
+    EXPECT_EQ(button->Marshalling(parcel), false);
+}
+
+/**
+ * @tc.name: Marshalling_00007
+ * @tc.desc: Test Marshalling returns false when buttonIconsResource size exceeds BUTTON_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Marshalling_00007, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    auto button = std::make_shared<NotificationLocalLiveViewButton>();
+    for (uint32_t i = 0; i <= BUTTON_MAX_SIZE; i++) {
+        button->buttonIconsResource_.push_back(nullptr);
+    }
+    EXPECT_EQ(button->Marshalling(parcel), false);
+}
+
+/**
+ * @tc.name: Unmarshalling_00009
+ * @tc.desc: Test Unmarshalling returns nullptr when button names size exceeds BUTTON_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00009, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteStringVector({"button1", "button2", "button3", "button4"});
+
+    EXPECT_EQ(NotificationLocalLiveViewButton::Unmarshalling(parcel), nullptr);
+}
+
+/**
+ * @tc.name: Unmarshalling_00010
+ * @tc.desc: Test Unmarshalling returns nullptr when button icons size exceeds BUTTON_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00010, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteStringVector({"button1"});
+    parcel.WriteUint64(BUTTON_MAX_SIZE + 1);
+
+    EXPECT_EQ(NotificationLocalLiveViewButton::Unmarshalling(parcel), nullptr);
+}
+
+/**
+ * @tc.name: Unmarshalling_00011
+ * @tc.desc: Test Unmarshalling returns nullptr when icon resources size exceeds BUTTON_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00011, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteStringVector({"button1"});
+    parcel.WriteUint64(0);
+    parcel.WriteUint64(BUTTON_MAX_SIZE + 1);
+
+    EXPECT_EQ(NotificationLocalLiveViewButton::Unmarshalling(parcel), nullptr);
+}
+
+/**
+ * @tc.name: Unmarshalling_00012
+ * @tc.desc: Test Unmarshalling parses resource id within uint32_t range.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationLocalLiveViewButtonTest, Unmarshalling_00012, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    parcel.WriteStringVector({"button1"});
+    parcel.WriteUint64(0);
+    parcel.WriteUint64(1);
+    parcel.WriteStringVector({"bundleName", "moduleName", "4294967295"});
+
+    auto button = NotificationLocalLiveViewButton::Unmarshalling(parcel);
+    ASSERT_NE(button, nullptr);
+    ASSERT_EQ(button->GetAllButtonIconResource().size(), 1);
+    EXPECT_EQ(button->GetAllButtonIconResource()[0]->id, 4294967295U);
+    EXPECT_EQ(button->GetAllButtonIconResource()[0]->bundleName, "bundleName");
 }
 }
 }

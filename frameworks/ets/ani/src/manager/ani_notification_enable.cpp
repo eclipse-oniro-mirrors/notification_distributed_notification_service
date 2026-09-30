@@ -76,7 +76,7 @@ bool SetCallbackObject(ani_env* env, ani_object callback, AsyncCallbackEnabledIn
 
 bool CheckCompleteEnvironment(ani_env **envCurr, AsyncCallbackEnabledInfo* asyncCallbackInfo)
 {
-    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || envCurr == nullptr) {
+    if (asyncCallbackInfo->vm->GetEnv(ANI_VERSION_1, envCurr) != ANI_OK || *envCurr == nullptr) {
         ANS_LOGE("GetEnv failed");
         delete asyncCallbackInfo;
         asyncCallbackInfo = nullptr;
@@ -144,7 +144,7 @@ ani_object AniIsNotificationEnabled(ani_env *env, ani_object callback)
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
 
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -186,7 +186,7 @@ ani_object AniIsNotificationEnabledWithId(ani_env *env, ani_int userId, ani_obje
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -234,7 +234,7 @@ ani_object AniIsNotificationEnabledWithBundleOption(ani_env *env, ani_object bun
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -282,7 +282,7 @@ ani_object AniSetNotificationEnable(ani_env *env, ani_object bundleOption, ani_b
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -329,7 +329,7 @@ ani_object AniSetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -374,7 +374,7 @@ ani_object AniGetAllNotificationEnabledBundles(ani_env *env, ani_object callback
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -417,7 +417,7 @@ ani_object AniGetAllNotificationEnabledBundlesByUserId(ani_env *env, ani_int use
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -474,7 +474,7 @@ ani_object AniGetSyncNotificationEnabledWithoutApp(ani_env *env, ani_int userId,
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -529,7 +529,7 @@ ani_object AniDisableNotificationFeature(ani_env *env, ani_boolean disabled, ani
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
@@ -584,7 +584,7 @@ ani_object AniDisableNotificationFeatureWithId(ani_env *env, ani_boolean disable
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return NotificationSts::AniJumpCbError(env, callback, OHOS::Notification::ERR_ANS_INNER_TASK_ERR);
     }
-    ani_object promise;
+    ani_object promise = nullptr;
     NotificationSts::PaddingCallbackPromiseInfo(env, asyncCallbackInfo->info.callback,
         asyncCallbackInfo->info, promise);
     ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);

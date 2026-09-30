@@ -100,7 +100,7 @@ bool StsBadgeQueryCallBack::SetObject(ani_env *env, ani_object obj)
 void StsBadgeQueryCallBack::Clean(ani_env *env)
 {
     std::lock_guard<ffrt::mutex> lock(callbackMutex_);
-    if (env == nullptr) {
+    if (env == nullptr || ref_ == nullptr) {
         return;
     }
     if (env->GlobalReference_Delete(ref_) != ANI_OK) {
@@ -117,6 +117,10 @@ void StsBadgeQueryCallBack::HandleBadgeQueryCallback(ani_env *env, std::vector<a
     ANS_LOGD("enter");
     if (env == nullptr) {
         ANS_LOGE("env is nullptr");
+        return;
+    }
+    if (ref_ == nullptr) {
+        ANS_LOGE("ref_ is nullptr");
         return;
     }
 

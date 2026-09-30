@@ -25,6 +25,8 @@ namespace Mock {
 
 void MockCreateBundleContextReturnNull(bool isNull);
 void MockResetCreateBundleContextState();
+int32_t GetCreateBundleContextCallCount();
+void MockResetCreateBundleContextCallCount();
 
 class MockApplicationContext : public ApplicationContext {
 public:

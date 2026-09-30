@@ -282,5 +282,64 @@ HWTEST_F(NotificationCapsuleTest, ResetIcon_00001, Function | SmallTest | Level1
     capsule.ResetIcon();
     ASSERT_EQ(capsule.GetIcon(), nullptr);
 }
+
+/**
+ * @tc.name: Marshalling_00002
+ * @tc.desc: Test Marshalling returns false when capsuleButton size exceeds BUTTON_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, Marshalling_00002, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    NotificationCapsule capsule;
+    std::vector<NotificationIconButton> buttons;
+    for (uint32_t i = 0; i <= BUTTON_MAX_SIZE; i++) {
+        buttons.push_back(NotificationIconButton());
+    }
+    capsule.SetCapsuleButton(buttons);
+    EXPECT_EQ(capsule.Marshalling(parcel), false);
+}
+
+/**
+ * @tc.name: Unmarshalling_00003
+ * @tc.desc: Test Unmarshalling returns nullptr when capsuleButton size exceeds BUTTON_MAX_SIZE.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, Unmarshalling_00003, Function | SmallTest | Level1)
+{
+    Parcel parcel;
+    NotificationCapsule capsule;
+    std::vector<NotificationIconButton> buttons;
+    for (uint32_t i = 0; i <= BUTTON_MAX_SIZE; i++) {
+        buttons.push_back(NotificationIconButton());
+    }
+    capsule.SetCapsuleButton(buttons);
+    // Marshalling fails on the size check, but the leading fields are already written.
+    EXPECT_EQ(capsule.Marshalling(parcel), false);
+    parcel.WriteInt32(static_cast<int32_t>(buttons.size()));
+
+    EXPECT_EQ(NotificationCapsule::Unmarshalling(parcel), nullptr);
+}
+
+/**
+ * @tc.name: FromJson_00004
+ * @tc.desc: Test FromJson keeps at most BUTTON_MAX_SIZE capsule buttons.
+ * @tc.type: FUNC
+ * @tc.require: issueI5WBBH
+ */
+HWTEST_F(NotificationCapsuleTest, FromJson_00004, Function | SmallTest | Level1)
+{
+    nlohmann::json buttonsJson = nlohmann::json::array();
+    for (uint32_t i = 0; i < BUTTON_MAX_SIZE + 2; i++) {
+        buttonsJson.push_back(nlohmann::json::object());
+    }
+    nlohmann::json jsonObject = nlohmann::json{{"capsuleButtons", buttonsJson}};
+
+    sptr<NotificationCapsule> capsuleSptr = NotificationCapsule::FromJson(jsonObject);
+    ASSERT_NE(capsuleSptr, nullptr);
+    EXPECT_EQ(capsuleSptr->GetCapsuleButton().size(), BUTTON_MAX_SIZE);
+}
 }
 }
