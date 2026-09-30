@@ -27,6 +27,12 @@ namespace Notification {
 
         int32_t num = fuzzData->ConsumeIntegral<uint32_t>();
         service->SetNotificationBadgeNum(num);
+        static const int32_t badgeBoundaries[] = { 0, 1, 99, INT32_MAX, -1 };
+        for (int32_t badgeNum : badgeBoundaries) {
+            service->SetNotificationBadgeNum(badgeNum);
+        }
+        int32_t badgeNumber = 0;
+        service->GetBadgeNumber(badgeNumber);
         return true;
     }
 }
@@ -42,6 +48,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
         OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
     };
+    MockRandomToken(&fdp, requestPermission);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fdp);
     ENSURE_ANS_SERVICE_CLEANED_AT_EXIT();
     return 0;
