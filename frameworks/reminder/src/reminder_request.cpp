@@ -1936,10 +1936,6 @@ void ReminderRequest::UpdateNotificationCommon(NotificationRequest& notification
     notificationNormalContent->SetTitle(title_);
     auto notificationContent = std::make_shared<NotificationContent>(notificationNormalContent);
     notificationRequest.SetContent(notificationContent);
-    if ((reminderType_ == ReminderRequest::ReminderType::TIMER) ||
-        (reminderType_ == ReminderRequest::ReminderType::ALARM)) {
-        notificationRequest.SetUnremovable(true);
-    }
 }
 
 void ReminderRequest::UpdateNotificationContent(NotificationRequest& notificationRequest, const bool &setSnooze)
