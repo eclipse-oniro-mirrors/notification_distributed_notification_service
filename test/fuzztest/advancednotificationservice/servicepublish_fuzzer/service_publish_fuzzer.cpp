@@ -24,12 +24,32 @@ namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
         auto service = AdvancedNotificationService::GetInstance();
-        
+
         service->InitPublishProcess();
         service->CreateDialogManager();
         std::string stringData = ConsumePrintableString(fuzzData, fuzzData->ConsumeIntegralInRange<int32_t>(0, 15));
         sptr<NotificationRequest> request = ObjectBuilder<NotificationRequest>::Build(fuzzData);
         service->Publish(stringData, request);
+        if (request != nullptr) {
+            uint64_t nums = 0;
+            service->GetActiveNotificationNums(nums);
+            // Cancel matches records by the request's own (bundle, uid, label, id),
+            // so reusing its fields closes the publish -> query -> cancel chain
+            service->Cancel(request->GetNotificationId(), request->GetLabel(),
+                request->GetAppInstanceKey());
+        }
+        static const std::string kBoundaryLabels[] = {
+            "",
+            "boundary_label_overlong_" + std::string(256, 'x'),
+            "\xe4\xbd\xa0\xe5\xa5\xbd\xe4\xb8\x96\xe7\x95\x8c\xf0\x9f\x8e\x89",
+            "%s%s%s%d%n\\\\..\\/..\\/",
+        };
+        sptr<NotificationRequest> boundaryRequest = ObjectBuilder<NotificationRequest>::Build(fuzzData);
+        for (const std::string &label : kBoundaryLabels) {
+            service->Publish(label, boundaryRequest);
+        }
+        uint64_t numsAfter = 0;
+        service->GetActiveNotificationNums(numsAfter);
         return true;
     }
 }

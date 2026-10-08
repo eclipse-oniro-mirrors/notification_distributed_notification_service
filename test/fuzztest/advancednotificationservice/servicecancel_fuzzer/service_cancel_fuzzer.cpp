@@ -30,11 +30,22 @@ namespace Notification {
         std::string label = fuzzData->ConsumeRandomLengthString();
         std::string instanceKey = fuzzData->ConsumeRandomLengthString();
         service->Cancel(notificationId, label, instanceKey);
+        // publish first so the cancel-below can hit the record-found branch:
+        // Cancel matches by the request's own (bundle, uid, label, id)
+        sptr<NotificationRequest> request = ObjectBuilder<NotificationRequest>::Build(fuzzData);
+        if (request != nullptr) {
+            request->SetNotificationId(notificationId);
+            request->SetLabel(label);
+            service->Publish(label, request);
+            service->Cancel(notificationId, label, instanceKey);
+        }
         sptr<AnsResultDataSynchronizerImpl> synchronizer = new AnsResultDataSynchronizerImpl();
         if (service->Cancel(notificationId, label, instanceKey,
             iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
             synchronizer->Wait();
         }
+        service->Cancel(INT32_MIN, "", instanceKey);
+        service->Cancel(INT32_MAX, "\xe6\xb5\x8b\xe8\xaf\x95\xe6\xa0\x87\xe7\xad\xbe", instanceKey);
         return true;
     }
 }

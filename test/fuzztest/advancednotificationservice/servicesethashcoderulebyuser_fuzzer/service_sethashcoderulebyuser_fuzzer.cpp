@@ -42,6 +42,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         OHOS::Notification::OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER,
         OHOS::Notification::OHOS_PERMISSION_SET_UNREMOVABLE_NOTIFICATION
     };
+    MockRandomToken(&fdp, requestPermission);
     OHOS::Notification::DoSomethingInterestingWithMyAPI(&fdp);
     ENSURE_ANS_SERVICE_CLEANED_AT_EXIT();
     return 0;

@@ -36,6 +36,20 @@ namespace Notification {
         }
         std::vector<sptr<NotificationRequest>> notifications = { request };
         service->GetActiveNotifications(notifications, stringData);
+        // publish with this label first so the two queries below can reach the
+        // record-found branches instead of always scanning an empty list
+        if (request != nullptr) {
+            request->SetAppInstanceKey(stringData);
+            service->Publish(stringData, request);
+            if (service->GetActiveNotifications(stringData,
+                iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
+                synchronizer->Wait();
+            }
+            std::vector<sptr<NotificationRequest>> found;
+            service->GetActiveNotifications(found, stringData);
+        }
+        uint64_t nums = 0;
+        service->GetActiveNotificationNums(nums);
         return true;
     }
 }
