@@ -3535,6 +3535,10 @@ bool NotificationPreferencesDatabase::SetLiveViewRebuildFlag(int32_t userId)
         ANS_LOGE("null RdbStore");
         return false;
     }
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("User %{public}d not exist", userId);
+        return false;
+    }
     int32_t result = rdbDataManager_->InsertData(LIVE_VIEW_REBUILD_FLAG, KEY_REMOVED_FLAG, userId);
     ANS_LOGI("Set liveViewRebuildflag ret=%{public}d", result);
     return (result == NativeRdb::E_OK);
@@ -3583,7 +3587,7 @@ bool NotificationPreferencesDatabase::IsSilentReminderEnabled(
                 result = true;
                 int32_t switchValue = AnsCommonUtils::StringToInt(value);
                 if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
-                    switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+                    switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON)) {
                     ANS_LOGE("Invalid silent reminder state: %{public}d", switchValue);
                 } else {
                     silentReminderInfo.enableStatus = switchValue ?

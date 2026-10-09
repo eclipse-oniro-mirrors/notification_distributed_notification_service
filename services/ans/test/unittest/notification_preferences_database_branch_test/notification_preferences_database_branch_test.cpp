@@ -26,6 +26,8 @@
 #undef private
 #undef protected
 
+extern void MockIsOsAccountExists(bool mockRet);
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
@@ -1305,6 +1307,58 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, GetClonePriorityInfos_0200,
 }
 
 /**
+ * @tc.name      : SetLiveViewRebuildFlag_00100
+ * @tc.desc      : test SetLiveViewRebuildFlag when user does not exist, return false
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, SetLiveViewRebuildFlag_00100, Function | SmallTest | Level1)
+{
+    // set CheckRdbStore is true and InsertData success, but user does not exist
+    MockInit(true);
+    MockInsertData(true);
+    MockIsOsAccountExists(false);
+    int32_t userId = 100;
+    ASSERT_FALSE(preferncesDB_->SetLiveViewRebuildFlag(userId));
+    // reset to default for subsequent tests
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.name      : SetLiveViewRebuildFlag_00200
+ * @tc.desc      : test SetLiveViewRebuildFlag when user exists and insert success, return true
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, SetLiveViewRebuildFlag_00200, Function | SmallTest | Level1)
+{
+    // set CheckRdbStore is true, user exists and InsertData returns E_OK
+    MockInit(true);
+    MockInsertData(true);
+    MockIsOsAccountExists(true);
+    int32_t userId = 100;
+    ASSERT_TRUE(preferncesDB_->SetLiveViewRebuildFlag(userId));
+}
+
+/**
+ * @tc.name      : SetLiveViewRebuildFlag_00300
+ * @tc.desc      : test SetLiveViewRebuildFlag when user exists but insert fails, return false
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, SetLiveViewRebuildFlag_00300, Function | SmallTest | Level2)
+{
+    // set CheckRdbStore is true, user exists, but InsertData returns E_ERROR
+    MockInit(true);
+    MockInsertData(false);
+    MockIsOsAccountExists(true);
+    int32_t userId = 100;
+    ASSERT_FALSE(preferncesDB_->SetLiveViewRebuildFlag(userId));
+    // reset to default for subsequent tests
+    MockInsertData(true);
+}
+
+/**
  * @tc.name      : IsSilentReminderEnabled_00100
  * @tc.desc      : test IsSilentReminderEnabled with E_OK and value 1, enableStatus is USER_MODIFIED_ON
  * @tc.type      : FUNC
@@ -1348,19 +1402,20 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_0020
 
 /**
  * @tc.name      : IsSilentReminderEnabled_00300
- * @tc.desc      : test IsSilentReminderEnabled with E_OK and value 3 in valid range, enableStatus is ON
+ * @tc.desc      : test IsSilentReminderEnabled with E_OK and value 3 out of valid range, enableStatus unchanged
  * @tc.type      : FUNC
  * @tc.require   : I00001
  */
 HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_00300, Function | SmallTest | Level1)
 {
-    // set QueryData returns E_OK with value 3 (SYSTEM_DEFAULT_ON, upper bound of valid range)
+    // set QueryData returns E_OK with value 3 (SYSTEM_DEFAULT_ON, greater than USER_MODIFIED_ON, out of valid range)
     MockInit(true);
     MockQueryData(NativeRdb::E_OK);
     MockSetDataValue("3");
     NotificationPreferencesInfo::SilentReminderInfo info;
     info.bundleName = "bundleName";
     info.uid = 2001;
+    info.enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     ASSERT_TRUE(preferncesDB_->IsSilentReminderEnabled(info));
     EXPECT_EQ(info.enableStatus, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     // reset to default for subsequent tests
@@ -1467,6 +1522,28 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_0080
     ASSERT_FALSE(preferncesDB_->IsSilentReminderEnabled(info));
     // reset to default for subsequent tests
     MockInit(true);
+}
+
+/**
+ * @tc.name      : IsSilentReminderEnabled_00900
+ * @tc.desc      : test IsSilentReminderEnabled with E_OK and value 2 out of valid range, enableStatus unchanged
+ * @tc.type      : FUNC
+ * @tc.require   : I00001
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_00900, Function | SmallTest | Level1)
+{
+    // set QueryData returns E_OK with value 2 (SYSTEM_DEFAULT_OFF, greater than USER_MODIFIED_ON, out of valid range)
+    MockInit(true);
+    MockQueryData(NativeRdb::E_OK);
+    MockSetDataValue("2");
+    NotificationPreferencesInfo::SilentReminderInfo info;
+    info.bundleName = "bundleName";
+    info.uid = 2001;
+    info.enableStatus = NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
+    ASSERT_TRUE(preferncesDB_->IsSilentReminderEnabled(info));
+    EXPECT_EQ(info.enableStatus, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    // reset to default for subsequent tests
+    MockSetDataValue("");
 }
 }  // namespace Notification
 }  // namespace OHOS
