@@ -338,4 +338,37 @@ HWTEST_F(RdbEventHandlerManagerTest, ExecuteOnUpgradeWithCrashRecovery_500, Test
     EXPECT_EQ(ret, -1);
     EXPECT_EQ(failing->GetUpgradeFailureCallCount(), 0);
 }
+
+/**
+ * @tc.name: ExecuteOnUpgradeWithCrashRecovery_600
+ * @tc.desc: Verify cleanup failure skips that handler's migration without propagating the
+ *           failure or blocking subsequent handlers, and clears its residual mark.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RdbEventHandlerManagerTest, ExecuteOnUpgradeWithCrashRecovery_600, TestSize.Level1)
+{
+    RdbEventHandlerManager mgr;
+    auto cleanupFail = std::make_shared<MockRdbEventHandler>("cleanup_fail_h", 0);
+    cleanupFail->SetMigrationMarkKey("upgrade_migration_mark_cleanup_fail");
+    cleanupFail->SetUpgradeFailureReturnCode(NativeRdb::E_ERROR);
+    auto healthy = std::make_shared<MockRdbEventHandler>("healthy_h", 0);
+    healthy->SetMigrationMarkKey("upgrade_migration_mark_healthy");
+    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, cleanupFail);
+    mgr.RegisterHandler(RdbEventHandlerManager::EventType::ON_UPGRADE, healthy);
+    MockRdbStore store;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    // Mark reads: cleanup_fail "2" ≥ threshold → cleanup fails → skip; healthy no row → no cleanup
+    SetMockQueryResults({mockResultSet, nullptr});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK, NativeRdb::E_ERROR});
+    SetMockGetStringValuesAndErrCodes({"2"}, {NativeRdb::E_OK});
+    // cleanup_fail: residual mark clear; healthy: mark write + mark clear
+    SetMockInsertWithConflictResolutionErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockDeleteErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    int32_t ret = mgr.ExecuteOnUpgradeWithCrashRecovery(store, 1, 2);
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(cleanupFail->GetUpgradeFailureCallCount(), 1);
+    EXPECT_EQ(cleanupFail->GetUpgradeCallCount(), 0);
+    EXPECT_EQ(healthy->GetUpgradeCallCount(), 1);
+    EXPECT_EQ(GetMockDeleteExecuteTimes(), 2);
+}
 } // namespace

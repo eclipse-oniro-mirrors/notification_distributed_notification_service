@@ -59,7 +59,12 @@ public:
      */
     int32_t OnUpgrade(NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion) override;
 
-    void OnUpgradeFailure(NativeRdb::RdbStore &rdbStore) override;
+    /**
+     * @brief Delete priority info data managed by this handler.
+     * @return NativeRdb::E_OK on success; an error code when cleanup failed, in which
+     * case the manager skips this handler's migration to avoid a crash-restart loop.
+     */
+    int32_t OnUpgradeFailure(NativeRdb::RdbStore &rdbStore) override;
 
     std::string GetMigrationMarkKey() const override;
 

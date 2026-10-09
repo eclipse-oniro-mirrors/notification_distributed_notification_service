@@ -73,17 +73,21 @@ public:
     /** @brief Execute all enabled handlers registered for ON_CREATE. */
     int32_t ExecuteOnCreate(NativeRdb::RdbStore &rdbStore);
 
-    /** @brief Execute all enabled handlers registered for ON_UPGRADE. */
+    /**
+     * @brief Execute ON_UPGRADE handlers via each handler's crash-recovery lifecycle,
+     *         short-circuiting on the first handler failure.
+     */
     int32_t ExecuteOnUpgrade(NativeRdb::RdbStore &rdbStore, int32_t oldVersion, int32_t newVersion);
 
     /**
-     * @brief Execute ON_UPGRADE handlers with per-business crash recovery.
+     * @brief Execute ON_UPGRADE handlers via each handler's crash-recovery lifecycle
+     *         (IRdbEventHandler::ExecuteUpgradeWithCrashRecovery) without short-circuiting.
      *
-     * Each handler owns a migration-in-progress mark key. The mark is set before the
-     * handler's migration and cleared after it returns. A residual mark means the last
-     * migration was interrupted by a crash, so only that handler's OnUpgradeFailure
-     * cleanup runs before retrying. Handlers execute without short-circuiting, and a
-     * normal business failure never triggers data cleanup.
+     * Per-handler crash recovery (migration mark counting, OnUpgradeFailure cleanup on
+     * repeated crash interruption, and migration skip with old-format data when the
+     * cleanup itself fails) is owned by IRdbEventHandler. This method only iterates
+     * the registered handlers and aggregates the first business failure, so one
+     * handler's failure never blocks the remaining handlers.
      */
     int32_t ExecuteOnUpgradeWithCrashRecovery(NativeRdb::RdbStore &rdbStore,
         int32_t oldVersion, int32_t newVersion);

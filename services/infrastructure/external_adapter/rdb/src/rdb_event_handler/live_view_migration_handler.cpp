@@ -51,17 +51,18 @@ int32_t LiveViewMigrationHandler::OnUpgrade(
     return NativeRdb::E_OK;
 }
 
-void LiveViewMigrationHandler::OnUpgradeFailure(NativeRdb::RdbStore &rdbStore)
+int32_t LiveViewMigrationHandler::OnUpgradeFailure(NativeRdb::RdbStore &rdbStore)
 {
     ANS_LOGI("Cleaning up live view data due to upgrade failure");
     std::set<std::string> tables = GetTableNames(rdbStore);
     if (tables.empty()) {
-        return;
+        ANS_LOGE("Failed to enumerate tables for live view cleanup");
+        return NativeRdb::E_ERROR;
     }
     int32_t ret = rdbStore.BeginTransaction();
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("BeginTransaction failed, ret=%{public}d", ret);
-        return;
+        return ret;
     }
     for (const auto &tableName : tables) {
         if (!IsKvBusinessTable(tableName)) {
@@ -74,14 +75,16 @@ void LiveViewMigrationHandler::OnUpgradeFailure(NativeRdb::RdbStore &rdbStore)
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("Failed to delete live view data from %{public}s: %{public}d", tableName.c_str(), ret);
             rdbStore.RollBack();
-            return;
+            return ret;
         }
     }
     ret = rdbStore.Commit();
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("Commit failed, ret=%{public}d", ret);
         rdbStore.RollBack();
+        return ret;
     }
+    return NativeRdb::E_OK;
 }
 
 bool LiveViewMigrationHandler::IsKvBusinessTable(const std::string &tableName) const

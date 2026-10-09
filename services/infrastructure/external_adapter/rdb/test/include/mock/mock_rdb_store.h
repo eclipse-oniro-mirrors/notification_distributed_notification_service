@@ -45,15 +45,9 @@ public:
         return 0;
     }
 
-    int BeginTransaction() override
-    {
-        return 0;
-    }
+    int BeginTransaction() override;
 
-    int Commit() override
-    {
-        return 0;
-    }
+    int Commit() override;
 
     int RollBack() override
     {
@@ -68,6 +62,8 @@ void SetMockBatchInsertErrCodes(const std::vector<int32_t> &errCodes);
 void SetMockReStoreErrCodes(const std::vector<int> &errCodes);
 void SetMockDeleteErrCodes(const std::vector<int> &errCodes);
 void SetMockQueryResults(const std::vector<MockRdbStore::AbsSharedResultSetPtr> &results);
+void SetMockBeginTransactionErrCodes(const std::vector<int> &errCodes);
+void SetMockCommitErrCodes(const std::vector<int> &errCodes);
 int GetMockInsertWithConflictResolutionExecuteTimes();
 int GetMockDeleteExecuteTimes();
 void ResetMockRdbStore();
