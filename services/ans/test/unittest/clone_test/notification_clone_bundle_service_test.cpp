@@ -19,7 +19,6 @@
 #define private public
 #define protected public
 #include "notification_clone_bundle_service.h"
-#include "notification_do_not_disturb_profile.h"
 #include "ans_inner_errors.h"
 #include "notification_clone_util.h"
 #include "advanced_notification_service.h"
@@ -286,13 +285,13 @@ HWTEST_F(NotificationCloneBundleTest, OnRestoreStart_Test_003, Function | SmallT
  */
 HWTEST_F(NotificationCloneBundleTest, OnUserSwitch_Test_001, Function | SmallTest | Level1)
 {
-    // Ensure cloneDisturbQueue_ is not null
+    // Ensure cloneBundleQueue_ is null
     notificationCloneBundle->cloneBundleQueue_  = nullptr;
 
     // Call the function
     notificationCloneBundle->OnUserSwitch(100);
 
-    // Verify that the profile is deleted
+    // Verify that the queue is still null
     EXPECT_EQ(notificationCloneBundle->cloneBundleQueue_, nullptr);
 }
 

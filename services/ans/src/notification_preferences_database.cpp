@@ -309,7 +309,6 @@ constexpr int32_t QUERY_STATISTICS_HOURS = 6 * 24;
 const static std::string KEY_HASH_CODE_RULE = "hashCodeRule";
 
 const static std::string CLONE_BUNDLE = "bundle_";
-const static std::string CLONE_PROFILE = "profile_";
 const static std::string CLONE_PRIORITY = "priority_";
 const static std::string KEY_DISABLE_NOTIFICATION = "disableNotificationFeature";
 const static std::string NITIFICATION_CREATE_TYPE = "1";
@@ -4092,80 +4091,6 @@ bool NotificationPreferencesDatabase::UpdateBundleSlotToDisturbeDB(int32_t userI
     }
     int32_t result = rdbDataManager_->InsertBatchData(values, userId);
     return (result == NativeRdb::E_OK);
-}
-
-bool NotificationPreferencesDatabase::DelCloneProfileInfo(const int32_t &userId,
-    const sptr<NotificationDoNotDisturbProfile>& info)
-{
-    if (!CheckRdbStore()) {
-        ANS_LOGE("null RdbStore");
-        return false;
-    }
-
-    std::string key = KEY_CLONE_LABEL + CLONE_PROFILE + std::to_string(info->GetProfileId());
-    int32_t result = rdbDataManager_->DeleteData(key, userId);
-    if (result != NativeRdb::E_OK) {
-        ANS_LOGE("delete clone profile Info failed.");
-        return false;
-    }
-    return true;
-}
-
-bool NotificationPreferencesDatabase::DelBatchCloneProfileInfo(const int32_t &userId,
-    const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo)
-{
-    std::string cloneProfile = KEY_CLONE_LABEL + CLONE_PROFILE;
-    if (!CheckRdbStore()) {
-        ANS_LOGE("null RdbStore");
-        return false;
-    }
-
-    std::vector<std::string> keys;
-    for (auto info : profileInfo) {
-        std::string key = cloneProfile + std::to_string(info->GetProfileId());
-        keys.emplace_back(key);
-    }
-
-    int32_t result = rdbDataManager_->DeleteBatchData(keys, userId);
-    if (result != NativeRdb::E_OK) {
-        ANS_LOGE("delete clone bundle Info failed.");
-        return false;
-    }
-    return true;
-}
-
-bool NotificationPreferencesDatabase::UpdateBatchCloneProfileInfo(const int32_t &userId,
-    const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo)
-{
-    std::string cloneProfile = KEY_CLONE_LABEL + CLONE_PROFILE;
-    std::unordered_map<std::string, std::string> values;
-    for (auto& info : profileInfo) {
-        std::string key = cloneProfile + std::to_string(info->GetProfileId());
-        std::string jsonString = info->ToJson();
-        values.emplace(key, jsonString);
-    }
-    return UpdateCloneToDisturbeDB(userId, values);
-}
-
-void NotificationPreferencesDatabase::GetAllCloneProfileInfo(const int32_t &userId,
-    std::vector<sptr<NotificationDoNotDisturbProfile>>& profilesInfo)
-{
-    std::string cloneProfile = KEY_CLONE_LABEL + CLONE_PROFILE;
-    std::unordered_map<std::string, std::string> values;
-    if (GetBatchKvsFromDb(cloneProfile, values, userId) != ERR_OK) {
-        ANS_LOGW("Get clone bundle map info failed %{public}d.", userId);
-        return;
-    }
-
-    for (auto item : values) {
-        sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
-        if (profile == nullptr) {
-            ANS_LOGW("Get clone profile failed.");
-            continue;
-        }
-        profile->FromJson(item.second);
-        profilesInfo.push_back(profile);
-    }
 }
 
 bool NotificationPreferencesDatabase::DelClonePriorityInfo(

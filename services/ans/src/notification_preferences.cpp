@@ -910,64 +910,6 @@ ErrCode NotificationPreferences::RemoveDoNotDisturbProfiles(
     return ERR_OK;
 }
 
-void NotificationPreferences::UpdateProfilesUtil(std::vector<NotificationBundleOption>& trustList,
-    const std::vector<NotificationBundleOption> bundleList)
-{
-    for (auto& item : bundleList) {
-        bool exit = false;
-        for (auto& bundle: trustList) {
-            if (item.GetUid() == bundle.GetUid()) {
-                exit = true;
-                break;
-            }
-        }
-        if (!exit) {
-            trustList.push_back(item);
-        }
-    }
-}
-
-ErrCode NotificationPreferences::UpdateDoNotDisturbProfiles(int32_t userId, int64_t profileId,
-    const std::string& name, const std::vector<NotificationBundleOption>& bundleList)
-{
-    ANS_LOGD("called, update Profile %{public}d %{public}s %{public}zu",
-        userId, std::to_string(profileId).c_str(), bundleList.size());
-    if (bundleList.empty()) {
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-
-    sptr<NotificationDoNotDisturbProfile> profile = new (std::nothrow) NotificationDoNotDisturbProfile();
-    if (profile == nullptr) {
-        ANS_LOGE("profile is nullptr");
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
-    if (preferencesInfo.GetDoNotDisturbProfiles(profileId, userId, profile)) {
-        auto trustList = profile->GetProfileTrustList();
-        UpdateProfilesUtil(trustList, bundleList);
-        profile->SetProfileTrustList(trustList);
-    } else {
-        profile->SetProfileId(profileId);
-        profile->SetProfileName(name);
-        profile->SetProfileTrustList(bundleList);
-    }
-    ANS_LOGI("Update profile %{public}d %{public}s %{public}zu",
-        userId, std::to_string(profile->GetProfileId()).c_str(),
-        profile->GetProfileTrustList().size());
-    preferencesInfo.AddDoNotDisturbProfiles(userId, {profile});
-    if (preferncesDB_ == nullptr) {
-        ANS_LOGE("The prefernces db is nullptr.");
-        return ERR_ANS_INNER_SERVICE_NOT_READY;
-    }
-    if (!preferncesDB_->AddDoNotDisturbProfiles(userId, {profile})) {
-        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
-    }
-    preferencesInfo_ = preferencesInfo;
-    StartCacheCleanupTimer();
-    return ERR_OK;
-}
-
 bool NotificationPreferences::BuildCloneSlotInfo(const NotificationCloneBundleInfo& cloneBundleInfo,
     NotificationPreferencesInfo::BundleInfo& bundleInfo,
     std::vector<sptr<NotificationSlot>>& slots)
@@ -1264,13 +1206,6 @@ bool NotificationPreferences::RemoveLiveViewRebuildFlag(int32_t userId)
         return false;
     }
     return preferncesDB_->RemoveLiveViewRebuildFlag(userId);
-}
-
-void NotificationPreferences::GetDoNotDisturbProfileListByUserId(int32_t userId,
-    std::vector<sptr<NotificationDoNotDisturbProfile>> &profiles)
-{
-    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-    preferencesInfo_.GetAllDoNotDisturbProfiles(userId, profiles);
 }
 
 ErrCode NotificationPreferences::GetAllNotificationEnabledBundlesInner(
@@ -2526,37 +2461,6 @@ std::string NotificationPreferences::GetAdditionalConfig(const std::string &key)
     return preferncesDB_->GetAdditionalConfig(key);
 }
 
-bool NotificationPreferences::DelCloneProfileInfo(const int32_t &userId,
-    const sptr<NotificationDoNotDisturbProfile>& info)
-{
-    if (info == nullptr) {
-        ANS_LOGE("Invalid info parameter.");
-        return false;
-    }
-    if (preferncesDB_ == nullptr) {
-        return false;
-    }
-    return preferncesDB_->DelCloneProfileInfo(userId, info);
-}
-
-bool NotificationPreferences::UpdateBatchCloneProfileInfo(const int32_t &userId,
-    const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo)
-{
-    if (preferncesDB_ == nullptr) {
-        return false;
-    }
-    return preferncesDB_->UpdateBatchCloneProfileInfo(userId, profileInfo);
-}
-
-void NotificationPreferences::GetAllCloneProfileInfo(const int32_t &userId,
-    std::vector<sptr<NotificationDoNotDisturbProfile>>& profilesInfo)
-{
-    if (preferncesDB_ == nullptr) {
-        return;
-    }
-    return preferncesDB_->GetAllCloneProfileInfo(userId, profilesInfo);
-}
-
 bool NotificationPreferences::DelClonePriorityInfo(
     const int32_t &userId, const NotificationClonePriorityInfo &cloneInfo)
 {
@@ -2622,15 +2526,6 @@ bool NotificationPreferences::DelCloneBundleInfo(const int32_t &userId,
         return false;
     }
     return preferncesDB_->DelCloneBundleInfo(userId, cloneBundleInfo);
-}
-
-bool NotificationPreferences::DelBatchCloneProfileInfo(const int32_t &userId,
-    const std::vector<sptr<NotificationDoNotDisturbProfile>>& profileInfo)
-{
-    if (preferncesDB_ == nullptr) {
-        return false;
-    }
-    return preferncesDB_->DelBatchCloneProfileInfo(userId, profileInfo);
 }
 
 bool NotificationPreferences::DelBatchCloneBundleInfo(const int32_t &userId,

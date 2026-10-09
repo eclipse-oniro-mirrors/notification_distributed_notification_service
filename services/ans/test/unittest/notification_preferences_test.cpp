@@ -2380,141 +2380,6 @@ HWTEST_F(NotificationPreferencesTest, SetDistributedEnabledForBundle_0200, TestS
 }
 
 /**
- * @tc.number    : UpdateProfilesUtil_00100
- * @tc.name      :
- * @tc.desc      :
- */
-HWTEST_F(NotificationPreferencesTest, UpdateProfilesUtil_00100, Function | SmallTest | Level1)
-{
-    NotificationBundleOption bundleOne;
-    bundleOne.SetBundleName("test1");
-    bundleOne.SetUid(100);
-    NotificationBundleOption bundleTwo;
-    std::vector<NotificationBundleOption> bundleList;
-    bundleList.push_back(bundleOne);
-    bundleList.push_back(bundleTwo);
-    std::vector<NotificationBundleOption> trustList;
-    trustList.push_back(bundleOne);
-    NotificationPreferences::GetInstance()->UpdateProfilesUtil(trustList, bundleList);
-    EXPECT_EQ(bundleList.size(), trustList.size());
-}
-
-/**
- * @tc.number    : UpdateDoNotDisturbProfiles_00100
- * @tc.name      :
- * @tc.desc      :
- */
-HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00100, Function | SmallTest | Level1)
-{
-    int32_t profileId = 3;
-    int32_t userId = 100;
-    std::string name = "testProfile";
-    std::vector<NotificationBundleOption> bundleList;
-
-    NotificationBundleOption bundleOne;
-    bundleOne.SetBundleName("test1");
-    bundleOne.SetUid(100);
-    bundleList.push_back(bundleOne);
-
-    NotificationCloneBundleInfo cloneBundleInfo;
-    NotificationPreferences::GetInstance()->UpdateCloneBundleInfo(
-        userId, cloneBundleInfo);
-
-    auto res = NotificationPreferences::GetInstance()->UpdateDoNotDisturbProfiles(
-        userId, profileId, name, bundleList);
-    EXPECT_EQ(res, ERR_OK);
-}
-
-/**
- * @tc.number    : UpdateDoNotDisturbProfiles_00200
- * @tc.name      :
- * @tc.desc      :
- */
-HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00200, Function | SmallTest | Level1)
-{
-    int32_t profileId = 0;
-    int32_t userId = 100;
-    std::string name = "testProfile";
-    std::vector<NotificationBundleOption> bundleList;
-
-    NotificationBundleOption bundleOne;
-    bundleOne.SetBundleName("test1");
-    bundleOne.SetUid(100);
-    bundleList.push_back(bundleOne);
-
-    auto res = NotificationPreferences::GetInstance()->UpdateDoNotDisturbProfiles(
-        userId, profileId, name, bundleList);
-    EXPECT_EQ(res, ERR_OK);
-}
-
-/**
- * @tc.number    : UpdateDoNotDisturbProfiles_00300
- * @tc.name      : UpdateDoNotDisturbProfiles_00300
- * @tc.desc      : Test UpdateDoNotDisturbProfiles
- */
-HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00300, Function | SmallTest | Level1)
-{
-    int32_t profileId = 3;
-    int32_t userId = 100;
-    std::string name = "testProfile";
-    std::vector<NotificationBundleOption> bundleList;
-
-    NotificationCloneBundleInfo cloneBundleInfo;
-    NotificationPreferences notificationPreferences;
-    notificationPreferences.UpdateCloneBundleInfo(userId, cloneBundleInfo);
-    auto res =notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
-    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
-
-    NotificationBundleOption bundleOne;
-    bundleOne.SetBundleName("test1");
-    bundleOne.SetUid(100);
-    bundleList.push_back(bundleOne);
-
-    notificationPreferences.preferncesDB_->rdbDataManager_ = nullptr;
-    res = notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
-    EXPECT_EQ(res, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
-
-    notificationPreferences.preferncesDB_ = nullptr;
-    res = notificationPreferences.UpdateDoNotDisturbProfiles(userId, profileId, name, bundleList);
-    EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
-}
-
- /**
- * @tc.name: UpdateDoNotDisturbProfiles_00400
- * @tc.desc: Test UpdateDoNotDisturbProfile
- * 1. Call the UpdateDoNotDisturbProfiles, EXPECT the result of the method call is ERR_OK
- * 2. Call the UpdateDoNotDisturbProfiles method again with the updated parameters
- * 3. The method of GetDoNotDisturbProfiles will return true
- * 3. EXPECT that the result is also ERR_OK
- * @tc.type: FUNC
- */
-HWTEST_F(NotificationPreferencesTest, UpdateDoNotDisturbProfiles_00400, Function | SmallTest | Level1)
-{
-    int32_t userId = 100;
-    int32_t profileId = 0;
-    std::string name = "testProfile";
-    std::vector<NotificationBundleOption> bundleList;
-
-    NotificationBundleOption bundleOne;
-    bundleOne.SetBundleName("test1");
-    bundleOne.SetUid(100);
-    bundleList.push_back(bundleOne);
-
-    auto res = NotificationPreferences::GetInstance()->UpdateDoNotDisturbProfiles(
-        userId, profileId, name, bundleList);
-    EXPECT_EQ(res, ERR_OK);
-
-    name = "testProfile2";
-    bundleOne.SetBundleName("test2");
-    bundleOne.SetUid(100);
-    bundleList.push_back(bundleOne);
-
-    res = NotificationPreferences::GetInstance()->UpdateDoNotDisturbProfiles(
-            userId, profileId, name, bundleList);
-    EXPECT_EQ(res, ERR_OK);
-}
-
-/**
  * @tc.number    : GetTemplateSupported_00100
  * @tc.name      :
  * @tc.desc      :
@@ -2601,58 +2466,6 @@ HWTEST_F(NotificationPreferencesTest, GetAdditionalConfig_00100, Function | Smal
 }
 
 /**
- * @tc.number    : DelCloneProfileInfo_00100
- * @tc.name      :
- * @tc.desc      :
- */
-HWTEST_F(NotificationPreferencesTest, DelCloneProfileInfo_00100, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbProfile> info(new NotificationDoNotDisturbProfile());
-    info->SetProfileId(1);
-    info->SetProfileName("TestName");
-
-    NotificationBundleOption bundleOption;
-    bundleOption.SetBundleName("bundleName");
-    bundleOption.SetUid(100);
-
-    std::vector<NotificationBundleOption> trustList;
-    trustList.push_back(bundleOption);
-    info->SetProfileTrustList(trustList);
-
-    auto res = NotificationPreferences::GetInstance()->DelCloneProfileInfo(
-        100, info);
-    EXPECT_EQ(res, true);
-}
-
-/**
- * @tc.number    : UpdateBatchCloneProfileInfo_00100
- * @tc.name      :
- * @tc.desc      :
- */
-HWTEST_F(NotificationPreferencesTest, UpdateBatchCloneProfileInfo_00100, Function | SmallTest | Level1)
-{
-    std::vector<sptr<NotificationDoNotDisturbProfile>> infos;
-
-    sptr<NotificationDoNotDisturbProfile> info(new NotificationDoNotDisturbProfile());
-    info->SetProfileId(1);
-    info->SetProfileName("TestName");
-    infos.push_back(info);
-
-    NotificationBundleOption bundleOption;
-    bundleOption.SetBundleName("bundleName");
-    bundleOption.SetUid(100);
-
-    std::vector<NotificationBundleOption> trustList;
-    trustList.push_back(bundleOption);
-    info->SetProfileTrustList(trustList);
-
-
-    auto res = NotificationPreferences::GetInstance()->UpdateBatchCloneProfileInfo(
-        100, infos);
-    EXPECT_EQ(res, true);
-}
-
-/**
  * @tc.number    : UpdateBatchCloneBundleInfo_00100
  * @tc.name      :
  * @tc.desc      :
@@ -2670,11 +2483,6 @@ HWTEST_F(NotificationPreferencesTest, UpdateBatchCloneBundleInfo_00100, Function
     NotificationPreferences::GetInstance()->GetAllCloneBundleInfo(
         100, cloneBundleInfoRes);
     EXPECT_EQ(cloneBundleInfoRes.size(), cloneBundleInfos.size());
-
-    std::vector<sptr<NotificationDoNotDisturbProfile>> profilesInfos;
-    NotificationPreferences::GetInstance()->GetAllCloneProfileInfo(
-        100, profilesInfos);
-    EXPECT_EQ(0, profilesInfos.size());
 }
 
 /**
@@ -2687,23 +2495,6 @@ HWTEST_F(NotificationPreferencesTest, DelCloneBundleInfo_00100, Function | Small
     NotificationCloneBundleInfo cloneBundleInfo;
     auto res = NotificationPreferences::GetInstance()->DelCloneBundleInfo(
         100, cloneBundleInfo);
-    EXPECT_EQ(res, true);
-}
-
-/**
- * @tc.number    : DelBatchCloneProfileInfo_00100
- * @tc.name      :
- * @tc.desc      :
- */
-HWTEST_F(NotificationPreferencesTest, DelBatchCloneProfileInfo_00100, Function | SmallTest | Level1)
-{
-    sptr<NotificationDoNotDisturbProfile> profileInfo(new NotificationDoNotDisturbProfile());
-
-    std::vector<sptr<NotificationDoNotDisturbProfile>> profileInfos;
-    profileInfos.push_back(profileInfo);
-
-    auto res = NotificationPreferences::GetInstance()->DelBatchCloneProfileInfo(
-        100, profileInfos);
     EXPECT_EQ(res, true);
 }
 
@@ -3076,9 +2867,6 @@ HWTEST_F(NotificationPreferencesTest, NullDeviceTypeTest_001, Function | SmallTe
     int32_t userId = 101;
     NotificationPreferences notificationPreferences;
     notificationPreferences.preferncesDB_ = nullptr;
-    sptr<NotificationDoNotDisturbProfile> info(new NotificationDoNotDisturbProfile());
-    info->SetProfileId(1);
-    info->SetProfileName("test");
 
     res = notificationPreferences.SetKvToDb(key, value, userId);
     EXPECT_EQ(res, ERR_ANS_INNER_SERVICE_NOT_READY);
@@ -3106,9 +2894,6 @@ HWTEST_F(NotificationPreferencesTest, NullDeviceTypeTest_001, Function | SmallTe
 
     resStr = notificationPreferences.GetAdditionalConfig(key);
     EXPECT_EQ(resStr.size(), 0);
-
-    res = notificationPreferences.DelCloneProfileInfo(userId, info);
-    EXPECT_EQ(res, false);
 }
 /**
  * @tc.name: NullPreferncesDBTest_002
@@ -3127,7 +2912,6 @@ HWTEST_F(NotificationPreferencesTest, NullPreferncesDBTest_002, TestSize.Level1)
     notificationPreferences.preferncesDB_ = nullptr;
     std::vector<NotificationCloneBundleInfo> cloneBundleInfos;
     NotificationCloneBundleInfo cloneBundleInfo;
-    std::vector<sptr<NotificationDoNotDisturbProfile>> infos;
     NotificationConstant::SlotType slotType = NotificationConstant::SlotType::LIVE_VIEW;
     sptr<NotificationBundleOption> bundleOption(new NotificationBundleOption("bundleName", 1));
     cloneBundleInfos.push_back(cloneBundleInfo);
@@ -3136,19 +2920,12 @@ HWTEST_F(NotificationPreferencesTest, NullPreferncesDBTest_002, TestSize.Level1)
     notificationDisable->SetDisabled(true);
     notificationDisable->SetBundleList({ "com.example.app" });
 
-    res = notificationPreferences.UpdateBatchCloneProfileInfo(userId, infos);
-    EXPECT_EQ(res, false);
-
-    notificationPreferences.GetAllCloneProfileInfo(userId, infos);
     notificationPreferences.GetAllCloneBundleInfo(userId, cloneBundleInfos);
 
     res = notificationPreferences.UpdateBatchCloneBundleInfo(userId, cloneBundleInfos);
     EXPECT_EQ(res, false);
 
     res = notificationPreferences.DelCloneBundleInfo(userId, cloneBundleInfo);
-    EXPECT_EQ(res, false);
-
-    res = notificationPreferences.DelBatchCloneProfileInfo(userId, infos);
     EXPECT_EQ(res, false);
 
     res = notificationPreferences.DelBatchCloneBundleInfo(userId, cloneBundleInfos);
@@ -4973,19 +4750,6 @@ HWTEST_F(NotificationPreferencesTest, UpdateStatisticsAll_DBFail_001, Function |
     EXPECT_EQ(after.GetRecentCount(), 5);
 
     MockGetOsAccountLocalIdFromUid(true, 0); // reset to default
-}
-
-/**
- * @tc.number    : DelCloneProfileInfo_NullInfo_0001
- * @tc.name      : DelCloneProfileInfo with null info
- * @tc.desc      : Test DelCloneProfileInfo returns false when info is nullptr.
- */
-HWTEST_F(NotificationPreferencesTest, DelCloneProfileInfo_NullInfo_0001, Function | SmallTest | Level1)
-{
-    auto prefs = NotificationPreferences::GetInstance();
-    ASSERT_NE(prefs, nullptr);
-    bool result = prefs->DelCloneProfileInfo(0, nullptr);
-    EXPECT_FALSE(result);
 }
 
 /**
