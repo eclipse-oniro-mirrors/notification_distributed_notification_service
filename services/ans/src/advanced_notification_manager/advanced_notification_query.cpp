@@ -49,37 +49,6 @@ inline bool IsContained(const std::vector<std::string> &vec, const std::string &
     return isContained;
 }
 
-ErrCode AdvancedNotificationService::GetActiveNotifications(const std::string &instanceKey,
-    const sptr<IAnsResultDataSynchronizer> &synchronizer)
-{
-    ANS_LOGD("called");
-    if (synchronizer == nullptr) {
-        ANS_LOGE("synchronizer is null");
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INNER_INVALID_BUNDLE;
-    }
-    bundleOption->SetAppInstanceKey(instanceKey);
-    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
-        ANS_LOGD("called");
-        std::vector<sptr<NotificationRequest>> requests;
-        for (auto record : notificationList_) {
-            if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
-                (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
-                requests.push_back(sptr<NotificationRequest>(new NotificationRequest(*record->request)));
-                GetUri(requests.back());
-            }
-        }
-        synchronizer->TransferResultData(ERR_OK, requests);
-    }));
-    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get active notifications.");
-    return ERR_OK;
-}
-
 ErrCode AdvancedNotificationService::GetActiveNotifications(
     std::vector<sptr<NotificationRequest>> &notifications, const std::string &instanceKey)
 {
@@ -127,38 +96,6 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
         num = static_cast<uint64_t>(count);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get active notifications num.");
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::GetAllActiveNotifications(const sptr<IAnsResultDataSynchronizer> &synchronizer)
-{
-    ANS_LOGD("called");
-    if (synchronizer == nullptr) {
-        ANS_LOGE("synchronizer is null");
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        return ERR_ANS_INNER_NON_SYSTEM_APP;
-    }
-
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
-    if (callingUid != RSS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        ANS_LOGE("AccessTokenHelper::CheckPermission failed.");
-        return ERR_ANS_INNER_PERMISSION_DENIED;
-    }
-
-    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
-        ANS_LOGD("called");
-        std::vector<sptr<Notification>> notifications;
-        for (auto record : notificationList_) {
-            if (record->notification != nullptr && record->notification->request_ != nullptr) {
-                notifications.push_back(record->notification);
-            }
-        }
-        synchronizer->TransferResultData(ERR_OK, notifications);
-    }));
-    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get all active notifications.");
     return ERR_OK;
 }
 

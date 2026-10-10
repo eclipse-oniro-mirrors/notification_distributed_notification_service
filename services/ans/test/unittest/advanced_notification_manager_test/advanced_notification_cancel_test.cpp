@@ -47,21 +47,6 @@ static sptr<AdvancedNotificationService> GetService()
 }
 
 /**
- * @tc.name: CancelAll_SynchronizerNullptr_00001
- * @tc.desc: Test CancelAll with nullptr synchronizer
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(AdvancedNotificationCancelTest, CancelAll_SynchronizerNullptr_00001, Function | SmallTest | Level1)
-{
-    auto service = GetService();
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-
-    auto result = service->CancelAll("", nullptr);
-    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
-}
-
-/**
  * @tc.name: CancelAsBundleWithAgent_NullBundleOption_00001
  * @tc.desc: Test CancelAsBundleWithAgent with nullptr bundleOption
  * @tc.type: FUNC
@@ -72,7 +57,7 @@ HWTEST_F(AdvancedNotificationCancelTest, CancelAsBundleWithAgent_NullBundleOptio
     auto service = GetService();
     sptr<NotificationBundleOption> nullBundle = nullptr;
 
-    auto result = service->CancelAsBundleWithAgent(nullBundle, 1, nullptr);
+    auto result = service->CancelAsBundleWithAgent(nullBundle, 1);
     EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 

@@ -14,7 +14,6 @@
  */
 
 interface OHOS.Notification.IAnsDialogCallback;
-interface OHOS.Notification.IAnsResultDataSynchronizer;
 interface OHOS.Notification.IAnsSubscriberLocalLiveView;
 interface OHOS.Notification.IAnsSubscriber;
 interface OHOS.Notification.IAnsOperationCallback;
@@ -50,19 +49,14 @@ interface OHOS.Notification.IAnsManager {
     void PublishNotificationForIndirectProxy([in] sptr<NotificationRequest> notification);
     [ipcincapacity 520] void PublishNotificationForIndirectProxyWithMaxCapacity([in] sptr<NotificationRequest> notification);
 
-    void Cancel([in] int notificationId, [in] String label, [in] String instanceKey, [in] IAnsResultDataSynchronizer synchronizer);
     void Cancel([in] int notificationId, [in] String label, [in] String instanceKey);
 
-    void CancelAll([in] String instanceKey, [in] IAnsResultDataSynchronizer synchronizer);
     void CancelAll([in] String instanceKey);
 
-    void CancelAsBundle([in] int notificationId, [in] String representativeBundle, [in] int userId, [in] IAnsResultDataSynchronizer synchronizer);
     void CancelAsBundle([in] int notificationId, [in] String representativeBundle, [in] int userId);
 
-    void CancelAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int notificationId, [in] IAnsResultDataSynchronizer synchronizer);
     void CancelAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int notificationId);
 
-    void CancelAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int notificationId, [in] int userId, [in] IAnsResultDataSynchronizer synchronizer);
     void CancelAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int notificationId, [in] int userId);
 
     void AddSlotByType([in] int slotTypeInt);
@@ -79,12 +73,10 @@ interface OHOS.Notification.IAnsManager {
 
     void GetSlotNumAsBundle([in] sptr<NotificationBundleOption> bundleOption, [out] unsigned long num);
 
-    void GetActiveNotifications([in] String instanceKey, [in] IAnsResultDataSynchronizer synchronizer);
     void GetActiveNotifications([out] sptr<NotificationRequest>[] notifications, [in] String instanceKey);
 
     void GetActiveNotificationNums([out] unsigned long num);
 
-    void GetAllActiveNotifications([in] IAnsResultDataSynchronizer synchronizer);
     void GetAllActiveNotifications([out] sptr<Notification>[] notifications);
 
     void GetAllNotificationsBySlotType([out] sptr<Notification>[] notifications, [in] int slotTypeInt);
@@ -163,13 +155,11 @@ interface OHOS.Notification.IAnsManager {
 
     void SetShowBadgeEnabledForBundles([in] OrderedMap<sptr<NotificationBundleOption>, boolean> bundleOptions);
 
-    void GetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [in] IAnsResultDataSynchronizer synchronizer);
     void GetShowBadgeEnabledForBundle([in] sptr<NotificationBundleOption> bundleOption, [out] boolean enabled);
 
     void GetShowBadgeEnabledForBundles([in] sptr<NotificationBundleOption>[] bundleOptions,
         [out] OrderedMap<sptr<NotificationBundleOption>, boolean> badgeEnabled);
 
-    void GetShowBadgeEnabled([in] IAnsResultDataSynchronizer synchronizer);
     void GetShowBadgeEnabled([out] boolean enabled);
 
     void Subscribe([in] IAnsSubscriber subscriber, [in] unsigned int subscribedFlags);
@@ -382,7 +372,6 @@ interface OHOS.Notification.IAnsManager {
 
     void IsDistributedEnabledByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] String deviceType, [in] boolean isNotification, [out] int enabled);
 
-    void CancelAsBundleWithAgent([in] sptr<NotificationBundleOption> bundleOption, [in] int id, [in] IAnsResultDataSynchronizer synchronizer);
     void CancelAsBundleWithAgent([in] sptr<NotificationBundleOption> bundleOption, [in] int id);
 
     void SetTargetDeviceStatus([in] String deviceType, [in] unsigned int status, [in] String deviceId);

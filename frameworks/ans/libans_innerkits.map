@@ -24,8 +24,6 @@
     *AnsSubscriberStub*;
     *AnsOperationCallbackProxy*;
     *AnsOperationCallbackStub*;
-    *AnsResultDataSynchronizerProxy*;
-    *AnsResultDataSynchronizerStub*;
     *AnsSubscriberLocalLiveViewProxy*;
     *AnsSubscriberLocalLiveViewStub*;
     *BadgeQueryCallbackProxy*;

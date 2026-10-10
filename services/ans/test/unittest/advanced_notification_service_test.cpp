@@ -34,7 +34,6 @@
 #include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
-#include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -116,12 +115,7 @@ void AdvancedNotificationServiceTest::SetUp()
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAll("",
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-    }
+    advancedNotificationService_->CancelAll("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     GTEST_LOG_(INFO) << "SetUp end";
 }
@@ -157,7 +151,6 @@ sptr<NotificationRingtoneInfo> AdvancedNotificationServiceTest::CreateValidRingt
     ringtoneInfo->SetRingtoneTitle("Test Ringtone");
     return ringtoneInfo;
 }
-
 
 class TestAnsSubscriber : public NotificationSubscriber {
 public:
@@ -215,7 +208,6 @@ void AdvancedNotificationServiceTest::TestAddLiveViewSlot(bool isForceControl)
     slots.push_back(slot);
     ASSERT_EQ(advancedNotificationService_->AddSlots(slots), (int)ERR_OK);
 }
-
 
 /**
  * @tc.number    : AdvancedNotificationServiceTest_01600
@@ -324,30 +316,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02700,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_02800
- * @tc.name      : ANS_GetShowBadgeEnabledForBundle_0100
- * @tc.desc      : Test GetShowBadgeEnabledForBundle function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02800, Function | SmallTest | Level1)
-{
-    ASSERT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundle(
-                  new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), true),
-        (int)ERR_OK);
-
-    int32_t result = ERR_OK;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID),
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_028001
  * @tc.name      : ANS_GetShowBadgeEnabledForBundle_0100
  * @tc.desc      : Test GetShowBadgeEnabledForBundle function
@@ -362,25 +330,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_028001
                   new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow),
         (int)ERR_OK);
     EXPECT_TRUE(allow);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_02900
- * @tc.name      : ANS_GetActiveNotifications_0100
- * @tc.desc      : Test GetActiveNotifications function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_02900, Function | SmallTest | Level1)
-{
-    int32_t result = ERR_OK;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetActiveNotifications("",
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
 }
 
 /**
@@ -474,15 +423,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_03500,
     int32_t id = 0;
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAsBundleWithAgent(bundleOption, id,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    auto ret = advancedNotificationService_->CancelAsBundleWithAgent(bundleOption, id);
+    ASSERT_EQ(ret, result);
 }
 
 /**
@@ -706,7 +648,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_04400,
     ASSERT_EQ(ret, 0);
 }
 
-
 /**
  * @tc.number    : AdvancedNotificationServiceTest_05100
  * @tc.name      : ANS_AddSlots_0100
@@ -831,26 +772,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06800,
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_06900
- * @tc.name      : ANS_GetShowBadgeEnabledForBundle_0100
- * @tc.desc      : Test GetShowBadgeEnabledForBundle function when no bundle
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_06900, Function | SmallTest | Level1)
-{
-    int32_t result = ERR_OK;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID),
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_069001
  * @tc.name      : ANS_GetShowBadgeEnabledForBundle_0100
  * @tc.desc      : Test GetShowBadgeEnabledForBundle function when no bundle
@@ -861,25 +782,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_069001
     ASSERT_EQ((int)advancedNotificationService_->GetShowBadgeEnabledForBundle(
                   new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow),
         (int)ERR_OK);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_07000
- * @tc.name      : ANS_GetActiveNotifications_0100
- * @tc.desc      : Test GetActiveNotifications function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_07000, Function | SmallTest | Level1)
-{
-    int32_t result = ERR_OK;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetActiveNotifications("",
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
 }
 
 /**
@@ -1005,30 +907,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000040
 }
 
 /**
- * @tc.number    : AdvancedNotificationServiceTest_08600
- * @tc.name      : ANS_GetShowBadgeEnabledForBundle_0200
- * @tc.desc      : Test GetShowBadgeEnabledForBundle function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08600, Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::OTHER);
-    ASSERT_EQ((int)advancedNotificationService_->SetShowBadgeEnabledForBundle(
-                  new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), true),
-        (int)ERR_OK);
-    int32_t result = ERR_OK;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID),
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
-
-/**
  * @tc.number    : AdvancedNotificationServiceTest_086001
  * @tc.name      : ANS_GetShowBadgeEnabledForBundle_0200
  * @tc.desc      : Test GetShowBadgeEnabledForBundle function
@@ -1057,25 +935,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_08700,
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::SlotType::OTHER);
     ASSERT_EQ((int)advancedNotificationService_->GetSlotByType(NotificationConstant::OTHER, slot), (int)ERR_OK);
     ASSERT_EQ(slot->GetType(), NotificationConstant::SlotType::OTHER);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_09000
- * @tc.name      : ANS_GetAllActiveNotifications_0100
- * @tc.desc      : Test GetAllActiveNotifications function
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_09000, Function | SmallTest | Level1)
-{
-    int32_t result = ERR_OK;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetAllActiveNotifications(
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
 }
 
 /**
@@ -1304,27 +1163,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_12900,
 {
     bool granted = true;
     ASSERT_EQ(advancedNotificationService_->HasNotificationPolicyAccessPermission(granted), (int)ERR_OK);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceTest_13000
- * @tc.name      : ANS_GetShowBadgeEnabled_0100
- * @tc.desc      : Test GetShowBadgeEnabled function when the result is ERR_OK
- * @tc.require   : issueI5S4VP
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_13000, Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
-    auto result = ERR_OK;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetShowBadgeEnabled(
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
 }
 
 /**
@@ -1652,15 +1490,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16000,
     std::string label = "testLabel";
     sptr<NotificationBundleOption> bundleOption = nullptr;
     InnerErrorCode result = ERR_ANS_INNER_INVALID_BUNDLE;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelPreparedNotification(notificationId, label, bundleOption, 8,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    auto ret = advancedNotificationService_->CancelPreparedNotification(notificationId, label, bundleOption, 8).GetErrCode();
+    ASSERT_EQ(ret, result);
     GTEST_LOG_(INFO) << "CancelPreparedNotification_1000 test end";
 }
 
@@ -1695,15 +1526,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16200,
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 1;
     InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId);
+    ASSERT_EQ(ret, result);
     GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0200 test end";
 }
 
@@ -1738,15 +1562,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16300,
     std::string representativeBundle = "RepresentativeBundle";
     int32_t userId = 0;
     InnerErrorCode result = ERR_ANS_INNER_INVALID_UID;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId);
+    ASSERT_EQ(ret, result);
     GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0300 test end";
 }
 
@@ -1780,15 +1597,8 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16500,
     int32_t notificationId = 1;
 
     InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAsBundle(bundleOption, notificationId,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    auto ret = advancedNotificationService_->CancelAsBundle(bundleOption, notificationId);
+    ASSERT_EQ(ret, result);
     GTEST_LOG_(INFO) << "ANS_CancelAsBundle_0400 test end";
 }
 
@@ -1893,15 +1703,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     MockSystemApp();
 
     InnerErrorCode result = ERR_ANS_INNER_INVALID_BUNDLE;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetActiveNotifications("",
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    std::vector<sptr<NotificationRequest>> requests;
+    auto ret = advancedNotificationService_->GetActiveNotifications(requests, "");
+    ASSERT_EQ(ret, result);
 
     uint64_t num = 1;
     ASSERT_EQ(advancedNotificationService_->GetActiveNotificationNums(num), ERR_ANS_INNER_INVALID_BUNDLE);
@@ -1910,15 +1714,9 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_16900,
     ASSERT_EQ(advancedNotificationService_->GetBundleImportance(importance), ERR_ANS_INNER_INVALID_BUNDLE);
 
     result = ERR_ANS_INNER_INVALID_BUNDLE;
-    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    ret = advancedNotificationService_->GetShowBadgeEnabled(
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    bool allow = false;
+    ret = advancedNotificationService_->GetShowBadgeEnabled(allow);
+    ASSERT_EQ(ret, result);
 
     sptr<NotificationSlot> slot = new NotificationSlot(NotificationConstant::OTHER);
     ASSERT_EQ(advancedNotificationService_->GetSlotByType(NotificationConstant::OTHER, slot),
@@ -2002,27 +1800,14 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_17100,
     ASSERT_EQ(advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, enable), ERR_OK);
 
     int32_t result = ERR_OK;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        enable = synchronizer->GetEnabled();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    enable = false;
+    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption, enable);
+    ASSERT_EQ(ret, result);
 
     result = ERR_OK;
-    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    ret = advancedNotificationService_->GetAllActiveNotifications(
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    std::vector<sptr<Notification>> allNotifications;
+    ret = advancedNotificationService_->GetAllActiveNotifications(allNotifications);
+    ASSERT_EQ(ret, result);
 
     std::vector<std::string> keys;
     std::vector<sptr<Notification>> notifications;
@@ -3147,7 +2932,6 @@ HWTEST_F(AdvancedNotificationServiceTest, OnDistributedDelete_0300, Function | S
     GTEST_LOG_(INFO) << "OnDistributedDelete_0300 test end";
 }
 
-
 /**
  * @tc.number    : AdvancedNotificationServiceTest_20200
  * @tc.name      : CheckPublishWithoutApp_0100
@@ -3478,7 +3262,6 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21700,
     ASSERT_EQ(advancedNotificationService_->RegisterPushCallback(pushCallback, checkRequest),
         (int)ERR_OK);
     advancedNotificationService_->UnregisterPushCallback();
-
 
     GTEST_LOG_(INFO) << "RegisterPushCallback_0200 test end";
 }
@@ -4898,26 +4681,13 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
     auto request = new (std::nothrow) NotificationRequest();
 
     InnerErrorCode result = ERR_ANS_INNER_INVALID_PARAM;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle, 8,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    auto ret = advancedNotificationService_->CancelPreparedNotification(1, "label", bundle, 8).GetErrCode();
+    ASSERT_EQ(ret, result);
 
     result = ERR_ANS_INNER_INVALID_PARAM;
-    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    ret = advancedNotificationService_->GetActiveNotifications("",
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    std::vector<sptr<NotificationRequest>> requests;
+    ret = advancedNotificationService_->GetActiveNotifications(requests, "");
+    ASSERT_EQ(ret, result);
 
     uint64_t num = 0;
     ret = advancedNotificationService_->GetActiveNotificationNums(num);
@@ -4928,18 +4698,11 @@ HWTEST_F(AdvancedNotificationServiceTest, NotificationSvrQueue_00001, Function |
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     result = ERR_ANS_INNER_INVALID_PARAM;
-    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    ret = advancedNotificationService_->GetAllActiveNotifications(
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    std::vector<sptr<Notification>> notifications;
+    ret = advancedNotificationService_->GetAllActiveNotifications(notifications);
+    ASSERT_EQ(ret, result);
 
     std::vector<std::string> keys;
-    std::vector<sptr<Notification>> notifications;
     ret = advancedNotificationService_->GetSpecialActiveNotifications(keys, notifications);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 

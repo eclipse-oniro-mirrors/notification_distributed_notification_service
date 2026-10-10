@@ -17,7 +17,6 @@
 #include <fuzzer/FuzzedDataProvider.h>
 #include "advanced_notification_service.h"
 #include "ans_permission_def.h"
-#include "ans_result_data_synchronizer.h"
 #include "mock_notification_request.h"
 #include "mock_notification_bundle_option.h"
 
@@ -36,10 +35,6 @@ namespace Notification {
         int32_t notificationId = fuzzData->ConsumeIntegral<int32_t>();
         std::string instanceKey = fuzzData->ConsumeRandomLengthString();
         service->Cancel(notificationId, label, instanceKey);
-
-        sptr<AnsResultDataSynchronizerImpl> synchronizer = new AnsResultDataSynchronizerImpl();
-        service->Cancel(notificationId, label, instanceKey,
-            iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
 
         std::string key = fuzzData->ConsumeRandomLengthString();
         int32_t removeReason = fuzzData->ConsumeIntegral<int32_t>();
@@ -60,8 +55,6 @@ namespace Notification {
         service->CancelAsBundle(bundleOption, notificationId, userId);
 
         service->CancelAll(instanceKey);
-        service->CancelAll(instanceKey, synchronizer);
-
         return true;
     }
 }

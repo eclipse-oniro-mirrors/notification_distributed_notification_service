@@ -30,7 +30,6 @@
 #include "ans_dialog_callback_proxy.h"
 #include "ans_subscriber_stub.h"
 #include "ans_permission_def.h"
-#include "ans_result_data_synchronizer.h"
 #include "mock_notification_bundle_option.h"
 #include "mock_notification_request.h"
 #include "mock_notification_slot.h"
@@ -49,7 +48,6 @@ namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
         auto service = AdvancedNotificationService::GetInstance();
-        sptr<AnsResultDataSynchronizerImpl> synchronizer = new AnsResultDataSynchronizerImpl();
         service->InitPublishProcess();
         service->CreateDialogManager();
         {
@@ -178,12 +176,6 @@ namespace Notification {
         }
         {
             // LiveView (L171-L203)
-        sptr<AnsResultDataSynchronizerImpl> synchronizer =
-            new AnsResultDataSynchronizerImpl();
-        if (service->CancelPreparedNotification(0, "label", nullptr, 0,
-            iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
 
         sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
         sptr<NotificationBundleOption> bundle = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);

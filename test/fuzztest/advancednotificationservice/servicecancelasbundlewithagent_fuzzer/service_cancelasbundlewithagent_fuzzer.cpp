@@ -17,7 +17,6 @@
 #include <fuzzer/FuzzedDataProvider.h>
 #include "advanced_notification_service.h"
 #include "ans_permission_def.h"
-#include "ans_result_data_synchronizer.h"
 #include "mock_notification_request.h"
 #include "mock_notification_bundle_option.h"
 
@@ -31,11 +30,6 @@ namespace Notification {
         sptr<NotificationBundleOption> bundleOption = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
         int32_t intData = fuzzData->ConsumeIntegral<uint32_t>();
         service->CancelAsBundleWithAgent(bundleOption, intData);
-        sptr<AnsResultDataSynchronizerImpl> synchronizer = new AnsResultDataSynchronizerImpl();
-        if (service->CancelAsBundleWithAgent(bundleOption, intData,
-            iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         return true;
     }
 }

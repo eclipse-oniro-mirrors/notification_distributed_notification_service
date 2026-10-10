@@ -20,7 +20,6 @@
 #undef protected
 #include "ans_dialog_callback_proxy.h"
 #include "ans_permission_def.h"
-#include "ans_result_data_synchronizer.h"
 #include "ansmanagerstubannex_fuzzer.h"
 #include "reminder_request_timer.h"
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -108,8 +107,6 @@ namespace OHOS {
         std::vector<Notification::NotificationBundleOption> bundleOptions;
         std::vector<sptr<Notification::NotificationSlot>> slots;
         std::vector<sptr<Notification::NotificationRequest>> notificationRequests;
-        sptr<Notification::AnsResultDataSynchronizerImpl> synchronizer =
-            new Notification::AnsResultDataSynchronizerImpl();
 
         service->Delete(stringData, removeReason);
         service->DeleteByBundle(bundleOption);
@@ -121,15 +118,7 @@ namespace OHOS {
         service->SetNotificationsEnabledForSpecialBundle(stringData, bundleOption, enabled);
         service->SetShowBadgeEnabledForBundle(bundleOption, enabled);
         service->GetShowBadgeEnabledForBundle(bundleOption, enabled);
-        if (service->GetShowBadgeEnabledForBundle(bundleOption,
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->GetShowBadgeEnabled(enabled);
-        if (service->GetShowBadgeEnabled(
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->IsAllowedNotify(allowed);
         service->IsAllowedNotifySelf(allowed);
         service->IsAllowedNotifySelf(bundleOption, allowed);
@@ -166,30 +155,10 @@ namespace OHOS {
         service->PublishNotificationForIndirectProxy(notificationRequest);
         service->PublishNotificationForIndirectProxyWithMaxCapacity(notificationRequest);
         service->CancelAsBundle(notificationId, stringData, userId);
-        if (service->CancelAsBundle(notificationId, stringData, userId,
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->CancelAsBundle(bundleOption, notificationId);
-        if (service->CancelAsBundle(bundleOption, notificationId,
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->CancelAsBundle(bundleOption, notificationId, userId);
-        if (service->CancelAsBundle(bundleOption, notificationId, userId,
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->CancelAll(key1);
-        if (service->CancelAll(key1,
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->Cancel(notificationId, stringData, key1);
-        if (service->Cancel(notificationId, stringData, key1,
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->AddSlotByType(slotType);
         service->AddSlots(slots);
         service->RemoveSlotByType(slotType);
@@ -200,16 +169,8 @@ namespace OHOS {
         service->SetSlotFlagsAsBundle(bundleOption, slotFlags);
         service->GetSlotFlagsAsBundle(bundleOption, slotFlags);
         service->GetActiveNotifications(notificationRequests, key1);
-        if (service->GetActiveNotifications(key1,
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->GetActiveNotificationNums(num);
         service->GetAllActiveNotifications(notificationsVector);
-        if (service->GetAllActiveNotifications(
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->GetSpecialActiveNotifications(keys, notificationsVector);
         service->GetActiveNotificationByFilter(
             bundleOption, notificationId, stringData, userId, keys, notificationRequest);
@@ -255,10 +216,6 @@ namespace OHOS {
         service->IsSmartReminderEnabled(deviceType, enabled);
         service->SetAdditionConfig(key1, value);
         service->CancelAsBundleWithAgent(bundleOption, userId);
-        if (service->CancelAsBundleWithAgent(bundleOption, userId,
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->GetTargetDeviceStatus(deviceType, deviceStatus);
 
         service->AddDoNotDisturbProfiles(profiles);

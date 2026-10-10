@@ -169,45 +169,6 @@ void AdvancedNotificationService::HandleBadgeEnabledChanged(
     NotificationSubscriberManager::GetInstance()->NotifyBadgeEnabledChanged(enabledData);
 }
 
-ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(const sptr<NotificationBundleOption> &bundleOption,
-    const sptr<IAnsResultDataSynchronizer> &synchronizer)
-{
-    ANS_LOGD("called");
-    if (synchronizer == nullptr) {
-        ANS_LOGE("synchronizer is null");
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGD("VerifyNativeToken is bogus.");
-        return ERR_ANS_INNER_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
-        return ERR_ANS_INNER_PERMISSION_DENIED;
-    }
-
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr) {
-        ANS_LOGE("null bundle");
-        return ERR_ANS_INNER_INVALID_BUNDLE;
-    }
-
-    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
-        ANS_LOGD("called");
-        ErrCode result = ERR_OK;
-        bool enabled = false;
-        result = NotificationPreferences::GetInstance()->IsShowBadge(bundle, enabled);
-        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_OK;
-            enabled = true;
-        }
-        synchronizer->TransferResultData(result, enabled);
-    }));
-    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set notification badge for bundle.");
-    return ERR_OK;
-}
-
 ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundle(
     const sptr<NotificationBundleOption> &bundleOption, bool &enabled)
 {
@@ -289,33 +250,6 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabledForBundles(
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     ANS_LOGD("GetShowBadgeEnabledForBundles end");
     return result;
-}
-
-ErrCode AdvancedNotificationService::GetShowBadgeEnabled(const sptr<IAnsResultDataSynchronizer> &synchronizer)
-{
-    ANS_LOGD("called");
-    if (synchronizer == nullptr) {
-        ANS_LOGE("synchronizer is null");
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-    sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
-    if (bundleOption == nullptr) {
-        return ERR_ANS_INNER_INVALID_BUNDLE;
-    }
-
-    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
-        ANS_LOGD("called");
-        ErrCode result = ERR_OK;
-        bool enabled = false;
-        result = NotificationPreferences::GetInstance()->IsShowBadge(bundleOption, enabled);
-        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_OK;
-            enabled = true;
-        }
-        synchronizer->TransferResultData(result, enabled);
-    }));
-    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get show badge enabled.");
-    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)

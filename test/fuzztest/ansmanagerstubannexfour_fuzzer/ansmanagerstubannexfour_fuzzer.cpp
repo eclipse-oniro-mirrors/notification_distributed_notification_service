@@ -22,7 +22,6 @@
 #undef protected
 #include "ans_dialog_callback_proxy.h"
 #include "ans_permission_def.h"
-#include "ans_result_data_synchronizer.h"
 #include "ansmanagerstubannexfour_fuzzer.h"
 #include "notification_record.h"
 #include "notification_request.h"
@@ -49,8 +48,6 @@ namespace OHOS {
         bool allowed = fuzzData->ConsumeBool();
         bool enabled = fuzzData->ConsumeBool();
         sptr<Notification::NotificationDoNotDisturbDate> date = new Notification::NotificationDoNotDisturbDate();
-        sptr<Notification::AnsResultDataSynchronizerImpl> synchronizer =
-            new (std::nothrow) Notification::AnsResultDataSynchronizerImpl();
         sptr<Notification::NotificationButtonOption> buttonOption = new Notification::NotificationButtonOption();
 
         bool support = fuzzData->ConsumeBool();
@@ -84,10 +81,6 @@ namespace OHOS {
         service->IsDistributedEnableByBundle(bundleOption, enable);
         service->SetDefaultNotificationEnabled(bundleOption, enabled);
         service->ExcuteCancelAll(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
-        if (service->ExcuteCancelAll(bundleOption, fuzzData->ConsumeIntegral<int32_t>(),
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->ExcuteDelete(stringData, fuzzData->ConsumeIntegral<int32_t>());
         service->RemoveSystemLiveViewNotifications(bundleName,
             fuzzData->ConsumeIntegral<int32_t>(), fuzzData->ConsumeIntegral<int32_t>());
