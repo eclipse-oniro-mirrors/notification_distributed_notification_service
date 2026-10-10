@@ -99,6 +99,7 @@ struct NotificationDialogPage {
 
   aboutToAppear() {
     this.privacyDialogController.open();
+    this.getUIContext().setPixelRoundMode(PixelRoundMode.PIXEL_ROUND_AFTER_MEASURE);
   }
 
   onPageShow() {
