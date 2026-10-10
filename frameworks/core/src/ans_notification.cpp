@@ -990,6 +990,52 @@ InnerErrorCode AnsNotification::RemoveAllNotifications(const NotificationBundleO
     return static_cast<InnerErrorCode>(proxy->RemoveAllNotifications(bo));
 }
 
+InnerErrorCode AnsNotification::RemoveNotificationAsAdmin(const NotificationBundleOption &bundleOption,
+    const int32_t notificationId, const std::string &label)
+{
+    ANS_LOGI("remove as admin id:%{public}d,bundle:%{public}s,label:%{public}s",
+        notificationId, bundleOption.GetBundleName().c_str(), label.c_str());
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notificationId < 0) {
+        ANS_LOGE("Invalid notificationId.");
+        return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
+    }
+    if (bundleOption.GetBundleName().empty()) {
+        ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
+    }
+
+    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
+    if (bo == nullptr) {
+        ANS_LOGE("null bundleOption");
+        return ERR_ANS_INNER_NO_MEMORY;
+    }
+    return static_cast<InnerErrorCode>(proxy->RemoveNotificationAsAdmin(bo, notificationId, label));
+}
+
+InnerErrorCode AnsNotification::RemoveAllNotificationsAsAdmin(int32_t userId)
+{
+    ANS_LOGI("remove all as admin userId:%{public}d", userId);
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (userId <= SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Input userId is invalid.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("GetAnsManagerProxy defeat.");
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
+    }
+    return static_cast<InnerErrorCode>(proxy->RemoveAllNotificationsAsAdmin(userId));
+}
+
 InnerErrorCode AnsNotification::RemoveNotifications(const std::vector<std::string> hashcodes, int32_t removeReason)
 {
     ANS_LOGI("remove removeReason:%{public}d", removeReason);

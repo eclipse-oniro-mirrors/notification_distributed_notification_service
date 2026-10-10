@@ -25,8 +25,11 @@
 #include "notification_content.h"
 #include "notification_normal_content.h"
 #include "notification_live_view_content.h"
+#include "notification_local_live_view_content.h"
 
 using namespace testing::ext;
+
+extern void MockIsOsAccountExists(bool mockRet);
 
 namespace OHOS {
 namespace Notification {
@@ -425,6 +428,235 @@ HWTEST_F(AdvancedNotificationCancelTest, ResolveAgentUid_ZeroUidResolved_00001, 
         NotificationConstant::APP_CANCEL_AS_BUNELE_WITH_AGENT_REASON_DELETE, outUid);
     EXPECT_EQ(result, ERR_OK);
     EXPECT_EQ(outUid, NON_SYSTEM_APP_UID);
+}
+
+/**
+ * @tc.name: RemoveNotificationAsAdmin_UserDeletableOnly_00001
+ * @tc.desc: Test RemoveNotificationAsAdmin returns USER_DELETABLE_ONLY error and keeps notification
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_UserDeletableOnly_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    service->notificationList_.clear();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    request->SetContent(content);
+    request->SetUserDeletableOnly(true);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    auto record = service->MakeNotificationRecord(request, bundle);
+    service->AddToNotificationList(record);
+
+    auto result = service->RemoveNotificationAsAdmin(bundle, 1, "");
+    EXPECT_EQ(result, ERR_ANS_INNER_ADMIN_NOTIFICATION_USER_DELETABLE_ONLY);
+    EXPECT_EQ(service->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveNotification_UserDeletableOnly_NotJudged_00001
+ * @tc.desc: Test normal RemoveNotification ignores userDeletableOnly and deletes successfully
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, RemoveNotification_UserDeletableOnly_NotJudged_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    service->notificationList_.clear();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    request->SetContent(content);
+    request->SetUserDeletableOnly(true);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    auto record = service->MakeNotificationRecord(request, bundle);
+    service->AddToNotificationList(record);
+
+    auto result = service->RemoveNotification(bundle, 1, "", NotificationConstant::CANCEL_REASON_DELETE);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(service->notificationList_.size(), 0);
+}
+
+/**
+ * @tc.name: RemoveAllNotificationsAsAdmin_UserDeletableOnly_00001
+ * @tc.desc: Test RemoveAllNotificationsAsAdmin skips userDeletableOnly notification and removes others
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, RemoveAllNotificationsAsAdmin_UserDeletableOnly_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    MockIsOsAccountExists(true);
+    auto service = GetService();
+    service->notificationList_.clear();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    sptr<NotificationRequest> protectedRequest = new NotificationRequest();
+    protectedRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    protectedRequest->SetNotificationId(1);
+    auto protectedContent = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    protectedRequest->SetContent(protectedContent);
+    protectedRequest->SetCreatorUserId(100);
+    protectedRequest->SetUserDeletableOnly(true);
+    service->AddToNotificationList(service->MakeNotificationRecord(protectedRequest, bundle));
+
+    sptr<NotificationRequest> normalRequest = new NotificationRequest();
+    normalRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    normalRequest->SetNotificationId(2);
+    auto normalContent = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    normalRequest->SetContent(normalContent);
+    normalRequest->SetCreatorUserId(100);
+    service->AddToNotificationList(service->MakeNotificationRecord(normalRequest, bundle));
+
+    ASSERT_EQ(service->notificationList_.size(), 2);
+
+    auto result = service->RemoveAllNotificationsAsAdmin(100);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(service->notificationList_.size(), 1);
+    EXPECT_TRUE(service->notificationList_.front()->request->IsUserDeletableOnly());
+}
+
+/**
+ * @tc.name: RemoveNotificationAsAdmin_SystemLiveView_00001
+ * @tc.desc: Test RemoveNotificationAsAdmin returns SYSTEM_LIVE_VIEW error and keeps notification
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_SystemLiveView_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    service->notificationList_.clear();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetNotificationId(1);
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationLocalLiveViewContent>());
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    service->AddToNotificationList(service->MakeNotificationRecord(request, bundle));
+
+    auto result = service->RemoveNotificationAsAdmin(bundle, 1, "");
+    EXPECT_EQ(result, ERR_ANS_INNER_ADMIN_SYSTEM_LIVE_VIEW_NOT_REMOVABLE);
+    EXPECT_EQ(service->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveNotificationAsAdmin_LabelMatch_00001
+ * @tc.desc: Test RemoveNotificationAsAdmin label matching with non-empty label
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_LabelMatch_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    service->notificationList_.clear();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    request->SetLabel("adminLabel");
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    request->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    service->AddToNotificationList(service->MakeNotificationRecord(request, bundle));
+
+    auto result = service->RemoveNotificationAsAdmin(bundle, 1, "wrongLabel");
+    EXPECT_EQ(result, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(service->notificationList_.size(), 1);
+
+    result = service->RemoveNotificationAsAdmin(bundle, 1, "adminLabel");
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(service->notificationList_.size(), 0);
+}
+
+/**
+ * @tc.name: NotificationRequest_CopyUserDeletableOnly_00001
+ * @tc.desc: Test NotificationRequest copy constructor and assignment keep userDeletableOnly
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, NotificationRequest_CopyUserDeletableOnly_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetUserDeletableOnly(true);
+
+    NotificationRequest copied(*request);
+    EXPECT_TRUE(copied.IsUserDeletableOnly());
+
+    NotificationRequest assigned;
+    assigned = *request;
+    EXPECT_TRUE(assigned.IsUserDeletableOnly());
+}
+
+/**
+ * @tc.name: RemoveAllNotificationsAsAdmin_CleansTriggerAndSnooze_00001
+ * @tc.desc: Test RemoveAllNotificationsAsAdmin cleans trigger and snooze delay lists
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, RemoveAllNotificationsAsAdmin_CleansTriggerAndSnooze_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    MockIsOsAccountExists(true);
+    auto service = GetService();
+    service->notificationList_.clear();
+    service->triggerNotificationList_.clear();
+    service->snoozeDelayTimerList_.clear();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    sptr<NotificationRequest> activeRequest = new NotificationRequest();
+    activeRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    activeRequest->SetNotificationId(1);
+    auto activeContent = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    activeRequest->SetContent(activeContent);
+    activeRequest->SetCreatorUserId(100);
+    service->AddToNotificationList(service->MakeNotificationRecord(activeRequest, bundle));
+
+    sptr<NotificationRequest> triggerRequest = new NotificationRequest();
+    triggerRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    triggerRequest->SetNotificationId(2);
+    auto triggerContent = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    triggerRequest->SetContent(triggerContent);
+    triggerRequest->SetCreatorUserId(100);
+    service->AddToTriggerNotificationList(service->MakeNotificationRecord(triggerRequest, bundle));
+    ASSERT_EQ(service->triggerNotificationList_.size(), 1);
+
+    sptr<NotificationRequest> snoozeRequest = new NotificationRequest();
+    snoozeRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    snoozeRequest->SetNotificationId(3);
+    auto snoozeContent = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    snoozeRequest->SetContent(snoozeContent);
+    snoozeRequest->SetCreatorUserId(100);
+    snoozeRequest->SetSnoozeDelayTime(1000000);
+    service->InsertsnoozeDelayTimer(service->MakeNotificationRecord(snoozeRequest, bundle));
+    ASSERT_EQ(service->snoozeDelayTimerList_.size(), 1);
+
+    auto result = service->RemoveAllNotificationsAsAdmin(100);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(service->notificationList_.size(), 0);
+    EXPECT_EQ(service->triggerNotificationList_.size(), 0);
+    EXPECT_EQ(service->snoozeDelayTimerList_.size(), 0);
 }
 
 }  // namespace Notification

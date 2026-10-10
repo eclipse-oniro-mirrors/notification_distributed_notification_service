@@ -1830,6 +1830,11 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         }
     }
 
+    if (!parcel.WriteBool(isUserDeletableOnly_)) {
+        ANS_LOGE("Failed to write isUserDeletableOnly");
+        return false;
+    }
+
     return true;
 }
 
@@ -2231,6 +2236,8 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
             return false;
         }
     }
+    // New field appended at tail: old-version parcel without this field reads default false.
+    isUserDeletableOnly_ = parcel.ReadBool();
     return true;
 }
 
@@ -2331,6 +2338,16 @@ void NotificationRequest::SetRemoveAllowed(bool isRemoveAllowed)
     isRemoveAllowed_ = isRemoveAllowed;
 }
 
+bool NotificationRequest::IsUserDeletableOnly() const
+{
+    return isUserDeletableOnly_;
+}
+
+void NotificationRequest::SetUserDeletableOnly(bool isUserDeletableOnly)
+{
+    isUserDeletableOnly_ = isUserDeletableOnly;
+}
+
 bool NotificationRequest::IsForceDistributed() const
 {
     return forceDistributed_;
@@ -2398,6 +2415,7 @@ void NotificationRequest::CopyBase(const NotificationRequest &other)
     this->appName_ = other.appName_;
     this->isAgent_ = other.isAgent_;
     this->isRemoveAllowed_ = other.isRemoveAllowed_;
+    this->isUserDeletableOnly_ = other.isUserDeletableOnly_;
     this->forceDistributed_ = other.forceDistributed_;
     this->notDistributed_ = other.notDistributed_;
     this->isSystemApp_ = other.isSystemApp_;

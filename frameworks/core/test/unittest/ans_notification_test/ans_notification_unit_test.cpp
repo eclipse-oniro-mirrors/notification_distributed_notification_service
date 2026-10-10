@@ -397,6 +397,50 @@ HWTEST_F(AnsNotificationUnitTest, RemoveNotifications_0100, Function | MediumTes
 }
 
 /*
+ * @tc.name: RemoveNotificationAsAdmin_0100
+ * @tc.desc: test RemoveNotificationAsAdmin.
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AnsNotificationUnitTest, RemoveNotificationAsAdmin_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    NotificationBundleOption bundleOption("", 0);
+    InnerErrorCode ret1 = ans_->RemoveNotificationAsAdmin(bundleOption, 1, "");
+    EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
+    NotificationBundleOption bundleOption2("com.example.admin", 100);
+    InnerErrorCode ret2 = ans_->RemoveNotificationAsAdmin(bundleOption2, -1, "");
+    EXPECT_EQ(ret2, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    InnerErrorCode ret3 = ans_->RemoveNotificationAsAdmin(bundleOption2, 1, "");
+    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_READY);
+}
+
+/*
+ * @tc.name: RemoveAllNotificationsAsAdmin_0100
+ * @tc.desc: test RemoveAllNotificationsAsAdmin.
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AnsNotificationUnitTest, RemoveAllNotificationsAsAdmin_0100, Function | MediumTest | Level1)
+{
+    MockWriteInterfaceToken(false);
+    sptr<MockIRemoteObject> iremoteObjects = new (std::nothrow) MockIRemoteObject();
+    ASSERT_NE(nullptr, iremoteObjects);
+    std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
+    ASSERT_NE(nullptr, proxy);
+    ans_->GetAnsManagerProxy();
+    InnerErrorCode ret1 = ans_->RemoveAllNotificationsAsAdmin(1);
+    EXPECT_EQ(ret1, ERR_ANS_INNER_SERVICE_NOT_READY);
+    InnerErrorCode ret2 = ans_->RemoveAllNotificationsAsAdmin(-1);
+    EXPECT_EQ(ret2, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/*
  * @tc.name: GetNotificationSlotForBundle_0100
  * @tc.desc: test GetNotificationSlotForBundle.
  * @tc.type: FUNC
