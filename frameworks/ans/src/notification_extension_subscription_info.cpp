@@ -27,7 +27,7 @@ NotificationExtensionSubscriptionInfo::NotificationExtensionSubscriptionInfo(
 
 NotificationExtensionSubscriptionInfo::NotificationExtensionSubscriptionInfo(
     const NotificationExtensionSubscriptionInfo& info)
-    : addr_(info.addr_), isHfp_(info.isHfp_), type_(info.type_), priorityStrategy_(info.priorityStrategy_)
+    : addr_(info.addr_), type_(info.type_), priorityStrategy_(info.priorityStrategy_)
 {}
 
 NotificationExtensionSubscriptionInfo::~NotificationExtensionSubscriptionInfo()
@@ -41,16 +41,6 @@ std::string NotificationExtensionSubscriptionInfo::GetAddr() const
 void NotificationExtensionSubscriptionInfo::SetAddr(const std::string& addr)
 {
     addr_ = addr;
-}
-
-bool NotificationExtensionSubscriptionInfo::IsHfp() const
-{
-    return isHfp_;
-}
-
-void NotificationExtensionSubscriptionInfo::SetHfp(const bool& hfp)
-{
-    isHfp_ = hfp;
 }
 
 NotificationConstant::SubscribeType NotificationExtensionSubscriptionInfo::GetType() const
@@ -123,7 +113,6 @@ bool NotificationExtensionSubscriptionInfo::ReadFromParcel(Parcel& parcel)
 bool NotificationExtensionSubscriptionInfo::ToJson(nlohmann::json& jsonObject) const
 {
     jsonObject["addr"] = addr_;
-    jsonObject["isHfp"] = isHfp_;
     jsonObject["type"] = static_cast<int32_t>(type_);
     jsonObject["priorityStrategy"] = priorityStrategy_;
 
@@ -147,10 +136,6 @@ NotificationExtensionSubscriptionInfo* NotificationExtensionSubscriptionInfo::Fr
 
     if (jsonObject.find("addr") != jsonEnd && jsonObject.at("addr").is_string()) {
         pDistributedBundleOption->addr_ = jsonObject.at("addr").get<std::string>();
-    }
-
-    if (jsonObject.find("isHfp") != jsonEnd && jsonObject.at("isHfp").is_boolean()) {
-        pDistributedBundleOption->isHfp_ = jsonObject.at("isHfp").get<bool>();
     }
 
     if (jsonObject.find("type") != jsonEnd && jsonObject.at("type").is_number_integer()) {

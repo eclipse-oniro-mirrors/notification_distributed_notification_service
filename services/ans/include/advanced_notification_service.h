@@ -32,7 +32,6 @@
 
 #include "ans_const_define.h"
 #include "ans_manager_stub.h"
-#include "bluetooth_hfp_ag.h"
 #include "bluetooth_host.h"
 #include "common_notification_publish_process.h"
 #include "distributed_kv_data_manager.h"
@@ -40,6 +39,7 @@
 #include "live_publish_process.h"
 #include "notification.h"
 #include "notification_bundle_option.h"
+#include "notification_bundle_icon_info.h"
 #include "distributed_bundle_option.h"
 #include "notification_dialog_manager.h"
 #include "notification_do_not_disturb_profile.h"
@@ -2051,6 +2051,11 @@ public:
     ErrCode SetUserGrantedBundleState(const sptr<NotificationBundleOption>& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled) override;
 
+    ErrCode GetUserGrantedBundleIcon(
+        const std::string& bundleName, sptr<NotificationBundleIconInfo>& bundleIcon) override;
+
+    ErrCode DisableUserGrantedByBundle(const sptr<NotificationBundleOption>& bundle) override;
+
     ErrCode ValidateExtensionBundleOption(sptr<NotificationBundleOption> &bundleOption);
     ErrCode CanOpenSubscribeSettings() override;
 
@@ -2119,7 +2124,6 @@ public:
     void HandleBundleInstall(const sptr<NotificationBundleOption> &bundleOption);
     void HandleBundleUpdate(const sptr<NotificationBundleOption> &bundleOption);
     void HandleBundleUninstall(const sptr<NotificationBundleOption> &bundleOption);
-    void OnHfpDeviceConnectChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
     void OnBluetoothStateChanged(const int status);
     void OnBluetoothPairedStatusChanged(const OHOS::Bluetooth::BluetoothRemoteDevice &device, int state);
 #endif
@@ -2611,7 +2615,7 @@ private:
     bool IsSystemTypeSubscriber(const sptr<NotificationBundleOption> &bundle);
     bool CheckBluetoothConnectionInInfos(
         const sptr<NotificationBundleOption> &bundleOption,
-        const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos, bool &updateHfp);
+        const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos);
     void FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles,
         std::vector<sptr<NotificationBundleOption>> &mismatchedBundles);
     void FilterGrantedBundles(std::vector<sptr<NotificationBundleOption>> &bundles,
@@ -2632,10 +2636,9 @@ private:
     bool ShutdownExtensionServiceAndUnSubscribed(const sptr<NotificationBundleOption> &bundle);
     bool GetCloneBundleList(const sptr<NotificationBundleOption>& bundleOption,
         std::vector<sptr<NotificationBundleOption>>& cloneBundleList);
-    void ProcessHfpDeviceStateChange(int state);
     void ProcessBluetoothStateChanged(const int status);
     void ProcessBluetoothPairedStatusChange(int state);
-    void CheckBleAndHfpStateChange(bool filterHfpOnly);
+    void CheckBluetoothStateChange();
     std::vector<sptr<NotificationBundleOption>>::iterator FindBundleInCache(
         const sptr<NotificationBundleOption> &bundleOption);
     bool EnsureBundlesCanSubscribePriority(const sptr<NotificationBundleOption> &bundle);
@@ -2646,6 +2649,10 @@ private:
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled, ErrCode& result);
     void ProcessExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos, ErrCode& result);
+    void ProcessGetUserGrantedBundleIcon(const sptr<NotificationBundleOption>& bundleOption,
+        const std::string& bundleName, int32_t& grantedUid, int32_t& grantedAppIndex, ErrCode& result);
+    void ProcessDisableUserGrantedByBundle(const sptr<NotificationBundleOption>& bundleOption,
+        const sptr<NotificationBundleOption>& bundleProcessed, ErrCode& result);
     void ReportInvalidBundleOption(const sptr<NotificationBundleOption>& targetBundle, HaMetaMessage &message);
     ErrCode GetNotificationExtensionEnabledBundles(std::vector<sptr<NotificationBundleOption>>  &bundles);
     bool HasExtensionSubscriptionStateChanged(const sptr<NotificationBundleOption> &bundle, bool enabled);
@@ -2773,7 +2780,6 @@ private:
     mutable std::shared_mutex proxyForUnawareUidSetMutex_;
     std::atomic<bool> notificationExtensionLoaded_ = false;
     std::shared_ptr<NotificationLoadUtils> notificationExtensionHandler_;
-    bool supportHfp_ = false;
     std::vector<sptr<NotificationBundleOption>> cacheNotificationExtensionBundles_;
     ffrt::mutex notDisturbEnableStateMutex_;
     int32_t notDisturbEnableState_ = -1;

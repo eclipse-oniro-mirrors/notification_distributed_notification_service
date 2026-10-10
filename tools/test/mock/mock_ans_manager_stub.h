@@ -1111,6 +1111,17 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode GetUserGrantedBundleIcon(const std::string& bundleName, sptr<NotificationBundleIconInfo>& icon)
+        override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode DisableUserGrantedByBundle(const sptr<NotificationBundleOption>& bundle) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode GetUserGrantedEnabledBundles(const sptr<NotificationBundleOption>& bundleOption,
         std::vector<sptr<NotificationBundleOption>>& enabledBundles) override
     {

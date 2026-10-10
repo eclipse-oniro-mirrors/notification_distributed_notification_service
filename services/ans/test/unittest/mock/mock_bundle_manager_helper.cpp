@@ -33,12 +33,18 @@ void MockIsNonBundleName(bool isNonBundleName)
 bool g_getBundle = true;
 bool g_systemBundle = false;
 int32_t g_bundleHelperResult = 0;
+std::string g_bundleIconData;
 std::vector<NotificationBundleOption> g_installedBundles;
 bool g_isAncoApp = false;
 
 void MockBundleManager::MockBundleInterfaceResult(const int32_t result)
 {
     g_bundleHelperResult = result;
+}
+
+void MockBundleManager::MockBundleIconData(const std::string &iconData)
+{
+    g_bundleIconData = iconData;
 }
 
 void MockBundleManager::MockInstallBundle(const NotificationBundleOption& bundleOption)
@@ -193,6 +199,7 @@ bool BundleManagerHelper::CheckSystemApp(const std::string& bundleName, int32_t 
 ErrCode BundleManagerHelper::GetBundleResourceInfo(const std::string &bundleName,
     AppExecFwk::BundleResourceInfo &bundleResourceInfo, const int32_t appIndex)
 {
+    bundleResourceInfo.icon = g_bundleIconData;
     return g_bundleHelperResult;
 }
 

@@ -18,6 +18,7 @@ import { BundleOption, UserGrantSetting } from 'notification.NotificationCommonD
 import { BundleOption, GrantedBundleInfo } from 'notification.NotificationCommonDef';
 import { NotificationExtensionSubscriptionInfo } from 'notification.NotificationExtensionSubscriptionInfo';
 import UIAbilityContext from 'application.UIAbilityContext';
+import image from '@ohos.multimedia.image';
 
 type ResolveCallback<T> = (data: T) => void;
 type RejectCallback = (err: Error) => void;
@@ -54,6 +55,8 @@ export default namespace notificationExtensionSubscription {
     native function nativeGetUserGrantedEnabledBundlesForSelf(): Promise<GrantedBundleInfo[]>;
     native function nativeSetUserGrantedBundleState(targetBundle: BundleOption,
         enabledBundles:BundleOption[], enabled:boolean): Promise<void>;
+    native function nativeGetUserGrantedBundleIcon(bundleName: string): Promise<image.PixelMap>;
+    native function nativeDisableUserGrantedByBundle(bundle: GrantedBundleInfo): Promise<void>;
 
     function isInvalidParameter(bundle: BundleOption): BusinessError
     {
@@ -240,6 +243,28 @@ export default namespace notificationExtensionSubscription {
         let result: Promise<void>;
         try {
             result = nativeSetUserGrantedBundleState(targetBundle, enabledBundles, enabled);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
+    }
+
+    function getUserGrantedBundleIcon(bundleName: string): Promise<image.PixelMap> {
+        let result: Promise<image.PixelMap>;
+        try {
+            result = nativeGetUserGrantedBundleIcon(bundleName);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
+    }
+
+    function disableUserGrantedByBundle(bundle: GrantedBundleInfo): Promise<void> {
+        let result: Promise<void>;
+        try {
+            result = nativeDisableUserGrantedByBundle(bundle);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
             throw error;

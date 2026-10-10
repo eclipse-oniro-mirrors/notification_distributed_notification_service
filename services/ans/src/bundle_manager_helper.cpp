@@ -23,11 +23,51 @@
 
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
+#include "image_source.h"
 #include "os_account_manager_helper.h"
 
 
 namespace OHOS {
 namespace Notification {
+namespace {
+constexpr const char *ICON_DATA_URI_PREFIX = "data:image/png;base64,";
+const std::string BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+constexpr size_t BASE64_GROUP_SIZE = 4;
+constexpr size_t BASE64_MAX_PADDING = 2;
+constexpr uint32_t BASE64_BITS_PER_CHAR = 6;
+constexpr uint32_t BITS_PER_BYTE = 8;
+
+bool Base64Decode(const std::string &input, std::vector<uint8_t> &output)
+{
+    output.clear();
+    if (input.size() % BASE64_GROUP_SIZE != 0) {
+        return false;
+    }
+    uint32_t buffer = 0;
+    int32_t bits = 0;
+    for (size_t i = 0; i < input.size(); ++i) {
+        char c = input[i];
+        if (c == '=') {
+            if (i + BASE64_MAX_PADDING < input.size()) {
+                return false;
+            }
+            continue;
+        }
+        size_t index = BASE64_CHARS.find(c);
+        if (index == std::string::npos) {
+            return false;
+        }
+        buffer = (buffer << BASE64_BITS_PER_CHAR) | static_cast<uint32_t>(index);
+        bits += BASE64_BITS_PER_CHAR;
+        if (bits >= BITS_PER_BYTE) {
+            bits -= BITS_PER_BYTE;
+            output.push_back(static_cast<uint8_t>((buffer >> bits) & 0xFF));
+        }
+    }
+    return true;
+}
+}  // namespace
+
 constexpr int32_t APP_TYPE_ONE = 1;
 constexpr int32_t APP_TYPE_TWO = 2;
 BundleManagerHelper::BundleManagerHelper()
@@ -455,6 +495,54 @@ ErrCode __attribute__((weak)) BundleManagerHelper::GetBundleResourceInfo(const s
     result = bundleResourceProxy->GetBundleResourceInfo(bundleName, flag, bundleResourceInfo, appIndex);
     IPCSkeleton::SetCallingIdentity(identity);
     return result;
+}
+
+ErrCode __attribute__((weak)) BundleManagerHelper::GetBundleIcon(const std::string &bundleName,
+    int32_t appIndex, std::shared_ptr<Media::PixelMap> &icon)
+{
+    icon = nullptr;
+    AppExecFwk::BundleResourceInfo bundleResourceInfo = {};
+    ErrCode result = GetBundleResourceInfo(bundleName, bundleResourceInfo, appIndex);
+    if (result != ERR_OK) {
+        ANS_LOGE("GetBundleResourceInfo failed, bundleName = %{public}s, result = %{public}d",
+            bundleName.c_str(), result);
+        return result;
+    }
+
+    const std::string &dataUri = bundleResourceInfo.icon;
+    size_t prefixLen = std::strlen(ICON_DATA_URI_PREFIX);
+    if (dataUri.empty()) {
+        ANS_LOGE("Bundle icon is empty, bundleName = %{public}s", bundleName.c_str());
+        return -1;
+    }
+    if (dataUri.size() <= prefixLen || dataUri.compare(0, prefixLen, ICON_DATA_URI_PREFIX) != 0) {
+        ANS_LOGE("Invalid bundle icon data uri prefix, bundleName = %{public}s", bundleName.c_str());
+        return -1;
+    }
+
+    std::vector<uint8_t> pngData;
+    if (!Base64Decode(dataUri.substr(prefixLen), pngData) || pngData.empty()) {
+        ANS_LOGE("Decode bundle icon base64 failed, bundleName = %{public}s", bundleName.c_str());
+        return -1;
+    }
+
+    Media::SourceOptions sourceOptions;
+    uint32_t res = 0;
+    auto imageSource = Media::ImageSource::CreateImageSource(pngData.data(), pngData.size(), sourceOptions, res);
+    if (res != ERR_OK || imageSource == nullptr) {
+        ANS_LOGE("Create image source failed, res = %{public}u, bundleName = %{public}s", res, bundleName.c_str());
+        return -1;
+    }
+
+    Media::DecodeOptions decodeOpts;
+    auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, res);
+    if (res != ERR_OK || pixelMapPtr == nullptr) {
+        ANS_LOGE("Create pixel map failed, res = %{public}u, bundleName = %{public}s", res, bundleName.c_str());
+        return -1;
+    }
+
+    icon = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    return ERR_OK;
 }
 
 bool __attribute__((weak)) BundleManagerHelper::QueryExtensionInfos(

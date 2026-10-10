@@ -21,6 +21,7 @@ interface OHOS.Notification.IAnsOperationCallback;
 interface OHOS.Notification.IBadgeQueryCallback;
 
 sequenceable OHOS.Notification.NotificationBundleOption;
+sequenceable OHOS.Notification.NotificationBundleIconInfo;
 sequenceable OHOS.Notification.NotificationReminderInfo;
 sequenceable OHOS.Notification.DistributedBundleOption;
 sequenceable OHOS.Notification.NotificationDisable;
@@ -469,7 +470,6 @@ interface OHOS.Notification.IAnsManager {
 
     void SetUserGrantedBundleState([in] sptr<NotificationBundleOption> targetBundle, [in] sptr<NotificationBundleOption>[] enabledBundles, [in] boolean enabled);
 
-
     void ProxyForUnaware([in] int[] uidList, [in] boolean isProxy);
 
     void GetAllSubscriptionBundles([out] sptr<NotificationBundleOption>[] bundles);
@@ -496,4 +496,8 @@ interface OHOS.Notification.IAnsManager {
         [in] sptr<NotificationBundleOption>[] bundleOptions,
         [in] int slotType,
         [out] OrderedMap<sptr<NotificationBundleOption>, boolean> slotEnabled);
+
+    void GetUserGrantedBundleIcon([in] String bundleName, [out] null_sptr<NotificationBundleIconInfo> icon);
+
+    void DisableUserGrantedByBundle([in] sptr<NotificationBundleOption> bundle);
 }

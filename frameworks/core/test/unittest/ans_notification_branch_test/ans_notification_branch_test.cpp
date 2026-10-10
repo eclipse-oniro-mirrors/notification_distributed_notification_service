@@ -591,6 +591,16 @@ public:
         return ERR_OK;
     }
 
+    ErrCode GetUserGrantedBundleIcon(const std::string& bundleName, sptr<NotificationBundleIconInfo>& icon)
+    {
+        return ERR_OK;
+    }
+
+    ErrCode DisableUserGrantedByBundle(const sptr<NotificationBundleOption>& bundle)
+    {
+        return ERR_OK;
+    }
+
     ErrCode GetDeviceRemindType(int32_t& remindTypeInt) override
     {
         return ERR_ANS_INNER_INVALID_PARAM;

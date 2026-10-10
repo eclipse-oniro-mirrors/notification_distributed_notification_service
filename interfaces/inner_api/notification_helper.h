@@ -18,6 +18,7 @@
 
 #include "ans_dialog_host_client.h"
 #include "notification_bundle_option.h"
+#include "notification_bundle_icon_info.h"
 #include "distributed_bundle_option.h"
 #include "notification_button_option.h"
 #include "notification_do_not_disturb_date.h"
@@ -1855,6 +1856,22 @@ public:
      */
     static ErrCode SetUserGrantedBundleState(const NotificationBundleOption& targetBundle,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled);
+
+    /**
+     * @brief Obtains the current icon of the specified bundle which is granted by self.
+     * @param bundleName The bundle name to be queried.
+     * @param bundleIcon The returned bundle icon information.
+     * @return Returns get result.
+     */
+    static ErrCode GetUserGrantedBundleIcon(
+        const std::string& bundleName, sptr<NotificationBundleIconInfo>& bundleIcon);
+
+    /**
+     * @brief Disables the notification cooperation switch of the specified bundle granted by self.
+     * @param bundle The bundle option to be disabled.
+     * @return Returns set result.
+     */
+    static ErrCode DisableUserGrantedByBundle(const NotificationBundleOption& bundle);
 
     /**
      * @brief Obtains the list of bundleOption which granted by user.

@@ -736,44 +736,6 @@ bool __attribute__((weak)) NotificationConfigParse::IsNotificationExtensionLifec
     return false;
 }
 
-bool __attribute__((weak)) NotificationConfigParse::IsNotificationExtensionSubscribeSupportHfp(
-    bool &outSupportHfp) const
-{
-    nlohmann::json root;
-    std::string jsonPoint = "/";
-    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION);
-    jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_SUPPORT_HFP);
-    if (!GetConfigJson(jsonPoint, root)) {
-        ANS_LOGI("Failed to get HFP support config, using default value: false.");
-        outSupportHfp = false;
-        return false;
-    }
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) ||
-        !root[CFG_KEY_NOTIFICATION_SERVICE].contains(CFG_KEY_NOTIFICATION_EXTENSION)) {
-        ANS_LOGE("IsNotificationExtensionSubscribeSupportHfp missing notificationExtension jsonKey");
-        outSupportHfp = false;
-        return false;
-    }
-    nlohmann::json service = root[CFG_KEY_NOTIFICATION_SERVICE];
-    nlohmann::json extension = service[CFG_KEY_NOTIFICATION_EXTENSION];
-    if (extension.is_null() || extension.empty()) {
-        ANS_LOGE("IsNotificationExtensionSubscribeSupportHfp invalid notificationExtension json");
-        outSupportHfp = false;
-        return false;
-    }
-    if (extension.contains(CFG_KEY_SUPPORT_HFP) && extension[CFG_KEY_SUPPORT_HFP].is_boolean()) {
-        outSupportHfp = extension[CFG_KEY_SUPPORT_HFP].get<bool>();
-        return true;
-    }
-
-    ANS_LOGI("HFP support config not found in notificationExtension, using default value: false.");
-    outSupportHfp = false;
-    return false;
-}
-
 bool __attribute__((weak)) NotificationConfigParse::GetNotificationExtensionEnabledBundlesWriteList(
     std::vector<std::string>& bundles) const
 {

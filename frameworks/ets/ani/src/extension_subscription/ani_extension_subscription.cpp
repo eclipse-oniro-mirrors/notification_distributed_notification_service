@@ -55,6 +55,10 @@ void AniNotificationExtensionRegistryInit(ani_env *env)
             reinterpret_cast<void*>(AniGetUserGrantedEnabledBundlesForSelf) },
         ani_native_function {
             "nativeSetUserGrantedBundleState", nullptr, reinterpret_cast<void*>(AniSetUserGrantedBundleState) },
+        ani_native_function {
+            "nativeGetUserGrantedBundleIcon", nullptr, reinterpret_cast<void*>(AniGetUserGrantedBundleIcon) },
+        ani_native_function {
+            "nativeDisableUserGrantedByBundle", nullptr, reinterpret_cast<void*>(AniDisableUserGrantedByBundle) },
     };
 
     ANS_LOGD("Start bind native methods to '%{public}s'", npName);

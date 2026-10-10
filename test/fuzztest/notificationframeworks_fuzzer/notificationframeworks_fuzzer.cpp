@@ -286,9 +286,6 @@ public:
         subscriptionInfo->SetType(type);
         subscriptionInfo->GetType();
 
-        subscriptionInfo->SetHfp(enabled);
-        subscriptionInfo->IsHfp();
-
         subscriptionInfo->Dump();
 
         std::string addr = fdp->ConsumeRandomLengthString();

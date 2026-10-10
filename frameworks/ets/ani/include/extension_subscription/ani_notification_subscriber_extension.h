@@ -19,6 +19,7 @@
 #include "concurrency_helpers.h"
 #include "sts_callback_promise.h"
 #include "notification_bundle_option.h"
+#include "notification_bundle_icon_info.h"
 #include "notification_extension_subscription_info.h"
 
 namespace OHOS {
@@ -35,7 +36,9 @@ enum class NotificationExtensionFunctionType {
     GET_USER_GRANTED_ENABLED_BUNDLES,
     GET_USER_GRANTED_ENABLED_BUNDLES_FOR_SELF,
     SET_USER_GRANTED_BUNDLE_STATE,
-    SUBSCRIBE_NOTIFICATION
+    SUBSCRIBE_NOTIFICATION,
+    GET_USER_GRANTED_BUNDLE_ICON,
+    DISABLE_USER_GRANTED_BY_BUNDLE
 };
 struct AsyncCallbackInfoNotificationExtension {
     ani_vm *vm = nullptr;
@@ -47,6 +50,7 @@ struct AsyncCallbackInfoNotificationExtension {
     int32_t priorityStrategy = 0;
     Notification::NotificationBundleOption targetBundle;
     std::vector<sptr<Notification::NotificationBundleOption>> bundles;
+    sptr<Notification::NotificationBundleIconInfo> bundleIcon = nullptr;
     std::vector<sptr<Notification::NotificationExtensionSubscriptionInfo>> subscriptionInfo;
 };
 
@@ -64,6 +68,8 @@ ani_object AniSetUserGrantedState(ani_env *env, ani_object bundleOption, ani_boo
 ani_object AniGetUserGrantedEnabledBundles(ani_env *env, ani_object bundleOption);
 ani_object AniGetUserGrantedEnabledBundlesForSelf(ani_env *env);
 ani_object AniSetUserGrantedBundleState(ani_env *env, ani_object bundleOption, ani_object bundles, ani_boolean enabled);
+ani_object AniGetUserGrantedBundleIcon(ani_env *env, ani_string bundleName);
+ani_object AniDisableUserGrantedByBundle(ani_env *env, ani_object bundle);
 } // namespace NotificationExtensionSubScriptionSts
 } // namespace OHOS
 #endif

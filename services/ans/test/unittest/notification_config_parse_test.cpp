@@ -437,29 +437,6 @@ HWTEST_F(NotificationConfigParseTest, IsNotificationExtensionLifecycleDestroyTim
 }
 
 /**
- * @tc.name: IsNotificationExtensionSubscribeSupportHfp_00001
- * @tc.desc: Test with non-boolean HFP support (should return false).
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(NotificationConfigParseTest, IsNotificationExtensionSubscribeSupportHfp_00001,
-    Function | SmallTest | Level1)
-{
-    auto inst = NotificationConfigParse::GetInstance();
-    auto saved = inst->notificationConfigJsons_;
-    inst->notificationConfigJsons_.clear();
-    nlohmann::json badJson = nlohmann::json{
-        {"notificationService", {{"notificationExtension",
-            {{"supportHfp", "not_a_bool"}}}}}
-    };
-    inst->notificationConfigJsons_.push_back(badJson);
-    bool outSupportHfp = true;
-    bool result = inst->IsNotificationExtensionSubscribeSupportHfp(outSupportHfp);
-    EXPECT_FALSE(result);
-    inst->notificationConfigJsons_ = saved;
-}
-
-/**
  * @tc.name: GetNotificationExtensionEnabledBundlesWriteList_00002
  * @tc.desc: Test with non-string elements in write list (should skip them).
  * @tc.type: FUNC

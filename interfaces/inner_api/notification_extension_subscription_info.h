@@ -59,20 +59,6 @@ public:
     void SetAddr(const std::string& addr);
 
     /**
-     * @brief Get hfp.
-     *
-     * @return Returns hfp value.
-     */
-    bool IsHfp() const;
-
-    /**
-     * @brief Sets hfp.
-     *
-     * @param hfp hfp status.
-     */
-    void SetHfp(const bool& hfp);
-
-    /**
      * @brief Get type.
      *
      * @return Returns type value.
@@ -103,7 +89,7 @@ public:
     /**
      * @brief Returns a string representation of the object.
      *
-     * @return Returns a string representation of the object.
+     * @return Returns a string representation.
      */
     std::string Dump();
 
@@ -150,7 +136,6 @@ private:
 
 private:
     std::string addr_ {};
-    bool isHfp_ = false;
     NotificationConstant::SubscribeType type_ = NotificationConstant::SubscribeType::BLUETOOTH;
     int32_t priorityStrategy_ = 0;
 };

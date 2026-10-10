@@ -174,7 +174,6 @@ namespace Notification {
         config.IsReportTrustList(str);
         config.GetCloneExpiredTime(num);
         config.IsNotificationExtensionLifecycleDestroyTimeConfigured(unum);
-        config.IsNotificationExtensionSubscribeSupportHfp(enabled);
         std::vector<std::string> strs;
         strs.emplace_back(str);
         config.GetNotificationExtensionEnabledBundlesWriteList(strs);

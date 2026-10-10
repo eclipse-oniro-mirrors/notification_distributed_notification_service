@@ -22,6 +22,7 @@
 #include "ians_manager.h"
 #include "ibadge_query_callback.h"
 #include "notification_bundle_option.h"
+#include "notification_bundle_icon_info.h"
 
 namespace OHOS {
 namespace Notification {
@@ -283,6 +284,9 @@ public:
     MOCK_METHOD1(GetUserGrantedEnabledBundlesForSelf, ErrCode(std::vector<sptr<NotificationBundleOption>>& bundles));
     MOCK_METHOD3(SetUserGrantedBundleState, ErrCode(const sptr<NotificationBundleOption>& bundleOption,
         const std::vector<sptr<NotificationBundleOption>>& enabledBundles, bool enabled));
+    MOCK_METHOD2(GetUserGrantedBundleIcon, ErrCode(const std::string& bundleName,
+        sptr<NotificationBundleIconInfo>& bundleIcon));
+    MOCK_METHOD1(DisableUserGrantedByBundle, ErrCode(const sptr<NotificationBundleOption>& bundle));
     MOCK_METHOD1(SetShowBadgeEnabledForBundles,
         ErrCode(const std::map<sptr<NotificationBundleOption>, bool> &bundleOptions));
     MOCK_METHOD2(GetShowBadgeEnabledForBundles, ErrCode(const std::vector<sptr<NotificationBundleOption>> &bundles,

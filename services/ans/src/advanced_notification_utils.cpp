@@ -1998,7 +1998,13 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateValidBundleO
 
     sptr<NotificationBundleOption> validBundleOption = nullptr;
     if (bundleOption->GetUid() <= 0) {
-        int32_t actualUid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
+        int32_t actualUid = -1;
+        if (bundleOption->GetAppIndex() > 0) {
+            actualUid = bundleManager->GetDefaultUidByBundleName(
+                bundleOption->GetBundleName(), activeUserId, bundleOption->GetAppIndex());
+        } else {
+            actualUid = bundleManager->GetDefaultUidByBundleName(bundleOption->GetBundleName(), activeUserId);
+        }
         if (actualUid < 0) {
             ANS_LOGE("Bundle name %{public}s does not exist in userId %{public}d",
                 bundleOption->GetBundleName().c_str(), activeUserId);
@@ -2471,7 +2477,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForExtensionSubscription(
         return;
     }
     // Restore priority strategy first: SetExtensionSubscriptionNotification writes strategy + simplified infos,
-    // then SetExtensionSubscriptionInfos overwrites with full infos (including addr, isHfp, type, priorityStrategy)
+    // then SetExtensionSubscriptionInfos overwrites with full infos (including addr, type, priorityStrategy)
     RestoreClonePriorityStrategy(bundle, cloneBundleInfo.GetExtensionSubscriptionInfos());
     if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(
         bundle, cloneBundleInfo.GetExtensionSubscriptionInfos()) != ERR_OK) {
