@@ -304,7 +304,7 @@ HWTEST_F(PriorityInfoMigrationHandlerTest, GetHandlerName_100, Function | SmallT
 
 /**
  * @tc.name: OnUpgradeFailure_100
- * @tc.desc: Verify OnUpgradeFailure handles empty table set without crash when QuerySql returns null.
+ * @tc.desc: Verify OnUpgradeFailure returns an error when table enumeration fails (QuerySql null).
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_100, Function | SmallTest | Level1)
@@ -312,12 +312,12 @@ HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_100, Function | Smal
     PriorityInfoMigrationHandler handler;
     MockRdbStore rdbStore;
     SetMockQuerySqlResults({nullptr});
-    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+    EXPECT_EQ(handler.OnUpgradeFailure(rdbStore), NativeRdb::E_ERROR);
 }
 
 /**
  * @tc.name: OnUpgradeFailure_200
- * @tc.desc: Verify OnUpgradeFailure handles empty result set when GoToFirstRow fails.
+ * @tc.desc: Verify OnUpgradeFailure returns an error when table enumeration fails (GoToFirstRow fails).
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_200, Function | SmallTest | Level1)
@@ -327,12 +327,12 @@ HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_200, Function | Smal
     auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
     SetMockQuerySqlResults({mockResultSet});
     SetMockGoToFirstRowErrCodes({NativeRdb::E_ERROR});
-    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+    EXPECT_EQ(handler.OnUpgradeFailure(rdbStore), NativeRdb::E_ERROR);
 }
 
 /**
  * @tc.name: OnUpgradeFailure_300
- * @tc.desc: Verify OnUpgradeFailure executes DELETE for KV tables and skips non-KV tables.
+ * @tc.desc: Verify OnUpgradeFailure deletes KV table rows and returns E_OK on success.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_300, Function | SmallTest | Level1)
@@ -347,12 +347,13 @@ HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_300, Function | Smal
         {NativeRdb::E_OK, NativeRdb::E_OK});
     SetMockGoToNextRowErrCodes({NativeRdb::E_OK, NativeRdb::E_ERROR});
     SetMockDeleteErrCodes({NativeRdb::E_OK});
-    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+    EXPECT_EQ(handler.OnUpgradeFailure(rdbStore), NativeRdb::E_OK);
+    EXPECT_EQ(GetMockDeleteExecuteTimes(), 1);
 }
 
 /**
  * @tc.name: OnUpgradeFailure_400
- * @tc.desc: Verify OnUpgradeFailure rolls back the transaction when Delete fails on a table.
+ * @tc.desc: Verify OnUpgradeFailure rolls back and returns the error when Delete fails on a table.
  * @tc.type: FUNC
  */
 HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_400, Function | SmallTest | Level1)
@@ -362,9 +363,46 @@ HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_400, Function | Smal
     auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
     SetMockQuerySqlResults({mockResultSet});
     SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
-    SetMockGetStringValuesAndErrCodes({"table1"}, {NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"notification_table"}, {NativeRdb::E_OK});
     SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
     SetMockDeleteErrCodes({NativeRdb::E_ERROR});
-    EXPECT_NO_FATAL_FAILURE(handler.OnUpgradeFailure(rdbStore));
+    EXPECT_EQ(handler.OnUpgradeFailure(rdbStore), NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name: OnUpgradeFailure_500
+ * @tc.desc: Verify OnUpgradeFailure returns the error when BeginTransaction fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_500, Function | SmallTest | Level1)
+{
+    PriorityInfoMigrationHandler handler;
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"notification_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    SetMockBeginTransactionErrCodes({NativeRdb::E_ERROR});
+    EXPECT_EQ(handler.OnUpgradeFailure(rdbStore), NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name: OnUpgradeFailure_600
+ * @tc.desc: Verify OnUpgradeFailure rolls back and returns the error when Commit fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityInfoMigrationHandlerTest, OnUpgradeFailure_600, Function | SmallTest | Level1)
+{
+    PriorityInfoMigrationHandler handler;
+    MockRdbStore rdbStore;
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"notification_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    SetMockDeleteErrCodes({NativeRdb::E_OK});
+    SetMockCommitErrCodes({NativeRdb::E_ERROR});
+    EXPECT_EQ(handler.OnUpgradeFailure(rdbStore), NativeRdb::E_ERROR);
 }
 } // namespace OHOS::Notification::Infra

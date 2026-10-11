@@ -38,6 +38,12 @@ std::vector<int> g_mockDeleteErrCodes = {NativeRdb::E_OK};
 
 int g_mockQueryExecuteTimes = 0;
 std::vector<MockRdbStore::AbsSharedResultSetPtr> g_mockQueryResults = {nullptr};
+
+int g_mockBeginTransactionExecuteTimes = 0;
+std::vector<int> g_mockBeginTransactionErrCodes = {NativeRdb::E_OK};
+
+int g_mockCommitExecuteTimes = 0;
+std::vector<int> g_mockCommitErrCodes = {NativeRdb::E_OK};
 }
 
 MockRdbStore::AbsSharedResultSetPtr MockRdbStore::QuerySql(
@@ -185,6 +191,40 @@ void SetMockQueryResults(const std::vector<MockRdbStore::AbsSharedResultSetPtr> 
     g_mockQueryExecuteTimes = 0;
 }
 
+int MockRdbStore::BeginTransaction()
+{
+    if (g_mockBeginTransactionErrCodes.empty()) {
+        return NativeRdb::E_ERROR;
+    }
+    if (g_mockBeginTransactionExecuteTimes < static_cast<int>(g_mockBeginTransactionErrCodes.size())) {
+        return g_mockBeginTransactionErrCodes[g_mockBeginTransactionExecuteTimes++];
+    }
+    return g_mockBeginTransactionErrCodes.back();
+}
+
+void SetMockBeginTransactionErrCodes(const std::vector<int> &errCodes)
+{
+    g_mockBeginTransactionErrCodes = errCodes;
+    g_mockBeginTransactionExecuteTimes = 0;
+}
+
+int MockRdbStore::Commit()
+{
+    if (g_mockCommitErrCodes.empty()) {
+        return NativeRdb::E_ERROR;
+    }
+    if (g_mockCommitExecuteTimes < static_cast<int>(g_mockCommitErrCodes.size())) {
+        return g_mockCommitErrCodes[g_mockCommitExecuteTimes++];
+    }
+    return g_mockCommitErrCodes.back();
+}
+
+void SetMockCommitErrCodes(const std::vector<int> &errCodes)
+{
+    g_mockCommitErrCodes = errCodes;
+    g_mockCommitExecuteTimes = 0;
+}
+
 int GetMockInsertWithConflictResolutionExecuteTimes()
 {
     return g_mockInsertWithConflictResolutionExecuteTimes;
@@ -217,5 +257,11 @@ void ResetMockRdbStore()
 
     g_mockQueryResults = {nullptr};
     g_mockQueryExecuteTimes = 0;
+
+    g_mockBeginTransactionErrCodes = {NativeRdb::E_OK};
+    g_mockBeginTransactionExecuteTimes = 0;
+
+    g_mockCommitErrCodes = {NativeRdb::E_OK};
+    g_mockCommitExecuteTimes = 0;
 }
 } // namespace OHOS::Notification::Infra

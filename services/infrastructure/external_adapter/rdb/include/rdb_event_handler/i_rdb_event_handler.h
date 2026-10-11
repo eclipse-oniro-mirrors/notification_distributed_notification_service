@@ -71,8 +71,12 @@ public:
      *
      * Each handler should delete only the data it manages (e.g., specific key prefixes)
      * to preserve unrelated data in the database.
+     *
+     * @return NativeRdb::E_OK when the managed data has been cleaned up; an error code
+     * when cleanup failed. On failure the caller skips this handler's migration to
+     * avoid an endless crash-restart loop, leaving its data in the old format.
      */
-    virtual void OnUpgradeFailure(NativeRdb::RdbStore &rdbStore);
+    virtual int32_t OnUpgradeFailure(NativeRdb::RdbStore &rdbStore);
 
     /**
      * @brief Per-business migration-in-progress mark key for crash recovery.
@@ -83,6 +87,24 @@ public:
      * OnUpgradeFailure cleanup must run. An empty string opts out of crash recovery.
      */
     virtual std::string GetMigrationMarkKey() const;
+
+    /**
+     * @brief Run this handler's upgrade under the crash-recovery lifecycle.
+     *
+     * An empty migration mark key runs OnUpgrade directly. Otherwise the residual
+     * crash-interrupt count is read first: when it reaches the cleanup threshold,
+     * OnUpgradeFailure runs, and if that cleanup fails the migration is skipped
+     * (keeping the data in the old format) so an endless crash-restart loop is
+     * avoided. The mark is written before migration and cleared after it returns.
+     *
+     * Non-virtual by design: subclasses customize behavior through the OnUpgrade,
+     * OnUpgradeFailure, and GetMigrationMarkKey hooks instead of overriding the
+     * lifecycle, so a marked handler can never run OnUpgrade unprotected.
+     *
+     * @return The handler's business result; a cleanup failure is not propagated.
+     */
+    int32_t ExecuteUpgradeWithCrashRecovery(NativeRdb::RdbStore &rdbStore,
+        int32_t oldVersion, int32_t newVersion);
 
     /** @brief Unique handler name used for registration and logging. */
     virtual std::string GetHandlerName() const = 0;

@@ -14,10 +14,11 @@
  */
 
 #include "mock_rdb_event_handler.h"
+#include "rdb_errno.h"
 
 namespace OHOS::Notification::Infra {
 MockRdbEventHandler::MockRdbEventHandler(const std::string &name, int32_t ret, bool enabled)
-    : name_(name), ret_(ret)
+    : name_(name), ret_(ret), upgradeFailureRet_(NativeRdb::E_OK)
 {
     enabled_ = enabled;
 }
@@ -29,6 +30,7 @@ int32_t MockRdbEventHandler::OnCreate(NativeRdb::RdbStore &)
 
 int32_t MockRdbEventHandler::OnUpgrade(NativeRdb::RdbStore &, int32_t, int32_t)
 {
+    upgradeCallCount_++;
     return ret_;
 }
 
@@ -47,9 +49,10 @@ int32_t MockRdbEventHandler::OnCorruption(const std::string &)
     return ret_;
 }
 
-void MockRdbEventHandler::OnUpgradeFailure(NativeRdb::RdbStore &)
+int32_t MockRdbEventHandler::OnUpgradeFailure(NativeRdb::RdbStore &)
 {
     upgradeFailureCallCount_++;
+    return upgradeFailureRet_;
 }
 
 std::string MockRdbEventHandler::GetMigrationMarkKey() const
@@ -82,8 +85,18 @@ void MockRdbEventHandler::SetReturnCode(int32_t ret)
     ret_ = ret;
 }
 
+void MockRdbEventHandler::SetUpgradeFailureReturnCode(int32_t ret)
+{
+    upgradeFailureRet_ = ret;
+}
+
 int32_t MockRdbEventHandler::GetUpgradeFailureCallCount() const
 {
     return upgradeFailureCallCount_;
+}
+
+int32_t MockRdbEventHandler::GetUpgradeCallCount() const
+{
+    return upgradeCallCount_;
 }
 } // namespace OHOS::Notification::Infra
