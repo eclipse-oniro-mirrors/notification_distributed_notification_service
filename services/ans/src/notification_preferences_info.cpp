@@ -323,9 +323,6 @@ bool NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionInfosFromJ
         if (AesGcmHelper::Decrypt(decryptedAddr, subscriptionInfo->GetAddr()) == ERR_OK) {
             subscriptionInfo->SetAddr(decryptedAddr);
         }
-        if (subscriptionInfo->GetPriorityStrategy() > 0) {
-            extensionSubscriptionNotificationStrategy_ = subscriptionInfo->GetPriorityStrategy();
-        }
         extensionSubscriptionInfos_.emplace_back(std::move(subscriptionInfo));
     }
     return true;
@@ -425,16 +422,6 @@ void NotificationPreferencesInfo::BundleInfo::RemoveExtensionSubscriptionBundles
             extensionSubscriptionBundles_.erase(iter);
         }
     }
-}
-
-int32_t NotificationPreferencesInfo::BundleInfo::GetExtensionSubscriptionNotificationStrategy() const
-{
-    return extensionSubscriptionNotificationStrategy_;
-}
-
-void NotificationPreferencesInfo::BundleInfo::SetExtensionSubscriptionNotificationStrategy(int32_t strategy)
-{
-    extensionSubscriptionNotificationStrategy_ = strategy;
 }
 
 std::string NotificationPreferencesInfo::GenerateBundleKey(const std::string& bundleName, int32_t uid) const

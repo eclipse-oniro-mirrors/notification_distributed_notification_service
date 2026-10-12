@@ -163,7 +163,7 @@ ani_object AniSubscribeNotification(ani_env *env, ani_int priorityStrategy)
             auto asyncCallbackInfo = static_cast<AsyncCallbackInfoNotificationExtension*>(data);
             if (asyncCallbackInfo) {
                 asyncCallbackInfo->info.returnCode =
-                    AnsNotification::GetInstance()->NotificationExtensionSubscribeNotification(
+                    AnsNotification::GetInstance()->NotificationExtensionSubscribe(
                         asyncCallbackInfo->priorityStrategy);
             }
         },

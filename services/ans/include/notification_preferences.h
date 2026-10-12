@@ -769,10 +769,6 @@ public:
         std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
     ErrCode SetExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos);
-    ErrCode SetExtensionSubscriptionNotification(const sptr<NotificationBundleOption>& bundleOption,
-        int32_t priorityStrategy);
-    ErrCode GetExtensionSubscriptionNotificationStrategy(const sptr<NotificationBundleOption>& bundleOption,
-        int32_t& priorityStrategy);
     ErrCode ClearExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption);
     ErrCode GetExtensionSubscriptionEnabled(const sptr<NotificationBundleOption> &bundleOption,
         NotificationConstant::SWITCH_STATE &state);

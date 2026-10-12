@@ -1920,8 +1920,6 @@ public:
     sptr<NotificationBundleOption> GenerateCloneValidBundleOption(const sptr<NotificationBundleOption> &bundleOption);
     void UpdateCloneBundleInfoForExtensionSubscription(int32_t userId,
         const NotificationCloneBundleInfo &cloneBundleInfo, const sptr<NotificationBundleOption> &bundle);
-    void RestoreClonePriorityStrategy(const sptr<NotificationBundleOption> &bundle,
-        const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos);
     void DelNormalCloneBundleForExtensionSubscription(const sptr<NotificationBundleOption> &bundle);
 #endif
 
@@ -2029,7 +2027,7 @@ public:
     ErrCode NotificationExtensionSubscribe(
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>>& infos) override;
 
-    ErrCode NotificationExtensionSubscribeNotification(int32_t priorityStrategy) override;
+    ErrCode NotificationExtensionSubscribe(int32_t priorityStrategy) override;
 
     ErrCode NotificationExtensionUnsubscribe() override;
 
@@ -2613,6 +2611,8 @@ private:
         std::vector<std::pair<sptr<NotificationBundleOption>,
         std::vector<sptr<NotificationBundleOption>>>> &subscribedBundleInfos);
     bool IsSystemTypeSubscriber(const sptr<NotificationBundleOption> &bundle);
+    ErrCode GetSystemSubscriptionStrategy(const sptr<NotificationBundleOption> &bundle,
+        int32_t &priorityStrategy);
     bool CheckBluetoothConnectionInInfos(
         const sptr<NotificationBundleOption> &bundleOption,
         const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos);

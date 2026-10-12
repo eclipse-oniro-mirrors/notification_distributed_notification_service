@@ -123,7 +123,7 @@ ErrCode AdvancedNotificationPriorityHelper::RefreshPriorityType(const std::strin
         notificationClassifications.emplace_back(nullptr);
     }
     if (requests.size() <= 0) {
-        ANS_LOGI("RefreshPriorityType requests empty, originRequests size: %{public}lu", originRequests.size());
+        ANS_LOGI("RefreshPriorityType requests empty, originRequests size: %{public}zu", originRequests.size());
         return ERR_OK;
     }
     NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(requests, commands, notificationClassifications, results);

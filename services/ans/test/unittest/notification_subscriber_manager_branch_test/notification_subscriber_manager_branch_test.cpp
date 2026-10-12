@@ -394,58 +394,73 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00600,
 }
 
 /**
- * @tc.number    : AddConsumedHashCodes_00100
- * @tc.name      : AddConsumedHashCodes_00100
- * @tc.desc      : test AddConsumedHashCodes adds hashCode and HasConsumedHashCode returns true
+ * @tc.number    : MarkConsumedBySubscriber_00100
+ * @tc.name      : MarkConsumedBySubscriber_00100
+ * @tc.desc      : test MarkConsumedBySubscriber marks record and IsConsumedBySubscriber returns true
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AddConsumedHashCodes_00100, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, MarkConsumedBySubscriber_00100, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<NotificationRequest> req = new NotificationRequest();
     req->SetCreatorBundleName("test.bundle");
     req->SetCreatorUid(100);
     req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
     sptr<Notification> notification = new Notification(req);
-    manager->AddConsumedHashCodes({notification});
-    EXPECT_TRUE(manager->HasConsumedHashCode(req->GetNotificationHashCode()));
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_TRUE(manager->IsConsumedBySubscriber(record, notification));
 }
 
 /**
- * @tc.number    : AddConsumedHashCodes_00200
- * @tc.name      : AddConsumedHashCodes_00200
- * @tc.desc      : test AddConsumedHashCodes with nullptr notification skipped
+ * @tc.number    : MarkConsumedBySubscriber_00200
+ * @tc.name      : MarkConsumedBySubscriber_00200
+ * @tc.desc      : test MarkConsumedBySubscriber with nullptr notification skipped
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AddConsumedHashCodes_00200, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, MarkConsumedBySubscriber_00200, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<Notification> nullNotification = nullptr;
-    manager->AddConsumedHashCodes({nullNotification});
-    EXPECT_TRUE(manager->consumedHashCodes_.empty());
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, nullNotification);
+    EXPECT_TRUE(manager->consumedRecords_.empty());
 }
 
 /**
- * @tc.number    : AddConsumedHashCodes_00300
- * @tc.name      : AddConsumedHashCodes_00300
- * @tc.desc      : test AddConsumedHashCodes deduplicates same hashCode
+ * @tc.number    : MarkConsumedBySubscriber_00300
+ * @tc.name      : MarkConsumedBySubscriber_00300
+ * @tc.desc      : test MarkConsumedBySubscriber deduplicates same hashCode and subscriber
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AddConsumedHashCodes_00300, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, MarkConsumedBySubscriber_00300, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<NotificationRequest> req = new NotificationRequest();
     req->SetCreatorBundleName("test.bundle");
     req->SetCreatorUid(100);
     req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
     sptr<Notification> notification = new Notification(req);
-    manager->AddConsumedHashCodes({notification, notification});
-    EXPECT_EQ(manager->consumedHashCodes_.size(), 1);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_EQ(manager->consumedRecords_.size(), 1);
+    EXPECT_EQ(manager->consumedRecords_[req->GetNotificationHashCode()].size(), 1);
 }
 
 /**
- * @tc.number    : AddConsumedHashCodes_00400
- * @tc.name      : AddConsumedHashCodes_00400
- * @tc.desc      : test AddConsumedHashCodes with multiple different notifications
+ * @tc.number    : MarkConsumedBySubscriber_00400
+ * @tc.name      : MarkConsumedBySubscriber_00400
+ * @tc.desc      : test MarkConsumedBySubscriber with multiple different notifications
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, AddConsumedHashCodes_00400, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, MarkConsumedBySubscriber_00400, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<NotificationRequest> req1 = new NotificationRequest();
@@ -453,75 +468,155 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AddConsumedHashCodes_00400, Fu
     req1->SetCreatorBundleName("bundle1");
     req1->SetCreatorUid(100);
     req1->SetOwnerBundleName("owner1");
+    req1->SetReceiverUserId(100);
     sptr<NotificationRequest> req2 = new NotificationRequest();
     req2->SetNotificationId(2);
     req2->SetCreatorBundleName("bundle2");
     req2->SetCreatorUid(200);
     req2->SetOwnerBundleName("owner2");
+    req2->SetReceiverUserId(100);
     sptr<Notification> notification1 = new Notification(req1);
     sptr<Notification> notification2 = new Notification(req2);
-    manager->AddConsumedHashCodes({notification1, notification2});
-    EXPECT_EQ(manager->consumedHashCodes_.size(), 2);
-    EXPECT_TRUE(manager->HasConsumedHashCode(req1->GetNotificationHashCode()));
-    EXPECT_TRUE(manager->HasConsumedHashCode(req2->GetNotificationHashCode()));
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification1);
+    manager->MarkConsumedBySubscriber(record, notification2);
+    EXPECT_EQ(manager->consumedRecords_.size(), 2);
+    EXPECT_TRUE(manager->IsConsumedBySubscriber(record, notification1));
+    EXPECT_TRUE(manager->IsConsumedBySubscriber(record, notification2));
 }
 
 /**
- * @tc.number    : HasConsumedHashCode_00100
- * @tc.name      : HasConsumedHashCode_00100
- * @tc.desc      : test HasConsumedHashCode returns false when hashCode not in set
+ * @tc.number    : MarkConsumedBySubscriber_00500
+ * @tc.name      : MarkConsumedBySubscriber_00500
+ * @tc.desc      : test consumed record is per-subscriber, unconsumed subscriber gets no cancel
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, HasConsumedHashCode_00100, Function | SmallTest | Level1)
-{
-    auto manager = std::make_shared<NotificationSubscriberManager>();
-    EXPECT_FALSE(manager->HasConsumedHashCode("nonexistent_hash"));
-}
-
-/**
- * @tc.number    : RemoveConsumedHashCodes_00100
- * @tc.name      : RemoveConsumedHashCodes_00100
- * @tc.desc      : test RemoveConsumedHashCodes removes hashCode and HasConsumedHashCode returns false
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, RemoveConsumedHashCodes_00100, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, MarkConsumedBySubscriber_00500, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<NotificationRequest> req = new NotificationRequest();
     req->SetCreatorBundleName("test.bundle");
     req->SetCreatorUid(100);
     req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
     sptr<Notification> notification = new Notification(req);
-    manager->AddConsumedHashCodes({notification});
-    EXPECT_TRUE(manager->HasConsumedHashCode(req->GetNotificationHashCode()));
-    manager->RemoveConsumedHashCodes({notification});
-    EXPECT_FALSE(manager->HasConsumedHashCode(req->GetNotificationHashCode()));
+    auto recordA = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    recordA->userId = 100;
+    recordA->subscriberBundleName_ = "subscriber.a";
+    recordA->subscriberUid = 101;
+    auto recordB = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    recordB->userId = 100;
+    recordB->subscriberBundleName_ = "subscriber.b";
+    recordB->subscriberUid = 102;
+    manager->MarkConsumedBySubscriber(recordA, notification);
+    EXPECT_TRUE(manager->IsConsumedBySubscriber(recordA, notification));
+    EXPECT_FALSE(manager->IsConsumedBySubscriber(recordB, notification));
 }
 
 /**
- * @tc.number    : RemoveConsumedHashCodes_00200
- * @tc.name      : RemoveConsumedHashCodes_00200
- * @tc.desc      : test RemoveConsumedHashCodes with nullptr notification skipped
+ * @tc.number    : MarkConsumedBySubscriber_00600
+ * @tc.name      : MarkConsumedBySubscriber_00600
+ * @tc.desc      : test consumed record survives subscriber record recreation with same identity
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, RemoveConsumedHashCodes_00200, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, MarkConsumedBySubscriber_00600, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<NotificationRequest> req = new NotificationRequest();
     req->SetCreatorBundleName("test.bundle");
     req->SetCreatorUid(100);
     req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
     sptr<Notification> notification = new Notification(req);
-    manager->AddConsumedHashCodes({notification});
-    EXPECT_EQ(manager->consumedHashCodes_.size(), 1);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    auto reconnectedRecord = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    reconnectedRecord->userId = 100;
+    reconnectedRecord->subscriberBundleName_ = "subscriber.bundle";
+    reconnectedRecord->subscriberUid = 101;
+    EXPECT_TRUE(manager->IsConsumedBySubscriber(reconnectedRecord, notification));
+}
+
+/**
+ * @tc.number    : IsConsumedBySubscriber_00100
+ * @tc.name      : IsConsumedBySubscriber_00100
+ * @tc.desc      : test IsConsumedBySubscriber returns false when not consumed
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsConsumedBySubscriber_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    EXPECT_FALSE(manager->IsConsumedBySubscriber(record, notification));
+}
+
+/**
+ * @tc.number    : ClearConsumedRecords_00100
+ * @tc.name      : ClearConsumedRecords_00100
+ * @tc.desc      : test ClearConsumedRecords removes hashCode and IsConsumedBySubscriber returns false
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ClearConsumedRecords_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_TRUE(manager->IsConsumedBySubscriber(record, notification));
+    manager->ClearConsumedRecords({notification});
+    EXPECT_FALSE(manager->IsConsumedBySubscriber(record, notification));
+}
+
+/**
+ * @tc.number    : ClearConsumedRecords_00200
+ * @tc.name      : ClearConsumedRecords_00200
+ * @tc.desc      : test ClearConsumedRecords with nullptr notification skipped
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ClearConsumedRecords_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_EQ(manager->consumedRecords_.size(), 1);
     sptr<Notification> nullNotification = nullptr;
-    manager->RemoveConsumedHashCodes({nullNotification});
-    EXPECT_EQ(manager->consumedHashCodes_.size(), 1);
+    manager->ClearConsumedRecords({nullNotification});
+    EXPECT_EQ(manager->consumedRecords_.size(), 1);
 }
 
 /**
- * @tc.number    : RemoveConsumedHashCodes_00300
- * @tc.name      : RemoveConsumedHashCodes_00300
- * @tc.desc      : test RemoveConsumedHashCodes removes only specified hashCode, others remain
+ * @tc.number    : ClearConsumedRecords_00300
+ * @tc.name      : ClearConsumedRecords_00300
+ * @tc.desc      : test ClearConsumedRecords removes only specified hashCode, others remain
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, RemoveConsumedHashCodes_00300, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, ClearConsumedRecords_00300, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<NotificationRequest> req1 = new NotificationRequest();
@@ -529,83 +624,66 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, RemoveConsumedHashCodes_00300,
     req1->SetCreatorBundleName("bundle1");
     req1->SetCreatorUid(100);
     req1->SetOwnerBundleName("owner1");
+    req1->SetReceiverUserId(100);
     sptr<NotificationRequest> req2 = new NotificationRequest();
     req2->SetNotificationId(2);
     req2->SetCreatorBundleName("bundle2");
     req2->SetCreatorUid(200);
     req2->SetOwnerBundleName("owner2");
+    req2->SetReceiverUserId(100);
     sptr<Notification> notification1 = new Notification(req1);
     sptr<Notification> notification2 = new Notification(req2);
-    manager->AddConsumedHashCodes({notification1, notification2});
-    EXPECT_EQ(manager->consumedHashCodes_.size(), 2);
-    manager->RemoveConsumedHashCodes({notification1});
-    EXPECT_EQ(manager->consumedHashCodes_.size(), 1);
-    EXPECT_FALSE(manager->HasConsumedHashCode(req1->GetNotificationHashCode()));
-    EXPECT_TRUE(manager->HasConsumedHashCode(req2->GetNotificationHashCode()));
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification1);
+    manager->MarkConsumedBySubscriber(record, notification2);
+    EXPECT_EQ(manager->consumedRecords_.size(), 2);
+    manager->ClearConsumedRecords({notification1});
+    EXPECT_EQ(manager->consumedRecords_.size(), 1);
+    EXPECT_FALSE(manager->IsConsumedBySubscriber(record, notification1));
+    EXPECT_TRUE(manager->IsConsumedBySubscriber(record, notification2));
 }
 
 /**
- * @tc.number    : ConsumedHashCodesCapacity_00100
- * @tc.name      : ConsumedHashCodesCapacity_00100
- * @tc.desc      : test consumedHashCodes list capacity limit evicts oldest entry via pop_front
+ * @tc.number    : IsConsumedBySubscriber_00200
+ * @tc.name      : IsConsumedBySubscriber_00200
+ * @tc.desc      : test IsConsumedBySubscriber returns false when notification is nullptr
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, ConsumedHashCodesCapacity_00100, Function | SmallTest | Level1)
-{
-    auto manager = std::make_shared<NotificationSubscriberManager>();
-    std::string firstHashCode;
-    for (int32_t i = 0; i <= static_cast<int32_t>(NotificationSubscriberManager::MAX_CONSUMED_HASH_CODE_LIST_SIZE);
-         i++) {
-        sptr<NotificationRequest> req = new NotificationRequest();
-        req->SetNotificationId(i);
-        req->SetCreatorBundleName("bundle" + std::to_string(i));
-        req->SetCreatorUid(i + 100);
-        req->SetOwnerBundleName("owner" + std::to_string(i));
-        sptr<Notification> notification = new Notification(req);
-        if (i == 0) {
-            firstHashCode = req->GetNotificationHashCode();
-        }
-        manager->AddConsumedHashCodes({notification});
-    }
-    EXPECT_EQ(manager->consumedHashCodes_.size(),
-        NotificationSubscriberManager::MAX_CONSUMED_HASH_CODE_LIST_SIZE);
-    EXPECT_FALSE(manager->HasConsumedHashCode(firstHashCode));
-    EXPECT_EQ(manager->consumedHashCodes_.front(), "1_bundle1_101_owner1");
-}
-
-/**
- * @tc.number    : ShouldNotifyPrioritySubscribers_00100
- * @tc.name      : ShouldNotifyPrioritySubscribers_00100
- * @tc.desc      : test ShouldNotifyPrioritySubscribers returns false when notification is nullptr
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00100, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsConsumedBySubscriber_00200, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
     record->userId = 100;
-    EXPECT_FALSE(manager->ShouldNotifyPrioritySubscribers(record, nullptr));
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    EXPECT_FALSE(manager->IsConsumedBySubscriber(record, nullptr));
 }
 
 /**
- * @tc.number    : ShouldNotifyPrioritySubscribers_00200
- * @tc.name      : ShouldNotifyPrioritySubscribers_00200
- * @tc.desc      : test ShouldNotifyPrioritySubscribers returns false when request is nullptr
+ * @tc.number    : IsConsumedBySubscriber_00300
+ * @tc.name      : IsConsumedBySubscriber_00300
+ * @tc.desc      : test IsConsumedBySubscriber returns false when request is nullptr
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00200, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsConsumedBySubscriber_00300, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<NotificationRequest> req = nullptr;
     sptr<Notification> notification = new Notification(req);
     auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
     record->userId = 100;
-    EXPECT_FALSE(manager->ShouldNotifyPrioritySubscribers(record, notification));
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    EXPECT_FALSE(manager->IsConsumedBySubscriber(record, notification));
 }
 
 /**
- * @tc.number    : ShouldNotifyPrioritySubscribers_00300
- * @tc.name      : ShouldNotifyPrioritySubscribers_00300
- * @tc.desc      : test ShouldNotifyPrioritySubscribers returns false when userId does not match
+ * @tc.number    : IsConsumedBySubscriber_00400
+ * @tc.name      : IsConsumedBySubscriber_00400
+ * @tc.desc      : test IsConsumedBySubscriber returns false when userId does not match
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00300, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsConsumedBySubscriber_00400, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<NotificationRequest> req = new NotificationRequest();
@@ -614,18 +692,20 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscriber
     req->SetOwnerBundleName("test.owner");
     req->SetReceiverUserId(200);
     sptr<Notification> notification = new Notification(req);
-    manager->AddConsumedHashCodes({notification});
     auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
     record->userId = 100;
-    EXPECT_FALSE(manager->ShouldNotifyPrioritySubscribers(record, notification));
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_FALSE(manager->IsConsumedBySubscriber(record, notification));
 }
 
 /**
- * @tc.number    : ShouldNotifyPrioritySubscribers_00400
- * @tc.name      : ShouldNotifyPrioritySubscribers_00400
- * @tc.desc      : test ShouldNotifyPrioritySubscribers returns false when distributed collaborate
+ * @tc.number    : IsConsumedBySubscriber_00500
+ * @tc.name      : IsConsumedBySubscriber_00500
+ * @tc.desc      : test IsConsumedBySubscriber returns false when distributed collaborate
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00400, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsConsumedBySubscriber_00500, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<NotificationRequest> req = new NotificationRequest();
@@ -635,18 +715,20 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscriber
     req->SetReceiverUserId(100);
     req->SetDistributedCollaborate(true);
     sptr<Notification> notification = new Notification(req);
-    manager->AddConsumedHashCodes({notification});
     auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
     record->userId = 100;
-    EXPECT_FALSE(manager->ShouldNotifyPrioritySubscribers(record, notification));
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_FALSE(manager->IsConsumedBySubscriber(record, notification));
 }
 
 /**
- * @tc.number    : ShouldNotifyPrioritySubscribers_00500
- * @tc.name      : ShouldNotifyPrioritySubscribers_00500
- * @tc.desc      : test ShouldNotifyPrioritySubscribers returns false when not consumed
+ * @tc.number    : IsConsumedBySubscriber_00600
+ * @tc.name      : IsConsumedBySubscriber_00600
+ * @tc.desc      : test IsConsumedBySubscriber returns true when all conditions satisfied
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00500, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsConsumedBySubscriber_00600, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
     sptr<NotificationRequest> req = new NotificationRequest();
@@ -657,27 +739,10 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscriber
     sptr<Notification> notification = new Notification(req);
     auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
     record->userId = 100;
-    EXPECT_FALSE(manager->ShouldNotifyPrioritySubscribers(record, notification));
-}
-
-/**
- * @tc.number    : ShouldNotifyPrioritySubscribers_00600
- * @tc.name      : ShouldNotifyPrioritySubscribers_00600
- * @tc.desc      : test ShouldNotifyPrioritySubscribers returns true when all conditions satisfied
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldNotifyPrioritySubscribers_00600, Function | SmallTest | Level1)
-{
-    auto manager = std::make_shared<NotificationSubscriberManager>();
-    sptr<NotificationRequest> req = new NotificationRequest();
-    req->SetCreatorBundleName("test.bundle");
-    req->SetCreatorUid(100);
-    req->SetOwnerBundleName("test.owner");
-    req->SetReceiverUserId(100);
-    sptr<Notification> notification = new Notification(req);
-    manager->AddConsumedHashCodes({notification});
-    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
-    record->userId = 100;
-    EXPECT_TRUE(manager->ShouldNotifyPrioritySubscribers(record, notification));
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_TRUE(manager->IsConsumedBySubscriber(record, notification));
 }
 
 /**
@@ -2358,7 +2423,7 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyConsumedSubscribers_0020
 /**
  * @tc.number    : NotifyConsumedSubscribers_00300
  * @tc.name      : NotifyConsumedSubscribers
- * @tc.desc      : test NotifyConsumedSubscribers skips priority subscriber when ShouldNotifyPrioritySubscribers false
+ * @tc.desc      : test NotifyConsumedSubscribers skips priority subscriber when not consumed
  */
 HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyConsumedSubscribers_00300, Function | SmallTest | Level1)
 {
@@ -2372,11 +2437,232 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyConsumedSubscribers_0030
     auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
     record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
     record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
     manager->subscriberRecordList_.push_back(record);
     sptr<NotificationSortingMap> notificationMap = nullptr;
     manager->NotifyConsumedSubscribers(notification, notificationMap, 0);
-    EXPECT_FALSE(manager->HasConsumedHashCode(
-        notification->GetNotificationRequestPoint()->GetNotificationHashCode()));
+    EXPECT_FALSE(manager->IsConsumedBySubscriber(record, notification));
+}
+
+/**
+ * @tc.number    : GetSubscriberKey_00100
+ * @tc.name      : GetSubscriberKey
+ * @tc.desc      : test GetSubscriberKey with null record and normal record
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, GetSubscriberKey_00100, Function | SmallTest | Level1)
+{
+    EXPECT_EQ(NotificationSubscriberManager::GetSubscriberKey(nullptr), "");
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    EXPECT_EQ(NotificationSubscriberManager::GetSubscriberKey(record), "subscriber.bundle_101");
+}
+
+/**
+ * @tc.number    : ShouldDispatchToRecord_00100
+ * @tc.name      : ShouldDispatchToRecord
+ * @tc.desc      : test ShouldDispatchToRecord returns false when record is nullptr
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldDispatchToRecord_00100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    sptr<Notification> notification = new Notification(req);
+    EXPECT_FALSE(manager->ShouldDispatchToRecord(nullptr, notification));
+}
+
+/**
+ * @tc.number    : ShouldDispatchToRecord_00200
+ * @tc.name      : ShouldDispatchToRecord
+ * @tc.desc      : test ShouldDispatchToRecord returns false when notification is nullptr
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldDispatchToRecord_00200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    EXPECT_FALSE(manager->ShouldDispatchToRecord(record, nullptr));
+}
+
+/**
+ * @tc.number    : ShouldDispatchToRecord_00300
+ * @tc.name      : ShouldDispatchToRecord
+ * @tc.desc      : test ShouldDispatchToRecord returns false when priority subscriber has not consumed
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldDispatchToRecord_00300, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
+    record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    EXPECT_FALSE(manager->ShouldDispatchToRecord(record, notification));
+}
+
+/**
+ * @tc.number    : ShouldDispatchToRecord_00400
+ * @tc.name      : ShouldDispatchToRecord
+ * @tc.desc      : test ShouldDispatchToRecord returns true for consumed priority subscriber
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldDispatchToRecord_00400, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->priorityStrategy_ = NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY;
+    record->userId = 100;
+    record->subscribedAll = true;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_TRUE(manager->ShouldDispatchToRecord(record, notification));
+}
+
+/**
+ * @tc.number    : ShouldDispatchToRecord_00500
+ * @tc.name      : ShouldDispatchToRecord
+ * @tc.desc      : test ShouldDispatchToRecord returns false when normal subscriber not subscribed
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldDispatchToRecord_00500, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscribedAll = false;
+    record->bundleList_.insert("other.bundle");
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    EXPECT_FALSE(manager->ShouldDispatchToRecord(record, notification));
+}
+
+/**
+ * @tc.number    : ShouldDispatchToRecord_00600
+ * @tc.name      : ShouldDispatchToRecord
+ * @tc.desc      : test ShouldDispatchToRecord returns true for subscribed normal subscriber
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ShouldDispatchToRecord_00600, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscribedAll = true;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    EXPECT_TRUE(manager->ShouldDispatchToRecord(record, notification));
+}
+
+/**
+ * @tc.number    : IsConsumedBySubscriber_00700
+ * @tc.name      : IsConsumedBySubscriber
+ * @tc.desc      : test IsConsumedBySubscriber returns false when record is nullptr
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsConsumedBySubscriber_00700, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    sptr<Notification> notification = new Notification(req);
+    EXPECT_FALSE(manager->IsConsumedBySubscriber(nullptr, notification));
+}
+
+/**
+ * @tc.number    : MarkConsumedBySubscriber_00700
+ * @tc.name      : MarkConsumedBySubscriber
+ * @tc.desc      : test MarkConsumedBySubscriber with nullptr record skipped
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MarkConsumedBySubscriber_00700, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    sptr<Notification> notification = new Notification(req);
+    manager->MarkConsumedBySubscriber(nullptr, notification);
+    EXPECT_TRUE(manager->consumedRecords_.empty());
+}
+
+/**
+ * @tc.number    : MarkConsumedBySubscriber_00800
+ * @tc.name      : MarkConsumedBySubscriber
+ * @tc.desc      : test MarkConsumedBySubscriber with null request skipped
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MarkConsumedBySubscriber_00800, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = nullptr;
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_TRUE(manager->consumedRecords_.empty());
+}
+
+/**
+ * @tc.number    : MarkConsumedBySubscriber_00900
+ * @tc.name      : MarkConsumedBySubscriber
+ * @tc.desc      : test MarkConsumedBySubscriber with empty hashCode skipped
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, MarkConsumedBySubscriber_00900, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_TRUE(manager->consumedRecords_.empty());
+}
+
+/**
+ * @tc.number    : ClearConsumedRecords_00400
+ * @tc.name      : ClearConsumedRecords
+ * @tc.desc      : test ClearConsumedRecords with null request skipped
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, ClearConsumedRecords_00400, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetCreatorBundleName("test.bundle");
+    req->SetCreatorUid(100);
+    req->SetOwnerBundleName("test.owner");
+    req->SetReceiverUserId(100);
+    sptr<Notification> notification = new Notification(req);
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = 100;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = 101;
+    manager->MarkConsumedBySubscriber(record, notification);
+    EXPECT_EQ(manager->consumedRecords_.size(), 1);
+    sptr<NotificationRequest> nullReq = nullptr;
+    sptr<Notification> nullRequestNotification = new Notification(nullReq);
+    manager->ClearConsumedRecords({nullRequestNotification});
+    EXPECT_EQ(manager->consumedRecords_.size(), 1);
 }
 
 /**

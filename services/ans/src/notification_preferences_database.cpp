@@ -3819,29 +3819,6 @@ bool NotificationPreferencesDatabase::PutExtensionSubscriptionEnabled(
     return (result == NativeRdb::E_OK);
 }
 
-bool NotificationPreferencesDatabase::PutExtensionSubscriptionNotificationStrategy(
-    const NotificationPreferencesInfo::BundleInfo& bundleInfo)
-{
-    if (bundleInfo.GetBundleName().empty()) {
-        ANS_LOGE("Bundle name is null.");
-        return false;
-    }
-
-    if (!CheckBundle(bundleInfo.GetBundleName(), bundleInfo.GetBundleUid())) {
-        return false;
-    }
-
-    if (!CheckRdbStore()) {
-        ANS_LOGE("null RdbStore");
-        return false;
-    }
-    std::string bundleKey = GenerateBundleLablel(bundleInfo);
-    int32_t userId = -1;
-    OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleInfo.GetBundleUid(), userId);
-    int32_t result = rdbDataManager_->InsertData(GenerateBundleKey(bundleKey, KEY_EXTENSION_SUBSCRIPTION_INFO),
-        bundleInfo.GetExtensionSubscriptionInfosJson(), userId);
-    return (result == NativeRdb::E_OK);
-}
 bool NotificationPreferencesDatabase::PutExtensionSubscriptionBundles(
     const NotificationPreferencesInfo::BundleInfo& bundleInfo)
 {

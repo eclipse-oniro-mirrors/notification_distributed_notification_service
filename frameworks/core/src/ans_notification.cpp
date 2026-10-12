@@ -3732,7 +3732,7 @@ InnerErrorCode AnsNotification::NotificationExtensionSubscribe(
     return static_cast<InnerErrorCode>(proxy->NotificationExtensionSubscribe(infos));
 }
 
-InnerErrorCode AnsNotification::NotificationExtensionSubscribeNotification(int32_t priorityStrategy)
+InnerErrorCode AnsNotification::NotificationExtensionSubscribe(int32_t priorityStrategy)
 {
     ANS_LOGD("called");
 
@@ -3742,7 +3742,7 @@ InnerErrorCode AnsNotification::NotificationExtensionSubscribeNotification(int32
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
-    return static_cast<InnerErrorCode>(proxy->NotificationExtensionSubscribeNotification(priorityStrategy));
+    return static_cast<InnerErrorCode>(proxy->NotificationExtensionSubscribe(priorityStrategy));
 }
 
 InnerErrorCode AnsNotification::NotificationExtensionUnsubscribe()

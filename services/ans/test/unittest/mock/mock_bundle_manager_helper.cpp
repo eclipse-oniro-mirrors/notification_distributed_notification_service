@@ -19,6 +19,7 @@
 #include "ans_ut_constant.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
+#include "mock_bundle_mgr.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
@@ -211,6 +212,9 @@ bool BundleManagerHelper::QueryExtensionInfos(std::vector<AppExecFwk::ExtensionA
 
 bool BundleManagerHelper::CheckBundleImplExtensionAbility(const sptr<NotificationBundleOption> &bundleOption)
 {
+    if (&g_isNeedHapModuleInfos != nullptr) {
+        return g_isNeedHapModuleInfos;
+    }
     return true;
 }
 

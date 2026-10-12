@@ -956,7 +956,7 @@ public:
         return ERR_ANS_INNER_INVALID_PARAM;
     }
 
-    ErrCode NotificationExtensionSubscribeNotification(int32_t priorityStrategy) override
+    ErrCode NotificationExtensionSubscribe(int32_t priorityStrategy) override
     {
         return ERR_ANS_INNER_INVALID_PARAM;
     }
@@ -1617,16 +1617,16 @@ HWTEST_F(AnsNotificationBranchTest, PublishDelayedNotification_0100, Function | 
 }
 
 /**
- * @tc.name: NotificationExtensionSubscribeNotification_0100
- * @tc.desc: NotificationExtensionSubscribeNotification
+ * @tc.name: NotificationExtensionSubscribePriority_0100
+ * @tc.desc: NotificationExtensionSubscribe with priorityStrategy
  * @tc.type: FUNC
  */
-HWTEST_F(AnsNotificationBranchTest, NotificationExtensionSubscribeNotification_0100, Function | MediumTest | Level1)
+HWTEST_F(AnsNotificationBranchTest, NotificationExtensionSubscribePriority_0100, Function | MediumTest | Level1)
 {
     auto notification = std::make_shared<AnsNotification>();
     ASSERT_NE(notification, nullptr);
     int32_t priorityStrategy = 0;
-    InnerErrorCode ret = notification->NotificationExtensionSubscribeNotification(priorityStrategy);
+    InnerErrorCode ret = notification->NotificationExtensionSubscribe(priorityStrategy);
     EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 }  // namespace Notification

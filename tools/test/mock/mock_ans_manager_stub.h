@@ -908,7 +908,7 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode NotificationExtensionSubscribeNotification(int32_t priorityStrategy) override
+    ErrCode NotificationExtensionSubscribe(int32_t priorityStrategy) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

@@ -2713,57 +2713,57 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, ClassifyNormalSubscriber
 #endif
 
 /**
- * @tc.number    : NotificationExtensionSubscribeNotification_0100
- * @tc.name      : NotificationExtensionSubscribeNotification
- * @tc.desc      : Test NotificationExtensionSubscribeNotification not system app
+ * @tc.number    : NotificationExtensionSubscribePriority_0100
+ * @tc.name      : NotificationExtensionSubscribePriority
+ * @tc.desc      : Test NotificationExtensionSubscribePriority not system app
  */
-HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribeNotification_0100,
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribePriority_0100,
     Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
-    auto ret = advancedNotificationService_->NotificationExtensionSubscribeNotification(0);
+    auto ret = advancedNotificationService_->NotificationExtensionSubscribe(0);
     EXPECT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
 /**
- * @tc.number    : NotificationExtensionSubscribeNotification_0200
- * @tc.name      : NotificationExtensionSubscribeNotification
- * @tc.desc      : Test NotificationExtensionSubscribeNotification CanOpenSubscribeSettings fails
+ * @tc.number    : NotificationExtensionSubscribePriority_0200
+ * @tc.name      : NotificationExtensionSubscribePriority
+ * @tc.desc      : Test NotificationExtensionSubscribePriority CanOpenSubscribeSettings fails
  */
-HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribeNotification_0200,
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribePriority_0200,
     Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
-    auto ret = advancedNotificationService_->NotificationExtensionSubscribeNotification(0);
+    auto ret = advancedNotificationService_->NotificationExtensionSubscribe(0);
     EXPECT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
 /**
- * @tc.number    : NotificationExtensionSubscribeNotification_0300
- * @tc.name      : NotificationExtensionSubscribeNotification
- * @tc.desc      : Test NotificationExtensionSubscribeNotification GenerateBundleOption returns nullptr
+ * @tc.number    : NotificationExtensionSubscribePriority_0300
+ * @tc.name      : NotificationExtensionSubscribePriority
+ * @tc.desc      : Test NotificationExtensionSubscribePriority GenerateBundleOption returns nullptr
  */
-HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribeNotification_0300,
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribePriority_0300,
     Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     MockIsNonBundleName(true);
-    auto ret = advancedNotificationService_->NotificationExtensionSubscribeNotification(0);
+    auto ret = advancedNotificationService_->NotificationExtensionSubscribe(0);
     EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     MockIsNonBundleName(false);
 }
 
 /**
- * @tc.number    : NotificationExtensionSubscribeNotification_0400
- * @tc.name      : NotificationExtensionSubscribeNotification
- * @tc.desc      : Test NotificationExtensionSubscribeNotification without queue
+ * @tc.number    : NotificationExtensionSubscribePriority_0400
+ * @tc.name      : NotificationExtensionSubscribePriority
+ * @tc.desc      : Test NotificationExtensionSubscribePriority without queue
  */
-HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribeNotification_0400,
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribePriority_0400,
     Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
@@ -2771,17 +2771,17 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSub
     MockIsVerfyPermisson(true);
     MockIsNeedHapModuleInfos(true);
     advancedNotificationService_->notificationSvrQueue_.Reset();
-    auto ret = advancedNotificationService_->NotificationExtensionSubscribeNotification(0);
+    auto ret = advancedNotificationService_->NotificationExtensionSubscribe(0);
     EXPECT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     MockIsNeedHapModuleInfos(false);
 }
 
 /**
- * @tc.number    : NotificationExtensionSubscribeNotification_0500
- * @tc.name      : NotificationExtensionSubscribeNotification
- * @tc.desc      : Test NotificationExtensionSubscribeNotification success path
+ * @tc.number    : NotificationExtensionSubscribePriority_0500
+ * @tc.name      : NotificationExtensionSubscribePriority
+ * @tc.desc      : Test NotificationExtensionSubscribePriority success path
  */
-HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribeNotification_0500,
+HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSubscribePriority_0500,
     Function | SmallTest | Level1)
 {
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
@@ -2794,7 +2794,7 @@ HWTEST_F(AdvancedNotificationExtensionSubscriptionTest, NotificationExtensionSub
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     advancedNotificationService_->DeleteAll();
     advancedNotificationService_->AddToNotificationList(record);
-    auto ret = advancedNotificationService_->NotificationExtensionSubscribeNotification(0);
+    auto ret = advancedNotificationService_->NotificationExtensionSubscribe(0);
     EXPECT_EQ(ret, ERR_OK);
     MockIsNeedHapModuleInfos(false);
 }

@@ -88,6 +88,10 @@ ohos_shared_library("notificationextensionsubscription") {
 
   defines = []
 
+  if (distributed_notification_service_feature_notification_extension_subscription) {
+    defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
+  }
+
   if (distributed_notification_service_feature_api_metrics) {
     external_deps += [ "api_metrics:histogrammanager" ]
     defines += [ "ANS_FEATURE_API_METRICS_HISTOGRAM" ]

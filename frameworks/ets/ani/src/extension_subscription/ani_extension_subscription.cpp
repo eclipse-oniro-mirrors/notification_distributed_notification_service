@@ -20,28 +20,31 @@
 #include "ani_open_subscribe_settings.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
+#include "sts_throw_erro.h"
 
 namespace OHOS {
 namespace NotificationExtensionSubScriptionSts {
-void AniNotificationExtensionRegistryInit(ani_env *env)
+void ThrowSystemCapErr(ani_env *env)
 {
-    ANS_LOGD("AniNotificationExtensionRegistryInit call");
-    static const char *npName = "@ohos.notificationExtensionSubscription.notificationExtensionSubscription";
-    ani_namespace np;
-    if (ANI_OK != env->FindNamespace(npName, &np)) {
-        ANS_LOGD("Not found '%{public}s'", npName);
-        return;
-    }
+    NotificationSts::ThrowErrorWithCode(env, OHOS::Notification::ERR_ANS_INNER_DEVICE_NOT_SUPPORT);
+}
 
-    std::array methods = {
+static auto BuildExtensionSubscriptionMethods()
+{
+    return std::array{
         ani_native_function {
             "nativeOpenSubscriptionSettings", nullptr, reinterpret_cast<void*>(AniOpenSubscribeSettings) },
         ani_native_function {
             "nativeOpenSubscriptionSettingsWithResult", nullptr,
             reinterpret_cast<void*>(AniOpenSubscribeSettingsWithResult) },
         ani_native_function { "nativeSubscribe", nullptr, reinterpret_cast<void*>(AniSubscribe) },
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         ani_native_function {
             "nativeSubscribeNotification", nullptr, reinterpret_cast<void*>(AniSubscribeNotification) },
+#else
+        ani_native_function {
+            "nativeSubscribeNotification", nullptr, reinterpret_cast<void*>(ThrowSystemCapErr) },
+#endif
         ani_native_function { "nativeUnsubscribe", nullptr, reinterpret_cast<void*>(AniUnsubscribe) },
         ani_native_function { "nativeGetSubscribeInfo", nullptr, reinterpret_cast<void*>(AniGetSubscribeInfo) },
         ani_native_function {
@@ -60,6 +63,19 @@ void AniNotificationExtensionRegistryInit(ani_env *env)
         ani_native_function {
             "nativeDisableUserGrantedByBundle", nullptr, reinterpret_cast<void*>(AniDisableUserGrantedByBundle) },
     };
+}
+
+void AniNotificationExtensionRegistryInit(ani_env *env)
+{
+    ANS_LOGD("AniNotificationExtensionRegistryInit call");
+    static const char *npName = "@ohos.notificationExtensionSubscription.notificationExtensionSubscription";
+    ani_namespace np;
+    if (ANI_OK != env->FindNamespace(npName, &np)) {
+        ANS_LOGD("Not found '%{public}s'", npName);
+        return;
+    }
+
+    auto methods = BuildExtensionSubscriptionMethods();
 
     ANS_LOGD("Start bind native methods to '%{public}s'", npName);
     ani_status status = env->Namespace_BindNativeFunctions(np, methods.data(), methods.size());
