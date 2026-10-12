@@ -227,7 +227,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationRequest_00500, Function | 
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     bool isSnooze = true;
     reminderRequest->UpdateNotificationRequest(notificationRequest, isSnooze, 0);
-    EXPECT_EQ(notificationRequest.IsUnremovable(), true);
+    EXPECT_EQ(notificationRequest.IsUnremovable(), false);
 }
 
 /**
@@ -459,7 +459,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00100, Function | S
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     reminderRequest->reminderType_ = ReminderRequest::ReminderType::TIMER;
     reminderRequest->UpdateNotificationCommon(notificationRequest, false);
-    EXPECT_EQ(notificationRequest.IsUnremovable(), true);
+    EXPECT_EQ(notificationRequest.IsUnremovable(), false);
     EXPECT_EQ(notificationRequest.GetLabel(), ReminderRequest::NOTIFICATION_LABEL);
     EXPECT_EQ(notificationRequest.IsShowDeliveryTime(), true);
 }
@@ -477,7 +477,7 @@ HWTEST_F(ReminderRequestBranchTest, UpdateNotificationCommon_00200, Function | S
     NotificationRequest notificationRequest(reminderRequest->GetNotificationId());
     reminderRequest->reminderType_ = ReminderRequest::ReminderType::ALARM;
     reminderRequest->UpdateNotificationCommon(notificationRequest, false);
-    EXPECT_EQ(notificationRequest.IsUnremovable(), true);
+    EXPECT_EQ(notificationRequest.IsUnremovable(), false);
     EXPECT_EQ(notificationRequest.GetLabel(), ReminderRequest::NOTIFICATION_LABEL);
 }
 
