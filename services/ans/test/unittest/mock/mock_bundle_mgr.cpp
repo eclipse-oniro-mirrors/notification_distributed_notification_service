@@ -23,11 +23,11 @@
 namespace OHOS {
 namespace Notification {
 __attribute__((weak)) bool g_isNonBundleName = false;
+bool g_isNeedHapModuleInfos = false;
 namespace {
 bool g_isEnable = true;
 bool g_setBundleInfoEnabled = false;
 bool g_getBundleInfoFailed = false;
-bool g_isNeedHapModuleInfos = false;
 bool g_isMockQueryExtensionAbilityInfos = false;
 bool g_isMockQueryExtensionAbilityInfosRet = true;
 bool g_isMockGetCloneAppIndexes = false;

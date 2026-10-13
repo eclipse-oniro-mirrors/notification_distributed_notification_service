@@ -245,6 +245,24 @@ bool AdvancedNotificationService::IsSystemTypeSubscriber(const sptr<Notification
     return false;
 }
 
+ErrCode AdvancedNotificationService::GetSystemSubscriptionStrategy(
+    const sptr<NotificationBundleOption> &bundle, int32_t &priorityStrategy)
+{
+    priorityStrategy = 0;
+    std::vector<sptr<NotificationExtensionSubscriptionInfo>> infos;
+    ErrCode result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionInfos(bundle, infos);
+    if (result != ERR_OK) {
+        return result;
+    }
+    for (const auto &info : infos) {
+        if (info != nullptr && info->GetType() == NotificationConstant::SubscribeType::SYSTEM) {
+            priorityStrategy = info->GetPriorityStrategy();
+            break;
+        }
+    }
+    return ERR_OK;
+}
+
 void AdvancedNotificationService::FilterPermissionBundles(std::vector<sptr<NotificationBundleOption>> &bundles,
     std::vector<sptr<NotificationBundleOption>> &mismatchedBundles)
 {
@@ -585,10 +603,9 @@ bool AdvancedNotificationService::EnsureBundlesCanSubscribePriority(
         return false;
     }
     int32_t priorityStrategy = 0;
-    ErrCode strategyResult = NotificationPreferences::GetInstance()->GetExtensionSubscriptionNotificationStrategy(
-        bundle, priorityStrategy);
+    ErrCode strategyResult = GetSystemSubscriptionStrategy(bundle, priorityStrategy);
     if (strategyResult != ERR_OK) {
-        ANS_LOGE("Failed to get extension subscription notification strategy, ret: %{public}d", strategyResult);
+        ANS_LOGE("Failed to get system subscription strategy, ret: %{public}d", strategyResult);
         return false;
     }
     SubscribeExtensionServiceNotification(bundle, priorityStrategy);
@@ -644,7 +661,7 @@ void AdvancedNotificationService::ProcessBluetoothStateChanged(const int status)
     if (status == OHOS::Bluetooth::BTStateID::STATE_TURN_ON) {
         std::vector<sptr<NotificationBundleOption>> bundles;
         GetCachedNotificationExtensionBundles(bundles);
-        if (bundles.size() == 0) {
+        if (bundles.empty()) {
             ANS_LOGD("No bundle match conditon");
             return;
         }
@@ -728,8 +745,7 @@ void AdvancedNotificationService::RecoverPrioritySubscriptions(
             continue;
         }
         int32_t priorityStrategy = 0;
-        auto result = NotificationPreferences::GetInstance()->GetExtensionSubscriptionNotificationStrategy(
-            bundle, priorityStrategy);
+        auto result = GetSystemSubscriptionStrategy(bundle, priorityStrategy);
         if (result != ERR_OK || priorityStrategy == 0) {
             continue;
         }
@@ -832,9 +848,9 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(
     return result;
 }
 
-ErrCode AdvancedNotificationService::NotificationExtensionSubscribeNotification(int32_t priorityStrategy)
+ErrCode AdvancedNotificationService::NotificationExtensionSubscribe(int32_t priorityStrategy)
 {
-    ANS_LOGD("AdvancedNotificationService::NotificationExtensionSubscribeNotification");
+    ANS_LOGD("AdvancedNotificationService::NotificationExtensionSubscribe with priorityStrategy");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_27, EventBranchId::BRANCH_0);
     if (!AccessTokenHelper::IsSystemApp()) {
         NotificationAnalyticsUtil::ReportModifyEvent(
@@ -852,20 +868,29 @@ ErrCode AdvancedNotificationService::NotificationExtensionSubscribeNotification(
         return validateResult;
     }
 
+    sptr<NotificationExtensionSubscriptionInfo> systemInfo =
+        new (std::nothrow) NotificationExtensionSubscriptionInfo();
+    if (systemInfo == nullptr) {
+        ANS_LOGE("Failed to create system subscription info.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    systemInfo->SetType(NotificationConstant::SubscribeType::SYSTEM);
+    systemInfo->SetPriorityStrategy(priorityStrategy);
+
     ErrCode result = ERR_OK;
-    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
-        result = NotificationPreferences::GetInstance()->SetExtensionSubscriptionNotification(
-            bundleOption, priorityStrategy);
+    auto submitResult = notificationSvrQueue_.SyncSubmit([&result, &message, systemInfo, bundleOption]() {
+        result = NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(
+            bundleOption, {systemInfo});
         if (result != ERR_OK) {
-            ANS_LOGE("Failed to set extension subscription notification, ret: %{public}d", result);
+            ANS_LOGE("Failed to set extension subscription infos, ret: %{public}d", result);
             return;
         }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
-        EnsureBundlesCanSubscribePriority(bundleOption);
+        AdvancedNotificationService::GetInstance()->EnsureBundlesCanSubscribePriority(bundleOption);
 #endif
         NotificationAnalyticsUtil::ReportModifyEvent(message.BranchId(BRANCH_12).Message(bundleOption->GetBundleName() +
             ":" + std::to_string(bundleOption->GetUid()) + " subscribe notification"));
-    }));
+    });
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult,
         "Notification extension subscribe notification.");
     return result;

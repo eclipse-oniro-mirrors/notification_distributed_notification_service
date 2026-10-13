@@ -2476,9 +2476,7 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForExtensionSubscription(
             bundle->GetBundleName().c_str());
         return;
     }
-    // Restore priority strategy first: SetExtensionSubscriptionNotification writes strategy + simplified infos,
-    // then SetExtensionSubscriptionInfos overwrites with full infos (including addr, type, priorityStrategy)
-    RestoreClonePriorityStrategy(bundle, cloneBundleInfo.GetExtensionSubscriptionInfos());
+    // Full infos (including the SYSTEM type entry with priorityStrategy) are persisted in one write.
     if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionInfos(
         bundle, cloneBundleInfo.GetExtensionSubscriptionInfos()) != ERR_OK) {
         ANS_LOGW("Set subscription infos failed.");
@@ -2518,24 +2516,6 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForExtensionSubscription(
     EnsureBundlesCanSubscribeOrUnsubscribe(bundle);
 }
 
-void AdvancedNotificationService::RestoreClonePriorityStrategy(
-    const sptr<NotificationBundleOption> &bundle,
-    const std::vector<sptr<NotificationExtensionSubscriptionInfo>> &infos)
-{
-    int32_t priorityStrategy = 0;
-    for (const auto &info : infos) {
-        if (info != nullptr && info->GetType() == NotificationConstant::SubscribeType::SYSTEM) {
-            priorityStrategy = info->GetPriorityStrategy();
-            break;
-        }
-    }
-    if (priorityStrategy > 0) {
-        if (NotificationPreferences::GetInstance()->SetExtensionSubscriptionNotification(
-            bundle, priorityStrategy) != ERR_OK) {
-            ANS_LOGW("Set extension subscription notification strategy failed.");
-        }
-    }
-}
 #endif
 void AdvancedNotificationService::UpdateCloneBundleInfoForEnable(
     const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)

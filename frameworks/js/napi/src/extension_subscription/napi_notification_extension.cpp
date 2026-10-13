@@ -1247,7 +1247,7 @@ napi_value NapiNotificationExtensionSubscribeNotification(napi_env env, napi_cal
                 static_cast<AsyncCallbackInfoNotificationExtensionSubscription *>(data);
             if (asynccallbackinfo) {
                 asynccallbackinfo->info.errorCode =
-                    AnsNotification::GetInstance()->NotificationExtensionSubscribeNotification(
+                    AnsNotification::GetInstance()->NotificationExtensionSubscribe(
                         asynccallbackinfo->priorityStrategy);
                 ANS_LOGI("errorCode = %{public}d", asynccallbackinfo->info.errorCode);
             }

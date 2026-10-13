@@ -29,7 +29,11 @@ napi_value NotificationSubscribeInit(napi_env env, napi_value exports)
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("subscribe", NapiNotificationExtensionSubscribe),
+#ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
         DECLARE_NAPI_FUNCTION("subscribeNotification", NapiNotificationExtensionSubscribeNotification),
+#else
+        DECLARE_NAPI_FUNCTION("subscribeNotification", Common::NapiReturnCapErr),
+#endif
         DECLARE_NAPI_FUNCTION("unsubscribe", NapiNotificationExtensionUnsubscribe),
         DECLARE_NAPI_FUNCTION("getSubscribeInfo", NapiGetSubscribeInfo),
         DECLARE_NAPI_FUNCTION("isUserGranted", NapiIsUserGranted),

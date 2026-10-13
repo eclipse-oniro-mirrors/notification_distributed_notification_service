@@ -1792,7 +1792,7 @@ public:
      * @param priorityStrategy The priority strategy.
      * @return Returns subscribe result.
      */
-    InnerErrorCode NotificationExtensionSubscribeNotification(int32_t priorityStrategy);
+    InnerErrorCode NotificationExtensionSubscribe(int32_t priorityStrategy);
 
     /**
      * @brief Unsubscribe the notification.

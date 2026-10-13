@@ -1513,9 +1513,6 @@ ErrCode NotificationPreferences::GetBundleProperty(
             case BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE:
                 value = static_cast<int32_t>(bundleInfo.GetExtensionSubscriptionEnabled());
                 break;
-            case BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_NOTIFICATION_STRATEGY_TYPE:
-                value = bundleInfo.GetExtensionSubscriptionNotificationStrategy();
-                break;
             default:
                 result = ERR_ANS_INNER_INVALID_PARAM;
                 break;
@@ -2861,61 +2858,6 @@ ErrCode NotificationPreferences::SetExtensionSubscriptionInfos(const sptr<Notifi
     } else {
         return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
     }
-}
-
-ErrCode NotificationPreferences::SetExtensionSubscriptionNotification(
-    const sptr<NotificationBundleOption>& bundleOption, int32_t priorityStrategy)
-{
-    ANS_LOGD("called");
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        ANS_LOGE("Invalid bundle option");
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
-    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
-    NotificationPreferencesInfo::BundleInfo bundleInfo;
-    if (!GetBundleInfo(preferencesInfo_, bundleOption, bundleInfo)) {
-        bundleInfo.SetBundleName(bundleOption->GetBundleName());
-        bundleInfo.SetBundleUid(bundleOption->GetUid());
-    }
-
-    bundleInfo.SetExtensionSubscriptionNotificationStrategy(priorityStrategy);
-    sptr<NotificationExtensionSubscriptionInfo> subscriptionInfo =
-        new (std::nothrow) NotificationExtensionSubscriptionInfo();
-    if (subscriptionInfo != nullptr) {
-        subscriptionInfo->SetPriorityStrategy(priorityStrategy);
-        subscriptionInfo->SetType(NotificationConstant::SubscribeType::SYSTEM);
-        bundleInfo.SetExtensionSubscriptionInfos({subscriptionInfo});
-    }
-    if (preferncesDB_ == nullptr) {
-        ANS_LOGE("the prefernces db is nullptr");
-        return ERR_ANS_INNER_SERVICE_NOT_READY;
-    }
-    if (preferncesDB_->PutExtensionSubscriptionNotificationStrategy(bundleInfo)) {
-        preferencesInfo.SetBundleInfo(bundleInfo);
-        preferencesInfo_ = preferencesInfo;
-        StartCacheCleanupTimer();
-        return ERR_OK;
-    } else {
-        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
-    }
-}
-
-ErrCode NotificationPreferences::GetExtensionSubscriptionNotificationStrategy(
-    const sptr<NotificationBundleOption>& bundleOption, int32_t& priorityStrategy)
-{
-    ANS_LOGD("called");
-    if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-    int32_t val = 0;
-    auto result = GetBundleProperty(bundleOption,
-        BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_NOTIFICATION_STRATEGY_TYPE, val);
-    if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-        result = ERR_OK;
-    }
-    priorityStrategy = val;
-    return result;
 }
 
 ErrCode NotificationPreferences::ClearExtensionSubscriptionInfos(const sptr<NotificationBundleOption>& bundleOption)

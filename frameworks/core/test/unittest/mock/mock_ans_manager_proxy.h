@@ -267,7 +267,7 @@ public:
     MOCK_METHOD1(NotificationExtensionSubscribe,
         ErrCode(const std::vector<sptr<NotificationExtensionSubscriptionInfo>>&));
     MOCK_METHOD0(NotificationExtensionUnsubscribe, ErrCode());
-    MOCK_METHOD1(NotificationExtensionSubscribeNotification, ErrCode(int32_t));
+    MOCK_METHOD1(NotificationExtensionSubscribe, ErrCode(int32_t));
     MOCK_METHOD1(GetSubscribeInfo, ErrCode(std::vector<sptr<NotificationExtensionSubscriptionInfo>>&));
     MOCK_METHOD1(IsUserGranted, ErrCode(bool &enabled));
     MOCK_METHOD2(GetUserGrantedState, ErrCode(const sptr<NotificationBundleOption> &targetBundle, bool &enabled));

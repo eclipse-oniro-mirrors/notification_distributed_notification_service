@@ -21,6 +21,9 @@
 #include <memory>
 #include <mutex>
 #include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "errors.h"
 #include "event_handler.h"
@@ -276,6 +279,9 @@ private:
         const std::shared_ptr<SubscriberRecord> &record);
     void NotifyCanceledInner(const sptr<Notification> &notification,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
+    void CollectCanceledNotifications(const std::shared_ptr<SubscriberRecord> &record,
+        const std::vector<sptr<Notification>> &notifications,
+        std::vector<sptr<Notification>> &currNotifications);
     void BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
     void ClearLiveViewContent(sptr<Notification> &notification);
@@ -334,11 +340,26 @@ private:
     void NotifyVoiceNotificationCanceled(const sptr<NotificationRequest>& request);
     void NotifyConsumedSubscribers(const sptr<Notification> &notification,
         const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
-    bool ShouldNotifyPrioritySubscribers(const std::shared_ptr<SubscriberRecord> &record,
-        const sptr<Notification> &notification);
-    void AddConsumedHashCodes(const std::vector<sptr<Notification>> &notifications);
-    bool HasConsumedHashCode(const std::string &hashCode);
-    void RemoveConsumedHashCodes(const std::vector<sptr<Notification>> &notifications);
+    bool ShouldDispatchToRecord(
+        const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
+    bool IsConsumedBySubscriber(
+        const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
+    void MarkConsumedBySubscriber(
+        const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification);
+    void ClearConsumedRecords(const std::vector<sptr<Notification>> &notifications);
+    static std::string GetSubscriberKey(const std::shared_ptr<SubscriberRecord> &record);
+    void DispatchOnConsumed(const std::shared_ptr<SubscriberRecord> &record,
+        const sptr<Notification> &notificationStub, const sptr<NotificationSortingMap> &notificationMap);
+    void DispatchOnCanceled(const std::shared_ptr<SubscriberRecord> &record,
+        const sptr<Notification> &notificationStub, const sptr<NotificationSortingMap> &notificationMap,
+        int32_t deleteReason);
+    void DispatchOnConsumedList(const std::shared_ptr<SubscriberRecord> &record,
+        const std::vector<sptr<Notification>> &notificationStubs,
+        const sptr<NotificationSortingMap> &notificationMap);
+    void DispatchOnCanceledList(const std::shared_ptr<SubscriberRecord> &record,
+        const std::vector<sptr<Notification>> &notificationStubs,
+        const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason);
+    void ReportNotificationsRemovedEvent(const std::vector<sptr<Notification>> &notifications);
 
 private:
     ffrt::mutex subscriberRecordListMutex_;
@@ -350,9 +371,8 @@ private:
     std::shared_ptr<ffrt::queue> notificationSubQueue_ = nullptr;
     std::function<void(const std::shared_ptr<SubscriberRecord> &)> onSubscriberAddCallback_ = nullptr;
     ffrt::mutex onSubscriberAddCallbackMutex_;
-    static constexpr size_t MAX_CONSUMED_HASH_CODE_LIST_SIZE = 1000;
-    std::list<std::string> consumedHashCodes_;
-    ffrt::mutex consumedHashCodesMutex_;
+    std::unordered_map<std::string, std::unordered_set<std::string>> consumedRecords_;
+    ffrt::mutex consumedRecordsMutex_;
 
     DECLARE_DELAYED_SINGLETON(NotificationSubscriberManager);
     DISALLOW_COPY_AND_MOVE(NotificationSubscriberManager);

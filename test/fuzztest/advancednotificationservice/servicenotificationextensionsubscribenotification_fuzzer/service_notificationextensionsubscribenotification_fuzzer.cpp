@@ -26,7 +26,7 @@ bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
 {
     auto service = AdvancedNotificationService::GetInstance();
     int32_t priorityStrategy = fuzzData->ConsumeIntegralInRange<int32_t>(0, 255);
-    service->NotificationExtensionSubscribeNotification(priorityStrategy);
+    service->NotificationExtensionSubscribe(priorityStrategy);
     return true;
 }
 

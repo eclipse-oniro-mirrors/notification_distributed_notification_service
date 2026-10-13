@@ -504,7 +504,7 @@ void NotificationSubscriberManager::SendCommonEvent(
 {
     EventFwk::Want want;
     EventFwk::CommonEventData commonData;
-    if (eventType != NotificationConstant::TYPE_PRIORITY_INTELLIGENT_SWITCH && params.size() <= 0) {
+    if (eventType != NotificationConstant::TYPE_PRIORITY_INTELLIGENT_SWITCH && params.empty()) {
         return;
     }
     switch (eventType) {
@@ -800,7 +800,7 @@ int32_t NotificationSubscriberManager::GetVoiceContentInfo(const sptr<Notificati
         return -1;
     }
     auto flagsMap = request->GetDeviceFlags();
-    if (flagsMap == nullptr || flagsMap->size() <= 0) {
+    if (flagsMap == nullptr || flagsMap->empty()) {
         return ERR_OK;
     }
 
@@ -911,12 +911,8 @@ void NotificationSubscriberManager::NotifyPriorityRecordOnConsumed(const std::sh
         ANS_LOGW("notificationStub null");
         return;
     }
-    AddConsumedHashCodes({notification});
-    if (notificationMap != nullptr) {
-        record->subscriber->OnConsumed(notificationStub, notificationMap);
-    } else {
-        record->subscriber->OnConsumed(notificationStub);
-    }
+    MarkConsumedBySubscriber(record, notification);
+    DispatchOnConsumed(record, notificationStub, notificationMap);
 }
 
 void NotificationSubscriberManager::NotifyRecordOnConsumed(
@@ -943,11 +939,7 @@ void NotificationSubscriberManager::NotifyRecordOnConsumed(
         notificationStub->SetNotificationClassification(notificationClassifications.at(0));
     }
     notification->GetNotificationRequestPoint()->AddConsumedDevices(record->deviceType);
-    if (notificationMap != nullptr) {
-        record->subscriber->OnConsumed(notificationStub, notificationMap);
-    } else {
-        record->subscriber->OnConsumed(notificationStub);
-    }
+    DispatchOnConsumed(record, notificationStub, notificationMap);
 }
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
@@ -1052,11 +1044,7 @@ void NotificationSubscriberManager::BatchNotifyConsumedInner(
     if (!currNotifications.empty()) {
         ANS_LOGD("OnConsumedList currNotifications size = <%{public}zu>", currNotifications.size());
         if (record->subscriber != nullptr) {
-            if (notificationMap != nullptr) {
-                record->subscriber->OnConsumedList(currNotifications, notificationMap);
-            } else {
-                record->subscriber->OnConsumedList(currNotifications);
-            }
+            DispatchOnConsumedList(record, currNotifications, notificationMap);
         }
     }
 }
@@ -1098,16 +1086,10 @@ void NotificationSubscriberManager::NotifyCanceledInner(
             }
     }
     ANS_LOGI("CancelNotification key=%{public}s", notification->GetKey().c_str());
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    std::vector<sptr<NotificationBundleOption>> bundleOptions;
-    std::vector<sptr<NotificationRequest>> requests;
-    AdvancedNotificationService::GetInstance()->GetRequestsFromNotification({ notification }, requests);
-    NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent(
-        NotificationConstant::EVENT_NOTIFICATION_REMOVED, bundleOptions, requests);
-#endif
+    ReportNotificationsRemovedEvent({notification});
     NotifyVoiceNotificationCanceled(notification->GetNotificationRequestPoint());
     NotifyConsumedSubscribers(notification, notificationMap, deleteReason);
-    RemoveConsumedHashCodes({notification});
+    ClearConsumedRecords({notification});
 }
 
 void NotificationSubscriberManager::NotifyConsumedSubscribers(
@@ -1119,22 +1101,15 @@ void NotificationSubscriberManager::NotifyConsumedSubscribers(
     }
     for (auto record : subscriberRecordList_) {
         ANS_LOGD("%{public}s record->userId = <%{public}d>", __FUNCTION__, record->userId);
-        if (record->priorityStrategy_ != 0 && !ShouldNotifyPrioritySubscribers(record, notification)) {
+        if (!ShouldDispatchToRecord(record, notification) ||
+            !(record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CANCELED)) {
             continue;
         }
-
-        if (IsSubscribedBysubscriber(record, notification) && IsSubscribedByDeviceType(record, notification, true) &&
-            (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CANCELED)) {
-            auto notificationStub = GenerateSubscribedNotification(record, notification);
-            if (notificationStub == nullptr) {
-                continue;
-            }
-            if (notificationMap != nullptr) {
-                record->subscriber->OnCanceled(notificationStub, notificationMap, deleteReason);
-            } else {
-                record->subscriber->OnCanceled(notificationStub, deleteReason);
-            }
+        auto notificationStub = GenerateSubscribedNotification(record, notification);
+        if (notificationStub == nullptr) {
+            continue;
         }
+        DispatchOnCanceled(record, notificationStub, notificationMap, deleteReason);
     }
 }
 
@@ -1165,7 +1140,7 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
         return false;
     }
     auto slotIter = std::find(record->slotTypes.begin(), record->slotTypes.end(), soltType);
-    bool isSubscribedSlotType = (record->slotTypes.size() == 0) || (slotIter != record->slotTypes.end());
+    bool isSubscribedSlotType = record->slotTypes.empty() || (slotIter != record->slotTypes.end());
     if (!isSubscribedSlotType) {
         return false;
     }
@@ -1263,14 +1238,14 @@ bool NotificationSubscriberManager::IsSubscribedByDeviceType(const std::shared_p
         return true;
     }
     auto flagsMap = request->GetDeviceFlags();
-    if (flagsMap == nullptr || flagsMap->size() <= 0) {
+    if (flagsMap == nullptr || flagsMap->empty()) {
         return true;
     }
     auto flagIter = flagsMap->find(deviceType);
     if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
         return true;
     }
-    if (deviceType.size() <= 0 || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
+    if (deviceType.empty() || deviceType.compare(NotificationConstant::CURRENT_DEVICE_TYPE) == 0) {
         return true;
     }
     ANS_LOGE("noDevFlags key=%{public}s dev=%{public}s bundle=%{public}s",
@@ -1424,6 +1399,28 @@ void NotificationSubscriberManager::ClearLiveViewContent(sptr<Notification> &not
     }
 }
 
+void NotificationSubscriberManager::CollectCanceledNotifications(
+    const std::shared_ptr<SubscriberRecord> &record,
+    const std::vector<sptr<Notification>> &notifications,
+    std::vector<sptr<Notification>> &currNotifications)
+{
+    for (size_t i = 0; i < notifications.size(); i ++) {
+        sptr<Notification> notification = notifications[i];
+        if (notification == nullptr) {
+            continue;
+        }
+        ClearLiveViewContent(notification);
+        if (!ShouldDispatchToRecord(record, notification)) {
+            continue;
+        }
+        auto notificationStub = GenerateSubscribedNotification(record, notification);
+        if (notificationStub == nullptr) {
+            continue;
+        }
+        currNotifications.emplace_back(notificationStub);
+    }
+}
+
 void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<sptr<Notification>> &notifications,
     const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
@@ -1444,13 +1441,7 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         }
     }
     ANS_LOGI("CancelNotification key = %{public}s", notificationKeys.c_str());
-#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
-    std::vector<sptr<NotificationBundleOption>> bundleOptions;
-    std::vector<sptr<NotificationRequest>> requests;
-    AdvancedNotificationService::GetInstance()->GetRequestsFromNotification(notifications, requests);
-    NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent(
-        NotificationConstant::EVENT_NOTIFICATION_REMOVED, bundleOptions, requests);
-#endif
+    ReportNotificationsRemovedEvent(notifications);
     for (auto record : subscriberRecordList_) {
         if (record == nullptr) {
             continue;
@@ -1461,37 +1452,16 @@ void NotificationSubscriberManager::BatchNotifyCanceledInner(const std::vector<s
         }
         ANS_LOGD("record->userId = <%{public}d>", record->userId);
         std::vector<sptr<Notification>> currNotifications;
-        for (size_t i = 0; i < notifications.size(); i ++) {
-            sptr<Notification> notification = notifications[i];
-            if (notification == nullptr) {
-                continue;
-            }
-            ClearLiveViewContent(notification);
-            if (IsSubscribedBysubscriber(record, notification) &&
-                IsSubscribedByDeviceType(record, notification, true)) {
-                auto notificationStub = GenerateSubscribedNotification(record, notification);
-                if (notificationStub == nullptr) {
-                    continue;
-                }
-                if (record->priorityStrategy_ != 0 && !ShouldNotifyPrioritySubscribers(record, notification)) {
-                    continue;
-                }
-                currNotifications.emplace_back(notificationStub);
-            }
-        }
+        CollectCanceledNotifications(record, notifications, currNotifications);
         if (!currNotifications.empty()) {
             ANS_LOGD("onCanceledList currNotifications size = <%{public}zu>", currNotifications.size());
             if (record->subscriber == nullptr) {
                 continue;
             }
-            if (notificationMap != nullptr) {
-                record->subscriber->OnCanceledList(currNotifications, notificationMap, deleteReason);
-            } else {
-                record->subscriber->OnCanceledList(currNotifications, deleteReason);
-            }
+            DispatchOnCanceledList(record, currNotifications, notificationMap, deleteReason);
         }
     }
-    RemoveConsumedHashCodes(notifications);
+    ClearConsumedRecords(notifications);
 }
 
 void NotificationSubscriberManager::NotifyUpdatedInner(const sptr<NotificationSortingMap> &notificationMap)
@@ -1827,7 +1797,7 @@ void NotificationSubscriberManager::TrackCodeLog(const sptr<Notification> &notif
         return;
     }
     auto flagsMap = request->GetDeviceFlags();
-    if (flagsMap == nullptr || flagsMap->size() <= 0) {
+    if (flagsMap == nullptr || flagsMap->empty()) {
         ANS_LOGE("null flagsMap or empty flagsMap");
         return;
     }
@@ -1935,8 +1905,21 @@ void NotificationSubscriberManager::NotifyNotificationSwitchChangedInner(
         &IAnsSubscriber::OnNotificationSwitchChanged, callbackData);
 }
 
-bool NotificationSubscriberManager::ShouldNotifyPrioritySubscribers(const std::shared_ptr<SubscriberRecord> &record,
-    const sptr<Notification> &notification)
+bool NotificationSubscriberManager::ShouldDispatchToRecord(
+    const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
+{
+    if (record == nullptr || notification == nullptr) {
+        return false;
+    }
+    if (record->priorityStrategy_ != 0 && !IsConsumedBySubscriber(record, notification)) {
+        return false;
+    }
+    return IsSubscribedBysubscriber(record, notification) &&
+        IsSubscribedByDeviceType(record, notification, true);
+}
+
+bool NotificationSubscriberManager::IsConsumedBySubscriber(
+    const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
 {
     if (record == nullptr || notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
         return false;
@@ -1951,54 +1934,101 @@ bool NotificationSubscriberManager::ShouldNotifyPrioritySubscribers(const std::s
         return false;
     }
     std::string hashCode = notification->GetNotificationRequestPoint()->GetNotificationHashCode();
-    bool isConsumed = HasConsumedHashCode(hashCode);
-    if (!isConsumed) {
+    std::lock_guard<ffrt::mutex> lock(consumedRecordsMutex_);
+    auto iter = consumedRecords_.find(hashCode);
+    if (iter == consumedRecords_.end()) {
         ANS_LOGD("not consumed, skip priority subscriber cancel");
         return false;
     }
-    return true;
+    return iter->second.find(GetSubscriberKey(record)) != iter->second.end();
 }
 
-void NotificationSubscriberManager::AddConsumedHashCodes(const std::vector<sptr<Notification>> &notifications)
+void NotificationSubscriberManager::MarkConsumedBySubscriber(
+    const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification)
 {
-    std::lock_guard<ffrt::mutex> lock(consumedHashCodesMutex_);
+    if (record == nullptr || notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
+        return;
+    }
+    std::string hashCode = notification->GetNotificationRequestPoint()->GetNotificationHashCode();
+    if (hashCode.empty()) {
+        return;
+    }
+    std::string subscriberKey = GetSubscriberKey(record);
+    std::lock_guard<ffrt::mutex> lock(consumedRecordsMutex_);
+    consumedRecords_[hashCode].insert(subscriberKey);
+}
+
+void NotificationSubscriberManager::ClearConsumedRecords(const std::vector<sptr<Notification>> &notifications)
+{
+    std::lock_guard<ffrt::mutex> lock(consumedRecordsMutex_);
     for (auto notification : notifications) {
         if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
             continue;
         }
-        std::string hashCode = notification->GetNotificationRequestPoint()->GetNotificationHashCode();
-        if (hashCode.empty()) {
-            continue;
-        }
-        if (std::find(consumedHashCodes_.begin(), consumedHashCodes_.end(), hashCode) != consumedHashCodes_.end()) {
-            continue;
-        }
-        if (consumedHashCodes_.size() >= MAX_CONSUMED_HASH_CODE_LIST_SIZE) {
-            consumedHashCodes_.pop_front();
-        }
-        consumedHashCodes_.push_back(hashCode);
+        consumedRecords_.erase(notification->GetNotificationRequestPoint()->GetNotificationHashCode());
     }
 }
 
-bool NotificationSubscriberManager::HasConsumedHashCode(const std::string &hashCode)
+std::string NotificationSubscriberManager::GetSubscriberKey(const std::shared_ptr<SubscriberRecord> &record)
 {
-    std::lock_guard<ffrt::mutex> lock(consumedHashCodesMutex_);
-    return std::find(consumedHashCodes_.begin(), consumedHashCodes_.end(), hashCode) != consumedHashCodes_.end();
+    if (record == nullptr) {
+        return "";
+    }
+    return record->subscriberBundleName_ + "_" + std::to_string(record->subscriberUid);
 }
 
-void NotificationSubscriberManager::RemoveConsumedHashCodes(const std::vector<sptr<Notification>> &notifications)
+void NotificationSubscriberManager::DispatchOnConsumed(const std::shared_ptr<SubscriberRecord> &record,
+    const sptr<Notification> &notificationStub, const sptr<NotificationSortingMap> &notificationMap)
 {
-    std::lock_guard<ffrt::mutex> lock(consumedHashCodesMutex_);
-    for (auto notification : notifications) {
-        if (notification == nullptr || notification->GetNotificationRequestPoint() == nullptr) {
-            continue;
-        }
-        std::string hashCode = notification->GetNotificationRequestPoint()->GetNotificationHashCode();
-        auto it = std::find(consumedHashCodes_.begin(), consumedHashCodes_.end(), hashCode);
-        if (it != consumedHashCodes_.end()) {
-            consumedHashCodes_.erase(it);
-        }
+    if (notificationMap != nullptr) {
+        record->subscriber->OnConsumed(notificationStub, notificationMap);
+    } else {
+        record->subscriber->OnConsumed(notificationStub);
     }
+}
+
+void NotificationSubscriberManager::DispatchOnCanceled(const std::shared_ptr<SubscriberRecord> &record,
+    const sptr<Notification> &notificationStub, const sptr<NotificationSortingMap> &notificationMap,
+    int32_t deleteReason)
+{
+    if (notificationMap != nullptr) {
+        record->subscriber->OnCanceled(notificationStub, notificationMap, deleteReason);
+    } else {
+        record->subscriber->OnCanceled(notificationStub, deleteReason);
+    }
+}
+
+void NotificationSubscriberManager::DispatchOnConsumedList(const std::shared_ptr<SubscriberRecord> &record,
+    const std::vector<sptr<Notification>> &notificationStubs, const sptr<NotificationSortingMap> &notificationMap)
+{
+    if (notificationMap != nullptr) {
+        record->subscriber->OnConsumedList(notificationStubs, notificationMap);
+    } else {
+        record->subscriber->OnConsumedList(notificationStubs);
+    }
+}
+
+void NotificationSubscriberManager::DispatchOnCanceledList(const std::shared_ptr<SubscriberRecord> &record,
+    const std::vector<sptr<Notification>> &notificationStubs, const sptr<NotificationSortingMap> &notificationMap,
+    int32_t deleteReason)
+{
+    if (notificationMap != nullptr) {
+        record->subscriber->OnCanceledList(notificationStubs, notificationMap, deleteReason);
+    } else {
+        record->subscriber->OnCanceledList(notificationStubs, deleteReason);
+    }
+}
+
+void NotificationSubscriberManager::ReportNotificationsRemovedEvent(
+    const std::vector<sptr<Notification>> &notifications)
+{
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    std::vector<sptr<NotificationRequest>> requests;
+    AdvancedNotificationService::GetInstance()->GetRequestsFromNotification(notifications, requests);
+    NOTIFICATION_AI_EXTENSION_WRAPPER->NotifyPriorityEvent(
+        NotificationConstant::EVENT_NOTIFICATION_REMOVED, bundleOptions, requests);
+#endif
 }
 }  // namespace Notification
 }  // namespace OHOS

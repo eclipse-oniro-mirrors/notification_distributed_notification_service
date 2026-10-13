@@ -3365,6 +3365,7 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     "notification_subscriber_manager_branch_test/mock_advanced_notification_service.cpp",
     "notification_subscriber_manager_branch_test/mock_notification.cpp",
     "notification_subscriber_manager_branch_test/mock_notification_preferences.cpp",
+    "notification_subscriber_manager_branch_test/notification_subscriber_dispatch_branch_test.cpp",
     "notification_subscriber_manager_branch_test/notification_subscriber_manager_branch_test.cpp",
   ]
 
@@ -4295,6 +4296,10 @@ ohos_unittest("notification_extension_test") {
 
   if (distributed_notification_service_feature_dist_notification_persist) {
     defines += [ "ANS_FEATURE_DIST_NOTIFICATION_PERSIST" ]
+  }
+
+  if (distributed_notification_service_feature_notification_extension_subscription) {
+    defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
   }
 
   deps = [

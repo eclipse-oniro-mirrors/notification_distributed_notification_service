@@ -365,6 +365,11 @@ ohos_shared_library("notificationextensionsubscription_ani") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
+  defines = []
+  if (distributed_notification_service_feature_notification_extension_subscription) {
+    defines += [ "NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED" ]
+  }
+
   ldflags = notification_size_opt_ldflags
 
   version_script = "libnotificationextensionsubscription_ani.map"

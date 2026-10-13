@@ -51,6 +51,11 @@ public:
 
 namespace Notification {
 
+// Weak reference to the mock switch defined in mock_bundle_mgr.cpp. When that mock is not
+// linked into the test target, the reference resolves to null and callers fall back to the
+// legacy always-true behavior.
+extern bool g_isNeedHapModuleInfos __attribute__((weak));
+
 void MockIsNonBundleName(bool isNonBundleName);
 
 void MockDistributedNotificationEnabled(bool isEnable);
