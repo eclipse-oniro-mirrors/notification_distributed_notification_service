@@ -22,6 +22,7 @@
 #include "distributed_data_define.h"
 #include "distributed_bundle_service.h"
 #include "mock_bundle_manager_helper.h"
+#include "notification_subscriber_manager.h"
 
 namespace OHOS {
 namespace Notification {
@@ -47,6 +48,11 @@ void DistributedBundleServiceTest::SetUpTestCase()
 void DistributedBundleServiceTest::TearDownTestCase()
 {
     GTEST_LOG_(INFO) << "TearDown test case";
+    // HandleLocalSwitchEvent creates the NotificationSubscriberManager singleton.
+    // Destroy it here while FFRT is still alive (its destructor drains the FFRT
+    // queue), so process-exit static destruction never runs NSM code against a
+    // torn-down FFRT runtime (issue #735).
+    DelayedSingleton<NotificationSubscriberManager>::DestroyInstance();
 }
 
 

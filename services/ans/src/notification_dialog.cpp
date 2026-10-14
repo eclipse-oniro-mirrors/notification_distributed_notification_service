@@ -40,7 +40,7 @@ constexpr const char* SYSTEM_UI_ABILITY_NAME = "com.ohos.systemui.dialog";
 constexpr const char* UI_EXTENSION_TYPE = "sysDialog/common";
 
 ErrCode ConnectEnableNotificationDialog(
-    int32_t uid, const std::string &appBundleName, bool innerLake, bool easyAbroad)
+    int32_t uid, const std::string &appBundleName, bool innerLake, bool easyAbroad, int32_t userId)
 {
     AAFwk::Want want;
     want.SetElementName(SCENEBOARD_BUNDLE_NAME, SCENEBOARD_ABILITY_NAME);
@@ -62,12 +62,12 @@ ErrCode ConnectEnableNotificationDialog(
     std::string identity = IPCSkeleton::ResetCallingIdentity();
 
     auto result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
-        want, connection, nullptr, DEFAULT_VALUE);
+        want, connection, nullptr, userId);
     if (result != ERR_OK) {
         ANS_LOGW("connect fail, result = %{public}d", result);
         want.SetElementName(SYSTEM_UI_BUNDLE_NAME, SYSTEM_UI_ABILITY_NAME);
         result = AAFwk::ExtensionManagerClient::GetInstance().ConnectServiceExtensionAbility(
-            want, connection, nullptr, DEFAULT_VALUE);
+            want, connection, nullptr, userId);
     }
 
     IPCSkeleton::SetCallingIdentity(identity);
@@ -94,7 +94,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     const bool easyAbroad)
 {
     ANS_LOGD("%{public}s, Enter.", __func__);
-    int userId = INVALID_USER_ID;
+    int32_t userId = INVALID_USER_ID;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
         return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
@@ -102,7 +102,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     auto topBundleName =
         IN_PROCESS_CALL(AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(false, userId).GetBundleName());
     if (topBundleName != appBundleName) {
-        ANS_LOGW("App isn't in foreground, top %{public}s.", topBundleName.c_str());
+        ANS_LOGW("App isn't in foreground, top %{public}s user: %{public}d.", topBundleName.c_str(), userId);
         if (!innerLake) {
             return ERR_ANS_INNER_INVALID_BUNDLE;
         } else {
@@ -116,7 +116,7 @@ ErrCode NotificationDialog::StartEnableNotificationDialogAbility(
     }
     ANS_LOGD("called");
 
-    return ConnectEnableNotificationDialog(uid, appBundleName, innerLake, easyAbroad);
+    return ConnectEnableNotificationDialog(uid, appBundleName, innerLake, easyAbroad, userId);
 }
 }  // namespace Notification
 }  // namespace OHOS
