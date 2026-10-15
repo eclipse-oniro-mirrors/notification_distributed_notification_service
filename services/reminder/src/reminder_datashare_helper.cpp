@@ -67,6 +67,16 @@ void GetRdbValue(const std::shared_ptr<DataShare::DataShareResultSet>& resultSet
     }
 }
 
+template<typename T>
+const T* GetVBucketValue(const DataShare::DataShareObserver::ChangeInfo::VBucket& info, const std::string& name)
+{
+    auto iter = info.find(name);
+    if (iter == info.end()) {
+        return nullptr;
+    }
+    return std::get_if<T>(&iter->second);
+}
+
 ReminderDataShareHelper& ReminderDataShareHelper::GetInstance()
 {
     static ReminderDataShareHelper helper;
@@ -469,18 +479,18 @@ std::map<std::string, sptr<ReminderRequest>> ReminderDataShareHelper::CreateRemi
         sptr<ReminderRequest> reminder = sptr<ReminderRequestCalendar>::MakeSptr();
         InitNormalInfo(reminder);
         uint64_t triggerTime = 0;
-        auto iter = values.find(ReminderCalendarShareTable::ALARM_TIME);
-        if (iter != values.end()) {
-            triggerTime = static_cast<uint64_t>(std::get<double>(iter->second));
+        const auto* alarmTime = GetVBucketValue<double>(values, ReminderCalendarShareTable::ALARM_TIME);
+        if (alarmTime != nullptr) {
+            triggerTime = static_cast<uint64_t>(*alarmTime);
             reminder->SetTriggerTimeInMilli(triggerTime);
             reminder->SetOriTriggerTimeInMilli(triggerTime);
         }
         InitBaseInfo(values, reminder);
         BuildReminderV1(values, reminder);
         uint64_t endDateTime = 0;
-        iter = values.find(ReminderCalendarShareTable::END);
-        if (iter != values.end()) {
-            endDateTime = static_cast<uint64_t>(std::get<double>(iter->second));
+        const auto* endTime = GetVBucketValue<double>(values, ReminderCalendarShareTable::END);
+        if (endTime != nullptr) {
+            endDateTime = static_cast<uint64_t>(*endTime);
             reminder->SetAutoDeletedTime(endDateTime);
         }
 
@@ -524,39 +534,38 @@ void ReminderDataShareHelper::InitNormalInfo(sptr<ReminderRequest>& reminder)
 void ReminderDataShareHelper::InitBaseInfo(const DataShare::DataShareObserver::ChangeInfo::VBucket& info,
     sptr<ReminderRequest>& reminder)
 {
-    auto iter = info.find(ReminderCalendarShareTable::ID);
-    if (iter != info.end()) {
-        reminder->SetReminderId(static_cast<int32_t>(std::get<double>(iter->second)));
+    const auto* id = GetVBucketValue<double>(info, ReminderCalendarShareTable::ID);
+    if (id != nullptr) {
+        reminder->SetReminderId(static_cast<int32_t>(*id));
     }
-    iter = info.find(ReminderCalendarShareTable::EVENT_ID);
-    if (iter != info.end()) {
-        reminder->SetNotificationId(static_cast<int32_t>(std::get<double>(iter->second)));
+    const auto* eventId = GetVBucketValue<double>(info, ReminderCalendarShareTable::EVENT_ID);
+    if (eventId != nullptr) {
+        reminder->SetNotificationId(static_cast<int32_t>(*eventId));
     }
-    iter = info.find(ReminderCalendarShareTable::SLOT_TYPE);
-    if (iter != info.end()) {
-        reminder->SetSlotType(
-            NotificationConstant::SlotType(static_cast<int32_t>(std::get<double>(iter->second))));
+    const auto* slotType = GetVBucketValue<double>(info, ReminderCalendarShareTable::SLOT_TYPE);
+    if (slotType != nullptr) {
+        reminder->SetSlotType(NotificationConstant::SlotType(static_cast<int32_t>(*slotType)));
     }
-    iter = info.find(ReminderCalendarShareTable::TITLE);
-    if (iter != info.end()) {
-        reminder->SetTitle(std::get<std::string>(iter->second));
+    const auto* title = GetVBucketValue<std::string>(info, ReminderCalendarShareTable::TITLE);
+    if (title != nullptr) {
+        reminder->SetTitle(*title);
     }
-    iter = info.find(ReminderCalendarShareTable::CONTENT);
-    if (iter != info.end()) {
-        reminder->SetContent(std::get<std::string>(iter->second));
+    const auto* content = GetVBucketValue<std::string>(info, ReminderCalendarShareTable::CONTENT);
+    if (content != nullptr) {
+        reminder->SetContent(*content);
     }
-    iter = info.find(ReminderCalendarShareTable::BUTTONS);
-    if (iter != info.end()) {
-        reminder->DeserializeButtonInfoFromJson(std::get<std::string>(iter->second));
+    const auto* buttons = GetVBucketValue<std::string>(info, ReminderCalendarShareTable::BUTTONS);
+    if (buttons != nullptr) {
+        reminder->DeserializeButtonInfoFromJson(*buttons);
     }
-    iter = info.find(ReminderCalendarShareTable::WANT_AGENT);
-    if (iter != info.end()) {
-        reminder->DeserializeWantAgent(std::get<std::string>(iter->second), 0);
+    const auto* wantAgent = GetVBucketValue<std::string>(info, ReminderCalendarShareTable::WANT_AGENT);
+    if (wantAgent != nullptr) {
+        reminder->DeserializeWantAgent(*wantAgent, 0);
         CheckWantAgent(reminder);
     }
-    iter = info.find(ReminderCalendarShareTable::IDENTIFIER);
-    if (iter != info.end()) {
-        reminder->SetIdentifier(std::get<std::string>(iter->second));
+    const auto* identifier = GetVBucketValue<std::string>(info, ReminderCalendarShareTable::IDENTIFIER);
+    if (identifier != nullptr) {
+        reminder->SetIdentifier(*identifier);
     }
 }
 
@@ -598,38 +607,38 @@ void ReminderDataShareHelper::BuildReminderV1(const DataShare::DataShareObserver
     if (rdbVersion_ == 0) {
         return;
     }
-    auto iter = info.find(ReminderCalendarShareTable::TIME_INTERVAL);
-    if (iter != info.end()) {
-        reminder->SetTimeInterval(static_cast<uint64_t>(std::get<double>(iter->second)));
+    const auto* timeInterval = GetVBucketValue<double>(info, ReminderCalendarShareTable::TIME_INTERVAL);
+    if (timeInterval != nullptr) {
+        reminder->SetTimeInterval(static_cast<uint64_t>(*timeInterval));
     }
-    iter = info.find(ReminderCalendarShareTable::SNOOZE_TIMES);
-    if (iter != info.end()) {
-        reminder->SetSnoozeTimes(static_cast<uint8_t>(std::get<double>(iter->second)));
+    const auto* snoozeTimes = GetVBucketValue<double>(info, ReminderCalendarShareTable::SNOOZE_TIMES);
+    if (snoozeTimes != nullptr) {
+        reminder->SetSnoozeTimes(static_cast<uint8_t>(*snoozeTimes));
     }
-    iter = info.find(ReminderCalendarShareTable::RING_DURATION);
-    if (iter != info.end()) {
-        reminder->SetRingDuration(static_cast<uint64_t>(std::get<double>(iter->second)));
+    const auto* ringDuration = GetVBucketValue<double>(info, ReminderCalendarShareTable::RING_DURATION);
+    if (ringDuration != nullptr) {
+        reminder->SetRingDuration(static_cast<uint64_t>(*ringDuration));
     }
-    iter = info.find(ReminderCalendarShareTable::SNOOZE_SLOT_TYPE);
-    if (iter != info.end()) {
-        reminder->SetSnoozeSlotType(
-            NotificationConstant::SlotType(static_cast<int32_t>(std::get<double>(iter->second))));
+    const auto* snoozeSlotType = GetVBucketValue<double>(info, ReminderCalendarShareTable::SNOOZE_SLOT_TYPE);
+    if (snoozeSlotType != nullptr) {
+        reminder->SetSnoozeSlotType(NotificationConstant::SlotType(static_cast<int32_t>(*snoozeSlotType)));
     }
-    iter = info.find(ReminderCalendarShareTable::SNOOZE_CONTENT);
-    if (iter != info.end()) {
-        reminder->SetSnoozeContent(std::get<std::string>(iter->second));
+    const auto* snoozeContent = GetVBucketValue<std::string>(info, ReminderCalendarShareTable::SNOOZE_CONTENT);
+    if (snoozeContent != nullptr) {
+        reminder->SetSnoozeContent(*snoozeContent);
     }
-    iter = info.find(ReminderCalendarShareTable::EXPIRED_CONTENT);
-    if (iter != info.end()) {
-        reminder->SetExpiredContent(std::get<std::string>(iter->second));
+    const auto* expiredContent = GetVBucketValue<std::string>(info, ReminderCalendarShareTable::EXPIRED_CONTENT);
+    if (expiredContent != nullptr) {
+        reminder->SetExpiredContent(*expiredContent);
     }
-    iter = info.find(ReminderCalendarShareTable::MAX_SCREEN_WANT_AGENT);
-    if (iter != info.end()) {
-        reminder->DeserializeWantAgent(std::get<std::string>(iter->second), 1);
+    const auto* maxScreenWantAgent = GetVBucketValue<std::string>(info,
+        ReminderCalendarShareTable::MAX_SCREEN_WANT_AGENT);
+    if (maxScreenWantAgent != nullptr) {
+        reminder->DeserializeWantAgent(*maxScreenWantAgent, 1);
     }
-    iter = info.find(ReminderCalendarShareTable::CUSTOM_RING_URI);
-    if (iter != info.end()) {
-        reminder->SetCustomRingUri(std::get<std::string>(iter->second));
+    const auto* customRingUri = GetVBucketValue<std::string>(info, ReminderCalendarShareTable::CUSTOM_RING_URI);
+    if (customRingUri != nullptr) {
+        reminder->SetCustomRingUri(*customRingUri);
     }
 }
 
