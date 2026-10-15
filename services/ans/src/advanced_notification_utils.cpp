@@ -686,7 +686,6 @@ void AdvancedNotificationService::OnBootSystemCompleted()
     ANS_LOGD("Called.");
     InitNotificationEnableList();
     TryStartReminderAgentService();
-    RecoverLiveViewFromDb();
 #ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
     InitNotificationStatistics();
 #endif
