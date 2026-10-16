@@ -17,7 +17,6 @@
 #include <fuzzer/FuzzedDataProvider.h>
 #include "advanced_notification_service.h"
 #include "ans_permission_def.h"
-#include "ans_result_data_synchronizer.h"
 #include "mock_notification_request.h"
 
 namespace OHOS {
@@ -29,11 +28,6 @@ namespace Notification {
         service->CreateDialogManager();
         std::string stringData = fuzzData->ConsumeRandomLengthString();
         sptr<NotificationRequest> request = ObjectBuilder<NotificationRequest>::Build(fuzzData);
-        sptr<AnsResultDataSynchronizerImpl> synchronizer = new AnsResultDataSynchronizerImpl();
-        if (service->GetActiveNotifications(stringData,
-            iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         std::vector<sptr<NotificationRequest>> notifications = { request };
         service->GetActiveNotifications(notifications, stringData);
         // publish with this label first so the two queries below can reach the
@@ -41,10 +35,6 @@ namespace Notification {
         if (request != nullptr) {
             request->SetAppInstanceKey(stringData);
             service->Publish(stringData, request);
-            if (service->GetActiveNotifications(stringData,
-                iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-                synchronizer->Wait();
-            }
             std::vector<sptr<NotificationRequest>> found;
             service->GetActiveNotifications(found, stringData);
         }

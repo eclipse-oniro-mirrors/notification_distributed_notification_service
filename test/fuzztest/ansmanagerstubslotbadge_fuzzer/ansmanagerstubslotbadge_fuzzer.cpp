@@ -22,7 +22,6 @@
 #undef protected
 #include "ans_dialog_callback_proxy.h"
 #include "ans_permission_def.h"
-#include "ans_result_data_synchronizer.h"
 #include "ansmanagerstubslotbadge_fuzzer.h"
 #include "notification_record.h"
 #include "notification_request.h"
@@ -41,8 +40,6 @@ namespace OHOS {
         struct FuzzServiceContext {
             sptr<Notification::AdvancedNotificationService> service;
             sptr<Notification::NotificationBundleOption> bundleOption;
-            sptr<Notification::AnsResultDataSynchronizerImpl> synchronizer;
-            sptr<Notification::IAnsResultDataSynchronizer> remoteSynchronizer;
             std::string stringData;
             int32_t userId;
             bool enabled;
@@ -84,18 +81,9 @@ namespace OHOS {
         ctx.service->UpdateSlots(ctx.bundleOption, slots);
         std::vector<sptr<Notification::NotificationRequest>> notifications;
         ctx.service->GetActiveNotifications(notifications, fuzzData->ConsumeRandomLengthString());
-        if ((ctx.remoteSynchronizer != nullptr) &&
-            (ctx.service->GetActiveNotifications(fuzzData->ConsumeRandomLengthString(),
-                ctx.remoteSynchronizer) == ERR_OK)) {
-            ctx.synchronizer->Wait();
-        }
         ctx.service->GetActiveNotificationNums(num);
         std::vector<sptr<Notification::Notification>> notificationss;
         ctx.service->GetAllActiveNotifications(notificationss);
-        if ((ctx.remoteSynchronizer != nullptr) &&
-            (ctx.service->GetAllActiveNotifications(ctx.remoteSynchronizer) == ERR_OK)) {
-            ctx.synchronizer->Wait();
-        }
         std::vector<std::string> key;
         ctx.service->GetSpecialActiveNotifications(key, notificationss);
     }
@@ -113,15 +101,7 @@ namespace OHOS {
         ctx.service->SetNotificationsEnabledForSpecialBundle(ctx.stringData, ctx.bundleOption, ctx.enabled);
         ctx.service->SetShowBadgeEnabledForBundle(ctx.bundleOption, ctx.enabled);
         ctx.service->GetShowBadgeEnabledForBundle(ctx.bundleOption, ctx.enabled);
-        if ((ctx.remoteSynchronizer != nullptr) &&
-            (ctx.service->GetShowBadgeEnabledForBundle(ctx.bundleOption, ctx.remoteSynchronizer) == ERR_OK)) {
-            ctx.synchronizer->Wait();
-        }
         ctx.service->GetShowBadgeEnabled(enabled);
-        if ((ctx.remoteSynchronizer != nullptr) &&
-            (ctx.service->GetShowBadgeEnabled(ctx.remoteSynchronizer) == ERR_OK)) {
-            ctx.synchronizer->Wait();
-        }
         int32_t badgeNum = fuzzData->ConsumeIntegral<int32_t>();
         ctx.service->SetBadgeNumber(badgeNum, fuzzData->ConsumeRandomLengthString());
         ctx.service->SetBadgeNumberByBundle(ctx.bundleOption, fuzzData->ConsumeIntegral<int32_t>());
@@ -217,12 +197,6 @@ namespace OHOS {
         }
         ctx.bundleOption->SetBundleName(fuzzData->ConsumeRandomLengthString());
         ctx.bundleOption->SetUid(fuzzData->ConsumeIntegral<int32_t>());
-        ctx.synchronizer = new (std::nothrow) Notification::AnsResultDataSynchronizerImpl();
-        if (ctx.synchronizer == nullptr) {
-            return false;
-        }
-        ctx.remoteSynchronizer =
-            iface_cast<Notification::IAnsResultDataSynchronizer>(ctx.synchronizer->AsObject());
         ctx.stringData = fuzzData->ConsumeRandomLengthString();
         ctx.userId = fuzzData->ConsumeIntegral<int32_t>();
         ctx.enabled = fuzzData->ConsumeBool();

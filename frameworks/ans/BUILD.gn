@@ -19,7 +19,6 @@ idl_gen_interface("ans_manager_interface") {
     "IAnsDialogCallback.idl",
     "IAnsManager.idl",
     "IAnsOperationCallback.idl",
-    "IAnsResultDataSynchronizer.idl",
     "IAnsSubscriber.idl",
     "IAnsSubscriberLocalLiveView.idl",
     "IBadgeQueryCallback.idl",
@@ -86,7 +85,6 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/common/src/notification_want_params_helper.cpp",
     "${core_path}/src/ans_image_util.cpp",
     "${core_path}/src/ans_notification.cpp",
-    "${core_path}/src/ans_result_data_synchronizer.cpp",
     "${core_path}/src/dialog_status_data.cpp",
     "${core_path}/src/hitrace_util.cpp",
     "${core_path}/src/listener/ans_subscriber_listener.cpp",
@@ -314,7 +312,6 @@ ohos_source_set("ans_callback_proxy") {
                            [
                              "*_dialog_callback_proxy.cpp",
                              "*_operation_callback_proxy.cpp",
-                             "*_result_data_synchronizer_proxy.cpp",
                              "*_subscriber_proxy.cpp",
                              "*_subscriber_local_live_view_proxy.cpp",
                              "*badge_query_callback_proxy.cpp",
@@ -360,7 +357,6 @@ ohos_source_set("ans_callback_stub") {
                            [
                              "*_dialog_callback_stub.cpp",
                              "*_operation_callback_stub.cpp",
-                             "*_result_data_synchronizer_stub.cpp",
                              "*_subscriber_stub.cpp",
                              "*_subscriber_local_live_view_stub.cpp",
                              "*badge_query_callback_stub.cpp",

@@ -22,7 +22,6 @@
 #undef protected
 #include "ans_dialog_callback_proxy.h"
 #include "ans_permission_def.h"
-#include "ans_result_data_synchronizer.h"
 #include "ansmanagerstub_fuzzer.h"
 #include "notification_record.h"
 #include "notification_request.h"

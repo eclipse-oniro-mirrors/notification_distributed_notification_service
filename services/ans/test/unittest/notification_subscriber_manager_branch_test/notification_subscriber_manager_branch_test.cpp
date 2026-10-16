@@ -21,7 +21,6 @@
 #include "ans_ut_constant.h"
 #define private public
 #define protected public
-#include "ans_result_data_synchronizer.h"
 #include "advanced_notification_service.h"
 #include "notification_content.h"
 #include "notification_live_view_content.h"
@@ -1158,15 +1157,8 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_01
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     InnerErrorCode result = ERR_ANS_INNER_NON_SYSTEM_APP;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService.CancelAsBundle(notificationId, representativeBundle, userId,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    auto ret = advancedNotificationService.CancelAsBundle(notificationId, representativeBundle, userId);
+    ASSERT_EQ(ret, result);
 }
 
 /**
@@ -1316,15 +1308,9 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     InnerErrorCode result = ERR_ANS_INNER_NON_SYSTEM_APP;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService.GetShowBadgeEnabledForBundle(bundleOption,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
+    bool enabled = true;
+    auto ret = advancedNotificationService.GetShowBadgeEnabledForBundle(bundleOption, enabled);
+    ASSERT_EQ(ret, result);
 }
 
 /**
@@ -1375,16 +1361,6 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_02
     MockIsSystemApp(false);
     AdvancedNotificationService advancedNotificationService;
     ASSERT_EQ(advancedNotificationService.GetAllActiveNotifications(notifications), ERR_ANS_INNER_NON_SYSTEM_APP);
-    InnerErrorCode result = ERR_ANS_INNER_NON_SYSTEM_APP;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService.GetAllActiveNotifications(
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
 }
 
 /**

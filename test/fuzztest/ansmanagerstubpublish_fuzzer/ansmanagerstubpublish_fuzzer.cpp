@@ -22,7 +22,6 @@
 #undef protected
 #include "ans_dialog_callback_proxy.h"
 #include "ans_permission_def.h"
-#include "ans_result_data_synchronizer.h"
 #include "ansmanagerstubpublish_fuzzer.h"
 #include "notification_record.h"
 #include "notification_request.h"
@@ -57,41 +56,15 @@ namespace OHOS {
         service->PublishNotificationForIndirectProxyWithMaxCapacity(notification);
         int notificationId = fuzzData->ConsumeIntegral<int32_t>();
         int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
-        sptr<Notification::AnsResultDataSynchronizerImpl> synchronizer =
-            new (std::nothrow) Notification::AnsResultDataSynchronizerImpl();
         service->Cancel(notificationId, stringData, fuzzData->ConsumeRandomLengthString());
-        if (service->Cancel(notificationId, stringData, fuzzData->ConsumeRandomLengthString(),
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->CancelAll(fuzzData->ConsumeRandomLengthString());
-        if (service->CancelAll(fuzzData->ConsumeRandomLengthString(),
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->CancelAsBundle(notificationId, stringData, userId);
-        if (service->CancelAsBundle(notificationId, stringData, userId,
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         sptr<Notification::NotificationBundleOption> bundleOption = new Notification::NotificationBundleOption();
         bundleOption->SetBundleName(fuzzData->ConsumeRandomLengthString());
         bundleOption->SetUid(fuzzData->ConsumeIntegral<int32_t>());
         service->CancelAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
-        if (service->CancelAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>(),
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->CancelAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>(), userId);
-        if (service->CancelAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>(), userId,
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         service->CancelAsBundleWithAgent(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
-        if (service->CancelAsBundleWithAgent(bundleOption, fuzzData->ConsumeIntegral<int32_t>(),
-            iface_cast<Notification::IAnsResultDataSynchronizer>(synchronizer->AsObject())) == ERR_OK) {
-            synchronizer->Wait();
-        }
         int32_t removeReason = fuzzData->ConsumeIntegral<int32_t>();
         service->RemoveNotification(bundleOption, notificationId, stringData, removeReason);
         service->RemoveAllNotifications(bundleOption);

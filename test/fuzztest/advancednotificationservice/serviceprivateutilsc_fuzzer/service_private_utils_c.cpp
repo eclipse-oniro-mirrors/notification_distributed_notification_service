@@ -30,7 +30,6 @@
 #include "ans_dialog_callback_proxy.h"
 #include "ans_subscriber_stub.h"
 #include "ans_permission_def.h"
-#include "ans_result_data_synchronizer.h"
 #include "mock_notification_bundle_option.h"
 #include "mock_notification_request.h"
 #include "mock_notification_slot.h"
@@ -50,7 +49,6 @@ namespace Notification {
     bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)
     {
         auto service = AdvancedNotificationService::GetInstance();
-        sptr<AnsResultDataSynchronizerImpl> synchronizer = new AnsResultDataSynchronizerImpl();
         service->InitPublishProcess();
         service->CreateDialogManager();
         {

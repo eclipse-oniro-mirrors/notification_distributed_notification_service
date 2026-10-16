@@ -21,7 +21,6 @@
 #include "ans_trace_wrapper.h"
 #include "ans_manager_death_recipient.h"
 #include "ans_manager_proxy.h"
-#include "ans_result_data_synchronizer.h"
 #include "hitrace_meter_adapter.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -345,36 +344,6 @@ InnerErrorCode AnsNotification::PublishNotificationForIndirectProxy(const Notifi
     return static_cast<InnerErrorCode>(proxy->PublishNotificationForIndirectProxy(reqPtr));
 }
 
-InnerErrorCode AnsNotification::CancelNotificationNoBlockIPC(int32_t notificationId, const std::string &instanceKey)
-{
-    return CancelNotificationNoBlockIPC("", notificationId, instanceKey);
-}
-
-InnerErrorCode AnsNotification::CancelNotificationNoBlockIPC(const std::string &label, int32_t notificationId,
-    const std::string &instanceKey)
-{
-    ANS_LOGI("cancel id:%{public}d label:%{public}s", notificationId, label.c_str());
-    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
-    }
-
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    if (synchronizer == nullptr) {
-        ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->Cancel(notificationId, label, instanceKey, synchronizer));
-    // ERR_OK means the task is put into the ffrt queue at service layer.
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    synchronizer->Wait();
-    return static_cast<InnerErrorCode>(synchronizer->GetResultCode());
-}
-
 InnerErrorCode AnsNotification::CancelNotification(int32_t notificationId, const std::string &instanceKey)
 {
     return CancelNotification("", notificationId, instanceKey);
@@ -393,30 +362,6 @@ InnerErrorCode AnsNotification::CancelNotification(const std::string &label, int
     return static_cast<InnerErrorCode>(proxy->Cancel(notificationId, label, instanceKey));
 }
 
-InnerErrorCode AnsNotification::CancelAllNotificationsNoBlockIPC(const std::string &instanceKey)
-{
-    ANS_LOGI("cancel all");
-
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
-    }
-
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    if (synchronizer == nullptr) {
-        ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->CancelAll(instanceKey, synchronizer));
-    // ERR_OK means the task is put into the ffrt queue at service layer.
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    synchronizer->Wait();
-    return static_cast<InnerErrorCode>(synchronizer->GetResultCode());
-}
-
 InnerErrorCode AnsNotification::CancelAllNotifications(const std::string &instanceKey)
 {
     ANS_LOGI("cancel all");
@@ -429,31 +374,6 @@ InnerErrorCode AnsNotification::CancelAllNotifications(const std::string &instan
     return static_cast<InnerErrorCode>(proxy->CancelAll(instanceKey));
 }
 
-InnerErrorCode AnsNotification::CancelAsBundleNoBlockIPC(
-    int32_t notificationId, const std::string &representativeBundle, int32_t userId)
-{
-    ANS_LOGI("cancel id:%{public}d, %{public}s %{public}d", notificationId, representativeBundle.c_str(), userId);
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
-    }
-
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    if (synchronizer == nullptr) {
-        ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    InnerErrorCode ret = static_cast<InnerErrorCode>(
-        proxy->CancelAsBundle(notificationId, representativeBundle, userId, synchronizer));
-    // ERR_OK means the task is put into the ffrt queue at service layer.
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    synchronizer->Wait();
-    return static_cast<InnerErrorCode>(synchronizer->GetResultCode());
-}
-
 InnerErrorCode AnsNotification::CancelAsBundle(
     int32_t notificationId, const std::string &representativeBundle, int32_t userId)
 {
@@ -464,35 +384,6 @@ InnerErrorCode AnsNotification::CancelAsBundle(
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
     return static_cast<InnerErrorCode>(proxy->CancelAsBundle(notificationId, representativeBundle, userId));
-}
-
-InnerErrorCode AnsNotification::CancelAsBundleNoBlockIPC(
-    const NotificationBundleOption &bundleOption, int32_t notificationId)
-{
-    ANS_LOGI("cancel id:%{public}d %{public}s", notificationId, bundleOption.GetBundleName().c_str());
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
-    }
-    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    if (bo == nullptr) {
-        ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    if (synchronizer == nullptr) {
-        ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->CancelAsBundle(bo, notificationId, synchronizer));
-    // ERR_OK means the task is put into the ffrt queue at service layer.
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    synchronizer->Wait();
-    return static_cast<InnerErrorCode>(synchronizer->GetResultCode());
 }
 
 InnerErrorCode AnsNotification::CancelAsBundle(
@@ -520,30 +411,6 @@ InnerErrorCode AnsNotification::GetActiveNotificationNums(uint64_t &num)
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
     return static_cast<InnerErrorCode>(proxy->GetActiveNotificationNums(num));
-}
-
-InnerErrorCode AnsNotification::GetActiveNotificationsNoBlockIPC(std::vector<sptr<NotificationRequest>> &request,
-    const std::string &instanceKey)
-{
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
-    }
-
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    if (synchronizer == nullptr) {
-        ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetActiveNotifications(instanceKey, synchronizer));
-    // ERR_OK means the task is put into the ffrt queue at service layer.
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    synchronizer->Wait();
-    request = synchronizer->GetNotificationRequests();
-    return static_cast<InnerErrorCode>(synchronizer->GetResultCode());
 }
 
 InnerErrorCode AnsNotification::GetActiveNotifications(std::vector<sptr<NotificationRequest>> &request,
@@ -1267,29 +1134,6 @@ InnerErrorCode AnsNotification::UpdateNotificationSlots(
     return static_cast<InnerErrorCode>(proxy->UpdateSlots(bo, slots));
 }
 
-InnerErrorCode AnsNotification::GetAllActiveNotificationsNoBlockIPC(std::vector<sptr<Notification>> &notification)
-{
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
-    }
-
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    if (synchronizer == nullptr) {
-        ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetAllActiveNotifications(synchronizer));
-    // ERR_OK means the task is put into the ffrt queue at service layer.
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    synchronizer->Wait();
-    notification = synchronizer->GetNotifications();
-    return static_cast<InnerErrorCode>(synchronizer->GetResultCode());
-}
-
 InnerErrorCode AnsNotification::GetAllActiveNotifications(std::vector<sptr<Notification>> &notification)
 {
     notification.clear();
@@ -1470,41 +1314,6 @@ InnerErrorCode AnsNotification::SetShowBadgeEnabledForBundles(
     return static_cast<InnerErrorCode>(proxy->SetShowBadgeEnabledForBundles(sptrBundleOptions));
 }
 
-InnerErrorCode AnsNotification::GetShowBadgeEnabledForBundleNoBlockIPC(const NotificationBundleOption &bundleOption,
-    bool &enabled)
-{
-    if (bundleOption.GetBundleName().empty()) {
-        ANS_LOGE("Invalid bundle name.");
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
-    }
-
-    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    if (bo == nullptr) {
-        ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    if (synchronizer == nullptr) {
-        ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetShowBadgeEnabledForBundle(bo, synchronizer));
-    // ERR_OK means the task is put into the ffrt queue at service layer.
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    synchronizer->Wait();
-    enabled = synchronizer->GetEnabled();
-    return static_cast<InnerErrorCode>(synchronizer->GetResultCode());
-}
-
 InnerErrorCode AnsNotification::GetShowBadgeEnabledForBundle(
     const NotificationBundleOption &bundleOption, bool &enabled)
 {
@@ -1553,29 +1362,6 @@ InnerErrorCode AnsNotification::GetShowBadgeEnabledForBundles(
         sptrBundleOptions.emplace_back(std::move(bo));
     }
     return static_cast<InnerErrorCode>(proxy->GetShowBadgeEnabledForBundles(sptrBundleOptions, bundleEnable));
-}
-
-InnerErrorCode AnsNotification::GetShowBadgeEnabledNoBlockIPC(bool &enabled)
-{
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
-    }
-
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    if (synchronizer == nullptr) {
-        ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->GetShowBadgeEnabled(synchronizer));
-    // ERR_OK means the task is put into the ffrt queue at service layer.
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    synchronizer->Wait();
-    enabled = synchronizer->GetEnabled();
-    return static_cast<InnerErrorCode>(synchronizer->GetResultCode());
 }
 
 InnerErrorCode AnsNotification::GetShowBadgeEnabled(bool &enabled)
@@ -3029,36 +2815,6 @@ InnerErrorCode AnsNotification::IsDistributedEnabledBySlot(
     }
 
     return static_cast<InnerErrorCode>(proxy->IsDistributedEnabledBySlot(slotType, deviceType, enabled));
-}
-
-InnerErrorCode AnsNotification::CancelAsBundleWithAgentNoBlockIPC(const NotificationBundleOption &bundleOption,
-    const int32_t id)
-{
-    ANS_LOGI("cancelWithAgent bundleName:%{public}s,id:%{public}d",
-        bundleOption.GetBundleName().c_str(), id);
-    sptr<IAnsManager> proxy = GetAnsManagerProxy();
-    if (!proxy) {
-        ANS_LOGE("GetAnsManagerProxy fail.");
-        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
-    }
-
-    sptr<NotificationBundleOption> bundle(new (std::nothrow) NotificationBundleOption(bundleOption));
-    if (bundle == nullptr) {
-        ANS_LOGE("null bundle");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    if (synchronizer == nullptr) {
-        ANS_LOGE("null synchronizer");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    InnerErrorCode ret = static_cast<InnerErrorCode>(proxy->CancelAsBundleWithAgent(bundle, id, synchronizer));
-    // ERR_OK means the task is put into the ffrt queue at service layer.
-    if (ret != ERR_OK) {
-        return ret;
-    }
-    synchronizer->Wait();
-    return static_cast<InnerErrorCode>(synchronizer->GetResultCode());
 }
 
 InnerErrorCode AnsNotification::CancelAsBundleWithAgent(

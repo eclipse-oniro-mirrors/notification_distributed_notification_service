@@ -47,21 +47,6 @@ static sptr<AdvancedNotificationService> GetService()
 }
 
 /**
- * @tc.name: GetActiveNotifications_SynchronizerNullptr_00001
- * @tc.desc: Test GetActiveNotifications with nullptr synchronizer
- * @tc.type: FUNC
- * @tc.require: I00001
- */
-HWTEST_F(AdvancedNotificationQueryTest, GetActiveNotifications_SynchronizerNullptr_00001, Function | SmallTest | Level1)
-{
-    auto service = GetService();
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-
-    auto result = service->GetActiveNotifications("", nullptr);
-    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
-}
-
-/**
  * @tc.name: GetAllActiveNotifications_PermissionDenied_00001
  * @tc.desc: Test GetAllActiveNotifications with permission denied
  * @tc.type: FUNC

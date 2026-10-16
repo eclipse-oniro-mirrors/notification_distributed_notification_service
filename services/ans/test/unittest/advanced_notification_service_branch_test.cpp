@@ -27,7 +27,6 @@
 #include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_subscriber_listener.h"
-#include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
 #include "iremote_broker.h"
 #include "iremote_object.h"
@@ -96,12 +95,7 @@ void AnsBranchTest::SetUp()
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAll("",
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-    }
+    advancedNotificationService_->CancelAll("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     GTEST_LOG_(INFO) << "SetUp end";
@@ -211,31 +205,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_224000, Function | SmallTest | Level1)
     ASSERT_EQ(advancedNotificationService_->Publish(label, nullptr), ERR_ANS_INNER_INVALID_PARAM);
 }
 
-/**
- * @tc.number    : AnsBranchTest_225000
- * @tc.name      : CancelAsBundle_1000
- * @tc.desc      : Test CancelAsBundle function return ERR_ANS_INNER_NON_SYSTEM_APP.
- * @tc.require   : #I6P8UI
- */
-HWTEST_F(AnsBranchTest, AnsBranchTest_225000, Function | SmallTest | Level1)
-{
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-
-    int32_t notificationId = 1;
-    std::string representativeBundle = "RepresentativeBundle";
-    int32_t userId = 1;
-    InnerErrorCode result = ERR_ANS_INNER_NON_SYSTEM_APP;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.number    : AnsBranchTest_22500
@@ -255,31 +224,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_22500, Function | SmallTest | Level1)
         notificationId, representativeBundle, userId), ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
-/**
- * @tc.number    : AnsBranchTest_226000
- * @tc.name      : CancelAsBundle_2000
- * @tc.desc      : Test CancelAsBundle function return ERR_ANS_INNER_PERMISSION_DENIED.
- * @tc.require   : #I6P8UI
- */
-HWTEST_F(AnsBranchTest, AnsBranchTest_226000, Function | SmallTest | Level1)
-{
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsVerfyPermisson(false);
-
-    int32_t notificationId = 1;
-    std::string representativeBundle = "RepresentativeBundle";
-    int32_t userId = 1;
-    InnerErrorCode result = ERR_ANS_INNER_PERMISSION_DENIED;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAsBundle(notificationId, representativeBundle, userId,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.number    : AnsBranchTest_22600
@@ -461,29 +405,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_236000, Function | SmallTest | Level1)
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), true), ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
-/**
- * @tc.number    : AnsBranchTest_237000
- * @tc.name      : GetShowBadgeEnabledForBundle_1000
- * @tc.desc      : Test GetShowBadgeEnabledForBundle function return ERR_ANS_INNER_NON_SYSTEM_APP.
- * @tc.require   : #I6P8UI
- */
-HWTEST_F(AnsBranchTest, AnsBranchTest_237000, Function | SmallTest | Level1)
-{
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-
-    InnerErrorCode result = ERR_ANS_INNER_NON_SYSTEM_APP;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID),
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.number    : AnsBranchTest_2370001
@@ -501,29 +422,6 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_2370001, Function | SmallTest | Level1)
         new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID), allow), ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
-/**
- * @tc.number    : AnsBranchTest_238000
- * @tc.name      : GetShowBadgeEnabledForBundle_2000
- * @tc.desc      : Test GetShowBadgeEnabledForBundle function return ERR_ANS_INNER_PERMISSION_DENIED.
- * @tc.require   : #I6P8UI
- */
-HWTEST_F(AnsBranchTest, AnsBranchTest_238000, Function | SmallTest | Level1)
-{
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsVerfyPermisson(false);
-
-    InnerErrorCode result = ERR_ANS_INNER_PERMISSION_DENIED;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID),
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.number    : AnsBranchTest_2380001
@@ -630,28 +528,6 @@ HWTEST_F(AnsBranchTest, SubscribeSelf_279003, Function | SmallTest | Level1)
         ERR_OK);
 }
 
-/**
- * @tc.number    : AnsBranchTest_242000
- * @tc.name      : GetAllActiveNotifications_1000
- * @tc.desc      : Test GetAllActiveNotifications function return ERR_ANS_INNER_PERMISSION_DENIED.
- * @tc.require   : #I6P8UI
- */
-HWTEST_F(AnsBranchTest, AnsBranchTest_242000, Function | SmallTest | Level1)
-{
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsVerfyPermisson(false);
-
-    InnerErrorCode result = ERR_ANS_INNER_PERMISSION_DENIED;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetAllActiveNotifications(
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.number    : AnsBranchTest_2420001

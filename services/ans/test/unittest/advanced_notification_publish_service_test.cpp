@@ -33,7 +33,6 @@
 #include "accesstoken_kit.h"
 #include "notification_preferences.h"
 #include "notification_constant.h"
-#include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
 #include "ans_dialog_host_client.h"
 #include "mock_parameters.h"
@@ -108,12 +107,7 @@ void AnsPublishServiceTest::SetUp()
 #endif
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAll("",
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-    }
+    advancedNotificationService_->CancelAll("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     MockSetDataValue("");
@@ -744,29 +738,6 @@ HWTEST_F(AnsPublishServiceTest, DeleteAll_00003, Function | SmallTest | Level1)
     MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
-/**
- * @tc.name: SetShowBadgeEnabledForBundle_00001
- * @tc.desc: Test SetShowBadgeEnabledForBundle
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00001, Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundleOption = nullptr;
-    auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, true);
-    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
-
-    InnerErrorCode result = ERR_ANS_INNER_INVALID_BUNDLE;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundleOption,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.name: SetShowBadgeEnabledForBundle_100001
@@ -785,30 +756,6 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_100001, Function | 
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
-/**
- * @tc.name: SetShowBadgeEnabledForBundle_00002
- * @tc.desc: Test SetShowBadgeEnabledForBundle
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00002, Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-    advancedNotificationService_->notificationSvrQueue_.Reset();
-    auto ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, true);
-    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
-
-    InnerErrorCode result = ERR_ANS_INNER_INVALID_PARAM;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.name: SetShowBadgeEnabledForBundle_100002
@@ -828,84 +775,6 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_100002, Function | 
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
-/**
- * @tc.name: SetShowBadgeEnabledForBundle_00003
- * @tc.desc: Test SetShowBadgeEnabledForBundle,
- *  1. Non-subsystem (HAP token) and non-system app -> return ERR_ANS_INNER_NON_SYSTEM_APP
- *  2. Non-subsystem (HAP token) and system app -> return ERR_OK
- *  3. Subsystem (Native token) and non-system app -> return ERR_OK
- *  4. Subsystem (Native token) and system app -> return ERR_OK
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_00003, Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    bool enabled = true;
-    auto result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
-    ASSERT_EQ(result, ERR_ANS_INNER_NON_SYSTEM_APP);
-    result = ERR_ANS_INNER_NON_SYSTEM_APP;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    MockSetDataValue("bundleName1000");
-    std::unordered_map<std::string, std::string> mockDataValues;
-    mockDataValues["ans_bundle_bundleName1000_name"] = "bundleName";
-    MockSetDataValues(mockDataValues);
-    result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
-    ASSERT_EQ(result, ERR_OK);
-    result = ERR_OK;
-    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-    MockIsSystemApp(false);
-    result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
-    ASSERT_EQ(result, ERR_OK);
-    result = ERR_OK;
-    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-
-    MockIsSystemApp(true);
-    result = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundle, enabled);
-    ASSERT_EQ(result, ERR_OK);
-    result = ERR_OK;
-    synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    ret = advancedNotificationService_->GetShowBadgeEnabledForBundle(bundle,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.name: SetShowBadgeEnabledForBundle_100003
@@ -951,26 +820,6 @@ HWTEST_F(AnsPublishServiceTest, SetShowBadgeEnabledForBundle_100003, Function | 
     ASSERT_EQ(result, ERR_OK);
 }
 
-/**
- * @tc.name: GetShowBadgeEnabled_00001
- * @tc.desc: Test GetShowBadgeEnabled
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00001, Function | SmallTest | Level1)
-{
-    advancedNotificationService_->notificationSvrQueue_.Reset();
-    auto result = ERR_ANS_INNER_INVALID_PARAM;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetShowBadgeEnabled(
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.name: GetShowBadgeEnabled_100001
@@ -986,28 +835,6 @@ HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_100001, Function | SmallTest
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
-/**
- * @tc.name: GetShowBadgeEnabled_00002
- * @tc.desc: Test GetShowBadgeEnabled
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, GetShowBadgeEnabled_00002, Function | SmallTest | Level1)
-{
-    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    MockIsVerfyPermisson(true);
-    auto result = ERR_OK;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->GetShowBadgeEnabled(
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.name: GetShowBadgeEnabled_100002
@@ -1564,18 +1391,7 @@ HWTEST_F(AnsPublishServiceTest, NotificationSvrQueue_00001, Function | SmallTest
     advancedNotificationService_->notificationSvrQueue_.Reset();
     auto bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
 
-    InnerErrorCode result = ERR_ANS_INNER_INVALID_PARAM;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAll("",
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-
-    ret = advancedNotificationService_->CancelAll("");
+    auto ret = advancedNotificationService_->CancelAll("");
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
     ret = advancedNotificationService_->Delete("", 1);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
@@ -2816,68 +2632,6 @@ HWTEST_F(AnsPublishServiceTest, PublishNotificationForIndirectProxy_00009, Funct
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
-/**
- * @tc.name: CancelAsBundle_00001
- * @tc.desc: Test CancelAsBundle,
- *  1. Non-subsystem (HAP token) and non-system app -> return ERR_ANS_INNER_NON_SYSTEM_APP
- *  2. Non-subsystem (HAP token) and system app -> return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
- *  3. Subsystem (Native token) and non-system app -> return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
- *  4. Subsystem (Native token) and system app -> return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, CancelAsBundle_00001, Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 1);
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    InnerErrorCode result = ERR_ANS_INNER_NON_SYSTEM_APP;
-    auto ret = advancedNotificationService_->CancelAsBundle(bundle, 1, 1,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    ret = advancedNotificationService_->CancelAsBundle(bundle, 1, 1,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-    MockIsSystemApp(false);
-    result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    ret = advancedNotificationService_->CancelAsBundle(bundle, 1, 1,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-
-    MockIsSystemApp(true);
-    result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    ret = advancedNotificationService_->CancelAsBundle(bundle, 1, 1,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.name: CancelAsBundle_10000
@@ -2909,28 +2663,6 @@ HWTEST_F(AnsPublishServiceTest, CancelAsBundle_10000, Function | SmallTest | Lev
     ASSERT_EQ(result, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
-/**
- * @tc.name: CancelAsBundle_00002
- * @tc.desc: Test CancelAsBundle,
- *  bundleOption is valid, userId is -2, checkUserIdParams faild, except is ERR_ANS_INNER_INVALID_UID
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, CancelAsBundle_00002, Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 1);
-    MockIsOsAccountExists(false);
-    int32_t result = ERR_ANS_INNER_USER_NOT_EXIST;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAsBundle(bundle, 1, -2,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.name: CancelAsBundle_20000
@@ -2947,28 +2679,6 @@ HWTEST_F(AnsPublishServiceTest, CancelAsBundle_20000, Function | SmallTest | Lev
     ASSERT_EQ(result, (int)ERR_ANS_INNER_USER_NOT_EXIST);
 }
 
-/**
- * @tc.name: CancelAsBundle_00003
- * @tc.desc: Test CancelAsBundle,
- *  uid is 0, except is ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, CancelAsBundle_00003, Function | SmallTest | Level1)
-{
-    MockIsOsAccountExists(true);
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 0);
-    InnerErrorCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAsBundle(bundle, 1,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.name: CancelAsBundle_30000
@@ -2985,79 +2695,6 @@ HWTEST_F(AnsPublishServiceTest, CancelAsBundle_30000, Function | SmallTest | Lev
     ASSERT_EQ(result, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
-/**
- * @tc.name: CancelAsBundleWithAgent_00001
- * @tc.desc: Test CancelAsBundleWithAgent,
- *  1. Non-subsystem (HAP token) and non-system app -> return ERR_ANS_INNER_NON_SYSTEM_APP
- *  2. Non-subsystem (HAP token) and system app -> return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
- *  3. Subsystem (Native token) and non-system app -> return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
- *  4. Subsystem (Native token) and system app -> return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
- *  5. Subsystem (Native token) and system app, uid < 0 -> return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsPublishServiceTest, CancelAsBundleWithAgent_00001, Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleName", 1);
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(false);
-    InnerErrorCode result = ERR_ANS_INNER_NON_SYSTEM_APP;
-    auto ret = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    ret = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
-    MockIsSystemApp(false);
-    result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    ret = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-    MockIsSystemApp(true);
-    result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    ret = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-
-    bundle->SetUid(-1);
-    result = ERR_ANS_INNER_INVALID_UID;
-    ret = advancedNotificationService_->CancelAsBundleWithAgent(bundle, 1,
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-        ASSERT_EQ(synchronizer->GetResultCode(), result);
-    } else {
-        ASSERT_EQ(ret, result);
-    }
-}
 
 /**
  * @tc.name: CancelAsBundleWithAgent_10000

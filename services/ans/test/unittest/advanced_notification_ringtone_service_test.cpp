@@ -33,7 +33,6 @@
 #include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
 #include "ans_notification.h"
-#include "ans_result_data_synchronizer.h"
 #include "ans_ut_constant.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
@@ -83,12 +82,7 @@ void AdvancedNotificationRingToneServiceTest::SetUp()
 
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
-    sptr<AnsResultDataSynchronizerImpl> synchronizer = new (std::nothrow) AnsResultDataSynchronizerImpl();
-    auto ret = advancedNotificationService_->CancelAll("",
-        iface_cast<IAnsResultDataSynchronizer>(synchronizer->AsObject()));
-    if (ret == ERR_OK) {
-        synchronizer->Wait();
-    }
+    advancedNotificationService_->CancelAll("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
     GTEST_LOG_(INFO) << "SetUp end";
