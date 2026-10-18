@@ -2092,8 +2092,12 @@ private:
         bool isCancel = false);
     ErrCode RemoveFromNotificationList(const std::string &key, sptr<Notification> &notification,
         bool isCancel, int32_t removeReason);
+    ErrCode RemoveMatchedNotificationRecord(const std::shared_ptr<NotificationRecord> &record,
+        sptr<Notification> &notification, int32_t removeReason, bool isCancel);
     ErrCode RemoveFromNotificationListForDeleteAll(const std::string &key,
         const int32_t &userId, sptr<Notification> &notification, bool removeAll = false);
+    bool RemoveFromDelayedNotificationList(const sptr<NotificationBundleOption> &bundleOption,
+        const NotificationKey &notificationKey);
     bool RemoveFromDelayedNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationList(const std::string &key);
     std::shared_ptr<NotificationRecord> GetFromNotificationListByAtomicServiceKey(

@@ -19,6 +19,70 @@
 
 namespace OHOS {
 namespace NotificationNapi {
+namespace {
+struct OperationRejectWorkData {
+    napi_env env = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_async_work asyncWork = nullptr;
+};
+
+// Fallback for the case where the handle scope cannot be opened in the uv after callback:
+// settle the promise via a new async work (rejected with 1600001) instead of leaving it
+// pending forever.
+void RejectPromiseByAsyncWork(napi_env env, napi_deferred deferred)
+{
+    if (env == nullptr || deferred == nullptr) {
+        ANS_LOGE("invalid env or deferred");
+        return;
+    }
+    auto *data = new (std::nothrow) OperationRejectWorkData();
+    if (data == nullptr) {
+        ANS_LOGE("null OperationRejectWorkData");
+        return;
+    }
+    data->env = env;
+    data->deferred = deferred;
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "OperationCallbackReject", NAPI_AUTO_LENGTH, &resourceName);
+    napi_status status = napi_create_async_work(env, nullptr, resourceName,
+        [](napi_env env, void *data) {},
+        [](napi_env env, napi_status status, void *data) {
+            auto *rejectData = static_cast<OperationRejectWorkData *>(data);
+            if (rejectData == nullptr) {
+                return;
+            }
+            if (env != nullptr && status == napi_ok) {
+                if (rejectData->deferred != nullptr) {
+                    Common::SetPromise(env, rejectData->deferred, ERROR_INTERNAL_ERROR,
+                        Common::NapiGetNull(env), false);
+                }
+            } else {
+                // Env destroyed or work cancelled (typically during env teardown): any JS
+                // operation would crash, skip the promise settlement and only clean up.
+                ANS_LOGW("skip promise settle, env: %{public}p, status: %{public}d",
+                    env, static_cast<int32_t>(status));
+            }
+            if (env != nullptr && rejectData->asyncWork != nullptr) {
+                napi_delete_async_work(env, rejectData->asyncWork);
+            }
+            delete rejectData;
+        },
+        data, &data->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("create reject async work failed: %{public}d", status);
+        delete data;
+        return;
+    }
+    status = napi_queue_async_work(env, data->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("queue reject async work failed: %{public}d", status);
+        napi_delete_async_work(env, data->asyncWork);
+        delete data;
+        return;
+    }
+}
+}  // namespace
+
 DistributedOperationCallback::DistributedOperationCallback(const AsyncOperationCallbackInfo &asyncCallbackInfo)
 {
     asyncCallbackInfo_ = asyncCallbackInfo;
@@ -71,6 +135,7 @@ void DistributedOperationCallback::UvWorkOnCallBack(uv_work_t *work, int32_t sta
     auto retStatus = napi_open_handle_scope(callBackPtr->env, &scope);
     if (retStatus != napi_ok || scope == nullptr) {
         ANS_LOGE("status: %{public}d", retStatus);
+        RejectPromiseByAsyncWork(callBackPtr->env, callBackPtr->deferred);
         delete callBackPtr;
         callBackPtr = nullptr;
         delete work;

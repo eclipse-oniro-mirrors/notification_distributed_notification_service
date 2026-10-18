@@ -878,6 +878,9 @@ napi_value Common::GetNotificationRequestByCustomInnerSecond(
 napi_value Common::GetNotificationRequest(const napi_env &env, const napi_value &value, NotificationRequest &request)
 {
     ANS_LOGD("called");
+    // Reset the recorded parameter error message: only failures met during this
+    // conversion may be reported by the caller.
+    ClearParamErrorMsg();
     if (!GetNotificationRequestByNumber(env, value, request)) {
         return nullptr;
     }

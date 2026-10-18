@@ -17,8 +17,19 @@
 #include "ani_common_util.h"
 #include "ani_common_want.h"
 
+#include <algorithm>
+#include <mutex>
+#include <vector>
+
 namespace OHOS {
 namespace NotificationSts {
+namespace {
+// Keep-alive registry for live view subscribers: holds the shared_ptr owners while the
+// server side subscription is active, so the subscriber outlives the raw back reference
+// held by the IPC stub (SubscriberLocalLiveViewImpl::subscriber_).
+std::mutex g_stsLiveViewSubscriberMutex;
+std::vector<std::shared_ptr<StsNotificationLocalLiveViewSubscriber>> g_stsLiveViewSubscribers;
+}  // namespace
 bool SetDate(ani_env *env, ani_object obj, const char *name, int64_t time)
 {
     ANS_LOGD("SetDate call");
@@ -379,11 +390,71 @@ void StsNotificationLocalLiveViewSubscriber::OnConnected()
 
 void StsNotificationLocalLiveViewSubscriber::OnDisconnected()
 {
-    delete this;
+    // Unified release path: drop the registry keep-alive reference instead of raw
+    // `delete this`, so an in-flight OnResponse on another IPC thread is safe.
+    ReleaseFromRegistry();
 }
 
 void StsNotificationLocalLiveViewSubscriber::OnDied()
-{}
+{
+    // Unified release path (same as OnDisconnected): the service died, the subscription
+    // is gone and the subscriber will no longer be called.
+    ReleaseFromRegistry();
+}
+
+void StsNotificationLocalLiveViewSubscriber::KeepAliveInRegistry()
+{
+    std::lock_guard<std::mutex> lock(g_stsLiveViewSubscriberMutex);
+    g_stsLiveViewSubscribers.push_back(shared_from_this());
+}
+
+void StsNotificationLocalLiveViewSubscriber::ReleaseFromRegistry()
+{
+    std::shared_ptr<StsNotificationLocalLiveViewSubscriber> self;
+    {
+        std::lock_guard<std::mutex> lock(g_stsLiveViewSubscriberMutex);
+        auto iter = std::find_if(g_stsLiveViewSubscribers.begin(), g_stsLiveViewSubscribers.end(),
+            [this](const std::shared_ptr<StsNotificationLocalLiveViewSubscriber> &entry) {
+                return entry.get() == this;
+            });
+        if (iter != g_stsLiveViewSubscribers.end()) {
+            self = *iter;
+            g_stsLiveViewSubscribers.erase(iter);
+        }
+    }
+    // The last reference, if any, is dropped here outside the registry lock, so the
+    // subscriber is never destroyed while the mutex is held.
+}
+
+std::shared_ptr<StsNotificationLocalLiveViewSubscriber>
+    StsNotificationLocalLiveViewSubscriber::AcquireSelfFromRegistry()
+{
+    // Lock the registry and look ourselves up by raw pointer: a bare shared_from_this()
+    // is not synchronized with ReleaseFromRegistry() dropping the last reference on
+    // another IPC thread, which would read a freed control block here.
+    std::lock_guard<std::mutex> lock(g_stsLiveViewSubscriberMutex);
+    auto iter = std::find_if(g_stsLiveViewSubscribers.begin(), g_stsLiveViewSubscribers.end(),
+        [this](const std::shared_ptr<StsNotificationLocalLiveViewSubscriber> &entry) {
+            return entry.get() == this;
+        });
+    if (iter == g_stsLiveViewSubscribers.end()) {
+        // Already released by OnDisconnected/OnDied, or never registered: the
+        // subscriber may be destroyed concurrently, do not touch any member.
+        return nullptr;
+    }
+    return *iter;
+}
+
+void StsNotificationLocalLiveViewSubscriber::DetachAniThread()
+{
+    if (vm_ == nullptr) {
+        return;
+    }
+    ani_status aniResult = vm_->DetachCurrentThread();
+    if (aniResult != ANI_OK) {
+        ANS_LOGD("DetachCurrentThread error. result: %{public}d.", aniResult);
+    }
+}
 
 bool StsRingtoneTypeUtils::StsToC(const STSRingtoneType inType, RingtoneType &outType)
 {
@@ -429,13 +500,16 @@ bool StsRingtoneTypeUtils::CToSts(const RingtoneType inType, STSRingtoneType &ou
     return true;
 }
 
-void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, sptr<ButtonOption> buttonOption)
+void StsNotificationLocalLiveViewSubscriber::CallOnResponseCallback(
+    int32_t notificationId, sptr<ButtonOption> buttonOption)
 {
-    ANS_LOGD("OnResponse call");
     std::string functionName = "onResponse";
     ani_env *env = GetAniEnv();
     if (env == nullptr || stsSubscriber_ == nullptr) {
         ANS_LOGE("null env or stsSubscriber_");
+        if (env != nullptr) {
+            DetachAniThread();
+        }
         return;
     }
     ani_status status = ANI_OK;
@@ -445,12 +519,14 @@ void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, 
     status = GetPropertyRef(env, stsSubscriberObj, functionName.c_str(), isUndefined, funRef);
     if (status != ANI_OK || isUndefined == ANI_TRUE || funRef == nullptr) {
         ANS_LOGE("Object_GetField_Ref failed");
+        DetachAniThread();
         return;
     }
     ani_object notificationIdAni = CreateInt(env, notificationId);
     ani_object buttonOptionObj = WarpNotificationButtonOption(env, buttonOption);
     if (notificationIdAni == nullptr || buttonOptionObj == nullptr) {
         ANS_LOGE("null args");
+        DetachAniThread();
         return;
     }
     ani_fn_object onFn = reinterpret_cast<ani_fn_object>(funRef);
@@ -460,12 +536,23 @@ void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, 
     argv.push_back(buttonOptionObj);
     if ((status = env->FunctionalObject_Call(onFn, argv.size(), argv.data(), &resutlt)) != ANI_OK) {
         ANS_LOGE("FunctionalObject_Call failed, status: %{public}d", status);
+        DetachAniThread();
         return;
     }
-    ani_status aniResult = vm_->DetachCurrentThread();
-    if (aniResult != ANI_OK) {
-        ANS_LOGD("OnResponse DetachCurrentThread error. result: %{public}d.", aniResult);
+    DetachAniThread();
+}
+
+void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, sptr<ButtonOption> buttonOption)
+{
+    ANS_LOGD("OnResponse call");
+    std::shared_ptr<StsNotificationLocalLiveViewSubscriber> self = AcquireSelfFromRegistry();
+    if (self == nullptr) {
+        ANS_LOGW("OnResponse dropped, subscriber %{public}p not in registry", this);
+        return;
     }
+    // The strong reference must cover the whole callback: it keeps the subscriber
+    // alive while the JS onResponse is invoked on the attached thread.
+    CallOnResponseCallback(notificationId, buttonOption);
 }
 
 void StsNotificationLocalLiveViewSubscriber::SetStsNotificationLocalLiveViewSubscriber(

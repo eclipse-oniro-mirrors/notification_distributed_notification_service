@@ -26,6 +26,8 @@
 #include "notification_check_info.h"
 #include "notification_ringtone_info.h"
 
+#include <memory>
+
 namespace OHOS {
 namespace NotificationSts {
 using NotificationLocalLiveViewSubscriber = OHOS::Notification::NotificationLocalLiveViewSubscriber;
@@ -151,7 +153,8 @@ static bool StsToC(const STSSwitchState inType, SwitchState &outType);
 static bool CToSts(const SwitchState inType, STSSwitchState &outType);
 };
 
-class StsNotificationLocalLiveViewSubscriber : public NotificationLocalLiveViewSubscriber {
+class StsNotificationLocalLiveViewSubscriber : public NotificationLocalLiveViewSubscriber,
+    public std::enable_shared_from_this<StsNotificationLocalLiveViewSubscriber> {
 public:
     StsNotificationLocalLiveViewSubscriber();
     virtual ~StsNotificationLocalLiveViewSubscriber();
@@ -190,12 +193,30 @@ public:
         return stsSubscriber_;
     }
 
-    static StsNotificationLocalLiveViewSubscriber *GetSelfSubscriber()
+    static std::shared_ptr<StsNotificationLocalLiveViewSubscriber> GetSelfSubscriber()
     {
-        return new (std::nothrow) StsNotificationLocalLiveViewSubscriber();
+        return std::make_shared<StsNotificationLocalLiveViewSubscriber>();
     }
+
+    /**
+     * @brief Adds this subscriber to the global keep-alive registry, so it stays alive as
+     *        long as the server side subscription is active.
+     */
+    void KeepAliveInRegistry();
+
+    /**
+     * @brief Unified release path for OnDisconnected/OnDied/subscribe failure: drops the
+     *        registry keep-alive reference, so the subscriber is destroyed once no
+     *        in-flight callback (for example a concurrent OnResponse holding a strong
+     *        reference) still needs it.
+     */
+    void ReleaseFromRegistry();
+
 private:
+    std::shared_ptr<StsNotificationLocalLiveViewSubscriber> AcquireSelfFromRegistry();
+    void CallOnResponseCallback(int32_t notificationId, sptr<ButtonOption> buttonOption);
     ani_env* GetAniEnv();
+    void DetachAniThread();
 private:
     ani_vm* vm_ = nullptr;
     std::unique_ptr<AppExecFwk::ETSNativeReference> stsSubscriber_ = nullptr;

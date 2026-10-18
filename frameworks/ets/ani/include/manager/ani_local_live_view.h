@@ -21,6 +21,8 @@
 #include "sts_callback_promise.h"
 #include "sts_notification_manager.h"
 
+#include <memory>
+
 namespace OHOS {
 namespace NotificationManagerSts {
 struct AsyncCallbackLiveViewInfo {
@@ -30,7 +32,7 @@ struct AsyncCallbackLiveViewInfo {
     BundleOption bundleOption;
     NotificationSts::ButtonOption buttonOption;
     ani_int notificationId;
-    NotificationSts::StsNotificationLocalLiveViewSubscriber *localLiveViewSubscriber = nullptr;
+    std::shared_ptr<NotificationSts::StsNotificationLocalLiveViewSubscriber> localLiveViewSubscriber = nullptr;
 };
 
 void HandleLiveViewFunctionCallbackComplete(ani_env* env, arkts::concurrency_helpers::WorkStatus status, void* data);

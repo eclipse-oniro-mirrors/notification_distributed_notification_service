@@ -501,12 +501,16 @@ napi_value Common::GetNotificationLocalLiveViewContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "systemLiveView", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property localLiveView expected.");
+        std::string msg = "Incorrect parameter types. The type of systemLiveView must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     napi_get_named_property(env, result, "systemLiveView", &contentResult);
     NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
+        std::string msg = "Incorrect parameter types. The type of systemLiveView must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
 
@@ -1213,6 +1217,8 @@ napi_value Common::GetNotificationLiveViewContent(
     napi_value contentResult = AppExecFwk::GetPropertyValueByPropertyName(env, result, "liveView", napi_object);
     if (contentResult == nullptr) {
         ANS_LOGE("null contentResult");
+        std::string msg = "Incorrect parameter types. The type of liveView must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
 

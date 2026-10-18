@@ -58,6 +58,9 @@ void JsAnsDialogCallback::ProcessDialogStatusChanged(const DialogStatusData& dat
 {
     ANS_LOGD("enter");
     std::unique_ptr<AsyncCallbackInfoIsEnable> callbackInfo(callbackInfo_);
+    // Null the member immediately after taking ownership: the callbackInfo is single-use,
+    // and a later status change must never touch a dangling pointer.
+    callbackInfo_ = nullptr;
     if (env_ == nullptr || callbackInfo == nullptr || complete_ == nullptr) {
         ANS_LOGE("invalid data");
         return;
@@ -81,7 +84,7 @@ void JsAnsDialogCallback::ProcessDialogStatusChanged(const DialogStatusData& dat
     };
     auto workData = std::make_unique<WorkData>();
     workData->env = env_;
-    workData->callbackInfo = callbackInfo_;
+    workData->callbackInfo = callbackInfo.get();
     workData->complete = complete_;
 
     work->data = static_cast<void*>(workData.get());
@@ -95,6 +98,12 @@ void JsAnsDialogCallback::ProcessDialogStatusChanged(const DialogStatusData& dat
         auto* data = static_cast<WorkData*>(work->data);
         std::unique_ptr<WorkData> dataSP(data);
         std::unique_ptr<AsyncCallbackInfoIsEnable> callbackInfoSP(data->callbackInfo);
+        if (status != 0) {
+            // The work was cancelled, typically because the loop is closing during env
+            // teardown: the complete callback must not touch the dying env.
+            ANS_LOGW("uv work cancelled, status: %{public}d, skip dialog callback", status);
+            return;
+        }
         if (data->env == nullptr ||
             data->callbackInfo == nullptr ||
             data->complete == nullptr) {
@@ -110,7 +119,19 @@ void JsAnsDialogCallback::ProcessDialogStatusChanged(const DialogStatusData& dat
         jsCb,
         uv_qos_user_initiated);
     if (ret != 0) {
-        ANS_LOGE("uv_queue_work failed");
+        // Retry once with the untouched work req: a transient failure would leave the
+        // promise pending forever, and it can only be settled on the JS thread through
+        // this queue. If the retry fails as well (loop unavailable, typically during
+        // env teardown), nothing can be done from this IPC thread.
+        ANS_LOGW("uv_queue_work failed: %{public}d, retry once", ret);
+        ret = uv_queue_work_with_qos(loop,
+            work.get(),
+            [](uv_work_t *work) {},
+            jsCb,
+            uv_qos_user_initiated);
+    }
+    if (ret != 0) {
+        ANS_LOGE("uv_queue_work retry failed: %{public}d, the promise can not be settled from ipc thread", ret);
         return;
     }
     callbackInfo.release();

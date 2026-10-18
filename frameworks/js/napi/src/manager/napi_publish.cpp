@@ -32,7 +32,7 @@ napi_value NapiPublish(napi_env env, napi_callback_info info)
     ParametersInfoPublish params;
     if (ParseParameters(env, info, params) == nullptr) {
         Common::HistogramBoolReport("NotificationKit.APICall.publish", false);
-        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
+        Common::NapiThrowWithParamError(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
@@ -212,7 +212,7 @@ napi_value NapiPublishAsBundle(napi_env env, napi_callback_info info)
     TraceChainUtil traceChain = TraceChainUtil();
     ParametersInfoPublish params;
     if (ParsePublishAsBundleParameters(env, info, params) == nullptr) {
-        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM);
+        Common::NapiThrowWithParamError(env, ERR_ANS_INNER_INVALID_PARAM);
         return Common::NapiGetUndefined(env);
     }
 
