@@ -224,6 +224,7 @@ public:
 private:
     static void ClearEnvCallback(void *data);
     void UnregisterEnvCleanupHook();
+    void UnsubscribeOnEnvCleanup();
     void SetCancelCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetConsumeCallbackInfo(const napi_env &env, const napi_ref &ref);
     void SetUpdateCallbackInfo(const napi_env &env, const napi_ref &ref);

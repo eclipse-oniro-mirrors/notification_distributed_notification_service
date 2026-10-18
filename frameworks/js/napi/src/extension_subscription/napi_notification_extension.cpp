@@ -45,6 +45,20 @@ static std::unique_ptr<AsyncCallbackInfoOpenSettings> subcallbackInfo_ = nullptr
 static JsAnsCallbackComplete* subcomplete_ = nullptr;
 static std::mutex subSettingsMutex_;
 static std::atomic<bool> subisExist = false;
+static bool subEnvCleanupHookRegistered = false;
+
+void SubSettingsEnvCleanupCallback(void *data)
+{
+    ANS_LOGD("called");
+    std::lock_guard<std::mutex> lock(subSettingsMutex_);
+    // The env that opened the subscription settings panel is dying: the stored
+    // callbackInfo can never be completed, free it and null the statics so later
+    // panel result callbacks never touch a dangling env.
+    subenv_ = nullptr;
+    subcallbackInfo_.reset();
+    subcomplete_ = nullptr;
+    subEnvCleanupHookRegistered = false;
+}
 }
 
 napi_value GetNotificationExtensionSubscriptionInfo(
@@ -830,6 +844,14 @@ bool InitSub(napi_env env, AsyncCallbackInfoOpenSettings* callbackInfo,
     subenv_ = env;
     subcallbackInfo_.reset(callbackInfo);
     subcomplete_ = complete;
+    if (!subEnvCleanupHookRegistered) {
+        napi_status status = napi_add_env_cleanup_hook(env, SubSettingsEnvCleanupCallback, nullptr);
+        if (status == napi_ok) {
+            subEnvCleanupHookRegistered = true;
+        } else {
+            ANS_LOGE("add env cleanup hook failed: %{public}d", status);
+        }
+    }
     return true;
 }
 

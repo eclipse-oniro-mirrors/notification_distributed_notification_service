@@ -115,6 +115,11 @@ ErrCode AdvancedNotificationService::ExcuteCancelAll(
             }
         }
 
+        if (notifications.empty()) {
+            ANS_LOGW("cancelAll deleted 0 notifications, bundleName:%{public}s, uid:%{public}d, "
+                "instanceKey:%{public}s", bundleOption->GetBundleName().c_str(), bundleOption->GetUid(),
+                bundleOption->GetAppInstanceKey().c_str());
+        }
         if (!notifications.empty()) {
             NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
                 notifications, nullptr, reason);

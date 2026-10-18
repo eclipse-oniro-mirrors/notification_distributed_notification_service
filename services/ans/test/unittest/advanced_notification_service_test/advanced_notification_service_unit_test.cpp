@@ -3386,5 +3386,183 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_OnReceiveEvent
     EXPECT_TRUE(spyFired);
 }
 #endif
+
+/**
+ * @tc.name: RemoveFromNotificationList_2000
+ * @tc.desc: Test RemoveFromNotificationList when id/label/instanceKey all match the record.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2000, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+    NotificationKey notificationKey = {.id = 1, .label = "testLabel"};
+
+    sptr<Notification> notification = nullptr;
+    auto res = advancedNotificationService_->RemoveFromNotificationList(record->bundleOption, notificationKey,
+        notification, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE, true);
+
+    ASSERT_EQ(res, (int)ERR_OK);
+    EXPECT_NE(notification, nullptr);
+    EXPECT_TRUE(advancedNotificationService_->notificationList_.empty());
+}
+
+/**
+ * @tc.name: RemoveFromNotificationList_2100
+ * @tc.desc: Test RemoveFromNotificationList when id matches but label mismatches the record.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+    NotificationKey notificationKey = {.id = 1, .label = "wrongLabel"};
+
+    sptr<Notification> notification = nullptr;
+    auto res = advancedNotificationService_->RemoveFromNotificationList(record->bundleOption, notificationKey,
+        notification, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE, true);
+
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(notification, nullptr);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveFromNotificationList_2200
+ * @tc.desc: Test RemoveFromNotificationList when label matches but id mismatches the record.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2200, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+    NotificationKey notificationKey = {.id = 2, .label = "testLabel"};
+
+    sptr<Notification> notification = nullptr;
+    auto res = advancedNotificationService_->RemoveFromNotificationList(record->bundleOption, notificationKey,
+        notification, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE, true);
+
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(notification, nullptr);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveFromNotificationList_2300
+ * @tc.desc: Test RemoveFromNotificationList when only instanceKey mismatches the record.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2300, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    request->SetAppInstanceKey("recordInstanceKey");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    bundleOption->SetAppInstanceKey("queryInstanceKey");
+    NotificationKey notificationKey = {.id = 1, .label = "testLabel"};
+
+    sptr<Notification> notification = nullptr;
+    auto res = advancedNotificationService_->RemoveFromNotificationList(bundleOption, notificationKey,
+        notification, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE, true);
+
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(notification, nullptr);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveFromNotificationList_2400
+ * @tc.desc: Test RemoveFromNotificationList when id/label and non-empty instanceKey all match.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2400, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    request->SetAppInstanceKey("sameInstanceKey");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    bundleOption->SetAppInstanceKey("sameInstanceKey");
+    NotificationKey notificationKey = {.id = 1, .label = "testLabel"};
+
+    sptr<Notification> notification = nullptr;
+    auto res = advancedNotificationService_->RemoveFromNotificationList(bundleOption, notificationKey,
+        notification, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE, true);
+
+    ASSERT_EQ(res, (int)ERR_OK);
+    EXPECT_NE(notification, nullptr);
+    EXPECT_TRUE(advancedNotificationService_->notificationList_.empty());
+}
+
+/**
+ * @tc.name: ExcuteCancelAll_0100
+ * @tc.desc: Test ExcuteCancelAll deletes 0 notifications when no record matches the bundle.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, ExcuteCancelAll_0100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> otherBundle = new NotificationBundleOption("other.test.bundle", SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, otherBundle);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto res = advancedNotificationService_->ExcuteCancelAll(bundleOption,
+        NotificationConstant::APP_CANCEL_ALL_REASON_DELETE);
+
+    ASSERT_EQ(res, (int)ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: ExcuteCancelAll_0200
+ * @tc.desc: Test ExcuteCancelAll removes the matching record and returns ERR_OK.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, ExcuteCancelAll_0200, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto res = advancedNotificationService_->ExcuteCancelAll(bundleOption,
+        NotificationConstant::APP_CANCEL_ALL_REASON_DELETE);
+
+    ASSERT_EQ(res, (int)ERR_OK);
+    EXPECT_TRUE(advancedNotificationService_->notificationList_.empty());
+}
 }
 }

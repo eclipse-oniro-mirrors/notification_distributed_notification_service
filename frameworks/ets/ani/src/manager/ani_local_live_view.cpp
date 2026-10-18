@@ -182,10 +182,7 @@ ani_object AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj, an
     }
     asyncCallbackInfo->localLiveViewSubscriber->SetStsNotificationLocalLiveViewSubscriber(env, subscriberObj);
     if (!SetCallbackObject(env, callback, asyncCallbackInfo)) {
-        if (asyncCallbackInfo->localLiveViewSubscriber != nullptr) {
-            delete asyncCallbackInfo->localLiveViewSubscriber;
-            asyncCallbackInfo->localLiveViewSubscriber = nullptr;
-        }
+        asyncCallbackInfo->localLiveViewSubscriber = nullptr;
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
     }
@@ -195,10 +192,7 @@ ani_object AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj, an
     ani_status status = env->GetVM(&asyncCallbackInfo->vm);
     if (status != ANI_OK) {
         ANS_LOGE("GetVM failed, status: %{public}d", status);
-        if (asyncCallbackInfo->localLiveViewSubscriber != nullptr) {
-            delete asyncCallbackInfo->localLiveViewSubscriber;
-            asyncCallbackInfo->localLiveViewSubscriber = nullptr;
-        }
+        asyncCallbackInfo->localLiveViewSubscriber = nullptr;
         NotificationSts::ThrowInternerErrorWithLogE(env, "GetVM failed");
         DeleteCallBackInfo(env, asyncCallbackInfo);
         return nullptr;
@@ -207,10 +201,17 @@ ani_object AniSubscribeSystemLiveView(ani_env *env, ani_object subscriberObj, an
     WorkStatus workStatus = CreateAsyncWork(env,
         [](ani_env* env, void* data) {
             auto asyncCallbackInfo = static_cast<AsyncCallbackLiveViewInfo*>(data);
-            if (asyncCallbackInfo) {
+            if (asyncCallbackInfo && asyncCallbackInfo->localLiveViewSubscriber != nullptr) {
+                // Keep the subscriber alive in the registry before subscribing: the async
+                // callback info is deleted once the call completes, while the subscriber
+                // must outlive the server side subscription.
+                asyncCallbackInfo->localLiveViewSubscriber->KeepAliveInRegistry();
                 asyncCallbackInfo->info.returnCode =
                     AnsNotification::GetInstance()->SubscribeLocalLiveViewNotification(
                         *(asyncCallbackInfo->localLiveViewSubscriber), false);
+                if (asyncCallbackInfo->info.returnCode != ERR_OK) {
+                    asyncCallbackInfo->localLiveViewSubscriber->ReleaseFromRegistry();
+                }
             }
         },
         HandleLiveViewFunctionCallbackComplete, (void*)asyncCallbackInfo, &(asyncCallbackInfo->asyncWork));

@@ -342,6 +342,25 @@ void SubscriberInstance::ClearEnvCallback(void *data)
     // holder already freed: null out to avoid double free in UnregisterEnvCleanupHook
     subscriber->envCleanupHookData_ = nullptr;
     subscriber->ClearEnv();
+    subscriber->UnsubscribeOnEnvCleanup();
+}
+
+void SubscriberInstance::UnsubscribeOnEnvCleanup()
+{
+    auto subscriber = std::static_pointer_cast<SubscriberInstance>(shared_from_this());
+    ANS_LOGW("Env destroyed before unsubscribe, try to Remove subscriber asynchronously, subscriber: %{public}p",
+        subscriber.get());
+    ffrt::submit([subscriber]() {
+        if (!AddDeletingSubscriber(subscriber)) {
+            ANS_LOGW("Subscriber is deleting, skip Remove subscriber on env cleanup");
+            return;
+        }
+        ErrCode errCode = NotificationHelper::UnSubscribeNotification(*subscriber);
+        if (errCode != ERR_OK) {
+            ANS_LOGW("Remove subscriber on env cleanup failed, errCode: %{public}d", errCode);
+        }
+        DelDeletingSubscriber(subscriber);
+    });
 }
 
 void SubscriberInstance::CallThreadSafeFunc(void* data)
@@ -349,9 +368,11 @@ void SubscriberInstance::CallThreadSafeFunc(void* data)
     std::lock_guard<ffrt::mutex> lock(tsfnMutex_);
     if (tsfn_ == nullptr) {
         auto dataWorker = reinterpret_cast<NotificationReceiveDataWorker *>(data);
+        int32_t eventType = (dataWorker != nullptr) ? static_cast<int32_t>(dataWorker->type) : -1;
         delete dataWorker;
         dataWorker = nullptr;
-        ANS_LOGD("null tsfn_");
+        ANS_LOGW("In-flight event dropped for null tsfn_, subscriber: %{public}p, eventType: %{public}d",
+            this, eventType);
         return;
     }
     napi_acquire_threadsafe_function(tsfn_);
@@ -405,6 +426,7 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
         callbackInfo = canceCallbackInfo_;
     }
     if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
+        ANS_LOGW("OnCanceled dropped for invalid callback, subscriber: %{public}p", this);
         return;
     }
 

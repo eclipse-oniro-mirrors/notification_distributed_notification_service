@@ -472,6 +472,8 @@ napi_value Common::GetNotificationContent(const napi_env &env, const napi_value 
     napi_value result = AppExecFwk::GetPropertyValueByPropertyName(env, value, "content", napi_object);
     if (result == nullptr) {
         ANS_LOGE("null result");
+        std::string msg = "Incorrect parameter types. The type of content must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
 
@@ -537,6 +539,8 @@ napi_value Common::GetNotificationBasicContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "normal", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property normal expected.");
+        std::string msg = "Incorrect parameter types. The type of normal must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     napi_get_named_property(env, result, "normal", &contentResult);
@@ -642,6 +646,8 @@ napi_value Common::GetNotificationLongTextContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "longText", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property longText expected.");
+        std::string msg = "Incorrect parameter types. The type of longText must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
 
@@ -765,6 +771,8 @@ napi_value Common::GetNotificationPictureContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "picture", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property picture expected.");
+        std::string msg = "Incorrect parameter types. The type of picture must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     napi_get_named_property(env, result, "picture", &contentResult);
@@ -886,6 +894,8 @@ napi_value Common::GetNotificationConversationalContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "conversation", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property conversation expected.");
+        std::string msg = "Incorrect parameter types. The type of conversation must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     napi_get_named_property(env, result, "conversation", &contentResult);
@@ -1380,12 +1390,16 @@ napi_value Common::GetNotificationMultiLineContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "multiLine", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property multiLine expected.");
+        std::string msg = "Incorrect parameter types. The type of multiLine must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     napi_get_named_property(env, result, "multiLine", &contentResult);
     NAPI_CALL(env, napi_typeof(env, contentResult, &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
+        std::string msg = "Incorrect parameter types. The type of multiLine must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
 

@@ -1785,6 +1785,44 @@ void AdvancedNotificationService::CancelWantAgent(const sptr<Notification> &noti
     }
 }
 
+ErrCode AdvancedNotificationService::RemoveMatchedNotificationRecord(const std::shared_ptr<NotificationRecord> &record,
+    sptr<Notification> &notification, int32_t removeReason, bool isCancel)
+{
+    if (!isCancel && !record->notification->IsRemoveAllowed()) {
+        ANS_LOGI("UnRemoved-%{public}s", record->notification->GetKey().c_str());
+        return ERR_ANS_INNER_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
+    }
+    notification = record->notification;
+    // delete or delete all, call the function
+    if (!isCancel) {
+        TriggerRemoveWantAgent(record->request, removeReason, record->isThirdparty);
+    }
+    CancelWantAgent(notification);
+    ProcForDeleteNotificationFromDb(record);
+    NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+    notificationList_.remove(record);
+    if (IsSaCreateSystemLiveViewAsBundle(record, record->notification->GetNotificationRequest().GetCreatorUid())) {
+        SendLiveViewUploadHiSysEvent(record, UploadStatus::END);
+    }
+    return ERR_OK;
+}
+
+bool AdvancedNotificationService::RemoveFromDelayedNotificationList(
+    const sptr<NotificationBundleOption> &bundleOption, const NotificationKey &notificationKey)
+{
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
+    for (auto delayNotification : delayNotificationList_) {
+        if ((delayNotification.first->bundleOption->GetUid() == bundleOption->GetUid()) &&
+            (delayNotification.first->notification->GetLabel() == notificationKey.label) &&
+            (delayNotification.first->notification->GetId() == notificationKey.id)) {
+            CancelTimer(delayNotification.second);
+            delayNotificationList_.remove(delayNotification);
+            return true;
+        }
+    }
+    return false;
+}
+
 ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
     NotificationKey notificationKey, sptr<Notification> &notification, int32_t removeReason, bool isCancel)
 {
@@ -1793,7 +1831,17 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
         return ERR_ANS_INNER_INVALID_PARAM;
     }
     RemoveFromTriggerNotificationList(bundleOption, notificationKey);
+    bool idMatched = false;
+    bool labelMatched = false;
+    bool instanceKeyMatched = false;
     for (auto record : notificationList_) {
+        if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
+            (record->bundleOption->GetUid() == bundleOption->GetUid())) {
+            idMatched = idMatched || (record->notification->GetId() == notificationKey.id);
+            labelMatched = labelMatched || (record->notification->GetLabel() == notificationKey.label);
+            instanceKeyMatched = instanceKeyMatched ||
+                (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey());
+        }
         if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
             (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
             (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey()) &&
@@ -1803,39 +1851,18 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(const sptr<Notif
             && record->deviceId.empty()
 #endif
         ) {
-            if (!isCancel && !record->notification->IsRemoveAllowed()) {
-                ANS_LOGI("UnRemoved-%{public}s", record->notification->GetKey().c_str());
-                return ERR_ANS_INNER_NOTIFICATION_IS_UNALLOWED_REMOVEALLOWED;
-            }
-            notification = record->notification;
-            // delete or delete all, call the function
-            if (!isCancel) {
-                TriggerRemoveWantAgent(record->request, removeReason, record->isThirdparty);
-            }
-            CancelWantAgent(notification);
-            ProcForDeleteNotificationFromDb(record);
-            NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
-            notificationList_.remove(record);
-            if (IsSaCreateSystemLiveViewAsBundle(record,
-                record->notification->GetNotificationRequest().GetCreatorUid())) {
-                SendLiveViewUploadHiSysEvent(record, UploadStatus::END);
-            }
-            return ERR_OK;
+            return RemoveMatchedNotificationRecord(record, notification, removeReason, isCancel);
         }
     }
-
-    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
-    for (auto delayNotification : delayNotificationList_) {
-        if ((delayNotification.first->bundleOption->GetUid() == bundleOption->GetUid()) &&
-            (delayNotification.first->notification->GetLabel() == notificationKey.label) &&
-            (delayNotification.first->notification->GetId() == notificationKey.id)) {
-            CancelTimer(delayNotification.second);
-            delayNotificationList_.remove(delayNotification);
-            return ERR_OK;
-        }
+    if (RemoveFromDelayedNotificationList(bundleOption, notificationKey)) {
+        return ERR_OK;
     }
-    ANS_LOGE("notification:%{public}d, bundleName:%{public}s, uid:%{public}d",
-        notificationKey.id, bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+    ANS_LOGE("notification not exists, match detail: id:%{public}d(idMatched:%{public}d), "
+        "label:%{private}s(labelMatched:%{public}d), instanceKey:%{public}s(instanceKeyMatched:%{public}d), "
+        "bundleName:%{public}s, uid:%{public}d",
+        notificationKey.id, idMatched, notificationKey.label.c_str(), labelMatched,
+        bundleOption->GetAppInstanceKey().c_str(), instanceKeyMatched,
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
     return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
 }
 
