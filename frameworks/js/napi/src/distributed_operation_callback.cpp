@@ -59,8 +59,7 @@ void RejectPromiseByAsyncWork(napi_env env, napi_deferred deferred)
             } else {
                 // Env destroyed or work cancelled (typically during env teardown): any JS
                 // operation would crash, skip the promise settlement and only clean up.
-                ANS_LOGW("skip promise settle, env: %{public}p, status: %{public}d",
-                    env, static_cast<int32_t>(status));
+                ANS_LOGW("skip promise settle, status: %{public}d", static_cast<int32_t>(status));
             }
             if (env != nullptr && rejectData->asyncWork != nullptr) {
                 napi_delete_async_work(env, rejectData->asyncWork);

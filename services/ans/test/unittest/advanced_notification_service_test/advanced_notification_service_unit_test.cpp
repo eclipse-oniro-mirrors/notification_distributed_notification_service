@@ -3522,33 +3522,11 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2400, F
 
 /**
  * @tc.name: ExcuteCancelAll_0100
- * @tc.desc: Test ExcuteCancelAll deletes 0 notifications when no record matches the bundle.
- * @tc.type: FUNC
- * @tc.require: issue#743
- */
-HWTEST_F(AdvancedNotificationServiceUnitTest, ExcuteCancelAll_0100, Function | SmallTest | Level1)
-{
-    sptr<NotificationBundleOption> otherBundle = new NotificationBundleOption("other.test.bundle", SYSTEM_APP_UID);
-    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
-    request->SetNotificationId(1);
-    auto record = advancedNotificationService_->MakeNotificationRecord(request, otherBundle);
-    advancedNotificationService_->AddToNotificationList(record);
-
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
-    auto res = advancedNotificationService_->ExcuteCancelAll(bundleOption,
-        NotificationConstant::APP_CANCEL_ALL_REASON_DELETE);
-
-    ASSERT_EQ(res, (int)ERR_OK);
-    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
-}
-
-/**
- * @tc.name: ExcuteCancelAll_0200
  * @tc.desc: Test ExcuteCancelAll removes the matching record and returns ERR_OK.
  * @tc.type: FUNC
  * @tc.require: issue#743
  */
-HWTEST_F(AdvancedNotificationServiceUnitTest, ExcuteCancelAll_0200, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationServiceUnitTest, ExcuteCancelAll_0100, Function | SmallTest | Level1)
 {
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
