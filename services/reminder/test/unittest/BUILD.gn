@@ -246,7 +246,10 @@ ohos_unittest("reminder_service_test") {
 
   defines = []
 
-  sources = [ "reminder_store_test.cpp" ]
+  sources = [
+    "reminder_store_branch_test.cpp",
+    "reminder_store_test.cpp",
+  ]
 
   deps = [
     "${frameworks_module_reminder_path}:reminder_innerkits",

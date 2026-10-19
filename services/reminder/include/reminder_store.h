@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_STORE_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_REMINDER_INCLUDE_REMINDER_STORE_H
 
+#include <memory>
 #include <vector>
 #include <mutex>
 
@@ -26,13 +27,14 @@
 #include "rdb_helper.h"
 #include "rdb_open_callback.h"
 #include "rdb_store_config.h"
+#include "ffrt.h"
 
 namespace OHOS {
 namespace Notification {
-class ReminderStore {
+class ReminderStore : public std::enable_shared_from_this<ReminderStore> {
 public:
     ReminderStore() {};
-    virtual ~ReminderStore() {};
+    virtual ~ReminderStore();
 
 public:
     int32_t Init();
@@ -77,6 +79,11 @@ public:
     static const std::string REMINDER_DB_NAME;
     static const std::string REMINDER_DB_TABLE;
 
+    /**
+     * @brief Emsures DB column strings are initialized exactly once (thread-safe, idempotent).
+     */
+    static void EnsureDbColumnsInitialized();
+
 private:
     /**
      * @brief Inits the data in database when system boot on or proxy process reboot on.
@@ -87,6 +94,10 @@ private:
      * @return int32_t result code.
      */
     int32_t InitData();
+    int32_t OpenRdbStore();
+    bool EnsureOpen();
+    bool EnsureOpenLocked();
+    void PostDelayCloseTaskLocked();
     int32_t DeleteBase(const std::string& deleteCondition);
     int32_t Delete(const std::string& baseCondition, const std::string& assoConditon);
     int32_t Insert(const sptr<ReminderRequest>& reminder);
@@ -103,7 +114,12 @@ private:
 private:
     std::shared_ptr<NativeRdb::RdbStore> rdbStore_ = nullptr;
 
-    std::mutex initMutex_;
+    ffrt::mutex initMutex_;
+    std::shared_ptr<ffrt::queue> idleQueue_ = nullptr;
+    ffrt::task_handle closeTaskHandle_ {nullptr};
+    std::atomic<uint64_t> closeTaskGeneration_ {0};
+    static constexpr int64_t IDLE_CLOSE_DELAY_US = 20 * 1000 * 1000;
+    static std::once_flag dbColumnsInitFlag_;
 
 private:
 class ReminderStoreDataCallBack : public NativeRdb::RdbOpenCallback {
