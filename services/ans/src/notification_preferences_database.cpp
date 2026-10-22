@@ -2889,6 +2889,14 @@ std::string NotificationPreferencesDatabase::GenerateBundleLablel(
         .append(std::to_string(userId));
 }
 
+// Generate a log-safe key with the same format as GenerateBundleLablel(deviceType, deviceId,
+// userId), but only the deviceId segment is masked for privacy. For log printing only.
+std::string NotificationPreferencesDatabase::GenerateMaskedBundleLablel(
+    const std::string &deviceType, const std::string &deviceId, const int32_t userId) const
+{
+    return GenerateBundleLablel(deviceType, StringAnonymous(deviceId), userId);
+}
+
 template <typename T>
 int32_t NotificationPreferencesDatabase::PutDataToDB(const std::string &key, const T &value, const int32_t &userId)
 {
@@ -3617,7 +3625,8 @@ bool NotificationPreferencesDatabase::SetDistributedAuthStatus(
         __FUNCTION__, deviceType.c_str(), StringAnonymous(deviceId).c_str(), targetUserId);
     std::string key = GenerateBundleLablel(deviceType, deviceId, targetUserId);
     int32_t result = PutDataToDB(key, static_cast<int32_t>(isAuth), userId);
-    ANS_LOGD("key: %{public}s, result: %{public}d", key.c_str(), result);
+    ANS_LOGD("key: %{public}s, result: %{public}d",
+        GenerateMaskedBundleLablel(deviceType, deviceId, targetUserId).c_str(), result);
     return (result == NativeRdb::E_OK);
 }
 

@@ -1506,6 +1506,32 @@ HWTEST_F(NotificationPreferencesDatabaseTest, GenerateBundleLablel_0200, TestSiz
 }
 
 /**
+ * @tc.name: GenerateMaskedBundleLablel_0100
+ * @tc.desc: test GenerateMaskedBundleLablel masks only the deviceId segment
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GenerateMaskedBundleLablel_0100, TestSize.Level1)
+{
+    std::string deviceType = "test";
+    std::string deviceId = "device_12345678";
+    auto ret = preferncesDB_->GenerateMaskedBundleLablel(deviceType, deviceId, userId);
+    EXPECT_EQ(ret, "enabledDistributedAuthStatus-test-de******78-100");
+}
+
+/**
+ * @tc.name: GenerateMaskedBundleLablel_0200
+ * @tc.desc: test GenerateMaskedBundleLablel with short deviceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesDatabaseTest, GenerateMaskedBundleLablel_0200, TestSize.Level1)
+{
+    std::string deviceType = "test";
+    std::string deviceId = "abcd";
+    auto ret = preferncesDB_->GenerateMaskedBundleLablel(deviceType, deviceId, userId);
+    EXPECT_EQ(ret, "enabledDistributedAuthStatus-test-a******-100");
+}
+
+/**
  * @tc.name: PutDistributedEnabledForBundle_0100
  * @tc.desc: test PutDistributedEnabledForBundle with parameters
  * @tc.type: FUNC

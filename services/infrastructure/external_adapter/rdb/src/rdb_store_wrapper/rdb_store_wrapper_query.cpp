@@ -266,7 +266,7 @@ int32_t NtfRdbStoreWrapper::CheckFirstRow(std::shared_ptr<NativeRdb::AbsSharedRe
     int32_t ret = resultSet->GoToFirstRow();
     if (ret != NativeRdb::E_OK) {
         ANS_LOGD("GoToFirstRow failed from %{public}s table. It is empty!, key=%{public}s",
-            tableName.c_str(), key.c_str());
+            tableName.c_str(), StringAnonymous(key).c_str());
         if (ret != NativeRdb::E_ROW_OUT_RANGE) {
             ANS_LOGD("GoToFirstRow failed, rdb error is %{public}d.", ret);
             hookMgr_->OnRdbOperationFailReport(sceneId, branchId, ret, "GoToFirstRow failed");
