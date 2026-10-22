@@ -28,6 +28,9 @@
 #include "notification_local_live_view_content.h"
 #include "notification_subscriber_manager.h"
 #include "os_account_manager.h"
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+#include "priority_notification_degrade_manager.h"
+#endif
 
 #include "../advanced_notification_inline.cpp"
 
@@ -327,6 +330,9 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
                 (record->notification->GetId() == notificationId) && (record->notification->GetLabel() == label)) {
                 notification = record->notification;
                 NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+                PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
                 notificationList_.remove(record);
                 result = ERR_OK;
                 break;
@@ -424,6 +430,9 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotification(const sptr<Notific
 
             DeleteNotificationFromDb(record, removeReason, false);
             NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
             notificationList_.remove(record);
             result = ERR_OK;
             break;
@@ -524,6 +533,9 @@ void AdvancedNotificationService::ExcuteRemoveAllNotificationsInner(const sptr<N
     for (auto record : removeList) {
         ProcForDeleteNotificationFromDb(record);
         NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
         notificationList_.remove(record);
         if (record->notification != nullptr) {
             ANS_LOGD("record->notification is not nullptr.");
@@ -683,6 +695,9 @@ ErrCode AdvancedNotificationService::RemoveNotificationBySlot(const sptr<Notific
         }
         ProcForDeleteNotificationFromDb(record);
         NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
         notificationList_.remove(record);
         if (record->notification != nullptr) {
             ANS_LOGD("record->notification is not nullptr.");
@@ -1038,6 +1053,9 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotificationsByDeviceId(
         }
         for (auto deleteRecord : deleteRecords) {
             NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(deleteRecord->notification->GetKey());
+#endif
             notificationList_.remove(deleteRecord);
         }
     }));
@@ -1078,6 +1096,9 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
         }
         for (auto deleteRecord : deleteRecords) {
             NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(deleteRecord->notification->GetKey());
+#endif
             notificationList_.remove(deleteRecord);
         }
     }));
@@ -1137,6 +1158,9 @@ void AdvancedNotificationService::RemoveDistributedNotificationsByBundle(
         }
         for (auto deleteRecord : deleteRecords) {
             NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(deleteRecord->notification->GetKey());
+#endif
             notificationList_.remove(deleteRecord);
         }
     }));
@@ -1187,6 +1211,9 @@ ErrCode AdvancedNotificationService::RemoveDistributedNotifications(
         }
         for (auto deleteRecord : deleteRecords) {
             NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(deleteRecord->notification->GetKey());
+#endif
             notificationList_.remove(deleteRecord);
         }
     }));
@@ -1219,6 +1246,9 @@ ErrCode AdvancedNotificationService::RemoveAllDistributedNotifications(
 
         for (auto deleteRecord : deleteRecords) {
             NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(deleteRecord->notification->GetKey());
+#endif
             notificationList_.remove(deleteRecord);
         }
     }));

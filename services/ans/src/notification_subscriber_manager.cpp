@@ -23,6 +23,7 @@
 #include "advanced_notification_ai_extension_manager.h"
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
 #include "advanced_notification_priority_helper.h"
+#include "priority_notification_degrade_manager.h"
 #endif
 #include "ans_const_define.h"
 #include "ans_service_errors.h"
@@ -875,8 +876,16 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
 #endif
     AdvancedNotificationAiExtensionManager::GetInstance()->UpdateNotification(
         requests, notificationClassifications, hasAggregationSubscriber);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    sptr<NotificationClassification> effectiveClassification = nullptr;
+    PriorityNotificationDegradeManager::GetInstance()->ApplyTaggingResult(
+        notification->GetKey(), notification->GetNotificationRequestPoint(),
+        notificationClassifications.at(0), effectiveClassification);
+    std::vector<sptr<NotificationClassification>> effectiveClassifications = {effectiveClassification};
+#else
     NotificationClassificationMgr::GetInstance().AddOrUpdate(
         notification->GetKey(), notificationClassifications.at(0));
+#endif
     std::string content;
     std::set<std::string> voiceFlag;
     GetVoiceContentInfo(notification, voiceFlag, content);
@@ -891,7 +900,11 @@ void NotificationSubscriberManager::NotifyConsumedInner(const sptr<Notification>
             NotifyPriorityRecordOnConsumed(record, notification, notificationMap, bundlePriorityStrategy);
             continue;
         }
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        NotifyRecordOnConsumed(record, notification, notificationMap, content, voiceFlag, effectiveClassifications);
+#else
         NotifyRecordOnConsumed(record, notification, notificationMap, content, voiceFlag, notificationClassifications);
+#endif
     }
     NotificationSubscriberManager::TrackCodeLog(notification);
 }

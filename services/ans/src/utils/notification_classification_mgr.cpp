@@ -15,19 +15,106 @@
 
 #include "notification_classification_mgr.h"
 
+#include <new>
+
+#include "ans_const_define.h"
+#include "ans_log_wrapper.h"
+#include "notification_analytics_util.h"
+
 namespace OHOS {
 namespace Notification {
+namespace {
+constexpr char CLASSIFICATION_CACHE_CONTAINER_NAME[] = "classification_cache";
+}
+
 NotificationClassificationMgr& NotificationClassificationMgr::GetInstance()
 {
     static NotificationClassificationMgr instance;
     return instance;
 }
 
-void NotificationClassificationMgr::AddOrUpdate(
-    const std::string& key, sptr<NotificationClassification> classification)
+sptr<NotificationClassification> NotificationClassificationMgr::AddOrUpdate(
+    const std::string& key, const sptr<NotificationClassification>& classification)
+{
+    if (classification == nullptr) {
+        std::lock_guard<ffrt::mutex> lock(mutex_);
+        map_.erase(key);
+        return nullptr;
+    }
+
+    bool reportCapacity = false;
+    bool requestSweep = false;
+    size_t currentSize = 0;
+    sptr<NotificationClassification> landed = nullptr;
+    std::function<void()> sweepListener = nullptr;
+    {
+        std::lock_guard<ffrt::mutex> lock(mutex_);
+        auto it = map_.find(key);
+        sptr<NotificationClassification> cached = (it != map_.end()) ? it->second : nullptr;
+        if (cached == nullptr && map_.size() >= MAX_ACTIVE_NUM) {
+            currentSize = map_.size();
+            reportCapacity = !capacityAlerted_;
+            capacityAlerted_ = true;
+            requestSweep = true;
+            sweepListener = sweepListener_;
+        } else {
+            landed = new (std::nothrow) NotificationClassification();
+            if (landed != nullptr) {
+                if (classification->IsClassificationSet()
+                    || (cached != nullptr && cached->IsClassificationSet())) {
+                    if (classification->IsClassificationSet()) {
+                        landed->SetClassification(classification->GetClassification());
+                        landed->SetSubClassification(classification->GetSubClassification());
+                    } else {
+                        landed->SetClassification(cached->GetClassification());
+                        landed->SetSubClassification(cached->GetSubClassification());
+                    }
+                }
+
+                if (classification->IsPriorityInfoSet()
+                    || (cached != nullptr && cached->IsPriorityInfoSet())) {
+                    if (classification->IsPriorityInfoSet()) {
+                        landed->SetPriorityInfo(classification->GetPriorityInfo());
+                    } else {
+                        landed->SetPriorityInfo(cached->GetPriorityInfo());
+                    }
+                }
+
+                map_[key] = landed;
+            }
+        }
+    }
+
+    if (reportCapacity) {
+        ANS_LOGW("Classification cache reached capacity, reject new key, capacity: %{public}zu, "
+            "current size: %{public}zu", MAX_ACTIVE_NUM, currentSize);
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_30, EventBranchId::BRANCH_0);
+        message.Message(std::string(CLASSIFICATION_CACHE_CONTAINER_NAME) + "_cap_"
+            + std::to_string(MAX_ACTIVE_NUM) + "_size_" + std::to_string(currentSize));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
+    if (requestSweep && sweepListener != nullptr) {
+        sweepListener();
+    }
+    return landed;
+}
+
+void NotificationClassificationMgr::SetSweepListener(const std::function<void()>& listener)
 {
     std::lock_guard<ffrt::mutex> lock(mutex_);
-    map_[key] = std::move(classification);
+    sweepListener_ = listener;
+}
+
+void NotificationClassificationMgr::RetainOnly(const std::set<std::string>& liveKeys)
+{
+    std::lock_guard<ffrt::mutex> lock(mutex_);
+    for (auto it = map_.begin(); it != map_.end();) {
+        if (liveKeys.find(it->first) == liveKeys.end()) {
+            it = map_.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 bool NotificationClassificationMgr::Remove(const std::string& key)

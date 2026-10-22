@@ -61,6 +61,9 @@
 #include "notification_config_parse.h"
 #include "advanced_notification_flow_control_service.h"
 #include "notification_classification_mgr.h"
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+#include "priority_notification_degrade_manager.h"
+#endif
 #include "notification_operation_info.h"
 #include "notification_operation_service.h"
 #include "notification_extension_wrapper.h"
@@ -576,6 +579,9 @@ ErrCode AdvancedNotificationService::ExcuteCancelGroupCancel(
         for (auto record : removeList) {
             ProcForDeleteNotificationFromDb(record);
             NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
             notificationList_.remove(record);
             if (record->notification != nullptr) {
                 UpdateRecentNotification(record->notification, true, reason);
@@ -670,6 +676,9 @@ ErrCode AdvancedNotificationService::RemoveGroupByBundle(
         std::vector<uint64_t> timerIds;
         for (auto record : removeList) {
             NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
             notificationList_.remove(record);
             ProcForDeleteNotificationFromDb(record);
 
@@ -1447,6 +1456,9 @@ void AdvancedNotificationService::ExcuteRemoveAllNotificationsByBundleName(
             continue;
         }
         NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
         notificationList_.remove(record);
         if (record->notification != nullptr) {
             ANS_LOGD("record->notification is not nullptr.");

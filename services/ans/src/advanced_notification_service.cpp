@@ -92,6 +92,9 @@
 #include "advanced_datashare_observer.h"
 #include "notification_classification_mgr.h"
 #include "notification_extension_wrapper.h"
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+#include "priority_notification_degrade_manager.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -357,6 +360,9 @@ AdvancedNotificationService::AdvancedNotificationService()
 {
     ANS_LOGD("called");
     notificationSvrQueue_ = Infra::FfrtQueueImpl("NotificationSvrMain");
+    NotificationClassificationMgr::GetInstance().SetSweepListener([] {
+        AdvancedNotificationService::GetInstance()->ScheduleOrphanClassificationSweep();
+    });
     soundPermissionInfo_ = std::make_shared<SoundPermissionInfo>();
     recentInfo_ = std::make_shared<RecentInfo>();
     permissonFilter_ = std::make_shared<PermissionFilter>();
@@ -1800,6 +1806,9 @@ ErrCode AdvancedNotificationService::RemoveMatchedNotificationRecord(const std::
     CancelWantAgent(notification);
     ProcForDeleteNotificationFromDb(record);
     NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
     notificationList_.remove(record);
     if (IsSaCreateSystemLiveViewAsBundle(record, record->notification->GetNotificationRequest().GetCreatorUid())) {
         SendLiveViewUploadHiSysEvent(record, UploadStatus::END);
@@ -1884,6 +1893,9 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationList(
         DeleteNotificationFromDb(record, removeReason, isCancel);
         CancelWantAgent(notification);
         NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
         notificationList_.remove(record);
         return ERR_OK;
     }
@@ -1915,6 +1927,9 @@ ErrCode AdvancedNotificationService::RemoveFromNotificationListForDeleteAll(
 
             notification = record->notification;
             NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
             notificationList_.remove(record);
             return ERR_OK;
         }
@@ -2006,6 +2021,120 @@ std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetFromDelayedN
 
     return nullptr;
 }
+
+void AdvancedNotificationService::ScheduleOrphanClassificationSweep()
+{
+    if (orphanSweepInFlight_.exchange(true)) {
+        return;
+    }
+    Infra::FfrtQueueImpl svrQueue = GetNotificationSvrQueue();
+    auto submitResult = svrQueue.Submit([this] {
+        CleanOrphanClassificationCacheOnQueue();
+        orphanSweepInFlight_ = false;
+    });
+    if (submitResult != ERR_OK) {
+        orphanSweepInFlight_ = false;
+        ANS_LOGE("Submit orphan classification sweep failed");
+    }
+}
+
+void AdvancedNotificationService::CleanOrphanClassificationCacheOnQueue()
+{
+    std::set<std::string> liveKeys;
+    for (const auto &record : notificationList_) {
+        if (record->notification != nullptr) {
+            liveKeys.insert(record->notification->GetKey());
+        }
+    }
+    NotificationClassificationMgr::GetInstance().RetainOnly(liveKeys);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    PriorityNotificationDegradeManager::GetInstance()->RemoveOrphans(liveKeys);
+#endif
+}
+
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+sptr<Notification> AdvancedNotificationService::BuildDegradeNotification(
+    const std::string &key, const sptr<NotificationRequest> &cacheRequest)
+{
+    sptr<NotificationRequest> requestSnapshot = new (std::nothrow) NotificationRequest(*cacheRequest);
+    if (requestSnapshot == nullptr) {
+        ANS_LOGE("Priority degrade fail, null request snapshot, key: %{public}s", key.c_str());
+        return nullptr;
+    }
+    sptr<Notification> notification = new (std::nothrow) Notification(requestSnapshot);
+    if (notification == nullptr) {
+        ANS_LOGE("Priority degrade fail, null notification, key: %{public}s", key.c_str());
+        return nullptr;
+    }
+    return notification;
+}
+
+void AdvancedNotificationService::NotifyDegradeUpdate(const std::string &key,
+    const sptr<NotificationRequest> &cacheRequest, const std::string &oldPriorityType,
+    const sptr<NotificationClassification> &cachedClassification)
+{
+    bool wasPriority = oldPriorityType != NotificationConstant::PriorityNotificationType::OTHER;
+    if (!wasPriority && cachedClassification == nullptr) {
+        ANS_LOGI("Priority degrade skipped, already OTHER without classification, key: %{public}s",
+            key.c_str());
+        return;
+    }
+
+    sptr<Notification> notification = BuildDegradeNotification(key, cacheRequest);
+    if (notification == nullptr) {
+        return;
+    }
+
+    NotificationSubscriberManager::GetInstance()->NotifySystemUpdate(notification, cachedClassification);
+}
+
+bool AdvancedNotificationService::ProcessPriorityDegradeOnQueue(const std::string &key)
+{
+    auto record = GetFromNotificationList(key);
+    if (record == nullptr || record->notification == nullptr) {
+        return false;
+    }
+    auto cacheRequest = record->notification->GetNotificationRequestPoint();
+
+    sptr<NotificationClassification> cachedClassification = NotificationClassificationMgr::GetInstance().Get(key);
+
+    if (!PriorityNotificationDegradeManager::GetInstance()->IsPriorityDegradeDue(cachedClassification)) {
+        return true;
+    }
+
+    if (cacheRequest == nullptr) {
+        PriorityNotificationDegradeManager::GetInstance()->DegradePriorityCacheWithoutRequest(
+            key, cachedClassification);
+        return true;
+    }
+
+    std::string oldPriorityType = cacheRequest->GetPriorityNotificationType();
+
+    if (cachedClassification != nullptr) {
+        sptr<NotificationClassification> degraded = PriorityNotificationDegradeManager::GetInstance()
+            ->DegradeClassificationCache(key, cachedClassification);
+        if (degraded == nullptr) {
+            return true;
+        }
+        cacheRequest->SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::OTHER);
+        cachedClassification = degraded;
+    } else {
+        cacheRequest->SetInnerPriorityNotificationType(NotificationConstant::PriorityNotificationType::OTHER);
+    }
+    NotifyDegradeUpdate(key, cacheRequest, oldPriorityType, cachedClassification);
+    return true;
+}
+
+bool AdvancedNotificationService::ProcessPriorityDegrade(const std::string &key)
+{
+    bool result = false;
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        result = ProcessPriorityDegradeOnQueue(key);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return false, "Serial queue submit failed");
+    return result;
+}
+#endif
 
 std::shared_ptr<NotificationRecord> AdvancedNotificationService::GetRecordFromNotificationList(
     int32_t notificationId, int32_t uid, const std::string &label, const std::string &bundleName, int32_t userId)
@@ -2433,6 +2562,9 @@ void AdvancedNotificationService::TriggerAutoDelete(const std::string &hashCode,
             NotificationSubscriberManager::GetInstance()->NotifyCanceled(record->notification, nullptr, reason);
             ProcForDeleteNotificationFromDb(record);
             NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
             notificationList_.remove(record);
             break;
         }
@@ -2625,6 +2757,9 @@ void AdvancedNotificationService::RemoveNotificationList(const std::shared_ptr<N
 {
     ProcForDeleteNotificationFromDb(record);
     NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
     notificationList_.remove(record);
 }
 

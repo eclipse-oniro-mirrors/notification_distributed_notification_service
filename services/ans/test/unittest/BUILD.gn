@@ -718,6 +718,14 @@ ohos_unittest("permission_filter_test") {
 }
 
 ohos_unittest("notification_priority_test") {
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
 
   include_dirs = [
@@ -747,6 +755,8 @@ ohos_unittest("notification_priority_test") {
     "priority_test/advanced_notification_priority_helper_test.cpp",
     "priority_test/advanced_notification_priority_manager_service_test.cpp",
     "priority_test/notification_ai_extension_wrapper_test.cpp",
+    "priority_test/priority_notification_degrade_manager_test.cpp",
+    "priority_test/single_timer_scheduler_test.cpp",
   ]
 
   defines = []
@@ -4262,6 +4272,8 @@ ohos_unittest("notification_extension_test") {
     "${services_path}/ans/src/priority_notification/advanced_notification_priority_helper.cpp",
     "${services_path}/ans/src/priority_notification/advanced_notification_priority_manager_service.cpp",
     "${services_path}/ans/src/priority_notification/notification_ai_extension_wrapper.cpp",
+    "${services_path}/ans/src/priority_notification/priority_notification_degrade_manager.cpp",
+    "${services_path}/ans/src/priority_notification/single_timer_scheduler.cpp",
     "${services_path}/ans/src/reminder_swing_decision_center.cpp",
     "${services_path}/ans/src/report_time_info.cpp",
     "${services_path}/ans/src/snooze_delay_manager.cpp",

@@ -3101,3 +3101,305 @@ HWTEST_F(NotificationSubscriberManagerTest, SetBadgeNumber_InvalidUserId_001, Le
 }
 }  // namespace Notification
 }  // namespace OHOS
+
+// ---------------------------------------------------------------------------
+// FIX-9b appended (TEST-01 / AC-005 / AC-006 / AC-015): the semantic assertions of the
+// synchronous consumption path arbitration (NotifyConsumedInner). The existing smoke
+// cases above only assert that the subscriber callback fires; the two cases below
+// preset the classification cache state and assert what the consumption chain actually
+// distributes: the effective value of the arbitration (the cached landed value for the
+// drop family, the landed fresh triple for APPLY) plus the request type restore. The
+// cases reuse the smoke case skeleton (the stack manager instance, the mock ans
+// subscriber and the direct NotifyConsumedInner call). The wrapper stays uninitialized
+// for the drop family case (dlopen fails, the classification stays null: exactly the
+// null round boundary), while the APPLY case injects a fake update function pointer so
+// one fresh triple is handed over (the in process .so contract), restored to the
+// pristine null pointer right after the call. Everything below is guarded by the
+// priority feature macro, matching the conditional define of this target.
+// ---------------------------------------------------------------------------
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+#include <chrono>
+#include <cstdint>
+
+#include "notification_constant.h"
+#include "priority_notification_degrade_manager.h"
+#endif
+
+namespace OHOS {
+namespace Notification {
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+namespace {
+constexpr int64_t SUB_MGR_TEST_HOUR_MILLIS = 3600LL * 1000LL;
+constexpr int32_t SUB_MGR_TEST_UID = 200300;
+
+const std::string SUB_MGR_TEST_TYPE_URGENT = NotificationConstant::PriorityNotificationType::URGENT_MESSAGE;
+const std::string SUB_MGR_TEST_TYPE_AT_ME = NotificationConstant::PriorityNotificationType::AT_ME;
+const std::string SUB_MGR_TEST_TYPE_OTHER = NotificationConstant::PriorityNotificationType::OTHER;
+const int32_t SUB_MGR_TEST_SOURCE_AI = static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI);
+const int32_t SUB_MGR_TEST_SOURCE_KEYWORD =
+    static_cast<int32_t>(NotificationConstant::PrioritySourceResult::KEYWORD);
+
+int64_t SubMgrTestNowMillis()
+{
+    auto now = std::chrono::system_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    return duration.count();
+}
+
+// A request the consumption path accepts (the smoke case shape: a social notification
+// with normal content, so the stub round trip stays parcelable), carrying the bundle
+// identity the wrapper command building and the degrade registration key by.
+sptr<NotificationRequest> SubMgrTestMakeRequest(const std::string &bundleName)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetNotificationId(9100);
+    request->SetCreatorBundleName(bundleName);
+    request->SetCreatorUid(SUB_MGR_TEST_UID);
+    request->SetOwnerBundleName("");
+    request->SetOwnerUid(SUB_MGR_TEST_UID);
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    return request;
+}
+
+// Bundle level preference control through the real preferences singleton (the way the
+// priority helper cases steer the bundle filter of the wrapper command building).
+// PRIORITY_STRATEGY_INTELLIGENT carries no STATUS_ALL_PRIORITY bit, so the request
+// passes the filter.
+void SubMgrTestPutBundlePreference(const std::string &bundleName)
+{
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, SUB_MGR_TEST_UID);
+    NotificationPreferences::GetInstance()->PutPriorityEnabledByBundleV2(bundleOption,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    NotificationPreferences::GetInstance()->PutPriorityStrategyByBundle(
+        bundleOption, PRIORITY_STRATEGY_INTELLIGENT);
+}
+
+void SubMgrTestExpectPriorityInfo(const NotificationClassification::PriorityInfo &priorityInfo,
+    const std::string &type, int64_t expiredTime, int32_t source)
+{
+    EXPECT_EQ(priorityInfo.GetPriorityNotificationType(), type);
+    EXPECT_EQ(priorityInfo.GetExpiredTime(), expiredTime);
+    EXPECT_EQ(priorityInfo.GetSource(), source);
+}
+
+// Cleans the classification cache and resets the degrade manager singleton so every
+// case starts from a new lifecycle and leaves nothing behind for the later cases.
+void SubMgrTestResetPriorityState()
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    PriorityNotificationDegradeManager::DestroyInstance();
+}
+
+// A subscriber capturing the classification the server attached to the consumed
+// notification stub (the shape the classification distribution is observable through).
+class SubMgrTestClassificationSubscriber : public MockAnsSubscriber {
+public:
+    explicit SubMgrTestClassificationSubscriber(const sptr<IRemoteObject> &remote) : MockAnsSubscriber(remote) {};
+
+    ErrCode OnConsumed(const sptr<Notification> &notification,
+        const sptr<NotificationSortingMap> &notificationMap) override
+    {
+        isCalled_ = true;
+        if (notification != nullptr) {
+            lastClassification_ = notification->GetNotificationClassification();
+        }
+        return ERR_OK;
+    }
+
+    ErrCode OnConsumed(const sptr<Notification> &notification) override
+    {
+        isCalled_ = true;
+        return ERR_OK;
+    }
+
+    bool IsCalled() const
+    {
+        return isCalled_;
+    }
+
+    sptr<NotificationClassification> GetLastClassification() const
+    {
+        return lastClassification_;
+    }
+
+private:
+    bool isCalled_ {false};
+    sptr<NotificationClassification> lastClassification_ {nullptr};
+};
+
+// Registers the classification capturing subscriber with every consumption flag and
+// the classification distribution enabled (the registration goes through the inner
+// entry, no IPC side paths).
+sptr<SubMgrTestClassificationSubscriber> SubMgrTestRegisterSubscriber(
+    NotificationSubscriberManager &manager)
+{
+    sptr<SubMgrTestClassificationSubscriber> subscriber(
+        new SubMgrTestClassificationSubscriber(new MockIRemoteObject()));
+    const sptr<NotificationSubscribeInfo> subscribeInfo = new NotificationSubscribeInfo();
+    subscribeInfo->AddAppUserId(SUBSCRIBE_USER_ALL);
+    subscribeInfo->SetSubscribedFlags(0xFFFFFFFF);
+    subscribeInfo->SetEnableClassification(true);
+    EXPECT_EQ(manager.AddSubscriberInner(subscriber, subscribeInfo), ERR_OK);
+    return subscriber;
+}
+
+// The fake closed source round of the APPLY case: the real .so never loads in the unit
+// test environment (dlopen fails and the classification slot stays null), so the
+// landing of a fresh triple on the consumption path is only reachable through an
+// injected stand in function pointer. The fake mirrors the in process contract of the
+// real entry: it writes its round decision type into the request and returns the fresh
+// triple through the classification slot, and snapshots the triple so the assertions
+// compare against exactly what was handed over.
+NotificationClassification::PriorityInfo g_subMgrFakedPriorityInfo;
+
+int32_t SubMgrTestFakeUpdateNotification(const std::vector<sptr<NotificationRequest>> &requests,
+    const std::vector<nlohmann::json> &commands,
+    std::vector<sptr<NotificationClassification>> &notificationClassifications,
+    std::vector<int32_t> &results)
+{
+    if (requests.empty() || notificationClassifications.empty()) {
+        return NotificationAiExtensionWrapper::ErrorCode::ERR_FAIL;
+    }
+    requests[0]->SetInnerPriorityNotificationType(SUB_MGR_TEST_TYPE_AT_ME);
+    sptr<NotificationClassification> classification = new NotificationClassification("DEAL", "LOGISTICS");
+    NotificationClassification::PriorityInfo priorityInfo;
+    priorityInfo.SetPriorityNotificationType(SUB_MGR_TEST_TYPE_AT_ME);
+    priorityInfo.SetExpiredTime(SubMgrTestNowMillis() + 2 * SUB_MGR_TEST_HOUR_MILLIS);
+    priorityInfo.SetSource(SUB_MGR_TEST_SOURCE_AI);
+    classification->SetPriorityInfo(priorityInfo);
+    notificationClassifications[0] = classification;
+    g_subMgrFakedPriorityInfo = priorityInfo;
+    return NotificationAiExtensionWrapper::ErrorCode::ERR_OK;
+}
+} // namespace
+
+/**
+ * @tc.name: NotifyConsumedInner_PriorityNullClear_001
+ * @tc.desc: Test the null round clear semantics of the consumption path arbitration
+ *           (overwrite semantics): with the cache holding a determined rule triple, a
+ *           consumption round (a null classification, the wrapper unavailable shape)
+ *           clears the cached triple to the default (the aggregation labels kept),
+ *           forces the request type to OTHER, strips the stale registration and the
+ *           subscriber receives the reset value as the effective classification.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_PriorityNullClear_001, Level1)
+{
+    SubMgrTestResetPriorityState();
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<SubMgrTestClassificationSubscriber> subscriber = SubMgrTestRegisterSubscriber(notificationSubscriberManager);
+
+    sptr<NotificationRequest> request = SubMgrTestMakeRequest("com.example.subscriber.dropfamily");
+    sptr<Notification> notification = new Notification(request);
+    std::string notificationKey = notification->GetKey();
+    // The cache holds a determined rule triple landed through the real arbitration
+    // entry (a future expire time keeps the preset on the registration path only).
+    int64_t expireTime = SubMgrTestNowMillis() + SUB_MGR_TEST_HOUR_MILLIS;
+    request->SetInnerPriorityNotificationType(SUB_MGR_TEST_TYPE_URGENT);
+    sptr<NotificationClassification> preset = new NotificationClassification("DEAL", "LOGISTICS");
+    NotificationClassification::PriorityInfo presetInfo;
+    presetInfo.SetPriorityNotificationType(SUB_MGR_TEST_TYPE_URGENT);
+    presetInfo.SetExpiredTime(expireTime);
+    presetInfo.SetSource(SUB_MGR_TEST_SOURCE_KEYWORD);
+    preset->SetPriorityInfo(presetInfo);
+    sptr<NotificationClassification> presetEffective = nullptr;
+    ASSERT_EQ(PriorityNotificationDegradeManager::GetInstance()->ApplyTaggingResult(notificationKey,
+        notification->GetNotificationRequestPoint(), preset, presetEffective),
+        PriorityNotificationDegradeManager::ArbitrateResult::APPLY);
+    // The closed source wrote its own type into the request this round (either kept
+    // when the intelligent switch read fails early, or the OTHER of the reset before
+    // the wrapper call): the null round clear below forces both shapes to OTHER.
+    request->SetInnerPriorityNotificationType(SUB_MGR_TEST_TYPE_AT_ME);
+
+    sptr<NotificationSortingMap> notificationMap = new NotificationSortingMap();
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
+
+    // The subscriber got the consumed notification with the effective classification:
+    // null, the round's landed value (the cache entry was removed by the overwrite).
+    ASSERT_TRUE(subscriber->IsCalled());
+    EXPECT_EQ(subscriber->GetLastClassification(), nullptr);
+    // The request type was forced to OTHER inside the arbitration (no priority survives).
+    EXPECT_EQ(notification->GetNotificationRequestPoint()->GetPriorityNotificationType(),
+        SUB_MGR_TEST_TYPE_OTHER);
+    // The cache entry is removed and the stale registration is stripped.
+    EXPECT_EQ(NotificationClassificationMgr::GetInstance().Get(notificationKey), nullptr);
+    EXPECT_EQ(PriorityNotificationDegradeManager::GetInstance()->GetEarliestExpiredTime(), 0);
+
+    notificationSubscriberManager.RemoveSubscriberInner(subscriber, nullptr);
+    SubMgrTestResetPriorityState();
+}
+
+/**
+ * @tc.name: NotifyConsumedInner_PriorityApplyNewValue_001
+ * @tc.desc: Test the APPLY semantics of the consumption path arbitration (AC-006,
+ *           T004): with no cached classification, a consumption round carrying a fresh
+ *           triple (delivered through the injected fake closed source round, since the
+ *           real .so never loads here) lands the triple, registers the degrade and
+ *           distributes the landed new value to the subscriber.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyConsumedInner_PriorityApplyNewValue_001, Level1)
+{
+    SubMgrTestResetPriorityState();
+    NotificationSubscriberManager notificationSubscriberManager;
+    sptr<SubMgrTestClassificationSubscriber> subscriber = SubMgrTestRegisterSubscriber(notificationSubscriberManager);
+
+    // Steer the wrapper command building so the closed source round is actually
+    // reached: the intelligent switch on, the bundle enabled and an intelligent
+    // strategy (no STATUS_ALL_PRIORITY bit).
+    NotificationPreferences::GetInstance()->PutPriorityIntelligentEnabled(
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+    std::string bundleName = "com.example.subscriber.applynewvalue";
+    SubMgrTestPutBundlePreference(bundleName);
+    sptr<NotificationRequest> request = SubMgrTestMakeRequest(bundleName);
+    sptr<Notification> notification = new Notification(request);
+    std::string notificationKey = notification->GetKey();
+    // The fake closed source round hands over a fresh triple and writes its type into
+    // the request (the in process contract); the pristine wrapper state (the dlopen
+    // failure leaves the pointer null) is restored right after the call.
+    NOTIFICATION_AI_EXTENSION_WRAPPER->updateNotification_ = SubMgrTestFakeUpdateNotification;
+    g_subMgrFakedPriorityInfo = NotificationClassification::PriorityInfo();
+
+    sptr<NotificationSortingMap> notificationMap = new NotificationSortingMap();
+    notificationSubscriberManager.NotifyConsumedInner(notification, notificationMap);
+    NOTIFICATION_AI_EXTENSION_WRAPPER->updateNotification_ = nullptr;
+
+    // The fake round actually ran (otherwise the snapshot below stays the default
+    // triple and the following assertions fail loudly).
+    ASSERT_EQ(g_subMgrFakedPriorityInfo.GetPriorityNotificationType(), SUB_MGR_TEST_TYPE_AT_ME);
+    // The subscriber got the consumed notification with the landed new value.
+    ASSERT_TRUE(subscriber->IsCalled());
+    sptr<NotificationClassification> received = subscriber->GetLastClassification();
+    ASSERT_NE(received, nullptr);
+    SubMgrTestExpectPriorityInfo(received->GetPriorityInfo(),
+        g_subMgrFakedPriorityInfo.GetPriorityNotificationType(),
+        g_subMgrFakedPriorityInfo.GetExpiredTime(), g_subMgrFakedPriorityInfo.GetSource());
+    EXPECT_EQ(received->GetClassification(), "DEAL");
+    EXPECT_EQ(received->GetSubClassification(), "LOGISTICS");
+    // The fresh type the closed source wrote stays (APPLY never restores) and the
+    // triple landed into the cache with the degrade registration armed for it.
+    EXPECT_EQ(notification->GetNotificationRequestPoint()->GetPriorityNotificationType(),
+        SUB_MGR_TEST_TYPE_AT_ME);
+    sptr<NotificationClassification> landed = NotificationClassificationMgr::GetInstance().Get(notificationKey);
+    ASSERT_NE(landed, nullptr);
+    SubMgrTestExpectPriorityInfo(landed->GetPriorityInfo(),
+        g_subMgrFakedPriorityInfo.GetPriorityNotificationType(),
+        g_subMgrFakedPriorityInfo.GetExpiredTime(), g_subMgrFakedPriorityInfo.GetSource());
+    EXPECT_EQ(PriorityNotificationDegradeManager::GetInstance()->GetEarliestExpiredTime(),
+        g_subMgrFakedPriorityInfo.GetExpiredTime());
+
+    // Restore the factory intelligent switch default for the later cases.
+    NotificationPreferences::GetInstance()->PutPriorityIntelligentEnabled(
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+    notificationSubscriberManager.RemoveSubscriberInner(subscriber, nullptr);
+    SubMgrTestResetPriorityState();
+}
+#endif // ANS_FEATURE_PRIORITY_NOTIFICATION
+}  // namespace Notification
+}  // namespace OHOS
+

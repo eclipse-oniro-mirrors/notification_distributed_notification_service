@@ -29,7 +29,7 @@ public:
 
     void CreateTimer(std::shared_ptr<MiscServices::ITimerInfo> timerOptions);
 
-    void StartTimer(int64_t triggerTime);
+    bool StartTimer(int64_t triggerTime);
 
     void StopTimer();
 
