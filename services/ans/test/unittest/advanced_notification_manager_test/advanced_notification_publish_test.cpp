@@ -189,50 +189,58 @@ HWTEST_F(AdvancedNotificationPublishTest,
 }
 
 /**
- * @tc.name: GetUri_NullRequest_00001
- * @tc.desc: Test GetUri with nullptr request
+ * @tc.name: BuildRequestWithUri_NullRequest_00001
+ * @tc.desc: Test BuildRequestWithUri with nullptr request
  * @tc.type: FUNC
  * @tc.require: I00001
  */
-HWTEST_F(AdvancedNotificationPublishTest, GetUri_NullRequest_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationPublishTest, BuildRequestWithUri_NullRequest_00001,
+    Function | SmallTest | Level1)
 {
     auto service = GetService();
     sptr<NotificationRequest> nullRequest = nullptr;
-    
-    auto result = service->GetUri(nullRequest);
-    EXPECT_NE(result, ERR_OK);
+
+    auto result = service->BuildRequestWithUri(nullRequest);
+    EXPECT_EQ(result.GetRefPtr(), nullptr);
 }
 
 /**
- * @tc.name: GetUri_NullAdditionalData_00001
- * @tc.desc: Test GetUri with nullptr additionalData
+ * @tc.name: BuildRequestWithUri_NullAdditionalData_00001
+ * @tc.desc: Test BuildRequestWithUri with nullptr additionalData
  * @tc.type: FUNC
  * @tc.require: I00001
  */
-HWTEST_F(AdvancedNotificationPublishTest, GetUri_NullAdditionalData_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationPublishTest, BuildRequestWithUri_NullAdditionalData_00001,
+    Function | SmallTest | Level1)
 {
     auto service = GetService();
     sptr<NotificationRequest> request = new NotificationRequest();
-    
-    auto result = service->GetUri(request);
-    EXPECT_NE(result, ERR_OK);
+
+    auto result = service->BuildRequestWithUri(request);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetAdditionalData(), nullptr);
 }
 
 /**
- * @tc.name: GetUri_NullWantAgent_00001
- * @tc.desc: Test GetUri with nullptr wantAgent
+ * @tc.name: BuildRequestWithUri_NullWantAgent_00001
+ * @tc.desc: Test BuildRequestWithUri with nullptr wantAgent
  * @tc.type: FUNC
  * @tc.require: I00001
  */
-HWTEST_F(AdvancedNotificationPublishTest, GetUri_NullWantAgent_00001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationPublishTest, BuildRequestWithUri_NullWantAgent_00001,
+    Function | SmallTest | Level1)
 {
     auto service = GetService();
     sptr<NotificationRequest> request = new NotificationRequest();
     auto additionalData = std::make_shared<AAFwk::WantParams>();
     request->SetAdditionalData(additionalData);
-    
-    auto result = service->GetUri(request);
-    EXPECT_NE(result, ERR_OK);
+
+    auto result = service->BuildRequestWithUri(request);
+    ASSERT_NE(result, nullptr);
+    EXPECT_FALSE(additionalData->HasParam("ohos.notificationManager.wantUri"));
+    auto resultData = result->GetAdditionalData();
+    ASSERT_NE(resultData, nullptr);
+    EXPECT_TRUE(resultData->HasParam("ohos.notificationManager.wantUri"));
 }
 
 /**
