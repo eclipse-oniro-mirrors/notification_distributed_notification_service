@@ -35,6 +35,7 @@ struct ISystemEvent {
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleAdd;
     std::function<void(const sptr<NotificationBundleOption> &)> onBundleUpdate;
     std::function<void()> onBootSystemCompleted;
+    std::function<void(int32_t userId)> onDistributedAccountLogout;
 };
 }  // namespace Notification
 }  // namespace OHOS

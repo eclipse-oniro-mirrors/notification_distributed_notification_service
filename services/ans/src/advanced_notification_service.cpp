@@ -380,6 +380,7 @@ AdvancedNotificationService::AdvancedNotificationService()
         std::bind(&AdvancedNotificationService::OnBundleDataAdd, this, std::placeholders::_1),
         std::bind(&AdvancedNotificationService::OnBundleDataUpdate, this, std::placeholders::_1),
         std::bind(&AdvancedNotificationService::OnBootSystemCompleted, this),
+        std::bind(&AdvancedNotificationService::OnDistributedAccountLogout, this, std::placeholders::_1),
     };
     systemEventObserver_ = std::make_shared<SystemEventObserver>(iSystemEvent);
     DelayedSingleton<NotificationConfigParse>::GetInstance()->GetReportTrustListConfig();
