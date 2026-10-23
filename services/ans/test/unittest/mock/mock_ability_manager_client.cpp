@@ -22,6 +22,12 @@ bool g_topAbilitySequenceEnabled = false;
 int32_t g_lastTopAbilityUserId = -1;
 bool g_lastTopAbilityNeedLocalDeviceId = true;
 int32_t g_topAbilityCallCount = 0;
+
+constexpr int32_t DEFAULT_KIOSK_ERR_CODE = OHOS::ERR_OK;
+constexpr bool DEFAULT_KIOSK_MODE = false;
+int32_t g_kioskStatusErrCode = DEFAULT_KIOSK_ERR_CODE;
+bool g_kioskModeEnabled = DEFAULT_KIOSK_MODE;
+int32_t g_kioskStatusCallCount = 0;
 }
 
 namespace OHOS {
@@ -65,6 +71,24 @@ int32_t MockGetTopAbilityCallCount()
     return g_topAbilityCallCount;
 }
 
+void MockSetKioskStatus(int32_t errCode, bool isKioskMode)
+{
+    g_kioskStatusErrCode = errCode;
+    g_kioskModeEnabled = isKioskMode;
+}
+
+void MockResetKioskStatus()
+{
+    g_kioskStatusErrCode = DEFAULT_KIOSK_ERR_CODE;
+    g_kioskModeEnabled = DEFAULT_KIOSK_MODE;
+    g_kioskStatusCallCount = 0;
+}
+
+int32_t MockGetKioskStatusCallCount()
+{
+    return g_kioskStatusCallCount;
+}
+
 std::shared_ptr<MockAbilityManagerClient> MockAbilityManagerClient::mockinstance_ = nullptr;
 std::shared_ptr<MockAbilityManagerClient> MockAbilityManagerClient::GetInstance()
 {
@@ -94,6 +118,16 @@ AppExecFwk::ElementName AbilityManagerClient::GetTopAbility(bool isNeedLocalDevi
     }
     elementName.SetBundleName(g_topAbilityBundleName);
     return elementName;
+}
+
+ErrCode AbilityManagerClient::GetKioskStatus(KioskStatus &kioskStatus)
+{
+    g_kioskStatusCallCount++;
+    if (g_kioskStatusErrCode != ERR_OK) {
+        return static_cast<ErrCode>(g_kioskStatusErrCode);
+    }
+    kioskStatus.isKioskMode_ = g_kioskModeEnabled;
+    return ERR_OK;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

@@ -50,6 +50,12 @@ void MockResetTopAbility();
 int32_t MockGetLastTopAbilityUserId();
 bool MockGetLastTopAbilityNeedLocalDeviceId();
 int32_t MockGetTopAbilityCallCount();
+
+// Test hooks to control and inspect the GetKioskStatus mock.
+// Default behavior (ERR_OK with isKioskMode_ = false) is preserved until overridden.
+void MockSetKioskStatus(int32_t errCode, bool isKioskMode);
+void MockResetKioskStatus();
+int32_t MockGetKioskStatusCallCount();
 }  // namespace AAFwk
 }  // namespace OHOS
 
