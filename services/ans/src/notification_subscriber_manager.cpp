@@ -1256,27 +1256,19 @@ bool NotificationSubscriberManager::IsSubscribedByDeviceType(const std::shared_p
 #endif
 }
 
-int32_t NotificationSubscriberManager::MatchPriorityTypeToBits(int32_t priorityType)
+bool NotificationSubscriberManager::IsPriorityNotification(const sptr<NotificationRequest> &request) const
 {
-    static const std::map<int32_t, int32_t> typeToBits = {
-        { static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PARAM_IN),
-            NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
-            NotificationConstant::PriorityStrategyStatus::STATUS_APPLICATION_DEFINED },
-        { static_cast<int32_t>(NotificationConstant::PrioritySourceResult::KEYWORD),
-            NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
-            NotificationConstant::PriorityStrategyStatus::STATUS_USER_DEFINED },
-        { static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI),
-            NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
-            NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT },
-        { static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PUSH_RULE),
-            NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
-            NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_RULE }
-    };
-    auto it = typeToBits.find(priorityType);
-    if (it != typeToBits.end()) {
-        return it->second;
+    if (request == nullptr) {
+        return false;
     }
-    return 0;
+    // The system-side conclusion: a priority type other than OTHER means the notification is a priority one.
+    const std::string priorityType = request->GetPriorityNotificationType();
+    if (!priorityType.empty() && priorityType != NotificationConstant::PriorityNotificationType::OTHER) {
+        return true;
+    }
+    // Fallback: the conclusion has already been written into extendInfo during publish.
+    auto extendInfo = request->GetExtendInfo();
+    return extendInfo != nullptr && extendInfo->HasParam(EXTENDINFO_PRIORITY_TYPE);
 }
 
 bool NotificationSubscriberManager::IsSubscribedByPriority(
@@ -1315,10 +1307,24 @@ bool NotificationSubscriberManager::IsSubscribedByPriority(
     AAFwk::WantParams classifyParams = extendInfo->GetWantParams("notificationClassify");
     int32_t priorityType = classifyParams.GetIntParam("type", -1);
     ANS_LOGD("priorityType=%{public}d", priorityType);
+    if (priorityType < static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PARAM_IN) ||
+        priorityType > static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PUSH_RULE)) {
+        ANS_LOGD("invalid priorityType %{public}d", priorityType);
+        return false;
+    }
+    // The classify source only takes effect when the notification has been identified as a priority one.
+    if (!IsPriorityNotification(request)) {
+        ANS_LOGW("classify source without priority result, bundle=%{public}s, type=%{public}d",
+            notification->GetBundleName().c_str(), priorityType);
+        return false;
+    }
 
     return MatchPriorityStrategy(strategy, priorityType);
 }
 
+// Matches the classify source against the subscriber's priority strategy only. The "is priority
+// notification" precondition is verified by IsSubscribedByPriority(), and STATUS_ALL_PRIORITY is
+// handled there as well.
 bool NotificationSubscriberManager::MatchPriorityStrategy(int32_t strategy, int32_t priorityType)
 {
     static const std::map<int32_t, std::vector<int32_t>> strategyToTypes = {

@@ -19,6 +19,11 @@
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
 #include "ans_ut_constant.h"
+#include "ans_const_define.h"
+#include "int_wrapper.h"
+#include "string_wrapper.h"
+#include "want_params.h"
+#include "want_params_wrapper.h"
 #define private public
 #define protected public
 #include "advanced_notification_service.h"
@@ -73,74 +78,6 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, NotifyRefreshPriority_00100, F
     notificationSubscriberManager->NotifyRefreshPriorityIntelligent(true, requests);
     notificationSubscriberManager->NotifyRefreshPriorityStrategy(requests, strategies);
     notificationSubscriberManager->NotifyRefreshPriorityConfig(requests);
-}
-
-/**
- * @tc.number    : MatchPriorityTypeToBits_00100
- * @tc.name      : MatchPriorityTypeToBits_00100
- * @tc.desc      : test MatchPriorityTypeToBits with PARAM_IN
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00100, Function | SmallTest | Level1)
-{
-    auto manager = std::make_shared<NotificationSubscriberManager>();
-    auto result = manager->MatchPriorityTypeToBits(
-        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PARAM_IN));
-    EXPECT_EQ(result, NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
-        NotificationConstant::PriorityStrategyStatus::STATUS_APPLICATION_DEFINED);
-}
-
-/**
- * @tc.number    : MatchPriorityTypeToBits_00200
- * @tc.name      : MatchPriorityTypeToBits_00200
- * @tc.desc      : test MatchPriorityTypeToBits with KEYWORD
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00200, Function | SmallTest | Level1)
-{
-    auto manager = std::make_shared<NotificationSubscriberManager>();
-    auto result = manager->MatchPriorityTypeToBits(
-        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::KEYWORD));
-    EXPECT_EQ(result, NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
-        NotificationConstant::PriorityStrategyStatus::STATUS_USER_DEFINED);
-}
-
-/**
- * @tc.number    : MatchPriorityTypeToBits_00300
- * @tc.name      : MatchPriorityTypeToBits_00300
- * @tc.desc      : test MatchPriorityTypeToBits with AI
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00300, Function | SmallTest | Level1)
-{
-    auto manager = std::make_shared<NotificationSubscriberManager>();
-    auto result = manager->MatchPriorityTypeToBits(
-        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI));
-    EXPECT_EQ(result, NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
-        NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT);
-}
-
-/**
- * @tc.number    : MatchPriorityTypeToBits_00400
- * @tc.name      : MatchPriorityTypeToBits_00400
- * @tc.desc      : test MatchPriorityTypeToBits with PUSH_RULE
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00400, Function | SmallTest | Level1)
-{
-    auto manager = std::make_shared<NotificationSubscriberManager>();
-    auto result = manager->MatchPriorityTypeToBits(
-        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PUSH_RULE));
-    EXPECT_EQ(result, NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_DEFAULT |
-        NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_RULE);
-}
-
-/**
- * @tc.number    : MatchPriorityTypeToBits_00500
- * @tc.name      : MatchPriorityTypeToBits_00500
- * @tc.desc      : test MatchPriorityTypeToBits with invalid type returns 0
- */
-HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00500, Function | SmallTest | Level1)
-{
-    auto manager = std::make_shared<NotificationSubscriberManager>();
-    auto result = manager->MatchPriorityTypeToBits(static_cast<int32_t>(99));
-    EXPECT_EQ(result, 0);
 }
 
 /**
@@ -380,17 +317,246 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityStrategy_01100, F
     EXPECT_TRUE(result);
 }
 
+namespace {
+constexpr int32_t PRIORITY_TEST_USER_ID = 100;
+constexpr int32_t PRIORITY_TEST_UID = 101;
+constexpr int32_t STRATEGY_SYSTEM_RULE_AND_INTELLIGENT =
+    NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_RULE |
+    NotificationConstant::PriorityStrategyStatus::STATUS_INTELLIGENT;
+
+sptr<NotificationRequest> BuildPriorityRequest(int32_t classifyType, const std::string &priorityConclusion,
+    bool withClassifyKey = true)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    if (request == nullptr) {
+        return nullptr;
+    }
+    request->SetCreatorBundleName("test.priority.creator");
+    request->SetCreatorUid(PRIORITY_TEST_USER_ID);
+    request->SetOwnerBundleName("test.priority.owner");
+    request->SetReceiverUserId(PRIORITY_TEST_USER_ID);
+    request->SetInnerPriorityNotificationType(priorityConclusion);
+    if (!withClassifyKey) {
+        return request;
+    }
+    AAFwk::WantParams classify;
+    classify.SetParam("type", AAFwk::Integer::Box(classifyType));
+    AAFwk::WantParams extendInfo;
+    extendInfo.SetParam("notificationClassify", AAFwk::WantParamWrapper::Box(classify));
+    request->SetExtendInfo(std::make_shared<AAFwk::WantParams>(extendInfo));
+    return request;
+}
+
+std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> BuildPriorityRecord(int32_t strategy)
+{
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->userId = PRIORITY_TEST_USER_ID;
+    record->priorityStrategy_ = strategy;
+    record->subscriberBundleName_ = "subscriber.bundle";
+    record->subscriberUid = PRIORITY_TEST_UID;
+    return record;
+}
+} // namespace
+
 /**
- * @tc.number    : MatchPriorityTypeToBits_00600
- * @tc.name      : MatchPriorityTypeToBits_00600
- * @tc.desc      : test MatchPriorityTypeToBits with invalid type returns 0
+ * @tc.number    : IsSubscribedByPriority_0100
+ * @tc.name      : IsSubscribedByPriority_0100
+ * @tc.desc      : test classify source without priority conclusion is rejected
  */
-HWTEST_F(NotificationSubscriberManagerBranchTest, MatchPriorityTypeToBits_00600, Function | SmallTest | Level1)
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_0100, Function | SmallTest | Level1)
 {
     auto manager = std::make_shared<NotificationSubscriberManager>();
-    auto result = manager->MatchPriorityTypeToBits(static_cast<int32_t>(-1));
-    EXPECT_EQ(result, 0);
+    auto record = BuildPriorityRecord(STRATEGY_SYSTEM_RULE_AND_INTELLIGENT);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI),
+        NotificationConstant::PriorityNotificationType::OTHER);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_FALSE(manager->IsSubscribedByPriority(record, notification, 0));
 }
+
+/**
+ * @tc.number    : IsSubscribedByPriority_0200
+ * @tc.name      : IsSubscribedByPriority_0200
+ * @tc.desc      : test notification without classify key is rejected
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_0200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(STRATEGY_SYSTEM_RULE_AND_INTELLIGENT);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI),
+        NotificationConstant::PriorityNotificationType::OTHER, false);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_FALSE(manager->IsSubscribedByPriority(record, notification, 0));
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_0300
+ * @tc.name      : IsSubscribedByPriority_0300
+ * @tc.desc      : test invalid classify type is rejected
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_0300, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(STRATEGY_SYSTEM_RULE_AND_INTELLIGENT);
+    sptr<NotificationRequest> request = BuildPriorityRequest(99,
+        NotificationConstant::PriorityNotificationType::OTHER);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_FALSE(manager->IsSubscribedByPriority(record, notification, 0));
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_0400
+ * @tc.name      : IsSubscribedByPriority_0400
+ * @tc.desc      : test userId mismatch is rejected
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_0400, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(STRATEGY_SYSTEM_RULE_AND_INTELLIGENT);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI),
+        NotificationConstant::PriorityNotificationType::OTHER);
+    request->SetReceiverUserId(PRIORITY_TEST_USER_ID + 1);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_FALSE(manager->IsSubscribedByPriority(record, notification, 0));
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_0500
+ * @tc.name      : IsSubscribedByPriority_0500
+ * @tc.desc      : test distributed collaborate notification is rejected
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_0500, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(STRATEGY_SYSTEM_RULE_AND_INTELLIGENT);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI),
+        NotificationConstant::PriorityNotificationType::OTHER);
+    request->SetDistributedCollaborate(true);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_FALSE(manager->IsSubscribedByPriority(record, notification, 0));
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_0600
+ * @tc.name      : IsSubscribedByPriority_0600
+ * @tc.desc      : test all priority strategy is not affected by classify source
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_0600, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI),
+        NotificationConstant::PriorityNotificationType::OTHER);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_TRUE(manager->IsSubscribedByPriority(record, notification,
+        NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY));
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_0700
+ * @tc.name      : IsSubscribedByPriority_0700
+ * @tc.desc      : test priority conclusion written into extendInfo is accepted
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_0700, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(STRATEGY_SYSTEM_RULE_AND_INTELLIGENT);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI),
+        NotificationConstant::PriorityNotificationType::OTHER);
+    auto extendInfo = request->GetExtendInfo();
+    ASSERT_NE(extendInfo, nullptr);
+    extendInfo->SetParam(EXTENDINFO_PRIORITY_TYPE,
+        AAFwk::String::Box(NotificationConstant::PriorityNotificationType::URGENT_MESSAGE));
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_TRUE(manager->IsSubscribedByPriority(record, notification, 0));
+}
+
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+/**
+ * @tc.number    : IsSubscribedByPriority_0800
+ * @tc.name      : IsSubscribedByPriority_0800
+ * @tc.desc      : test AI priority notification matches intelligent strategy
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_0800, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(STRATEGY_SYSTEM_RULE_AND_INTELLIGENT);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI),
+        NotificationConstant::PriorityNotificationType::URGENT_MESSAGE);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_TRUE(manager->IsSubscribedByPriority(record, notification, 0));
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_0900
+ * @tc.name      : IsSubscribedByPriority_0900
+ * @tc.desc      : test AI priority notification does not match system rule only strategy
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_0900, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(NotificationConstant::PriorityStrategyStatus::STATUS_SYSTEM_RULE);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::AI),
+        NotificationConstant::PriorityNotificationType::URGENT_MESSAGE);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_FALSE(manager->IsSubscribedByPriority(record, notification, 0));
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_1000
+ * @tc.name      : IsSubscribedByPriority_1000
+ * @tc.desc      : test push rule source matches system rule bit in combined strategy
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_1000, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(STRATEGY_SYSTEM_RULE_AND_INTELLIGENT);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PUSH_RULE),
+        NotificationConstant::PriorityNotificationType::URGENT_MESSAGE);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_TRUE(manager->IsSubscribedByPriority(record, notification, 0));
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_1100
+ * @tc.name      : IsSubscribedByPriority_1100
+ * @tc.desc      : test application defined source matches application defined strategy
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_1100, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(NotificationConstant::PriorityStrategyStatus::STATUS_APPLICATION_DEFINED);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PARAM_IN),
+        NotificationConstant::PriorityNotificationType::URGENT_MESSAGE);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_TRUE(manager->IsSubscribedByPriority(record, notification, 0));
+}
+
+/**
+ * @tc.number    : IsSubscribedByPriority_1200
+ * @tc.name      : IsSubscribedByPriority_1200
+ * @tc.desc      : test application defined source does not match intelligent strategy
+ */
+HWTEST_F(NotificationSubscriberManagerBranchTest, IsSubscribedByPriority_1200, Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = BuildPriorityRecord(STRATEGY_SYSTEM_RULE_AND_INTELLIGENT);
+    sptr<NotificationRequest> request = BuildPriorityRequest(
+        static_cast<int32_t>(NotificationConstant::PrioritySourceResult::PARAM_IN),
+        NotificationConstant::PriorityNotificationType::URGENT_MESSAGE);
+    sptr<Notification> notification = new Notification(request);
+    EXPECT_FALSE(manager->IsSubscribedByPriority(record, notification, 0));
+}
+#endif
 
 /**
  * @tc.number    : MarkConsumedBySubscriber_00100
