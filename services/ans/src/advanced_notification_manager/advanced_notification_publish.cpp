@@ -31,6 +31,7 @@
 #include "notification_preferences.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
+#include "bool_wrapper.h"
 #include "long_wrapper.h"
 #include "string_wrapper.h"
 #include "int_wrapper.h"
@@ -325,7 +326,19 @@ void AdvancedNotificationService::SetIsFromSAToExtendInfo(const sptr<Notificatio
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     extendInfo->SetParam("notification_publish_by_sa", AAFwk::String::Box(std::to_string(isSubsystem)));
     request->SetExtendInfo(extendInfo);
-    return;
+    if (!IsFromAccountNotification(request)) {
+        return;
+    }
+    bool isSystemApp = AccessTokenHelper::IsSystemApp();
+    if (isSystemApp && AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER)) {
+        return;
+    }
+    request->GetExtendInfo()->SetParam(EXTENDINFO_IS_FROM_ACCOUNT, AAFwk::Boolean::Box(false));
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_35, EventBranchId::BRANCH_0)
+        .ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED)
+        .Message("isFromAccount reset: caller is not systemApp or has no agent permission");
+    NotificationAnalyticsUtil::ReportPublishFailedEvent(request, message);
+    ANS_LOGI("Caller is not systemApp or has no agent permission, reset isFromAccount to false.");
 }
 
 void AdvancedNotificationService::SetVersionCodeToExtendInfo(const sptr<NotificationRequest> &request)

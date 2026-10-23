@@ -379,6 +379,50 @@ HWTEST_F(AnsLogTest, AnsConvertTest_008, TestSize.Level1)
 }
 
 /*
+ * @tc.name: AnsConvertTest_018
+ * @tc.desc: test ReasonCToJS function for logout/geofence/distributed/snooze/shell reasons
+ *           and the default branch with an unknown reason.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLogTest, AnsConvertTest_018, TestSize.Level1)
+{
+    int outType;
+    int inType = NotificationConstant::USER_LOGOUT_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::USER_LOGOUT_REASON_DELETE));
+    inType = NotificationConstant::DISTRIBUTED_ENABLE_CLOSE_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::DISTRIBUTED_ENABLE_CLOSE_DELETE));
+    inType = NotificationConstant::DISTRIBUTED_RELEASE_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::DISTRIBUTED_RELEASE_DELETE));
+    inType = NotificationConstant::DISTRIBUTED_MASTER_ENABLE_CLOSE_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType,
+        static_cast<int32_t>(NotificationNapi::RemoveReason::DISTRIBUTED_MASTER_ENABLE_CLOSE_DELETE));
+    inType = NotificationConstant::TRIGGER_GEOFENCE_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::TRIGGER_GEOFENCE_REASON_DELETE));
+    inType = NotificationConstant::DISTRIBUTED_APPLICATION_ENABLE_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType,
+        static_cast<int32_t>(NotificationNapi::RemoveReason::DISTRIBUTED_APPLICATION_ENABLE_REASON_DELETE));
+    inType = NotificationConstant::SNOOZE_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::SNOOZE_REASON_DELETE));
+    inType = NotificationConstant::SHELL_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::SHELL_REASON_DELETE));
+    inType = NotificationConstant::USER_ACCOUNT_LOGOUT_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::USER_ACCOUNT_LOGOUT_REASON_DELETE));
+    // unknown reason falls through to the final default branch
+    inType = 9999; // invalid reason
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::APP_CANCEL_REASON_OTHER));
+}
+
+/*
  * @tc.name: AnsConvertTest_009
  * @tc.desc: test DoNotDisturbTypeJSToC function
  * @tc.type: FUNC

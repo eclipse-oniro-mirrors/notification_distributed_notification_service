@@ -1061,6 +1061,8 @@ public:
     void OnUserStopped(int32_t userId);
     void OnBundleDataCleared(const sptr<NotificationBundleOption> &bundleOption);
     void DeleteAllByUserStopped(int32_t userId);
+    void OnDistributedAccountLogout(int32_t userId);
+    void DeleteNotificationsByAccountLogout(int32_t userId);
 
     /**
      * @brief Obtains the event of bundle install.
@@ -2165,6 +2167,9 @@ private:
         const sptr<NotificationBundleOption> &bundleOption);
     ErrCode CheckGeofenceNotificationRequestLiveViewStatus(const sptr<NotificationRequest> &request);
     void DeleteAllByUserStoppedFromTriggerNotificationList(std::string key, int32_t userId);
+    void RemoveFromTriggerNotificationListByAccountLogout(int32_t userId);
+    void RemoveFromDelayNotificationListByAccountLogout(int32_t userId);
+    void RemoveFromSnoozeDelayListByAccountLogout(int32_t userId);
     void ExecuteRemoveNotificationFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle,
         int32_t notificationId, const std::string &label);
     void RemoveGroupByBundleFromTriggerNotificationList(const sptr<NotificationBundleOption> &bundle,
@@ -2445,6 +2450,7 @@ private:
     bool ExecuteDeleteDistributedNotification(std::shared_ptr<NotificationRecord>& record,
         std::vector<sptr<Notification>>& notifications, const int32_t removeReason);
     bool IsDistributedNotification(sptr<NotificationRequest> request);
+    bool IsFromAccountNotification(const sptr<NotificationRequest> &request);
     void InvockLiveViewSwitchCheck(const std::vector<sptr<NotificationBundleOption>>& bundles,
         int32_t userId, uint32_t index);
     void InvokeCheckConfig(const std::string& requestId);
