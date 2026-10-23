@@ -46,7 +46,12 @@ extern "C" {
  * @brief Checks whether this application is allowed to publish notifications.
  *
  * @return true  - This application is allowed to publish notifications.
- *         false - This application is not allowed to publish notifications.
+ *         false - This application is not allowed to publish notifications, or the query
+ *                 itself failed (for example, the IPC request failed or the notification
+ *                 service is not running). These two cases cannot be distinguished by the
+ *                 return value; when in doubt, check the hilog output of the notification
+ *                 service: a failed query prints an error log with the error code on the
+ *                 "Notification" tag before returning false.
  * @since 14
  */
 bool OH_Notification_IsNotificationEnabled(void);

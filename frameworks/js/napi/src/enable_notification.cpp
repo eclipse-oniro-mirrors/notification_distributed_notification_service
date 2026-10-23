@@ -454,11 +454,10 @@ void AsyncCompleteCallbackRequestEnableNotification(napi_env env, void *data)
     napi_handle_scope scope;
     auto status = napi_open_handle_scope(env, &scope);
     if (status != napi_ok || scope == nullptr) {
-        ANS_LOGE("status: %{public}d", status);
-        if (asynccallbackinfo->info.callback != nullptr) {
-            napi_delete_reference(env, asynccallbackinfo->info.callback);
-        }
-        napi_delete_async_work(env, asynccallbackinfo->asyncWork);
+        // The env is being destroyed: any napi call on it is undefined behaviour. Skip
+        // the settlement and the napi resource release (both are owned by the env and
+        // freed with it), only free the C++ callback info.
+        ANS_LOGW("env unavailable, skip settle, status: %{public}d", status);
         delete asynccallbackinfo;
         asynccallbackinfo = nullptr;
         return;

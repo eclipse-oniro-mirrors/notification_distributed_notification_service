@@ -774,4 +774,228 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_021, Level1)
 
     system::SetParameter("ohos.boot.bopd.mode", defaultParam);
 }
+
+/**
+ * @tc.name: ReminderDataShareHelper_022
+ * @tc.desc: test ReminderDataShareHelper::CreateReminder function with wrong value type
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_022, Level1)
+{
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
+    DataShare::DataShareObserver::ChangeInfo info;
+    info.valueBuckets_.resize(1);
+
+    // ALARM_TIME and END are wrong type
+    DataShare::DataShareObserver::ChangeInfo::Value wrongTime = std::string("invalid");
+    info.valueBuckets_[0][ReminderCalendarShareTable::ALARM_TIME] = wrongTime;
+    info.valueBuckets_[0][ReminderCalendarShareTable::END] = wrongTime;
+    auto result = ReminderDataShareHelper::GetInstance().CreateReminder(info);
+    EXPECT_EQ(result.size(), 1);
+    for (auto& [key, value] : result) {
+        EXPECT_EQ(value->GetTriggerTimeInMilli(), 0);
+        EXPECT_EQ(value->GetOriTriggerTimeInMilli(), 0);
+        EXPECT_EQ(value->GetAutoDeletedTime(), 0);
+        break;
+    }
+
+    // ALARM_TIME is ok, END is wrong type
+    info.valueBuckets_[0][ReminderCalendarShareTable::ALARM_TIME] = static_cast<double>(1761374864000);
+    result = ReminderDataShareHelper::GetInstance().CreateReminder(info);
+    EXPECT_EQ(result.size(), 1);
+    for (auto& [key, value] : result) {
+        EXPECT_EQ(value->GetTriggerTimeInMilli(), 1761374864000);
+        EXPECT_EQ(value->GetOriTriggerTimeInMilli(), 1761374864000);
+        EXPECT_EQ(value->GetAutoDeletedTime(), 0);
+        break;
+    }
+
+    // ALARM_TIME is wrong type, END is ok
+    info.valueBuckets_[0][ReminderCalendarShareTable::ALARM_TIME] = wrongTime;
+    info.valueBuckets_[0][ReminderCalendarShareTable::END] = static_cast<double>(1761378464000);
+    result = ReminderDataShareHelper::GetInstance().CreateReminder(info);
+    EXPECT_EQ(result.size(), 1);
+    for (auto& [key, value] : result) {
+        EXPECT_EQ(value->GetTriggerTimeInMilli(), 0);
+        EXPECT_EQ(value->GetOriTriggerTimeInMilli(), 0);
+        EXPECT_EQ(value->GetAutoDeletedTime(), 1761378464000);
+        break;
+    }
+}
+
+/**
+ * @tc.name: ReminderDataShareHelper_023
+ * @tc.desc: test ReminderDataShareHelper::InitBaseInfo function with wrong value type
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_023, Level1)
+{
+    sptr<ReminderRequest> reminder = sptr<ReminderRequestCalendar>::MakeSptr();
+    reminder->SetReminderId(1);
+    reminder->SetNotificationId(1);
+    reminder->SetTitle("title");
+    reminder->SetContent("content");
+    reminder->SetIdentifier("identifier");
+    DataShare::DataShareObserver::ChangeInfo info;
+    info.valueBuckets_.resize(1);
+
+    // numeric fields are wrong type
+    DataShare::DataShareObserver::ChangeInfo::Value wrongStr = std::string("invalid");
+    info.valueBuckets_[0][ReminderCalendarShareTable::ID] = wrongStr;
+    info.valueBuckets_[0][ReminderCalendarShareTable::EVENT_ID] = wrongStr;
+    info.valueBuckets_[0][ReminderCalendarShareTable::SLOT_TYPE] = wrongStr;
+    // string fields are wrong type
+    DataShare::DataShareObserver::ChangeInfo::Value wrongNum = static_cast<double>(15);
+    info.valueBuckets_[0][ReminderCalendarShareTable::TITLE] = wrongNum;
+    info.valueBuckets_[0][ReminderCalendarShareTable::CONTENT] = wrongNum;
+    info.valueBuckets_[0][ReminderCalendarShareTable::BUTTONS] = wrongNum;
+    info.valueBuckets_[0][ReminderCalendarShareTable::WANT_AGENT] = wrongNum;
+    info.valueBuckets_[0][ReminderCalendarShareTable::IDENTIFIER] = wrongNum;
+    ReminderDataShareHelper::GetInstance().InitBaseInfo(info.valueBuckets_[0], reminder);
+    EXPECT_EQ(reminder->GetReminderId(), 1);
+    EXPECT_EQ(reminder->GetNotificationId(), 1);
+    EXPECT_EQ(reminder->GetTitle(), "title");
+    EXPECT_EQ(reminder->GetContent(), "content");
+    EXPECT_EQ(reminder->GetIdentifier(), "identifier");
+    EXPECT_EQ(reminder->GetWantAgentInfo(), nullptr);
+}
+
+/**
+ * @tc.name: ReminderDataShareHelper_024
+ * @tc.desc: test ReminderDataShareHelper::BuildReminderV1 function with wrong value type
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_024, Level1)
+{
+    sptr<ReminderRequest> reminder = sptr<ReminderRequestCalendar>::MakeSptr();
+    reminder->SetTimeInterval(600);
+    reminder->SetSnoozeTimes(10);
+    reminder->SetRingDuration(300);
+    reminder->SetSnoozeContent("snooze");
+    reminder->SetExpiredContent("expired");
+    reminder->SetCustomRingUri("ring");
+    DataShare::DataShareObserver::ChangeInfo info;
+    info.valueBuckets_.resize(1);
+
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 1;
+    // numeric fields are wrong type
+    DataShare::DataShareObserver::ChangeInfo::Value wrongStr = std::string("invalid");
+    info.valueBuckets_[0][ReminderCalendarShareTable::TIME_INTERVAL] = wrongStr;
+    info.valueBuckets_[0][ReminderCalendarShareTable::SNOOZE_TIMES] = wrongStr;
+    info.valueBuckets_[0][ReminderCalendarShareTable::RING_DURATION] = wrongStr;
+    info.valueBuckets_[0][ReminderCalendarShareTable::SNOOZE_SLOT_TYPE] = wrongStr;
+    // string fields are wrong type
+    DataShare::DataShareObserver::ChangeInfo::Value wrongNum = static_cast<double>(15);
+    info.valueBuckets_[0][ReminderCalendarShareTable::SNOOZE_CONTENT] = wrongNum;
+    info.valueBuckets_[0][ReminderCalendarShareTable::EXPIRED_CONTENT] = wrongNum;
+    info.valueBuckets_[0][ReminderCalendarShareTable::MAX_SCREEN_WANT_AGENT] = wrongNum;
+    info.valueBuckets_[0][ReminderCalendarShareTable::CUSTOM_RING_URI] = wrongNum;
+    ReminderDataShareHelper::GetInstance().BuildReminderV1(info.valueBuckets_[0], reminder);
+    EXPECT_EQ(reminder->GetTimeInterval(), 600);
+    EXPECT_EQ(reminder->GetSnoozeTimes(), 10);
+    EXPECT_EQ(reminder->GetRingDuration(), 300);
+    EXPECT_EQ(reminder->GetSnoozeContent(), "snooze");
+    EXPECT_EQ(reminder->GetExpiredContent(), "expired");
+    EXPECT_EQ(reminder->GetCustomRingUri(), "ring");
+    EXPECT_EQ(reminder->maxScreenWantAgentInfo_, nullptr);
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
+}
+
+/**
+ * @tc.name: ReminderDataShareHelper_025
+ * @tc.desc: test ReminderDataShareHelper::CreateReminder function with int64 wrong value type
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_025, Level1)
+{
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
+    DataShare::DataShareObserver::ChangeInfo info;
+    info.valueBuckets_.resize(1);
+
+    // ALARM_TIME and END are int64, but double is expected
+    DataShare::DataShareObserver::ChangeInfo::Value int64Value = static_cast<int64_t>(1761374864000);
+    info.valueBuckets_[0][ReminderCalendarShareTable::ALARM_TIME] = int64Value;
+    info.valueBuckets_[0][ReminderCalendarShareTable::END] = int64Value;
+    auto result = ReminderDataShareHelper::GetInstance().CreateReminder(info);
+    EXPECT_EQ(result.size(), 1);
+    for (auto& [key, value] : result) {
+        EXPECT_EQ(value->GetTriggerTimeInMilli(), 0);
+        EXPECT_EQ(value->GetOriTriggerTimeInMilli(), 0);
+        EXPECT_EQ(value->GetAutoDeletedTime(), 0);
+        break;
+    }
+
+    // ALARM_TIME recovers to double
+    info.valueBuckets_[0][ReminderCalendarShareTable::ALARM_TIME] = static_cast<double>(1761374864000);
+    result = ReminderDataShareHelper::GetInstance().CreateReminder(info);
+    EXPECT_EQ(result.size(), 1);
+    for (auto& [key, value] : result) {
+        EXPECT_EQ(value->GetTriggerTimeInMilli(), 1761374864000);
+        EXPECT_EQ(value->GetOriTriggerTimeInMilli(), 1761374864000);
+        break;
+    }
+}
+
+/**
+ * @tc.name: ReminderDataShareHelper_026
+ * @tc.desc: test ReminderDataShareHelper::InitBaseInfo function with int64/bool/monostate/blob
+ * wrong value type
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_026, Level1)
+{
+    sptr<ReminderRequest> reminder = sptr<ReminderRequestCalendar>::MakeSptr();
+    reminder->SetReminderId(1);
+    reminder->SetTitle("title");
+    reminder->SetContent("content");
+    reminder->SetIdentifier("identifier");
+    DataShare::DataShareObserver::ChangeInfo info;
+    info.valueBuckets_.resize(1);
+
+    // ID is int64, TITLE is bool, CONTENT is monostate, IDENTIFIER is blob, but other types are expected
+    DataShare::DataShareObserver::ChangeInfo::Value int64Value = static_cast<int64_t>(15);
+    DataShare::DataShareObserver::ChangeInfo::Value boolValue = true;
+    DataShare::DataShareObserver::ChangeInfo::Value monostateValue;
+    std::vector<uint8_t> blob = {1, 2, 3};
+    info.valueBuckets_[0][ReminderCalendarShareTable::ID] = int64Value;
+    info.valueBuckets_[0][ReminderCalendarShareTable::TITLE] = boolValue;
+    info.valueBuckets_[0][ReminderCalendarShareTable::CONTENT] = monostateValue;
+    info.valueBuckets_[0][ReminderCalendarShareTable::IDENTIFIER] = blob;
+    ReminderDataShareHelper::GetInstance().InitBaseInfo(info.valueBuckets_[0], reminder);
+    EXPECT_EQ(reminder->GetReminderId(), 1);
+    EXPECT_EQ(reminder->GetTitle(), "title");
+    EXPECT_EQ(reminder->GetContent(), "content");
+    EXPECT_EQ(reminder->GetIdentifier(), "identifier");
+}
+
+/**
+ * @tc.name: ReminderDataShareHelper_027
+ * @tc.desc: test ReminderDataShareHelper::BuildReminderV1 function with int64/bool wrong value type
+ * @tc.type: FUNC
+ * @tc.require: issueI5YTF3
+ */
+HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_027, Level1)
+{
+    sptr<ReminderRequest> reminder = sptr<ReminderRequestCalendar>::MakeSptr();
+    reminder->SetTimeInterval(600);
+    reminder->SetSnoozeContent("snooze");
+    DataShare::DataShareObserver::ChangeInfo info;
+    info.valueBuckets_.resize(1);
+
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 1;
+    // TIME_INTERVAL is int64, SNOOZE_CONTENT is bool, but other types are expected
+    DataShare::DataShareObserver::ChangeInfo::Value int64Value = static_cast<int64_t>(1500);
+    DataShare::DataShareObserver::ChangeInfo::Value boolValue = true;
+    info.valueBuckets_[0][ReminderCalendarShareTable::TIME_INTERVAL] = int64Value;
+    info.valueBuckets_[0][ReminderCalendarShareTable::SNOOZE_CONTENT] = boolValue;
+    ReminderDataShareHelper::GetInstance().BuildReminderV1(info.valueBuckets_[0], reminder);
+    EXPECT_EQ(reminder->GetTimeInterval(), 600);
+    EXPECT_EQ(reminder->GetSnoozeContent(), "snooze");
+    ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
+}
 }

@@ -69,6 +69,7 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_OFF);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BUNDLE_SCAN_FINISHED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_STARTED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT);
     EventFwk::CommonEventSubscribeInfo commonEventSubscribeInfo(matchingSkills);
     commonEventSubscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::COMMON);
 
@@ -242,6 +243,15 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
         if (callbacks_.OnUserStopped != nullptr) {
             callbacks_.OnUserStopped(userId);
+        }
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT) {
+        int32_t userId = want.GetIntParam("userId", SUBSCRIBE_USER_INIT);
+        if (userId <= SUBSCRIBE_USER_INIT) {
+            ANS_LOGE("Illegal userId, userId[%{public}d].", userId);
+            return;
+        }
+        if (callbacks_.onDistributedAccountLogout != nullptr) {
+            callbacks_.onDistributedAccountLogout(userId);
         }
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_DATA_CLEARED) {
         if (callbacks_.onBundleDataCleared != nullptr) {

@@ -81,11 +81,6 @@ void DoSomethingInterestingWithManager(FuzzedDataProvider* fdp)
 
 void Clear()
 {
-    auto manager = Notification::ReminderDataManager::GetInstance();
-    if (manager->queue_ != nullptr) {
-        auto handler = manager->queue_->submit_h(std::bind([]() {}));
-        manager->queue_->wait(handler);
-    }
     Notification::ReminderDataManager::REMINDER_DATA_MANAGER = nullptr;
 }
 }

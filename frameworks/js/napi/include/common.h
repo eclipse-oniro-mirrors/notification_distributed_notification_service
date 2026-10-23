@@ -2053,6 +2053,10 @@ public:
     static void NapiThrow(napi_env env, int32_t errCode, std::string &msg);
     static void NapiThrowLegacy(napi_env env, int32_t errCode);
     static void NapiThrowLegacy(napi_env env, int32_t errCode, std::string &msg);
+    static void SetParamErrorMsg(const std::string &msg);
+    static std::string GetParamErrorMsg();
+    static void ClearParamErrorMsg();
+    static void NapiThrowWithParamError(napi_env env, int32_t errCode);
     static napi_value CreateErrorValueLegacy(napi_env env, int32_t errCode, bool newType);
     static napi_value CreateErrorValueLegacy(napi_env env, int32_t errCode, std::string &msg);
     static napi_value NapiReturnCapErrCb(napi_env env, napi_callback_info info);

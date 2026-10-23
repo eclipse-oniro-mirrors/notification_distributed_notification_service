@@ -24,6 +24,7 @@
 #include "ans_trace_wrapper.h"
 #include "access_token_helper.h"
 #include "ans_permission_def.h"
+#include "bool_wrapper.h"
 #include "bundle_manager_helper.h"
 #include "errors.h"
 #include "ipc_skeleton.h"
@@ -1393,6 +1394,129 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
             notifications, nullptr, NotificationConstant::USER_LOGOUT_REASON_DELETE);
     }
     BatchCancelTimer(timerIds);
+}
+
+void AdvancedNotificationService::OnDistributedAccountLogout(int32_t userId)
+{
+    ANS_LOGI("Distributed account logout, userId[%{public}d].", userId);
+    auto submitResult = notificationSvrQueue_.Submit(std::bind([=]() {
+        DeleteNotificationsByAccountLogout(userId);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return, "Delete notifications by account logout.");
+}
+
+bool AdvancedNotificationService::IsFromAccountNotification(const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr) {
+        return false;
+    }
+    auto extendInfo = request->GetExtendInfo();
+    if (extendInfo == nullptr) {
+        return false;
+    }
+    auto param = extendInfo->GetParam(EXTENDINFO_IS_FROM_ACCOUNT);
+    auto boolean = AAFwk::IBoolean::Query(param);
+    return boolean != nullptr && AAFwk::Boolean::Unbox(boolean);
+}
+
+void AdvancedNotificationService::DeleteNotificationsByAccountLogout(int32_t userId)
+{
+    const int32_t reason = NotificationConstant::USER_ACCOUNT_LOGOUT_REASON_DELETE;
+    std::vector<sptr<Notification>> notifications;
+    std::vector<uint64_t> timerIds;
+    std::list<std::shared_ptr<NotificationRecord>> deleteRecords;
+    for (auto record : notificationList_) {
+        if (record == nullptr || record->notification == nullptr) {
+            continue;
+        }
+        if ((record->notification->GetRecvUserId() != userId) || !IsFromAccountNotification(record->request)) {
+            continue;
+        }
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+        std::string deviceId;
+        std::string bundleName;
+        GetDistributedInfo(record->notification->GetKey(), deviceId, bundleName);
+#endif
+        ProcForDeleteNotificationFromDb(record);
+        UpdateRecentNotification(record->notification, true, reason);
+        notifications.emplace_back(record->notification);
+        timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+        DoDistributedDelete(deviceId, bundleName, record->notification);
+#endif
+        deleteRecords.push_back(record);
+        if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+            SendNotificationsOnCanceled(notifications, nullptr, reason);
+        }
+    }
+    for (auto deleteRecord : deleteRecords) {
+        NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+        notificationList_.remove(deleteRecord);
+    }
+    RemoveFromTriggerNotificationListByAccountLogout(userId);
+    RemoveFromDelayNotificationListByAccountLogout(userId);
+    RemoveFromSnoozeDelayListByAccountLogout(userId);
+    if (!notifications.empty()) {
+        NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, reason);
+    }
+    BatchCancelTimer(timerIds);
+    ANS_LOGI("Delete notifications by account logout finished, userId[%{public}d], deleted size[%{public}zu].",
+        userId, timerIds.size());
+}
+
+void AdvancedNotificationService::RemoveFromTriggerNotificationListByAccountLogout(int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+    for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if (*it == nullptr || (*it)->notification == nullptr) {
+            ++it;
+            continue;
+        }
+        if (((*it)->notification->GetRecvUserId() == userId) && IsFromAccountNotification((*it)->request)) {
+            ProcForDeleteGeofenceLiveView(*it);
+            it = triggerNotificationList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void AdvancedNotificationService::RemoveFromDelayNotificationListByAccountLogout(int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(delayNotificationMutext_);
+    for (auto it = delayNotificationList_.begin(); it != delayNotificationList_.end();) {
+        auto record = (*it).first;
+        if (record == nullptr || record->notification == nullptr) {
+            ++it;
+            continue;
+        }
+        if ((record->notification->GetRecvUserId() == userId) && IsFromAccountNotification(record->request)) {
+            CancelTimer((*it).second);
+            it = delayNotificationList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void AdvancedNotificationService::RemoveFromSnoozeDelayListByAccountLogout(int32_t userId)
+{
+    {
+        std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
+        for (auto it = snoozeDelayTimerList_.begin(); it != snoozeDelayTimerList_.end();) {
+            if ((*it) == nullptr || (*it)->notification == nullptr) {
+                ++it;
+                continue;
+            }
+            if (((*it)->notification->GetRecvUserId() == userId) && IsFromAccountNotification((*it)->request)) {
+                DeleteSnoozeNotificationFromDB(*it);
+                it = snoozeDelayTimerList_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    CheckSnoozeTimer();
 }
 
 ErrCode AdvancedNotificationService::DeleteAllByUser(int32_t userId)

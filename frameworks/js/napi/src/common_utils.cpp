@@ -172,6 +172,39 @@ void Common::NapiThrowLegacy(napi_env env, int32_t errCode, std::string &msg)
     napi_throw(env, CreateErrorValueLegacy(env, errCode, msg));
 }
 
+namespace {
+// Parameter error message recorded by the request convert layer (JS -> C++).
+// Only the new module entries consume it via NapiThrowWithParamError, so the deprecated
+// module keeps its original silent behavior on invalid parameters. The conversion runs
+// synchronously on the JS thread, so thread_local storage is safe.
+thread_local std::string g_paramErrorMsg;
+}
+
+void Common::SetParamErrorMsg(const std::string &msg)
+{
+    g_paramErrorMsg = msg;
+}
+
+std::string Common::GetParamErrorMsg()
+{
+    return g_paramErrorMsg;
+}
+
+void Common::ClearParamErrorMsg()
+{
+    g_paramErrorMsg.clear();
+}
+
+void Common::NapiThrowWithParamError(napi_env env, int32_t errCode)
+{
+    std::string msg = GetParamErrorMsg();
+    if (msg.empty()) {
+        NapiThrow(env, errCode);
+        return;
+    }
+    NapiThrow(env, errCode, msg);
+}
+
 napi_value Common::GetCallbackErrorValue(napi_env env, int32_t errCode)
 {
     napi_value result = nullptr;

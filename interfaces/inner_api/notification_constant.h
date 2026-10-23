@@ -537,6 +537,11 @@ public:
     static const int32_t ADMIN_REMOVE_ALL_REASON_DELETE = 43;
 
     /**
+     * Indicates that a notification is deleted because distributed account logout.
+     */
+    static const int32_t USER_ACCOUNT_LOGOUT_REASON_DELETE = 44;
+
+    /**
      * Indicates that a notification is deleted for other reasons.
      */
     static const int32_t APP_CANCEL_REASON_OTHER = 100;

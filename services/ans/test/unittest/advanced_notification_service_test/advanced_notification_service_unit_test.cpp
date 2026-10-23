@@ -3386,5 +3386,442 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_OnReceiveEvent
     EXPECT_TRUE(spyFired);
 }
 #endif
+
+/**
+ * @tc.name: RemoveFromNotificationList_2000
+ * @tc.desc: Test RemoveFromNotificationList when id/label/instanceKey all match the record.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2000, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+    NotificationKey notificationKey = {.id = 1, .label = "testLabel"};
+
+    sptr<Notification> notification = nullptr;
+    auto res = advancedNotificationService_->RemoveFromNotificationList(record->bundleOption, notificationKey,
+        notification, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE, true);
+
+    ASSERT_EQ(res, (int)ERR_OK);
+    EXPECT_NE(notification, nullptr);
+    EXPECT_TRUE(advancedNotificationService_->notificationList_.empty());
+}
+
+/**
+ * @tc.name: RemoveFromNotificationList_2100
+ * @tc.desc: Test RemoveFromNotificationList when id matches but label mismatches the record.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+    NotificationKey notificationKey = {.id = 1, .label = "wrongLabel"};
+
+    sptr<Notification> notification = nullptr;
+    auto res = advancedNotificationService_->RemoveFromNotificationList(record->bundleOption, notificationKey,
+        notification, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE, true);
+
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(notification, nullptr);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveFromNotificationList_2200
+ * @tc.desc: Test RemoveFromNotificationList when label matches but id mismatches the record.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2200, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+    NotificationKey notificationKey = {.id = 2, .label = "testLabel"};
+
+    sptr<Notification> notification = nullptr;
+    auto res = advancedNotificationService_->RemoveFromNotificationList(record->bundleOption, notificationKey,
+        notification, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE, true);
+
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(notification, nullptr);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveFromNotificationList_2300
+ * @tc.desc: Test RemoveFromNotificationList when only instanceKey mismatches the record.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2300, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    request->SetAppInstanceKey("recordInstanceKey");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    bundleOption->SetAppInstanceKey("queryInstanceKey");
+    NotificationKey notificationKey = {.id = 1, .label = "testLabel"};
+
+    sptr<Notification> notification = nullptr;
+    auto res = advancedNotificationService_->RemoveFromNotificationList(bundleOption, notificationKey,
+        notification, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE, true);
+
+    ASSERT_EQ(res, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_EQ(notification, nullptr);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveFromNotificationList_2400
+ * @tc.desc: Test RemoveFromNotificationList when id/label and non-empty instanceKey all match.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, RemoveFromNotificationList_2400, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    request->SetAppInstanceKey("sameInstanceKey");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    bundleOption->SetAppInstanceKey("sameInstanceKey");
+    NotificationKey notificationKey = {.id = 1, .label = "testLabel"};
+
+    sptr<Notification> notification = nullptr;
+    auto res = advancedNotificationService_->RemoveFromNotificationList(bundleOption, notificationKey,
+        notification, NotificationConstant::APP_CANCEL_ALL_REASON_DELETE, true);
+
+    ASSERT_EQ(res, (int)ERR_OK);
+    EXPECT_NE(notification, nullptr);
+    EXPECT_TRUE(advancedNotificationService_->notificationList_.empty());
+}
+
+/**
+ * @tc.name: ExcuteCancelAll_0100
+ * @tc.desc: Test ExcuteCancelAll removes the matching record and returns ERR_OK.
+ * @tc.type: FUNC
+ * @tc.require: issue#743
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, ExcuteCancelAll_0100, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetLabel("testLabel");
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    auto res = advancedNotificationService_->ExcuteCancelAll(bundleOption,
+        NotificationConstant::APP_CANCEL_ALL_REASON_DELETE);
+
+    ASSERT_EQ(res, (int)ERR_OK);
+    EXPECT_TRUE(advancedNotificationService_->notificationList_.empty());
+}
+
+/**
+ * @tc.name: SystemEventObserver_OnReceiveEvent_DistributedAccountLogout_001
+ * @tc.desc: Verify OnReceiveEvent enters the DISTRIBUTED_ACCOUNT_LOGOUT judgment with a valid
+ *           userId: the onDistributedAccountLogout spy fires with the userId from want params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    SystemEventObserver_OnReceiveEvent_DistributedAccountLogout_001, Function | SmallTest | Level1)
+{
+    ISystemEvent callbacks = {};
+    bool spyFired = false;
+    int32_t spyUserId = SUBSCRIBE_USER_INIT;
+    callbacks.onDistributedAccountLogout = [&spyFired, &spyUserId](int32_t userId) {
+        spyFired = true;
+        spyUserId = userId;
+    };
+    SystemEventObserver observer(callbacks);
+
+    EventFwk::CommonEventData data;
+    AAFwk::Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT);
+    want.SetParam("userId", 100);
+    data.SetWant(want);
+
+    observer.OnReceiveEvent(data);
+    EXPECT_TRUE(spyFired);
+    EXPECT_EQ(spyUserId, 100);
+}
+
+/**
+ * @tc.name: SystemEventObserver_OnReceiveEvent_DistributedAccountLogout_002
+ * @tc.desc: Verify OnReceiveEvent skips the onDistributedAccountLogout callback when the
+ *           DISTRIBUTED_ACCOUNT_LOGOUT event carries no valid userId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest,
+    SystemEventObserver_OnReceiveEvent_DistributedAccountLogout_002, Function | SmallTest | Level1)
+{
+    ISystemEvent callbacks = {};
+    bool spyFired = false;
+    callbacks.onDistributedAccountLogout = [&spyFired](int32_t) {
+        spyFired = true;
+    };
+    SystemEventObserver observer(callbacks);
+
+    EventFwk::CommonEventData data;
+    AAFwk::Want want;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_DISTRIBUTED_ACCOUNT_LOGOUT);
+    data.SetWant(want);
+
+    observer.OnReceiveEvent(data);
+    // no userId param -> default SUBSCRIBE_USER_INIT -> illegal -> callback not fired
+    EXPECT_FALSE(spyFired);
+}
+
+/**
+ * @tc.name: IsFromAccountNotification_100
+ * @tc.desc: Test IsFromAccountNotification with nullptr request, nullptr extendInfo,
+ *           isFromAccount=false and isFromAccount=true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, IsFromAccountNotification_100, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    EXPECT_FALSE(advancedNotificationService_->IsFromAccountNotification(nullptr));
+
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    EXPECT_FALSE(advancedNotificationService_->IsFromAccountNotification(request));
+
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isFromAccount", AAFwk::Boolean::Box(false));
+    request->SetExtendInfo(extendInfo);
+    EXPECT_FALSE(advancedNotificationService_->IsFromAccountNotification(request));
+
+    extendInfo->SetParam("isFromAccount", AAFwk::Boolean::Box(true));
+    EXPECT_TRUE(advancedNotificationService_->IsFromAccountNotification(request));
+}
+
+/**
+ * @tc.name: DeleteNotificationsByAccountLogout_100
+ * @tc.desc: Test DeleteNotificationsByAccountLogout only removes the notifications whose
+ *           receiverUserId matches and extendInfo isFromAccount is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, DeleteNotificationsByAccountLogout_100,
+    Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+
+    // record with isFromAccount=true and matching receiverUserId -> deleted
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetReceiverUserId(100);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isFromAccount", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    ASSERT_NE(record, nullptr);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    // record without isFromAccount -> kept
+    sptr<NotificationRequest> requestTwo = new (std::nothrow) NotificationRequest();
+    requestTwo->SetNotificationId(2);
+    requestTwo->SetReceiverUserId(100);
+    auto recordTwo = advancedNotificationService_->MakeNotificationRecord(requestTwo, bundle);
+    ASSERT_NE(recordTwo, nullptr);
+    advancedNotificationService_->AddToNotificationList(recordTwo);
+
+    // record with isFromAccount=true but different receiverUserId -> kept
+    sptr<NotificationRequest> requestThree = new (std::nothrow) NotificationRequest();
+    requestThree->SetNotificationId(3);
+    requestThree->SetReceiverUserId(101);
+    auto extendInfoThree = std::make_shared<AAFwk::WantParams>();
+    extendInfoThree->SetParam("isFromAccount", AAFwk::Boolean::Box(true));
+    requestThree->SetExtendInfo(extendInfoThree);
+    auto recordThree = advancedNotificationService_->MakeNotificationRecord(requestThree, bundle);
+    ASSERT_NE(recordThree, nullptr);
+    advancedNotificationService_->AddToNotificationList(recordThree);
+
+    advancedNotificationService_->DeleteNotificationsByAccountLogout(100);
+
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 2);
+    advancedNotificationService_->notificationList_.clear();
+}
+
+/**
+ * @tc.name: OnDistributedAccountLogout_100
+ * @tc.desc: Test OnDistributedAccountLogout deletes the matching notification asynchronously.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, OnDistributedAccountLogout_100, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetNotificationId(1);
+    request->SetReceiverUserId(100);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isFromAccount", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    ASSERT_NE(record, nullptr);
+    advancedNotificationService_->AddToNotificationList(record);
+
+    advancedNotificationService_->OnDistributedAccountLogout(100);
+
+    // conditional wait for the async ffrt task instead of a blind sleep
+    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(3);
+    while (!advancedNotificationService_->notificationList_.empty()) {
+        if (std::chrono::steady_clock::now() >= deadline) {
+            break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    advancedNotificationService_->notificationList_.clear();
+}
+
+/**
+ * @tc.name: SetIsFromSAToExtendInfo_100
+ * @tc.desc: Test SetIsFromSAToExtendInfo keeps isFromAccount when caller is system app
+ *           with agent permission, and writes notification_publish_by_sa.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetIsFromSAToExtendInfo_100, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isFromAccount", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+
+    advancedNotificationService_->SetIsFromSAToExtendInfo(request);
+    EXPECT_TRUE(advancedNotificationService_->IsFromAccountNotification(request));
+    EXPECT_EQ(request->GetExtendInfo()->GetStringParam("notification_publish_by_sa"), "0");
+}
+
+/**
+ * @tc.name: SetIsFromSAToExtendInfo_200
+ * @tc.desc: Test SetIsFromSAToExtendInfo resets isFromAccount when system app caller
+ *           has no agent permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetIsFromSAToExtendInfo_200, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isFromAccount", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+
+    advancedNotificationService_->SetIsFromSAToExtendInfo(request);
+    EXPECT_FALSE(advancedNotificationService_->IsFromAccountNotification(request));
+    EXPECT_EQ(request->GetExtendInfo()->GetStringParam("notification_publish_by_sa"), "0");
+}
+
+/**
+ * @tc.name: SetIsFromSAToExtendInfo_300
+ * @tc.desc: Test SetIsFromSAToExtendInfo resets isFromAccount when caller is not
+ *           system app even if it has the permission.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetIsFromSAToExtendInfo_300, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isFromAccount", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+
+    advancedNotificationService_->SetIsFromSAToExtendInfo(request);
+    EXPECT_FALSE(advancedNotificationService_->IsFromAccountNotification(request));
+    EXPECT_EQ(request->GetExtendInfo()->GetStringParam("notification_publish_by_sa"), "0");
+}
+
+/**
+ * @tc.name: SetIsFromSAToExtendInfo_400
+ * @tc.desc: Test SetIsFromSAToExtendInfo does not touch isFromAccount when extendInfo
+ *           has no isFromAccount param, but still writes notification_publish_by_sa.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetIsFromSAToExtendInfo_400, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("otherKey", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(false);
+    IPCSkeleton::SetCallingTokenID(NON_NATIVE_TOKEN);
+
+    advancedNotificationService_->SetIsFromSAToExtendInfo(request);
+    // no isFromAccount param -> not treated as account notification, no permission check
+    EXPECT_FALSE(advancedNotificationService_->IsFromAccountNotification(request));
+    EXPECT_EQ(request->GetExtendInfo()->GetStringParam("notification_publish_by_sa"), "0");
+}
+
+/**
+ * @tc.name: SetIsFromSAToExtendInfo_500
+ * @tc.desc: Test SetIsFromSAToExtendInfo resets isFromAccount for native token caller
+ *           because a native token is not a system app, and writes
+ *           notification_publish_by_sa as "1" for subsystem caller.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetIsFromSAToExtendInfo_500, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam("isFromAccount", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+
+    advancedNotificationService_->SetIsFromSAToExtendInfo(request);
+    EXPECT_FALSE(advancedNotificationService_->IsFromAccountNotification(request));
+    EXPECT_EQ(request->GetExtendInfo()->GetStringParam("notification_publish_by_sa"), "1");
+}
 }
 }
