@@ -549,8 +549,7 @@ void AdvancedNotificationService::ExcuteRemoveAllNotificationsInner(const sptr<N
     BatchCancelTimer(timerIds);
 }
 
-ErrCode AdvancedNotificationService::RemoveNotificationAsAdmin(const sptr<NotificationBundleOption> &bundleOption,
-    int32_t notificationId, const std::string &label)
+ErrCode AdvancedNotificationService::RemoveNotificationAsAdmin(const std::string &hashCode)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("called");
@@ -566,20 +565,19 @@ ErrCode AdvancedNotificationService::RemoveNotificationAsAdmin(const sptr<Notifi
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr) {
-        return ERR_ANS_INNER_INVALID_BUNDLE;
+    if (hashCode.empty()) {
+        ANS_LOGE("Invalid hashCode");
+        return ERR_ANS_INNER_INVALID_PARAM;
     }
 
     ErrCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
-        result = ExcuteRemoveNotificationAsAdmin(bundle, notificationId, label);
+        result = ExcuteRemoveNotificationAsAdmin(hashCode);
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Excute remove notification as admin.");
     if (result != ERR_OK) {
         ANS_LOGE("remove notification as admin error: %{public}d", result);
     }
-    SendRemoveHiSysEvent(notificationId, label, bundleOption, result);
     return result;
 }
 
@@ -597,28 +595,25 @@ ErrCode AdvancedNotificationService::CheckAdminRemoveProtected(
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::ExcuteRemoveNotificationAsAdmin(const sptr<NotificationBundleOption> &bundle,
-    int32_t notificationId, const std::string &label)
+ErrCode AdvancedNotificationService::ExcuteRemoveNotificationAsAdmin(const std::string &hashCode)
 {
     ErrCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
     ANS_LOGD("called");
     bool isThirdParty = true;
     sptr<Notification> notification = nullptr;
     sptr<NotificationRequest> notificationRequest = nullptr;
+    sptr<NotificationBundleOption> bundleOption = nullptr;
     const int32_t removeReason = NotificationConstant::ADMIN_REMOVE_REASON_DELETE;
 
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     std::string deviceId;
     std::string bundleName;
 #endif
-    ExecuteRemoveNotificationFromTriggerNotificationList(bundle, notificationId, label);
+    RemoveFromTriggerNotificationList(hashCode);
 
     for (auto record : notificationList_) {
-        if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
-            (record->bundleOption->GetUid() == bundle->GetUid()) &&
-            (record->notification->GetId() == notificationId) &&
-            (label.empty() || record->notification->GetLabel() == label)) {
-            ErrCode protectedResult = CheckAdminRemoveProtected(record, notificationId);
+        if (record->notification->GetKey() == hashCode) {
+            ErrCode protectedResult = CheckAdminRemoveProtected(record, record->notification->GetId());
             if (protectedResult != ERR_OK) {
                 return protectedResult;
             }
@@ -628,6 +623,7 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotificationAsAdmin(const sptr<
 #endif
             notification = record->notification;
             notificationRequest = record->request;
+            bundleOption = record->bundleOption;
             isThirdParty = record->isThirdparty;
 
             DeleteNotificationFromDb(record, removeReason, false);
@@ -646,6 +642,7 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotificationAsAdmin(const sptr<
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
         DoDistributedDelete(deviceId, bundleName, notification);
 #endif
+        SendRemoveHiSysEvent(notification->GetId(), notification->GetLabel(), bundleOption, ERR_OK);
     }
     TriggerRemoveWantAgent(notificationRequest, removeReason, isThirdParty);
     return result;

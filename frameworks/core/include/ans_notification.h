@@ -603,18 +603,16 @@ public:
     InnerErrorCode RemoveAllNotifications(const NotificationBundleOption &bundleOption);
 
     /**
-     * @brief Removes a specified notification as admin (MDM). System live view notifications
+     * @brief Removes a specified notification as admin (MDM) by hash code. System live view notifications
      *        and user-deletable-only notifications are protected.
      * @note Caller must be a native process holding both
      *       ohos.permission.MANAGE_EDM_POLICY and ohos.permission.NOTIFICATION_CONTROLLER.
      *
-     * @param bundleOption Indicates the bundle name and uid of the application whose notification is to be removed.
-     * @param notificationId Indicates the id of the notification to remove.
-     * @param label Indicates the label of the notification to remove. Empty matches any label.
+     * @param hashCode Indicates the hash code of the notification to remove, which is the key of the
+     * notification obtained from notification query or subscription interfaces.
      * @return Returns remove result.
      */
-    InnerErrorCode RemoveNotificationAsAdmin(const NotificationBundleOption &bundleOption,
-        const int32_t notificationId, const std::string &label = "");
+    InnerErrorCode RemoveNotificationAsAdmin(const std::string &hashCode);
 
     /**
      * @brief Removes all notifications of a specified user as admin (MDM).

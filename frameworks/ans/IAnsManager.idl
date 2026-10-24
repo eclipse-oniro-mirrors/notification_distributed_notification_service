@@ -490,8 +490,7 @@ interface OHOS.Notification.IAnsManager {
 
     void DisableUserGrantedByBundle([in] sptr<NotificationBundleOption> bundle);
 
-    void RemoveNotificationAsAdmin([in] sptr<NotificationBundleOption> bundleOption,
-        [in] int notificationId, [in] String label);
+    void RemoveNotificationAsAdmin([in] String hashCode);
 
     void RemoveAllNotificationsAsAdmin([in] int userId);
 }

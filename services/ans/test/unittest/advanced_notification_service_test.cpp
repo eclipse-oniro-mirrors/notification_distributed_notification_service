@@ -7169,20 +7169,19 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21003,
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsVerfyPermisson(true);
-    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("com.example.target", 100);
     ASSERT_EQ((int)advancedNotificationService_->RemoveNotificationAsAdmin(
-        nullptr, 1, ""), (int)ERR_ANS_INNER_INVALID_BUNDLE);
+        ""), (int)ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ((int)advancedNotificationService_->RemoveNotificationAsAdmin(
-        bundle, 1, ""), (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+        "notExistHashCode"), (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 
     MockIsVerfyPermisson(false);
     EXPECT_EQ((int)advancedNotificationService_->RemoveNotificationAsAdmin(
-        bundle, 1, ""), (int)ERR_ANS_INNER_PERMISSION_DENIED);
+        "notExistHashCode"), (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsVerfyPermisson(true);
     EXPECT_EQ((int)advancedNotificationService_->RemoveNotificationAsAdmin(
-        bundle, 1, ""), (int)ERR_ANS_INNER_NOT_SYSTEM_SERVICE);
+        "notExistHashCode"), (int)ERR_ANS_INNER_NOT_SYSTEM_SERVICE);
 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsVerfyPermisson(true);

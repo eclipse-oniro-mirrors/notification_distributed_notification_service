@@ -452,8 +452,9 @@ HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_UserDeletable
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
     auto record = service->MakeNotificationRecord(request, bundle);
     service->AddToNotificationList(record);
+    std::string hashCode = record->notification->GetKey();
 
-    auto result = service->RemoveNotificationAsAdmin(bundle, 1, "");
+    auto result = service->RemoveNotificationAsAdmin(hashCode);
     EXPECT_EQ(result, ERR_ANS_INNER_ADMIN_NOTIFICATION_USER_DELETABLE_ONLY);
     EXPECT_EQ(service->notificationList_.size(), 1);
 }
@@ -547,20 +548,22 @@ HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_SystemLiveVie
         std::make_shared<NotificationLocalLiveViewContent>());
     request->SetContent(content);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-    service->AddToNotificationList(service->MakeNotificationRecord(request, bundle));
+    auto record = service->MakeNotificationRecord(request, bundle);
+    service->AddToNotificationList(record);
+    std::string hashCode = record->notification->GetKey();
 
-    auto result = service->RemoveNotificationAsAdmin(bundle, 1, "");
+    auto result = service->RemoveNotificationAsAdmin(hashCode);
     EXPECT_EQ(result, ERR_ANS_INNER_ADMIN_SYSTEM_LIVE_VIEW_NOT_REMOVABLE);
     EXPECT_EQ(service->notificationList_.size(), 1);
 }
 
 /**
- * @tc.name: RemoveNotificationAsAdmin_LabelMatch_00001
- * @tc.desc: Test RemoveNotificationAsAdmin label matching with non-empty label
+ * @tc.name: RemoveNotificationAsAdmin_KeyMatch_00001
+ * @tc.desc: Test RemoveNotificationAsAdmin hash code matching with non-matching and matching hash code
  * @tc.type: FUNC
  * @tc.require: issue#4424
  */
-HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_LabelMatch_00001,
+HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_KeyMatch_00001,
     Function | SmallTest | Level1)
 {
     NotificationClassificationMgr::GetInstance().Clear();
@@ -574,13 +577,15 @@ HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_LabelMatch_00
         std::make_shared<NotificationNormalContent>());
     request->SetContent(content);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
-    service->AddToNotificationList(service->MakeNotificationRecord(request, bundle));
+    auto record = service->MakeNotificationRecord(request, bundle);
+    service->AddToNotificationList(record);
+    std::string hashCode = record->notification->GetKey();
 
-    auto result = service->RemoveNotificationAsAdmin(bundle, 1, "wrongLabel");
+    auto result = service->RemoveNotificationAsAdmin("wrongHashCode");
     EXPECT_EQ(result, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
     EXPECT_EQ(service->notificationList_.size(), 1);
 
-    result = service->RemoveNotificationAsAdmin(bundle, 1, "adminLabel");
+    result = service->RemoveNotificationAsAdmin(hashCode);
     EXPECT_EQ(result, ERR_OK);
     EXPECT_EQ(service->notificationList_.size(), 0);
 }

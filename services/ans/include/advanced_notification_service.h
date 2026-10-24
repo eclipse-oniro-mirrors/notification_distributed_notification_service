@@ -436,13 +436,10 @@ public:
      * @brief Remove a specified notification as admin (MDM). System live view notifications
      *        and user-deletable-only notifications are protected.
      *
-     * @param bundleOption Indicates the NotificationBundleOption of the notification.
-     * @param notificationId Indicates the id of the notification.
-     * @param label Indicates the label of the notification. Empty string matches any label.
+     * @param hashCode Indicates the hash code of the notification, which is the key of the notification.
      * @return Returns ERR_OK on success, others on failure.
      */
-    ErrCode RemoveNotificationAsAdmin(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
-        const std::string &label) override;
+    ErrCode RemoveNotificationAsAdmin(const std::string &hashCode) override;
 
     /**
      * @brief Remove all notifications of a specified user as admin (MDM).
@@ -2410,8 +2407,7 @@ private:
     AnsStatus ValidRightsForCancelAsBundle(int32_t notificationId, int32_t &reason);
     ErrCode ExcuteRemoveNotification(const sptr<NotificationBundleOption> &bundle,
         int32_t notificationId, const std::string &label, int32_t &removeReason);
-    ErrCode ExcuteRemoveNotificationAsAdmin(const sptr<NotificationBundleOption> &bundle,
-        int32_t notificationId, const std::string &label);
+    ErrCode ExcuteRemoveNotificationAsAdmin(const std::string &hashCode);
     ErrCode ExcuteRemoveAllNotificationsAsAdmin(const int32_t userId);
     ErrCode CheckAdminRemoveProtected(const std::shared_ptr<NotificationRecord> &record, int32_t notificationId);
     void RemoveFromTriggerNotificationListByUserAsAdmin(int32_t userId);

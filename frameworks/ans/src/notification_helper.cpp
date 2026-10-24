@@ -404,11 +404,10 @@ ErrCode NotificationHelper::RemoveAllNotifications(const NotificationBundleOptio
     return InnerErrorToNative(result);
 }
 
-ErrCode NotificationHelper::RemoveNotificationAsAdmin(const NotificationBundleOption &bundleOption,
-    const int32_t notificationId, const std::string &label)
+ErrCode NotificationHelper::RemoveNotificationAsAdmin(const std::string &hashCode)
 {
     InnerErrorCode result =
-        AnsNotification::GetInstance()->RemoveNotificationAsAdmin(bundleOption, notificationId, label);
+        AnsNotification::GetInstance()->RemoveNotificationAsAdmin(hashCode);
     return InnerErrorToNative(result);
 }
 
