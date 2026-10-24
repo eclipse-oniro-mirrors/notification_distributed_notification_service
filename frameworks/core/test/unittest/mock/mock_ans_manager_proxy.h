@@ -85,6 +85,9 @@ public:
         const sptr<NotificationBundleOption>&, int32_t, const std::string&, int32_t));
     MOCK_METHOD1(RemoveAllNotifications, ErrCode(const sptr<NotificationBundleOption>&));
     MOCK_METHOD2(RemoveNotifications, ErrCode(const std::vector<std::string>&, int32_t));
+    MOCK_METHOD3(RemoveNotificationAsAdmin,
+        ErrCode(const sptr<NotificationBundleOption>&, int32_t, const std::string&));
+    MOCK_METHOD1(RemoveAllNotificationsAsAdmin, ErrCode(int32_t));
     MOCK_METHOD2(Delete, ErrCode(const std::string&, int32_t));
     MOCK_METHOD1(DeleteByBundle, ErrCode(const sptr<NotificationBundleOption>&));
     MOCK_METHOD0(DeleteAll, ErrCode());

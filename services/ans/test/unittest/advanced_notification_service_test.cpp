@@ -7156,5 +7156,71 @@ HWTEST_F(AdvancedNotificationServiceTest, FillNotificationRecord_NullBundleOptio
     ASSERT_FALSE(ansStatus.Ok());
     GTEST_LOG_(INFO) << "FillNotificationRecord_NullBundleOption_0001 test end";
 }
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_21003
+ * @tc.name      : RemoveNotificationAsAdmin_0100
+ * @tc.desc      : Test RemoveNotificationAsAdmin permission and not-exists branch
+ * @tc.require   : issue#4424
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21003, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RemoveNotificationAsAdmin_0100 test start";
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("com.example.target", 100);
+    ASSERT_EQ((int)advancedNotificationService_->RemoveNotificationAsAdmin(
+        nullptr, 1, ""), (int)ERR_ANS_INNER_INVALID_BUNDLE);
+    EXPECT_EQ((int)advancedNotificationService_->RemoveNotificationAsAdmin(
+        bundle, 1, ""), (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+
+    MockIsVerfyPermisson(false);
+    EXPECT_EQ((int)advancedNotificationService_->RemoveNotificationAsAdmin(
+        bundle, 1, ""), (int)ERR_ANS_INNER_PERMISSION_DENIED);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(true);
+    EXPECT_EQ((int)advancedNotificationService_->RemoveNotificationAsAdmin(
+        bundle, 1, ""), (int)ERR_ANS_INNER_NOT_SYSTEM_SERVICE);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(true);
+    GTEST_LOG_(INFO) << "RemoveNotificationAsAdmin_0100 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_21004
+ * @tc.name      : RemoveAllNotificationsAsAdmin_0100
+ * @tc.desc      : Test RemoveAllNotificationsAsAdmin permission, userId check and empty list
+ * @tc.require   : issue#4424
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21004, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "RemoveAllNotificationsAsAdmin_0100 test start";
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(true);
+    EXPECT_EQ((int)advancedNotificationService_->RemoveAllNotificationsAsAdmin(100), (int)ERR_OK);
+
+    MockIsOsAccountExists(false);
+    EXPECT_EQ((int)advancedNotificationService_->RemoveAllNotificationsAsAdmin(100),
+        (int)ERR_ANS_INNER_USER_NOT_EXIST);
+    MockIsOsAccountExists(true);
+
+    MockIsVerfyPermisson(false);
+    EXPECT_EQ((int)advancedNotificationService_->RemoveAllNotificationsAsAdmin(100),
+        (int)ERR_ANS_INNER_PERMISSION_DENIED);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(true);
+    EXPECT_EQ((int)advancedNotificationService_->RemoveAllNotificationsAsAdmin(100),
+        (int)ERR_ANS_INNER_NOT_SYSTEM_SERVICE);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(true);
+    GTEST_LOG_(INFO) << "RemoveAllNotificationsAsAdmin_0100 test end";
+}
+
 }  // namespace Notification
 }  // namespace OHOS

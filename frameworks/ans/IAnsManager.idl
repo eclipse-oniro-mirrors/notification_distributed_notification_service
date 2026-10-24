@@ -489,4 +489,9 @@ interface OHOS.Notification.IAnsManager {
     void GetUserGrantedBundleIcon([in] String bundleName, [out] null_sptr<NotificationBundleIconInfo> icon);
 
     void DisableUserGrantedByBundle([in] sptr<NotificationBundleOption> bundle);
+
+    void RemoveNotificationAsAdmin([in] sptr<NotificationBundleOption> bundleOption,
+        [in] int notificationId, [in] String label);
+
+    void RemoveAllNotificationsAsAdmin([in] int userId);
 }

@@ -527,6 +527,16 @@ public:
     static const int32_t SHELL_REASON_DELETE = 41;
 
     /**
+     * Indicates that notification is deleted by admin (MDM) single remove.
+     */
+    static const int32_t ADMIN_REMOVE_REASON_DELETE = 42;
+
+    /**
+     * Indicates that notifications are deleted by admin (MDM) remove all.
+     */
+    static const int32_t ADMIN_REMOVE_ALL_REASON_DELETE = 43;
+
+    /**
      * Indicates that a notification is deleted because distributed account logout.
      */
     static const int32_t USER_ACCOUNT_LOGOUT_REASON_DELETE = 44;

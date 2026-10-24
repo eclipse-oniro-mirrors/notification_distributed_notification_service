@@ -219,6 +219,14 @@ static const std::vector<ServiceErrorConvertEntry> SERVICE_ERROR_CONVERT_TABLE =
     {ERR_ANS_INNER_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED,
         ERR_ANS_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED, ERROR_NO_RIGHT,
         "The right of liveView is not enabled."},
+
+    // ===== Admin control =====
+    {ERR_ANS_INNER_ADMIN_SYSTEM_LIVE_VIEW_NOT_REMOVABLE,
+        ERR_ANS_ADMIN_SYSTEM_LIVE_VIEW_NOT_REMOVABLE, ERROR_NOTIFICATION_UNREMOVABLE,
+        "Notification is system live view, not removable as admin"},
+    {ERR_ANS_INNER_ADMIN_NOTIFICATION_USER_DELETABLE_ONLY,
+        ERR_ANS_ADMIN_NOTIFICATION_USER_DELETABLE_ONLY, ERROR_NOTIFICATION_UNREMOVABLE,
+        "Notification is user deletable only, not removable as admin"},
 };
 
 // ===== Conversion functions (all use single-pass table lookup) =====

@@ -432,6 +432,27 @@ public:
 
     ErrCode RemoveAllNotificationsForDisable(const sptr<NotificationBundleOption> &bundleOption);
 
+    /**
+     * @brief Remove a specified notification as admin (MDM). System live view notifications
+     *        and user-deletable-only notifications are protected.
+     *
+     * @param bundleOption Indicates the NotificationBundleOption of the notification.
+     * @param notificationId Indicates the id of the notification.
+     * @param label Indicates the label of the notification. Empty string matches any label.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RemoveNotificationAsAdmin(const sptr<NotificationBundleOption> &bundleOption, int32_t notificationId,
+        const std::string &label) override;
+
+    /**
+     * @brief Remove all notifications of a specified user as admin (MDM).
+     *        System live view notifications and user-deletable-only notifications are kept.
+     *
+     * @param userId Indicates the user whose notifications are to be removed.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    ErrCode RemoveAllNotificationsAsAdmin(int32_t userId) override;
+
     ErrCode RemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason) override;
 
     /**
@@ -2389,6 +2410,13 @@ private:
     AnsStatus ValidRightsForCancelAsBundle(int32_t notificationId, int32_t &reason);
     ErrCode ExcuteRemoveNotification(const sptr<NotificationBundleOption> &bundle,
         int32_t notificationId, const std::string &label, int32_t &removeReason);
+    ErrCode ExcuteRemoveNotificationAsAdmin(const sptr<NotificationBundleOption> &bundle,
+        int32_t notificationId, const std::string &label);
+    ErrCode ExcuteRemoveAllNotificationsAsAdmin(const int32_t userId);
+    ErrCode CheckAdminRemoveProtected(const std::shared_ptr<NotificationRecord> &record, int32_t notificationId);
+    void RemoveFromTriggerNotificationListByUserAsAdmin(int32_t userId);
+    void GetRemoveListForRemoveAllAsAdmin(int32_t userId,
+        std::vector<std::shared_ptr<NotificationRecord>> &removeList);
     void ExcuteRemoveNotifications(const std::vector<std::string> &keys, int32_t removeReason);
     void GetRemoveListForRemoveNtfBySlot(const sptr<NotificationBundleOption> &bundle,
         const sptr<NotificationSlot> &slot, std::vector<std::shared_ptr<NotificationRecord>> &removeList);

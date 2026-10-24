@@ -1924,5 +1924,46 @@ HWTEST_F(NotificationHelperTest, GetNotificationSwitch_0400, Function | SmallTes
     ErrCode ret = notificationHelper.GetNotificationSwitch(switchName, userId, switchState);
     EXPECT_EQ(ret, ERR_ANS_INVALID_PARAM);
 }
+
+/**
+ * @tc.name: RemoveNotificationAsAdmin_00001
+ * @tc.desc: Test RemoveNotificationAsAdmin parameters.
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(NotificationHelperTest, RemoveNotificationAsAdmin_00001, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    NotificationBundleOption bundleOption("", 0);
+    ErrCode ret = notificationHelper.RemoveNotificationAsAdmin(bundleOption, 1, "");
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: RemoveNotificationAsAdmin_00002
+ * @tc.desc: Test RemoveNotificationAsAdmin with negative notification id.
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(NotificationHelperTest, RemoveNotificationAsAdmin_00002, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    NotificationBundleOption bundleOption("com.example.admin", 100);
+    ErrCode ret = notificationHelper.RemoveNotificationAsAdmin(bundleOption, -1, "");
+    EXPECT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
+}
+
+/**
+ * @tc.name: RemoveAllNotificationsAsAdmin_00001
+ * @tc.desc: Test RemoveAllNotificationsAsAdmin with invalid userId.
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(NotificationHelperTest, RemoveAllNotificationsAsAdmin_00001, Function | SmallTest | Level1)
+{
+    NotificationHelper notificationHelper;
+    ErrCode ret = notificationHelper.RemoveAllNotificationsAsAdmin(-1);
+    EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
+}
 }
 }

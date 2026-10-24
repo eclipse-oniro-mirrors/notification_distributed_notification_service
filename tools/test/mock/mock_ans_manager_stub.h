@@ -191,6 +191,17 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode RemoveNotificationAsAdmin(const sptr<NotificationBundleOption>& bundleOption,
+        int32_t notificationId, const std::string& label) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode RemoveAllNotificationsAsAdmin(int32_t userId) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode DeleteByBundle(const sptr<NotificationBundleOption>& bundleOption) override
     {
         return ERR_ANS_INVALID_PARAM;

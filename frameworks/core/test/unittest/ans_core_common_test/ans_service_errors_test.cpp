@@ -219,6 +219,24 @@ HWTEST_F(AnsServiceErrorsTest, InnerErrorToNative_NotificationAndSlot_001, TestS
 }
 
 /**
+ * @tc.name: InnerErrorToNative_AdminControl_001
+ * @tc.desc: 验证 Admin control 类的 InnerErrorCode 到 Inner API 错误码映射
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AnsServiceErrorsTest, InnerErrorToNative_AdminControl_001, TestSize.Level1)
+{
+    EXPECT_EQ(ERR_ANS_ADMIN_SYSTEM_LIVE_VIEW_NOT_REMOVABLE,
+        InnerErrorToNative(ERR_ANS_INNER_ADMIN_SYSTEM_LIVE_VIEW_NOT_REMOVABLE));
+    EXPECT_EQ(ERR_ANS_ADMIN_NOTIFICATION_USER_DELETABLE_ONLY,
+        InnerErrorToNative(ERR_ANS_INNER_ADMIN_NOTIFICATION_USER_DELETABLE_ONLY));
+    EXPECT_EQ("Notification is system live view, not removable as admin",
+        GetInnerErrMessage(ERR_ANS_INNER_ADMIN_SYSTEM_LIVE_VIEW_NOT_REMOVABLE));
+    EXPECT_EQ("Notification is user deletable only, not removable as admin",
+        GetInnerErrMessage(ERR_ANS_INNER_ADMIN_NOTIFICATION_USER_DELETABLE_ONLY));
+}
+
+/**
  * @tc.name: InnerErrorToNative_SpecialGroups_001
  * @tc.desc: 验证分布式、地理围栏、Push、弹窗、加密、代理/扩展类的 Inner 映射
  * @tc.type: FUNC

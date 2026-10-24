@@ -1278,6 +1278,10 @@ public:
 
     void SetRemoveAllowed(bool isRemoveAllowed);
 
+    bool IsUserDeletableOnly() const;
+
+    void SetUserDeletableOnly(bool isUserDeletableOnly);
+
     bool IsForceDistributed() const;
 
     void SetForceDistributed(bool forceDistributed);
@@ -1756,6 +1760,7 @@ private:
     bool permitted_ {true};
     bool isAgent_ {false};
     bool isRemoveAllowed_ {true};
+    bool isUserDeletableOnly_ {false};
     bool isCoverActionButtons_ {false};
     bool isUpdateByOwnerAllowed_ {false};
     bool distributedCollaborate_ {false};

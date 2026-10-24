@@ -549,6 +549,213 @@ void AdvancedNotificationService::ExcuteRemoveAllNotificationsInner(const sptr<N
     BatchCancelTimer(timerIds);
 }
 
+ErrCode AdvancedNotificationService::RemoveNotificationAsAdmin(const sptr<NotificationBundleOption> &bundleOption,
+    int32_t notificationId, const std::string &label)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    ANS_LOGD("called");
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem) {
+        ANS_LOGE("Client is not a native SA");
+        return ERR_ANS_INNER_NOT_SYSTEM_SERVICE;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_MANAGE_EDM_POLICY) ||
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Client lacks EDM policy or notification controller permission");
+        return ERR_ANS_INNER_PERMISSION_DENIED;
+    }
+
+    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
+    if (bundle == nullptr) {
+        return ERR_ANS_INNER_INVALID_BUNDLE;
+    }
+
+    ErrCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        result = ExcuteRemoveNotificationAsAdmin(bundle, notificationId, label);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Excute remove notification as admin.");
+    if (result != ERR_OK) {
+        ANS_LOGE("remove notification as admin error: %{public}d", result);
+    }
+    SendRemoveHiSysEvent(notificationId, label, bundleOption, result);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::CheckAdminRemoveProtected(
+    const std::shared_ptr<NotificationRecord> &record, int32_t notificationId)
+{
+    if (record->request->IsSystemLiveView()) {
+        ANS_LOGE("Notification %{public}d is system live view, not removable as admin", notificationId);
+        return ERR_ANS_INNER_ADMIN_SYSTEM_LIVE_VIEW_NOT_REMOVABLE;
+    }
+    if (record->request->IsUserDeletableOnly()) {
+        ANS_LOGE("Notification %{public}d is user deletable only, not removable as admin", notificationId);
+        return ERR_ANS_INNER_ADMIN_NOTIFICATION_USER_DELETABLE_ONLY;
+    }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::ExcuteRemoveNotificationAsAdmin(const sptr<NotificationBundleOption> &bundle,
+    int32_t notificationId, const std::string &label)
+{
+    ErrCode result = ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
+    ANS_LOGD("called");
+    bool isThirdParty = true;
+    sptr<Notification> notification = nullptr;
+    sptr<NotificationRequest> notificationRequest = nullptr;
+    const int32_t removeReason = NotificationConstant::ADMIN_REMOVE_REASON_DELETE;
+
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+    std::string deviceId;
+    std::string bundleName;
+#endif
+    ExecuteRemoveNotificationFromTriggerNotificationList(bundle, notificationId, label);
+
+    for (auto record : notificationList_) {
+        if ((record->bundleOption->GetBundleName() == bundle->GetBundleName()) &&
+            (record->bundleOption->GetUid() == bundle->GetUid()) &&
+            (record->notification->GetId() == notificationId) &&
+            (label.empty() || record->notification->GetLabel() == label)) {
+            ErrCode protectedResult = CheckAdminRemoveProtected(record, notificationId);
+            if (protectedResult != ERR_OK) {
+                return protectedResult;
+            }
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+            deviceId = record->deviceId;
+            bundleName = record->bundleName;
+#endif
+            notification = record->notification;
+            notificationRequest = record->request;
+            isThirdParty = record->isThirdparty;
+
+            DeleteNotificationFromDb(record, removeReason, false);
+            NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+            notificationList_.remove(record);
+            result = ERR_OK;
+            break;
+        }
+    }
+
+    if (notification != nullptr) {
+        CancelWantAgent(notification);
+        UpdateRecentNotification(notification, true, removeReason);
+        CancelTimer(notification->GetAutoDeletedTimer());
+        NotificationSubscriberManager::GetInstance()->NotifyCanceled(notification, nullptr, removeReason);
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+        DoDistributedDelete(deviceId, bundleName, notification);
+#endif
+    }
+    TriggerRemoveWantAgent(notificationRequest, removeReason, isThirdParty);
+    return result;
+}
+
+ErrCode AdvancedNotificationService::RemoveAllNotificationsAsAdmin(int32_t userId)
+{
+    NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    ANS_LOGD("called");
+
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem) {
+        ANS_LOGE("Client is not a native SA");
+        return ERR_ANS_INNER_NOT_SYSTEM_SERVICE;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_MANAGE_EDM_POLICY) ||
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
+        ANS_LOGE("Client lacks EDM policy or notification controller permission");
+        return ERR_ANS_INNER_PERMISSION_DENIED;
+    }
+
+    ErrCode errCode = CheckUserIdParams(userId);
+    if (errCode != ERR_OK) {
+        ANS_LOGE("Input userId is invalid: %{public}d", userId);
+        return errCode;
+    }
+
+    ErrCode result = ERR_OK;
+    auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
+        result = ExcuteRemoveAllNotificationsAsAdmin(userId);
+    }));
+    ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Excute remove all notifications as admin.");
+
+    return result;
+}
+
+void AdvancedNotificationService::RemoveFromTriggerNotificationListByUserAsAdmin(int32_t userId)
+{
+    std::lock_guard<ffrt::mutex> lock(triggerNotificationMutex_);
+    for (auto it = triggerNotificationList_.begin(); it != triggerNotificationList_.end();) {
+        if ((*it) == nullptr || (*it)->notification == nullptr || (*it)->request == nullptr) {
+            ++it;
+            continue;
+        }
+        if ((*it)->notification->GetUserId() == userId && !(*it)->request->IsSystemLiveView() &&
+            !(*it)->request->IsUserDeletableOnly()) {
+            ProcForDeleteGeofenceLiveView(*it);
+            it = triggerNotificationList_.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void AdvancedNotificationService::GetRemoveListForRemoveAllAsAdmin(
+    int32_t userId, std::vector<std::shared_ptr<NotificationRecord>> &removeList)
+{
+    for (auto record : notificationList_) {
+        if (record == nullptr || record->notification == nullptr || record->request == nullptr) {
+            continue;
+        }
+        if (record->notification->GetUserId() != userId) {
+            continue;
+        }
+        if (record->request->IsSystemLiveView()) {
+            ANS_LOGI("AdminRemoveAll-FILTER-SystemLiveView-%{public}s", record->notification->GetKey().c_str());
+            continue;
+        }
+        if (record->request->IsUserDeletableOnly()) {
+            ANS_LOGI("AdminRemoveAll-FILTER-UserDeletableOnly-%{public}s", record->notification->GetKey().c_str());
+            continue;
+        }
+        removeList.emplace_back(record);
+    }
+}
+
+ErrCode AdvancedNotificationService::ExcuteRemoveAllNotificationsAsAdmin(const int32_t userId)
+{
+    const int32_t reason = NotificationConstant::ADMIN_REMOVE_ALL_REASON_DELETE;
+    RemoveFromTriggerNotificationListByUserAsAdmin(userId);
+
+    std::vector<std::shared_ptr<NotificationRecord>> removeList;
+    GetRemoveListForRemoveAllAsAdmin(userId, removeList);
+
+    std::vector<sptr<Notification>> notifications;
+    std::vector<uint64_t> timerIds;
+    for (auto record : removeList) {
+        ProcForDeleteNotificationFromDb(record);
+        NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+        notificationList_.remove(record);
+        CancelWantAgent(record->notification);
+        UpdateRecentNotification(record->notification, true, reason);
+        notifications.emplace_back(record->notification);
+        timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+        DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
+#endif
+        TriggerRemoveWantAgent(record->request, reason, record->isThirdparty);
+        if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
+            SendNotificationsOnCanceled(notifications, nullptr, reason);
+        }
+    }
+    RemoveAllFromSnoozeDelayListByUser(userId);
+    if (!notifications.empty()) {
+        NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(notifications, nullptr, reason);
+    }
+    BatchCancelTimer(timerIds);
+    return ERR_OK;
+}
+
 void AdvancedNotificationService::GetRemoveListForRemoveAll(const sptr<NotificationBundleOption> &bundleOption,
     const sptr<NotificationBundleOption> &bundle, std::vector<std::shared_ptr<NotificationRecord>> &removeList)
 {
