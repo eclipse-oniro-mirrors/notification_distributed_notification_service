@@ -746,6 +746,8 @@ private:
         const std::string &deviceType, const int32_t userId) const;
     std::string GenerateBundleLablel(
         const std::string &deviceType, const std::string &deviceId, const int32_t userId) const;
+    std::string GenerateMaskedBundleLablel(
+        const std::string &deviceType, const std::string &deviceId, const int32_t userId) const;
     std::string GenerateLiveViewBundleLabel(
         const NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &deviceType) const;
     std::string GenerateSilentReminderKey(

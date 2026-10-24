@@ -188,7 +188,10 @@ ohos_unittest("ans_base_rdb_unittest") {
     "test/src/rdb_store_callback_test.cpp",
   ]
 
-  deps = [ ":ans_base_rdb" ]
+  deps = [
+    ":ans_base_rdb",
+    "${frameworks_module_ans_path}:ans_innerkits",
+  ]
 
   external_deps = [
     "c_utils:utils",
