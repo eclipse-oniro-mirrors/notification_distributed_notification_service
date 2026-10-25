@@ -18,6 +18,7 @@
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
 #include "ans_ut_constant.h"
+#include "errors.h"
 #define private public
 #define protected public
 #include "notification_preferences.h"
@@ -29,6 +30,7 @@
 #include "mock_bundle_manager_helper.h"
 #undef private
 #undef protected
+#include "mock_ability_manager_client.h"
 
 extern void MockIsOsAccountExists(bool mockRet);
 extern int32_t StringToInt(const std::string &str);
@@ -2987,17 +2989,31 @@ HWTEST_F(NotificationPreferencesTest, SetKioskModeStatus_001, Function | SmallTe
 /**
  * @tc.name: IsKioskMode_001
  * @tc.desc: Test IsKioskMode
+ * 1. GetKioskStatus returns ERR_OK with kiosk mode on, expects IsKioskMode returns true
+ * 2. GetKioskStatus returns ERR_OK with kiosk mode off, expects IsKioskMode returns false
+ * 3. GetKioskStatus returns error, expects IsKioskMode falls back to the cached value
  * @tc.type: FUNC
  */
 HWTEST_F(NotificationPreferencesTest, IsKioskMode_001, Function | SmallTest | Level1)
 {
     NotificationPreferences notificationPreferences;
-    notificationPreferences.isKioskMode_ = true;
-    auto ret = notificationPreferences.IsKioskMode();
-    EXPECT_EQ(ret, true);
-    notificationPreferences.isKioskMode_ = false;
-    ret = notificationPreferences.IsKioskMode();
-    EXPECT_EQ(ret, false);
+
+    AAFwk::MockSetKioskStatus(ERR_OK, true);
+    EXPECT_EQ(notificationPreferences.IsKioskMode(), true);
+
+    AAFwk::MockSetKioskStatus(ERR_OK, false);
+    EXPECT_EQ(notificationPreferences.IsKioskMode(), false);
+
+    AAFwk::MockSetKioskStatus(ERR_INVALID_OPERATION, true);
+    EXPECT_EQ(notificationPreferences.IsKioskMode(), false);
+
+    AAFwk::MockSetKioskStatus(ERR_OK, true);
+    EXPECT_EQ(notificationPreferences.IsKioskMode(), true);
+
+    AAFwk::MockSetKioskStatus(ERR_INVALID_OPERATION, false);
+    EXPECT_EQ(notificationPreferences.IsKioskMode(), true);
+
+    AAFwk::MockResetKioskStatus();
 }
 
 /**

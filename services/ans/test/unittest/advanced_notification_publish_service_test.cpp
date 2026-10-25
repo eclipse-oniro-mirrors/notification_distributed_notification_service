@@ -23,6 +23,9 @@
 #include "gtest/gtest.h"
 
 #define private public
+#include "mock_ability_manager_client.h"
+
+#define private public
 #include "advanced_notification_priority_helper.h"
 #include "advanced_notification_service.h"
 #include "advanced_datashare_helper.h"
@@ -102,6 +105,7 @@ void AnsPublishServiceTest::TearDownTestCase()
 void AnsPublishServiceTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp start";
+    AAFwk::MockResetKioskStatus();
 #ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     EXTENTION_WRAPPER->isPrivilegeMessage_ = nullptr;
 #endif
@@ -3198,6 +3202,7 @@ HWTEST_F(AnsPublishServiceTest, IsExistRestrictedModeTrustList_002, Function | S
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByRestrictedMode_001, Function | SmallTest | Level1)
 {
+    AAFwk::MockSetKioskStatus(ERR_INVALID_OPERATION, true);
     std::string bundleName = "";
     int32_t userId = 0;
     bool result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId);
@@ -3248,6 +3253,7 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_001, 
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_002, Function | SmallTest | Level1)
 {
+    AAFwk::MockSetKioskStatus(ERR_INVALID_OPERATION, true);
     int32_t userId = 0;
     std::string bundleName = "com.test.example";
     NotificationPreferences::GetInstance()->isKioskMode_ = true;
