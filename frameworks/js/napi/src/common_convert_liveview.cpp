@@ -501,7 +501,7 @@ napi_value Common::GetNotificationLocalLiveViewContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "systemLiveView", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property localLiveView expected.");
-        std::string msg = "Incorrect parameter types. The type of systemLiveView must be object.";
+        std::string msg = "Mandatory parameters are left unspecified. The systemLiveView parameter is required.";
         Common::SetParamErrorMsg(msg);
         return nullptr;
     }
@@ -554,6 +554,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
     NAPI_CALL(env, napi_typeof(env, capsuleResult, &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
+        std::string msg = "Incorrect parameter types. The type of capsule must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
 
@@ -617,6 +619,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         pixelMap = Media::PixelMapNapi::GetPixelMap(env, result);
         if (pixelMap == nullptr) {
             ANS_LOGE("null pixelMap");
+            std::string msg = "Incorrect parameter types. The type of icon must be image.PixelMap.";
+            Common::SetParamErrorMsg(msg);
             return nullptr;
         }
         capsule.SetIcon(pixelMap);
@@ -630,6 +634,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_number) {
             ANS_LOGE("Wrong argument type. Number expected.");
+            std::string msg = "Incorrect parameter types. The type of time must be number.";
+            Common::SetParamErrorMsg(msg);
             return nullptr;
         }
         napi_get_value_int32(env, result, &intValue);
@@ -642,6 +648,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsule(
         NAPI_CALL(env, napi_typeof(env, result, &valuetype));
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of capsuleButtons must be array.";
+            Common::SetParamErrorMsg(msg);
             return nullptr;
         }
         if (hasProperty && GetNotificationLocalLiveViewCapsuleCardButton(env, result, capsule) == nullptr) {
@@ -666,7 +674,7 @@ napi_value Common::GetNotificationLocalLiveViewCardButton(
     
     // 解析iconbutton数组
     std::vector<NotificationIconButton> cardButtons;
-    if (GetNotificationIconButton(env, buttonResult, cardButtons, BUTTON_MAX_SIZE) == nullptr) {
+    if (GetNotificationIconButton(env, buttonResult, "cardButtons", cardButtons, BUTTON_MAX_SIZE) == nullptr) {
         return nullptr;
     }
 
@@ -681,7 +689,8 @@ napi_value Common::GetNotificationLocalLiveViewCapsuleCardButton(
 {
     ANS_LOGD("called");
     std::vector<NotificationIconButton> cardButtons;
-    if (GetNotificationIconButton(env, capsuletResult, cardButtons, CAPSULE_BTN_MAX_SIZE) == nullptr) {
+    if (GetNotificationIconButton(env, capsuletResult, "capsuleButtons",
+        cardButtons, CAPSULE_BTN_MAX_SIZE) == nullptr) {
         return nullptr;
     }
 
@@ -690,7 +699,7 @@ napi_value Common::GetNotificationLocalLiveViewCapsuleCardButton(
 }
 
 napi_value Common::GetNotificationIconButton(
-    const napi_env &env, const napi_value &buttonResult,
+    const napi_env &env, const napi_value &buttonResult, const std::string &paramName,
     std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen)
 {
     // cardButton_item?: NotificationIconButton;
@@ -710,6 +719,8 @@ napi_value Common::GetNotificationIconButton(
     napi_is_array(env, buttonResult, &isArray);
     if (!isArray) {
         ANS_LOGE("Property names is expected to be an array.");
+        std::string msg = "Incorrect parameter types. The type of " + paramName + " must be array.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     napi_get_array_length(env, buttonResult, &length);
@@ -723,6 +734,8 @@ napi_value Common::GetNotificationIconButton(
         NAPI_CALL(env, napi_typeof(env, cardButton, &valuetype));
         if (valuetype != napi_object) {
             ANS_LOGE("Wrong argument type. Object expected.");
+            std::string msg = "Incorrect parameter types. The type of " + paramName + " item must be object.";
+            Common::SetParamErrorMsg(msg);
             return nullptr;
         }
         // 数组item
@@ -731,12 +744,16 @@ napi_value Common::GetNotificationIconButton(
         NAPI_CALL(env, napi_has_named_property(env, cardButton, "name", &hasProperty));
         if (!hasProperty) {
             ANS_LOGE("Property name expected.");
+            std::string msg = "Mandatory parameters are left unspecified. The name parameter is required.";
+            Common::SetParamErrorMsg(msg);
             return nullptr;
         } else {
             napi_get_named_property(env, cardButton, "name", &result);
             NAPI_CALL(env, napi_typeof(env, result, &valuetype));
             if (valuetype != napi_string) {
                 ANS_LOGE("Wrong argument type. String expected.");
+                std::string msg = "Incorrect parameter types. The type of name must be string.";
+                Common::SetParamErrorMsg(msg);
                 return nullptr;
             }
             NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -747,6 +764,8 @@ napi_value Common::GetNotificationIconButton(
         NAPI_CALL(env, napi_has_named_property(env, cardButton, "iconResource", &hasProperty));
         if (!hasProperty) {
             ANS_LOGE("Property iconResource expected.");
+            std::string msg = "Mandatory parameters are left unspecified. The iconResource parameter is required.";
+            Common::SetParamErrorMsg(msg);
             return nullptr;
         } else {
             // if icon type is Rersouce, get the resource object and return.
@@ -755,6 +774,8 @@ napi_value Common::GetNotificationIconButton(
             NAPI_CALL(env, napi_typeof(env, iconResource, &valuetype));
             if (valuetype != napi_object) {
                 ANS_LOGE("Wrong argument type. iconResource Object expected.");
+                std::string msg = "Incorrect parameter types. The type of iconResource must be object.";
+                Common::SetParamErrorMsg(msg);
                 return nullptr;
             }
 
@@ -782,6 +803,8 @@ napi_value Common::GetNotificationIconButton(
             NAPI_CALL(env, napi_typeof(env, result, &valuetype));
             if (valuetype != napi_string) {
                 ANS_LOGE("Wrong argument type. String expected.");
+                std::string msg = "Incorrect parameter types. The type of text must be string.";
+                Common::SetParamErrorMsg(msg);
                 return nullptr;
             }
             NAPI_CALL(env, napi_get_value_string_utf8(env, result, str, STR_MAX_SIZE - 1, &strLen));
@@ -795,6 +818,8 @@ napi_value Common::GetNotificationIconButton(
             NAPI_CALL(env, napi_typeof(env, result, &valuetype));
             if (valuetype != napi_boolean) {
                 ANS_LOGE("Wrong argument type. bool expected.");
+                std::string msg = "Incorrect parameter types. The type of hidePanel must be boolean.";
+                Common::SetParamErrorMsg(msg);
                 return nullptr;
             }
             napi_get_value_bool(env, result, &boolValue);
@@ -880,6 +905,8 @@ napi_value Common::GetNotificationLocalLiveViewButton(
     NAPI_CALL(env, napi_typeof(env, buttonResult, &valuetype));
     if (valuetype != napi_object) {
         ANS_LOGE("Wrong argument type. Object expected.");
+        std::string msg = "Incorrect parameter types. The type of button must be object.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
 
@@ -891,6 +918,8 @@ napi_value Common::GetNotificationLocalLiveViewButton(
         napi_is_array(env, result, &isArray);
         if (!isArray) {
             ANS_LOGE("Property names is expected to be an array.");
+            std::string msg = "Incorrect parameter types. The type of names must be array.";
+            Common::SetParamErrorMsg(msg);
             return nullptr;
         }
         napi_get_array_length(env, result, &length);
@@ -900,6 +929,8 @@ napi_value Common::GetNotificationLocalLiveViewButton(
             NAPI_CALL(env, napi_typeof(env, buttonName, &valuetype));
             if (valuetype != napi_string) {
                 ANS_LOGE("Wrong argument type. String expected.");
+                std::string msg = "Incorrect parameter types. The type of names item must be string.";
+                Common::SetParamErrorMsg(msg);
                 return nullptr;
             }
             NAPI_CALL(env, napi_get_value_string_utf8(env, buttonName, str, STR_MAX_SIZE - 1, &strLen));
@@ -914,6 +945,8 @@ napi_value Common::GetNotificationLocalLiveViewButton(
         napi_is_array(env, result, &isArray);
         if (!isArray) {
             ANS_LOGE("Property icons is expected to be an array.");
+            std::string msg = "Incorrect parameter types. The type of icons must be array.";
+            Common::SetParamErrorMsg(msg);
             return nullptr;
         }
         napi_get_array_length(env, result, &length);
@@ -924,15 +957,24 @@ napi_value Common::GetNotificationLocalLiveViewButton(
             NAPI_CALL(env, napi_typeof(env, buttonIcon, &valuetype));
             if (valuetype != napi_object) {
                 ANS_LOGE("Wrong argument type. Object expected.");
+                std::string msg = "Incorrect parameter types. The type of icons item must be object.";
+                Common::SetParamErrorMsg(msg);
                 return nullptr;
             }
             pixelMap = Media::PixelMapNapi::GetPixelMap(env, buttonIcon);
-            if (pixelMap != nullptr && static_cast<uint32_t>(pixelMap->GetByteCount()) <= MAX_ICON_SIZE) {
-                button.addSingleButtonIcon(pixelMap);
-            } else {
-                ANS_LOGE("Invalid pixelMap object or pixelMap is over size.");
+            if (pixelMap == nullptr) {
+                ANS_LOGE("Invalid pixelMap object.");
+                std::string msg = "Incorrect parameter types. The type of icons item must be image.PixelMap.";
+                Common::SetParamErrorMsg(msg);
                 return nullptr;
             }
+            if (static_cast<uint32_t>(pixelMap->GetByteCount()) > MAX_ICON_SIZE) {
+                ANS_LOGE("pixelMap is over size.");
+                std::string msg = "Incorrect parameter. The icons item is over size";
+                Common::SetParamErrorMsg(msg);
+                return nullptr;
+            }
+            button.addSingleButtonIcon(pixelMap);
         }
     }
 
@@ -942,6 +984,8 @@ napi_value Common::GetNotificationLocalLiveViewButton(
         napi_is_array(env, result, &isArray);
         if (!isArray) {
             ANS_LOGE("Property icon resource is expected to be an array.");
+            std::string msg = "Incorrect parameter types. The type of iconsResource must be array.";
+            Common::SetParamErrorMsg(msg);
             return nullptr;
         }
         napi_get_array_length(env, result, &length);
@@ -952,10 +996,14 @@ napi_value Common::GetNotificationLocalLiveViewButton(
             NAPI_CALL(env, napi_typeof(env, iconResource, &valuetype));
             if (valuetype != napi_object) {
                 ANS_LOGE("Wrong argument type. Object expected.");
+                std::string msg = "Incorrect parameter types. The type of iconsResource item must be object.";
+                Common::SetParamErrorMsg(msg);
                 return nullptr;
             }
             if (Common::GetResourceObject(env, resource, iconResource) == nullptr) {
                 ANS_LOGW("Invalid icon resource object.");
+                std::string msg = "Incorrect parameter types. The type of iconsResource item must be Resource.";
+                Common::SetParamErrorMsg(msg);
                 return nullptr;
             } else {
                 button.addSingleButtonIconResource(resource);

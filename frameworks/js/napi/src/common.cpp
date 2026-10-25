@@ -971,7 +971,7 @@ napi_value Common::GetNotificationContentType(const napi_env &env, const napi_va
         return NapiGetNull(env);
     } else {
         ANS_LOGE("Property contentType expected.");
-        std::string msg = "Incorrect parameter types. The type of contentType must be number.";
+        std::string msg = "Mandatory parameters are left unspecified. The contentType parameter is required.";
         Common::SetParamErrorMsg(msg);
         return nullptr;
     }

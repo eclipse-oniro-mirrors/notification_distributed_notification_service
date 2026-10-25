@@ -539,7 +539,7 @@ napi_value Common::GetNotificationBasicContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "normal", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property normal expected.");
-        std::string msg = "Incorrect parameter types. The type of normal must be object.";
+        std::string msg = "Mandatory parameters are left unspecified. The normal parameter is required.";
         Common::SetParamErrorMsg(msg);
         return nullptr;
     }
@@ -646,7 +646,7 @@ napi_value Common::GetNotificationLongTextContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "longText", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property longText expected.");
-        std::string msg = "Incorrect parameter types. The type of longText must be object.";
+        std::string msg = "Mandatory parameters are left unspecified. The longText parameter is required.";
         Common::SetParamErrorMsg(msg);
         return nullptr;
     }
@@ -771,7 +771,7 @@ napi_value Common::GetNotificationPictureContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "picture", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property picture expected.");
-        std::string msg = "Incorrect parameter types. The type of picture must be object.";
+        std::string msg = "Mandatory parameters are left unspecified. The picture parameter is required.";
         Common::SetParamErrorMsg(msg);
         return nullptr;
     }
@@ -894,7 +894,7 @@ napi_value Common::GetNotificationConversationalContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "conversation", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property conversation expected.");
-        std::string msg = "Incorrect parameter types. The type of conversation must be object.";
+        std::string msg = "Mandatory parameters are left unspecified. The conversation parameter is required.";
         Common::SetParamErrorMsg(msg);
         return nullptr;
     }
@@ -1390,7 +1390,7 @@ napi_value Common::GetNotificationMultiLineContent(
     NAPI_CALL(env, napi_has_named_property(env, result, "multiLine", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property multiLine expected.");
-        std::string msg = "Incorrect parameter types. The type of multiLine must be object.";
+        std::string msg = "Mandatory parameters are left unspecified. The multiLine parameter is required.";
         Common::SetParamErrorMsg(msg);
         return nullptr;
     }
@@ -1418,17 +1418,23 @@ napi_value Common::GetNotificationMultiLineContent(
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "briefText", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property briefText expected.");
+        std::string msg = "Mandatory parameters are left unspecified. The briefText parameter is required.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     napi_get_named_property(env, contentResult, "briefText", &multiLineContentResult);
     NAPI_CALL(env, napi_typeof(env, multiLineContentResult, &valuetype));
     if (valuetype != napi_string) {
         ANS_LOGE("Wrong argument type. String expected.");
+        std::string msg = "Incorrect parameter types. The type of briefText must be string.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
     if (std::strlen(shortStr) == 0) {
         ANS_LOGE("Property briefText is empty");
+        std::string msg = "Incorrect parameter. Property briefText is empty";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     multiLineContent->SetBriefText(shortStr);
@@ -1437,17 +1443,23 @@ napi_value Common::GetNotificationMultiLineContent(
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "longTitle", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property longTitle expected.");
+        std::string msg = "Mandatory parameters are left unspecified. The longTitle parameter is required.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     napi_get_named_property(env, contentResult, "longTitle", &multiLineContentResult);
     NAPI_CALL(env, napi_typeof(env, multiLineContentResult, &valuetype));
     if (valuetype != napi_string) {
         ANS_LOGE("Wrong argument type. String expected.");
+        std::string msg = "Incorrect parameter types. The type of longTitle must be string.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     NAPI_CALL(env, napi_get_value_string_utf8(env, multiLineContentResult, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
     if (std::strlen(shortStr) == 0) {
         ANS_LOGE("Property longTitle is empty");
+        std::string msg = "Incorrect parameter. Property longTitle is empty";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     multiLineContent->SetExpandedTitle(shortStr);
@@ -1456,6 +1468,8 @@ napi_value Common::GetNotificationMultiLineContent(
     NAPI_CALL(env, napi_has_named_property(env, contentResult, "lines", &hasProperty));
     if (!hasProperty) {
         ANS_LOGE("Property lines expected.");
+        std::string msg = "Mandatory parameters are left unspecified. The lines parameter is required.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     if (GetNotificationMultiLineContentLines(env, contentResult, multiLineContent) == nullptr) {
@@ -1492,12 +1506,16 @@ napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, con
     napi_is_array(env, multilines, &isArray);
     if (!isArray) {
         ANS_LOGE("Property lines is expected to be an array.");
+        std::string msg = "Incorrect parameter types. The type of lines must be array.";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
 
     napi_get_array_length(env, multilines, &length);
     if (length == 0) {
         ANS_LOGE("The array is empty.");
+        std::string msg = "Incorrect parameter. The lines array is empty";
+        Common::SetParamErrorMsg(msg);
         return nullptr;
     }
     for (size_t i = 0; i < length; i++) {
@@ -1506,6 +1524,8 @@ napi_value Common::GetNotificationMultiLineContentLines(const napi_env &env, con
         NAPI_CALL(env, napi_typeof(env, line, &valuetype));
         if (valuetype != napi_string) {
             ANS_LOGE("Wrong argument type. String expected.");
+            std::string msg = "Incorrect parameter types. The type of lines item must be string.";
+            Common::SetParamErrorMsg(msg);
             return nullptr;
         }
         NAPI_CALL(env, napi_get_value_string_utf8(env, line, shortStr, SHORT_TEXT_SIZE - 1, &strLen));
