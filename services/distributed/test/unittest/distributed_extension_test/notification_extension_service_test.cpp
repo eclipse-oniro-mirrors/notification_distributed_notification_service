@@ -24,6 +24,7 @@
 #include "extension_service_subscribe_service.h"
 #include "extension_service_connection_timer_info.h"
 #include "extension_service.h"
+#include "extension_service_subscriber.h"
 #include "notification_request.h"
 #include "notification_bundle_option.h"
 #include "mock_bundle_mgr.h"
@@ -851,6 +852,161 @@ HWTEST_F(NotificationExtensionServiceTest, InitService_001, Function | SmallTest
 
     EXPECT_EQ(result, 0);
     EXPECT_TRUE(NotificationExtensionService::GetInstance().IsPCModeEnabled());
+}
+
+/**
+ * @tc.name   : CloseConnection_SoleMapOwner_CreatedState_0100
+ * @tc.number : CloseConnection_SoleMapOwner_CreatedState_0100
+ * @tc.desc   : Close a CREATED connection while connectionMap_ is its sole owner. Close()
+ *              re-enters RemoveConnection() through the onDisconnected_ callback and must not
+ *              destroy the connection inside its own Close() stack frame (issue #748).
+ */
+HWTEST_F(NotificationExtensionServiceTest, CloseConnection_SoleMapOwner_CreatedState_0100,
+    Function | SmallTest | Level1)
+{
+    NotificationExtensionService::GetInstance().InitService(nullptr, nullptr, nullptr);
+    auto& svc = ExtensionServiceConnectionService::GetInstance();
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleSoleOwner";
+    info.extensionName = "extSoleOwner";
+    info.uid = 4101;
+    info.userId = 41;
+    std::string connectionKey = info.GetKey();
+
+    sptr<ExtensionServiceConnection> connection =
+        svc.GetConnection(std::make_shared<ExtensionSubscriberInfo>(info));
+    EXPECT_NE(connection, nullptr);
+    EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::CREATED);
+    wptr<ExtensionServiceConnection> weak = connection;
+    connection = nullptr; // connectionMap_ becomes the sole owner: crash precondition of issue #748
+
+    svc.CloseConnection(info);
+    EXPECT_TRUE(svc.connectionMap_.find(connectionKey) == svc.connectionMap_.end());
+    EXPECT_EQ(weak.promote(), nullptr);
+}
+
+/**
+ * @tc.name   : CloseConnection_SoleMapOwner_ConnectingState_0100
+ * @tc.number : CloseConnection_SoleMapOwner_ConnectingState_0100
+ * @tc.desc   : Close a CONNECTING connection while connectionMap_ is its sole owner; same
+ *              re-entrant destruction chain as CREATED state must stay safe (issue #748).
+ */
+HWTEST_F(NotificationExtensionServiceTest, CloseConnection_SoleMapOwner_ConnectingState_0100,
+    Function | SmallTest | Level1)
+{
+    NotificationExtensionService::GetInstance().InitService(nullptr, nullptr, nullptr);
+    auto& svc = ExtensionServiceConnectionService::GetInstance();
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleSoleConnecting";
+    info.extensionName = "extSoleConnecting";
+    info.uid = 4102;
+    info.userId = 42;
+    std::string connectionKey = info.GetKey();
+
+    sptr<ExtensionServiceConnection> connection =
+        svc.GetConnection(std::make_shared<ExtensionSubscriberInfo>(info));
+    EXPECT_NE(connection, nullptr);
+    connection->state_ = ExtensionServiceConnectionState::CONNECTING;
+    wptr<ExtensionServiceConnection> weak = connection;
+    connection = nullptr;
+
+    svc.CloseConnection(info);
+    EXPECT_TRUE(svc.connectionMap_.find(connectionKey) == svc.connectionMap_.end());
+    EXPECT_EQ(weak.promote(), nullptr);
+}
+
+/**
+ * @tc.name   : Connection_DeathRecipient_SoleMapOwner_0100
+ * @tc.number : Connection_DeathRecipient_SoleMapOwner_0100
+ * @tc.desc   : Extension process dies while connectionMap_ is the sole owner. The death
+ *              recipient callback closes the connection and removes it from the map without
+ *              destroying it on a locked stack frame (issue #748 latent path).
+ */
+HWTEST_F(NotificationExtensionServiceTest, Connection_DeathRecipient_SoleMapOwner_0100,
+    Function | SmallTest | Level1)
+{
+    NotificationExtensionService::GetInstance().InitService(nullptr, nullptr, nullptr);
+    auto& svc = ExtensionServiceConnectionService::GetInstance();
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleDeathOwner";
+    info.extensionName = "extDeathOwner";
+    info.uid = 4103;
+    info.userId = 43;
+    std::string connectionKey = info.GetKey();
+
+    sptr<ExtensionServiceConnection> connection =
+        svc.GetConnection(std::make_shared<ExtensionSubscriberInfo>(info));
+    EXPECT_NE(connection, nullptr);
+    sptr<DummyRemote> remote = new DummyRemote();
+    AppExecFwk::ElementName element("device", info.bundleName, info.extensionName);
+    connection->OnAbilityConnectDone(element, remote, 0);
+    EXPECT_EQ(connection->state_, ExtensionServiceConnectionState::CONNECTED);
+    wptr<ExtensionServiceConnection> weak = connection;
+    connection = nullptr; // connectionMap_ becomes the sole owner
+
+    ASSERT_NE(remote->recipient_, nullptr);
+    sptr<IRemoteObject::DeathRecipient> recipient = remote->recipient_; // keep recipient alive while dispatching
+    sptr<IRemoteObject> remoteObject = remote;
+    wptr<IRemoteObject> remoteWeak = remoteObject;
+    recipient->OnRemoteDied(remoteWeak);
+    EXPECT_TRUE(svc.connectionMap_.find(connectionKey) == svc.connectionMap_.end());
+    EXPECT_EQ(weak.promote(), nullptr);
+}
+
+/**
+ * @tc.name   : ExtensionServiceConnection_HandleDisconnectedState_InvokedOnce_0100
+ * @tc.number : ExtensionServiceConnection_HandleDisconnectedState_InvokedOnce_0100
+ * @tc.desc   : HandleDisconnectedState must invoke the onDisconnected callback exactly once
+ *              and clear it before the invocation (no member access after the callback).
+ */
+HWTEST_F(NotificationExtensionServiceTest, ExtensionServiceConnection_HandleDisconnectedState_InvokedOnce_0100,
+    Function | SmallTest | Level1)
+{
+    int callCount = 0;
+    ExtensionSubscriberInfo info;
+    info.bundleName = "bundleInvokedOnce";
+    info.extensionName = "extInvokedOnce";
+    info.uid = 4104;
+    info.userId = 44;
+    sptr<ExtensionServiceConnection> connection = new (std::nothrow) ExtensionServiceConnection(info,
+        [&callCount](const ExtensionSubscriberInfo &) { ++callCount; });
+    EXPECT_NE(connection, nullptr);
+
+    connection->HandleDisconnectedState();
+    connection->HandleDisconnectedState();
+    EXPECT_EQ(callCount, 1);
+    EXPECT_EQ(connection->onDisconnected_, nullptr);
+    connection = nullptr;
+}
+
+/**
+ * @tc.name   : Unsubscribe_ConnectionInCreatedState_0100
+ * @tc.number : Unsubscribe_ConnectionInCreatedState_0100
+ * @tc.desc   : Destroy a subscriber whose connection is stuck in CREATED state (ConnectAbility
+ *              failed): ~ExtensionServiceSubscriber -> CloseConnection -> Close() must run the
+ *              re-entrant RemoveConnection chain without use-after-free (issue #748 scenario).
+ */
+HWTEST_F(NotificationExtensionServiceTest, Unsubscribe_ConnectionInCreatedState_0100,
+    Function | SmallTest | Level1)
+{
+    NotificationExtensionService::GetInstance().InitService(nullptr, nullptr, nullptr);
+    auto& svc = ExtensionServiceConnectionService::GetInstance();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundleUnsubE2E", 4300);
+    std::string connectionKey;
+    {
+        ExtensionServiceSubscriber subscriber;
+        EXPECT_TRUE(subscriber.Init(bundle));
+        ASSERT_NE(subscriber.extensionSubscriberInfo_, nullptr);
+        connectionKey = subscriber.extensionSubscriberInfo_->GetKey();
+        // ConnectAbility fails in the test environment, so the connection stays in CREATED
+        // state inside the map, which is the exact crash precondition of issue #748.
+        sptr<NotificationRequest> request = new NotificationRequest(1);
+        svc.NotifyOnReceiveMessage(subscriber.extensionSubscriberInfo_, request);
+        auto iter = svc.connectionMap_.find(connectionKey);
+        ASSERT_TRUE(iter != svc.connectionMap_.end());
+        EXPECT_EQ(iter->second->state_, ExtensionServiceConnectionState::CREATED);
+    } // ~ExtensionServiceSubscriber -> CloseConnection -> Close() -> re-entrant RemoveConnection
+    EXPECT_TRUE(svc.connectionMap_.find(connectionKey) == svc.connectionMap_.end());
 }
 } // namespace Notification
 } // namespace OHOS
