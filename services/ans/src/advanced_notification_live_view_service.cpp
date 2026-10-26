@@ -198,13 +198,12 @@ bool IsWantAgentFieldBroken(const nlohmann::json &jsonObject, const std::string 
     const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &agent)
 {
     auto iter = jsonObject.find(key);
-    if (iter == jsonObject.end()) {
+    if (iter == jsonObject.end() || !iter->is_string()) {
+        // Notifications without a WantAgent are normal: a missing key or a non-string
+        // value (never produced by our serializer) is treated as "no agent" and kept.
         return false;
     }
-    if (iter->is_string()) {
-        return !iter->get<std::string>().empty() && agent == nullptr;
-    }
-    return !iter->is_null();
+    return !iter->get<std::string>().empty() && agent == nullptr;
 }
 
 void PrepareUsersForRecovery(int32_t userId, std::vector<int32_t> &usersToRecover)

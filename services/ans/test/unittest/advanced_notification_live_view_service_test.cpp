@@ -2520,13 +2520,16 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewRecoveryFailureCleanupTest001, Function
     ASSERT_EQ(requestsdb.size(), 0);
     ASSERT_FALSE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
 
+    // Non-string value is never produced by our serializer; treat it as "no agent" and keep it.
     jsonObject["wantAgent"] = 123;
     ASSERT_EQ(SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId), ERR_OK);
     requestsdb.clear();
     ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
-    ASSERT_EQ(requestsdb.size(), 0);
-    ASSERT_FALSE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
+    ASSERT_EQ(requestsdb.size(), 1);
+    ASSERT_TRUE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
+    NotificationPreferences::GetInstance()->DeleteKvFromDb(brokenRequest->GetSecureKey(), userId);
 
+    // Empty string means "no agent" (normal business notification) and must be kept.
     jsonObject["wantAgent"] = "";
     ASSERT_EQ(SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId), ERR_OK);
     requestsdb.clear();
@@ -2534,6 +2537,30 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewRecoveryFailureCleanupTest001, Function
     ASSERT_EQ(requestsdb.size(), 1);
     ASSERT_TRUE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
     NotificationPreferences::GetInstance()->DeleteKvFromDb(brokenRequest->GetSecureKey(), userId);
+
+    // Legacy data without the wantAgent key at all: normal notification without agent, keep it.
+    jsonObject["wantAgent"] = "";
+    jsonObject.erase("wantAgent");
+    jsonObject.erase("removalWantAgent");
+    ASSERT_EQ(SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId), ERR_OK);
+    requestsdb.clear();
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 1);
+    ASSERT_TRUE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
+    NotificationPreferences::GetInstance()->DeleteKvFromDb(brokenRequest->GetSecureKey(), userId);
+
+    // Business notification that never sets a WantAgent: serialized as empty strings, must recover.
+    sptr<NotificationRequest> noAgentRequest = BuildRecoverableLiveViewRequest(userId, "no_agent_row");
+    ASSERT_NE(noAgentRequest, nullptr);
+    sptr<NotificationBundleOption> noAgentBundle = new NotificationBundleOption("recover_test", 1);
+    AdvancedNotificationService::NotificationRequestDb noAgentDb =
+        { .request = noAgentRequest, .bundleOption = noAgentBundle };
+    ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDb(noAgentDb), ERR_OK);
+    requestsdb.clear();
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 1);
+    ASSERT_EQ(requestsdb[0].request->GetLabel(), "no_agent_row");
+    NotificationPreferences::GetInstance()->DeleteKvFromDb(noAgentRequest->GetSecureKey(), userId);
 }
 
 /**
