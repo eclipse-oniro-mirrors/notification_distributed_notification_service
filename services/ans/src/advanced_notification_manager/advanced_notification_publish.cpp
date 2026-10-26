@@ -703,6 +703,16 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
     bool isAgentController = AccessTokenHelper::VerifyCallerPermission(tokenCaller,
         OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER);
 
+    if (request->IsUserDeletableOnly()) {
+        bool hasAdminPrivilege = isSubsystem &&
+            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_MANAGE_EDM_POLICY) &&
+            AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER);
+        if (!hasAdminPrivilege) {
+            ANS_LOGW("userDeletableOnly is not allowed for this caller, reset to false");
+            request->SetUserDeletableOnly(false);
+        }
+    }
+
     auto content = request->GetContent();
     if (content != nullptr && content->GetContentType() == NotificationContent::Type::MULTILINE) {
         ErrCode checkCode = CheckNotificationRequestLineWantAgents(content, isAgentController,

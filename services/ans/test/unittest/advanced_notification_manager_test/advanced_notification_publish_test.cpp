@@ -337,5 +337,37 @@ HWTEST_F(AdvancedNotificationPublishTest, GrantSoundPermission_InvalidUserId_000
     MockGetOsAccountLocalIdFromUid(true, 0); // reset to default for subsequent tests
 }
 
+/**
+ * @tc.name: CheckNotificationRequest_UserDeletableOnly_00001
+ * @tc.desc: Test CheckNotificationRequest downgrades userDeletableOnly for unprivileged caller
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationPublishTest, CheckNotificationRequest_UserDeletableOnly_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsVerfyPermisson(true);
+    request->SetUserDeletableOnly(true);
+    EXPECT_EQ(service->CheckNotificationRequest(request), ERR_OK);
+    EXPECT_TRUE(request->IsUserDeletableOnly());
+
+    MockIsVerfyPermisson(false);
+    request->SetUserDeletableOnly(true);
+    EXPECT_EQ(service->CheckNotificationRequest(request), ERR_OK);
+    EXPECT_FALSE(request->IsUserDeletableOnly());
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsVerfyPermisson(true);
+    request->SetUserDeletableOnly(true);
+    EXPECT_EQ(service->CheckNotificationRequest(request), ERR_OK);
+    EXPECT_FALSE(request->IsUserDeletableOnly());
+
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
+}
+
 }  // namespace Notification
 }  // namespace OHOS
