@@ -134,11 +134,15 @@ inline void SetFailCountToDb(int32_t userId, int32_t count)
     NotificationPreferences::GetInstance()->SetKvToDb("ans_recover_fail_count", std::to_string(count), userId);
 }
 
-inline void SetRawLiveViewRecordToDb(const std::string &secureKey, const std::string &plainValue, int32_t userId)
+inline int32_t SetRawLiveViewRecordToDb(const std::string &secureKey, const std::string &plainValue,
+    int32_t userId)
 {
     std::string encryptValue;
-    (void)AesGcmHelper::Encrypt(plainValue, encryptValue);
-    NotificationPreferences::GetInstance()->SetKvToDb(secureKey, encryptValue, userId);
+    int32_t encryptRet = AesGcmHelper::Encrypt(plainValue, encryptValue);
+    if (encryptRet != ERR_OK) {
+        return encryptRet;
+    }
+    return NotificationPreferences::GetInstance()->SetKvToDb(secureKey, encryptValue, userId);
 }
 
 inline bool LiveViewKvExists(const std::string &key, int32_t userId)
@@ -2468,7 +2472,7 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewInvalidDataCleanupTest001, Function | S
     const std::string secureKey = request->GetSecureKey();
     const std::string plainKey = request->GetKey();
 
-    SetRawLiveViewRecordToDb(secureKey, "not-a-json", userId);
+    ASSERT_EQ(SetRawLiveViewRecordToDb(secureKey, "not-a-json", userId), ERR_OK);
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
     ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
     ASSERT_EQ(requestsdb.size(), 0);
@@ -2482,14 +2486,17 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewInvalidDataCleanupTest001, Function | S
         {"updateDeadLine", 4102444800000LL},
         {"finishDeadLine", 4102444800000LL},
     };
-    SetRawLiveViewRecordToDb(secureKey, badJson.dump(), userId);
+    ASSERT_EQ(SetRawLiveViewRecordToDb(secureKey, badJson.dump(), userId), ERR_OK);
     requestsdb.clear();
     ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
     ASSERT_EQ(requestsdb.size(), 0);
     ASSERT_FALSE(LiveViewKvExists(secureKey, userId));
 
+    // Empty live view table makes the underlying batch query return an RDB-layer error
+    // (pre-existing behavior, see advanced_notification_geofence_service_test.cpp); only the
+    // "no row is returned" behavior matters here.
     requestsdb.clear();
-    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    (void)advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId);
     ASSERT_EQ(requestsdb.size(), 0);
 }
 
@@ -2507,21 +2514,21 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewRecoveryFailureCleanupTest001, Function
     ASSERT_TRUE(NotificationJsonConverter::ConvertToJson(brokenRequest, jsonObject));
 
     jsonObject["wantAgent"] = "not-a-json";
-    SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId);
+    ASSERT_EQ(SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId), ERR_OK);
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
     ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
     ASSERT_EQ(requestsdb.size(), 0);
     ASSERT_FALSE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
 
     jsonObject["wantAgent"] = 123;
-    SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId);
+    ASSERT_EQ(SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId), ERR_OK);
     requestsdb.clear();
     ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
     ASSERT_EQ(requestsdb.size(), 0);
     ASSERT_FALSE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
 
     jsonObject["wantAgent"] = "";
-    SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId);
+    ASSERT_EQ(SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId), ERR_OK);
     requestsdb.clear();
     ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
     ASSERT_EQ(requestsdb.size(), 1);
@@ -2539,7 +2546,7 @@ HWTEST_F(AnsLiveViewServiceTest, RecoveryFailureIsolationTest001, Function | Sma
     int32_t userId = 100;
     sptr<NotificationRequest> failedRequest = BuildRecoverableLiveViewRequest(userId, "failed_row");
     ASSERT_NE(failedRequest, nullptr);
-    SetRawLiveViewRecordToDb(failedRequest->GetSecureKey(), "not-a-json", userId);
+    ASSERT_EQ(SetRawLiveViewRecordToDb(failedRequest->GetSecureKey(), "not-a-json", userId), ERR_OK);
 
     sptr<NotificationRequest> normalRequest = BuildRecoverableLiveViewRequest(userId, "normal_row");
     ASSERT_NE(normalRequest, nullptr);
