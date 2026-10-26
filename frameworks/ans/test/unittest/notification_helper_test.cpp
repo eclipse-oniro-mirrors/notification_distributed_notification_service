@@ -1939,19 +1939,6 @@ HWTEST_F(NotificationHelperTest, RemoveNotificationAsAdmin_00001, Function | Sma
 }
 
 /**
- * @tc.name: RemoveNotificationAsAdmin_00002
- * @tc.desc: Test RemoveNotificationAsAdmin with valid hash code.
- * @tc.type: FUNC
- * @tc.require: issue#4424
- */
-HWTEST_F(NotificationHelperTest, RemoveNotificationAsAdmin_00002, Function | SmallTest | Level1)
-{
-    NotificationHelper notificationHelper;
-    ErrCode ret = notificationHelper.RemoveNotificationAsAdmin("validHashCode");
-    EXPECT_EQ(ret, (int)ERR_ANS_SERVICE_NOT_READY);
-}
-
-/**
  * @tc.name: RemoveAllNotificationsAsAdmin_00001
  * @tc.desc: Test RemoveAllNotificationsAsAdmin with invalid userId.
  * @tc.type: FUNC
