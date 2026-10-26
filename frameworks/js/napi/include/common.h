@@ -1494,11 +1494,12 @@ public:
      *
      * @param env Indicates the environment that the API is invoked under
      * @param buttonResult Indicates a js array<object> to be converted
+     * @param paramName Indicates the name of the parameter being converted
      * @param cardButtons Indicates a button array from specified js object
      * @return Returns the null object if success, returns the null value otherwise
      */
     static napi_value GetNotificationIconButton(const napi_env &env, const napi_value &buttonResult,
-        std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen);
+        const std::string &paramName, std::vector<NotificationIconButton> &cardButtons, const uint32_t maxLen);
 
     /**
      * @brief Gets a time of NotificationLocalLiveViewContent object from specified js object
