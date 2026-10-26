@@ -62,11 +62,14 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
         ANS_LOGD("called");
         notifications.clear();
         for (auto record : notificationList_) {
-            if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
-                (record->bundleOption->GetUid() == bundleOption->GetUid()) &&
-                (record->notification->GetInstanceKey() == bundleOption->GetAppInstanceKey())) {
-                notifications.push_back(sptr<NotificationRequest>(new NotificationRequest(*record->request)));
-                GetUri(notifications.back());
+            if ((record->bundleOption->GetBundleName() != bundleOption->GetBundleName()) ||
+                (record->bundleOption->GetUid() != bundleOption->GetUid()) ||
+                (record->notification->GetInstanceKey() != bundleOption->GetAppInstanceKey())) {
+                continue;
+            }
+            auto request = BuildRequestWithUri(record->request);
+            if (request != nullptr) {
+                notifications.push_back(request);
             }
         }
     }));
@@ -354,34 +357,43 @@ ErrCode AdvancedNotificationService::GetNotificationRequestByHashCode(
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         auto record = GetFromNotificationList(hashCode);
         if (record != nullptr) {
-            notificationRequest = record->request;
-            GetUri(notificationRequest);
+            // Return a private copy, the record in notificationList_ is still being
+            // marshalled by other IPC threads and must not be modified here.
+            notificationRequest = BuildRequestWithUri(record->request);
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get notifications by hashcode.");
     return ERR_OK;
 }
 
-ErrCode AdvancedNotificationService::GetUri(sptr<NotificationRequest> &request)
+sptr<NotificationRequest> AdvancedNotificationService::BuildRequestWithUri(
+    const sptr<NotificationRequest> &source)
 {
-    if (request == nullptr) {
+    if (source == nullptr) {
         ANS_LOGE("null request");
-        return ERR_ANS_INNER_TASK_ERR;
+        return nullptr;
     }
 
-    auto additionalData = request->GetAdditionalData();
-    if (additionalData == nullptr) {
-        ANS_LOGE("null additionalData");
-        return ERR_ANS_INNER_TASK_ERR;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(*source);
+    if (request == nullptr) {
+        ANS_LOGE("Failed to copy notification request");
+        return nullptr;
     }
-    additionalData = std::make_shared<AAFwk::WantParams>(*additionalData);
-    request->SetAdditionalData(additionalData);
+
+    auto sourceData = source->GetAdditionalData();
+    if (sourceData == nullptr) {
+        ANS_LOGE("null additionalData");
+        return request;
+    }
+    auto additionalData = std::make_shared<AAFwk::WantParams>(*sourceData);
     additionalData->SetParam(NOTIFICATION_MANAGER_WANTURI, AAFwk::String::Box(""));
+    // The additionalData is owned by the returned copy only, never share it with source.
+    request->SetAdditionalData(additionalData);
 
     std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> wantAgent = request->GetWantAgent();
     if (!wantAgent) {
         ANS_LOGD("Failed to get wantAgent!");
-        return ERR_ANS_INNER_TASK_ERR;
+        return request;
     }
 
     std::shared_ptr<AAFwk::Want> want = AbilityRuntime::WantAgent::WantAgentHelper::GetWantFromProxy(wantAgent);
@@ -393,14 +405,14 @@ ErrCode AdvancedNotificationService::GetUri(sptr<NotificationRequest> &request)
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_31, EventBranchId::BRANCH_0);
         NotificationAnalyticsUtil::ReportModifyEvent(
             message.ErrorCode(ERR_ANS_INNER_TASK_ERR).Message(msg.c_str()));
-        return ERR_ANS_INNER_TASK_ERR;
+        return request;
     }
 
     std::string uri = want->GetUri().ToString();
     if (!uri.empty()) {
         additionalData->SetParam(NOTIFICATION_MANAGER_WANTURI, AAFwk::String::Box(uri));
     }
-    return ERR_OK;
+    return request;
 }
 } // Notification
 } // OHOS

@@ -2585,7 +2585,7 @@ private:
         const std::string &deviceType, const bool enabled, const bool isNotification);
     ErrCode SystemPermissionCheck();
     void RegisterNotDisturbEnableListener();
-    ErrCode GetUri(sptr<NotificationRequest> &request);
+    sptr<NotificationRequest> BuildRequestWithUri(const sptr<NotificationRequest> &source);
     ErrCode GetAllNotificationsBySlotTypeInner(std::vector<sptr<Notification>> &notifications,
         int32_t slotTypeInt, const int32_t userId);
     ErrCode AddDoNotDisturbProfilesInner(
