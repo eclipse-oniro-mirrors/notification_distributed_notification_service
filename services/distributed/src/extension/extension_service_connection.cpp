@@ -429,8 +429,12 @@ void ExtensionServiceConnection::HandleDisconnectedState()
     proxy_ = nullptr;
     if (onDisconnected_) {
         ANS_LOGD("call onDisconnected %{public}s", subscriberInfo_.GetKey().c_str());
-        onDisconnected_(subscriberInfo_);
+        // Move the callback out before invoking it: the callback may drop the last reference of
+        // this connection and destroy it inside the current stack frame, after which any member
+        // access (including the assignment below) is invalid.
+        auto onDisconnected = std::move(onDisconnected_);
         onDisconnected_ = nullptr;
+        onDisconnected(subscriberInfo_);
     }
 }
 

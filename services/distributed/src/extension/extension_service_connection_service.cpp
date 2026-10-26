@@ -52,6 +52,7 @@ void ExtensionServiceConnectionService::CloseConnection(const ExtensionSubscribe
 {
     std::string connectionKey = subscriberInfo.GetKey();
     ANS_LOGD("close connection: %{public}s", connectionKey.c_str());
+    sptr<ExtensionServiceConnection> connection = nullptr;
     bool needNotify = false;
     do {
         std::lock_guard<ffrt::recursive_mutex> lock(mapLock_);
@@ -61,14 +62,23 @@ void ExtensionServiceConnectionService::CloseConnection(const ExtensionSubscribe
             needNotify = connectionMap_.empty();
             break;
         }
-        if (iter->second == nullptr) {
+        connection = iter->second;
+        if (connection == nullptr) {
             ANS_LOGE("null connection");
             connectionMap_.erase(iter);
             needNotify = connectionMap_.empty();
             break;
         }
-        iter->second->Close();
     } while (false);
+
+    // Hold a local strong reference so the connection outlives the whole Close() call: Close()
+    // may re-enter RemoveConnection() through the onDisconnected_ callback and drop the last map
+    // reference, which would otherwise destroy the connection inside its own Close() stack frame
+    // and unlock an already destroyed mutex. Close() is called without holding mapLock_ to keep
+    // the lock order consistent with the death recipient path (mutex_ then mapLock_).
+    if (connection != nullptr) {
+        connection->Close();
+    }
 
     if (needNotify && onAllConnectionsClosed_) {
         onAllConnectionsClosed_();
