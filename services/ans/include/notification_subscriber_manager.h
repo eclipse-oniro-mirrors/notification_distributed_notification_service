@@ -306,7 +306,7 @@ private:
         const sptr<Notification> &notification, int64_t bundlePriorityStrategy);
     int64_t GetBundlePriorityStrategy(const sptr<Notification> &notification);
     bool MatchPriorityStrategy(int32_t strategy, int32_t priorityType);
-    int32_t MatchPriorityTypeToBits(int32_t priorityType);
+    bool IsPriorityNotification(const sptr<NotificationRequest> &request) const;
     sptr<Notification> GenerateSubscribedNotification(const std::shared_ptr<SubscriberRecord> &record,
         const sptr<Notification> &notification, const std::string& voiceContent = std::string());
     bool ConsumeRecordFilter(

@@ -3384,6 +3384,10 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     include_dirs += [ "${services_path}/distributed/include" ]
   }
 
+  if (distributed_notification_service_feature_priority_notification) {
+    defines += [ "ANS_FEATURE_PRIORITY_NOTIFICATION" ]
+  }
+
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
