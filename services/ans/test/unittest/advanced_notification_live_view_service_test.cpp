@@ -37,6 +37,9 @@
 #include "notification_content.h"
 #include "notification_record.h"
 #include "want_params_wrapper.h"
+#include "aes_gcm_helper.h"
+#include "notification_json_convert.h"
+#include "nlohmann/json.hpp"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -131,6 +134,41 @@ inline void SetFailCountToDb(int32_t userId, int32_t count)
     NotificationPreferences::GetInstance()->SetKvToDb("ans_recover_fail_count", std::to_string(count), userId);
 }
 
+inline void SetRawLiveViewRecordToDb(const std::string &secureKey, const std::string &plainValue, int32_t userId)
+{
+    std::string encryptValue;
+    (void)AesGcmHelper::Encrypt(plainValue, encryptValue);
+    NotificationPreferences::GetInstance()->SetKvToDb(secureKey, encryptValue, userId);
+}
+
+inline bool LiveViewKvExists(const std::string &key, int32_t userId)
+{
+    std::string value;
+    return NotificationPreferences::GetInstance()->GetKvFromDb(key, value, userId) == ERR_OK;
+}
+
+inline sptr<NotificationRequest> BuildRecoverableLiveViewRequest(int32_t userId, const std::string &label)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetNotificationId(1);
+    request->SetLabel(label);
+    request->SetCreatorUid(100);
+    request->SetCreatorUserId(100);
+    request->SetReceiverUserId(userId);
+    request->SetCreatorBundleName("recover_test");
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+    liveContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    request->SetContent(std::make_shared<NotificationContent>(liveContent));
+    auto epoch = std::chrono::system_clock::now().time_since_epoch();
+    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    int64_t futureTime = curTime + 3600 * 1000;
+    request->SetUpdateDeadLine(futureTime);
+    request->SetFinishDeadLine(futureTime);
+    return request;
+}
+
 /**
  * @tc.name: ProcForDeleteLiveView_00001
  * @tc.desc: Test ProcForDeleteLiveView
@@ -144,8 +182,14 @@ HWTEST_F(AnsLiveViewServiceTest, ProcForDeleteLiveView_00001, Function | SmallTe
     request->SetSlotType(slotType);
     request->SetNotificationId(1);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
+    auto epoch = std::chrono::system_clock::now().time_since_epoch();
+    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    int64_t futureTime = curTime + 3600 * 1000;
+    request->SetUpdateDeadLine(futureTime);
+    request->SetFinishDeadLine(futureTime);
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
 
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
@@ -2409,6 +2453,199 @@ HWTEST_F(AnsLiveViewServiceTest, SetFinishTimer_InvalidAutoDeletedTime_002, Func
     record->request->SetAutoDeletedTime(0);
     ErrCode res = advancedNotificationService_->SetFinishTimer(record);
     EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: LiveViewInvalidDataCleanupTest001
+ * @tc.desc: Test invalid json and construct-failed live view rows are deleted on recovery (AC-1.2)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, LiveViewInvalidDataCleanupTest001, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    sptr<NotificationRequest> request = BuildRecoverableLiveViewRequest(userId, "invalid_json_row");
+    ASSERT_NE(request, nullptr);
+    const std::string secureKey = request->GetSecureKey();
+    const std::string plainKey = request->GetKey();
+
+    SetRawLiveViewRecordToDb(secureKey, "not-a-json", userId);
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 0);
+    ASSERT_FALSE(LiveViewKvExists(secureKey, userId));
+    ASSERT_FALSE(LiveViewKvExists(plainKey, userId));
+
+    nlohmann::json badJson = {
+        {"slotType", static_cast<int32_t>(NotificationConstant::SlotType::LIVE_VIEW)},
+        {"notificationContentType", static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW)},
+        {"content", nlohmann::json::object()},
+        {"updateDeadLine", 4102444800000LL},
+        {"finishDeadLine", 4102444800000LL},
+    };
+    SetRawLiveViewRecordToDb(secureKey, badJson.dump(), userId);
+    requestsdb.clear();
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 0);
+    ASSERT_FALSE(LiveViewKvExists(secureKey, userId));
+
+    requestsdb.clear();
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 0);
+}
+
+/**
+ * @tc.name: LiveViewRecoveryFailureCleanupTest001
+ * @tc.desc: Test rows with broken wantAgent are deleted while empty/no-agent rows are kept (AC-1.1)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, LiveViewRecoveryFailureCleanupTest001, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    sptr<NotificationRequest> brokenRequest = BuildRecoverableLiveViewRequest(userId, "broken_agent");
+    ASSERT_NE(brokenRequest, nullptr);
+    nlohmann::json jsonObject;
+    ASSERT_TRUE(NotificationJsonConverter::ConvertToJson(brokenRequest, jsonObject));
+
+    jsonObject["wantAgent"] = "not-a-json";
+    SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId);
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 0);
+    ASSERT_FALSE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
+
+    jsonObject["wantAgent"] = 123;
+    SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId);
+    requestsdb.clear();
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 0);
+    ASSERT_FALSE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
+
+    jsonObject["wantAgent"] = "";
+    SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId);
+    requestsdb.clear();
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 1);
+    ASSERT_TRUE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
+    NotificationPreferences::GetInstance()->DeleteKvFromDb(brokenRequest->GetSecureKey(), userId);
+}
+
+/**
+ * @tc.name: RecoveryFailureIsolationTest001
+ * @tc.desc: Test a failed row does not block recovery of following normal rows (AC-1.4)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, RecoveryFailureIsolationTest001, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    sptr<NotificationRequest> failedRequest = BuildRecoverableLiveViewRequest(userId, "failed_row");
+    ASSERT_NE(failedRequest, nullptr);
+    SetRawLiveViewRecordToDb(failedRequest->GetSecureKey(), "not-a-json", userId);
+
+    sptr<NotificationRequest> normalRequest = BuildRecoverableLiveViewRequest(userId, "normal_row");
+    ASSERT_NE(normalRequest, nullptr);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("recover_test", 1);
+    AdvancedNotificationService::NotificationRequestDb requestDb =
+        { .request = normalRequest, .bundleOption = bundle };
+    ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDb(requestDb), ERR_OK);
+
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 1);
+    ASSERT_EQ(requestsdb[0].request->GetLabel(), "normal_row");
+    ASSERT_FALSE(LiveViewKvExists(failedRequest->GetSecureKey(), userId));
+    NotificationPreferences::GetInstance()->DeleteKvFromDb(normalRequest->GetSecureKey(), userId);
+}
+
+/**
+ * @tc.name: LiveViewExpiredPreParseTest001
+ * @tc.desc: Test expired live view row is deleted before request construction (AC-2.1)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, LiveViewExpiredPreParseTest001, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    sptr<NotificationRequest> request = BuildRecoverableLiveViewRequest(userId, "expired_row");
+    ASSERT_NE(request, nullptr);
+    auto epoch = std::chrono::system_clock::now().time_since_epoch();
+    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    int64_t pastTime = curTime - 1000;
+    request->SetUpdateDeadLine(pastTime);
+    request->SetFinishDeadLine(pastTime);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("recover_test", 1);
+    AdvancedNotificationService::NotificationRequestDb requestDb =
+        { .request = request, .bundleOption = bundle };
+    ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDb(requestDb), ERR_OK);
+
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    std::vector<std::string> removedBaseKeys;
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(
+        requestsdb, userId, &removedBaseKeys), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 0);
+    ASSERT_EQ(removedBaseKeys.size(), 1);
+    ASSERT_EQ(removedBaseKeys[0], request->GetBaseKey(""));
+    ASSERT_FALSE(LiveViewKvExists(request->GetSecureKey(), userId));
+    ASSERT_FALSE(LiveViewKvExists(request->GetKey(), userId));
+}
+
+/**
+ * @tc.name: LiveViewAllExpiredTest001
+ * @tc.desc: Test all expired live view rows are deleted and base keys are reported (AC-2.3)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, LiveViewAllExpiredTest001, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    auto epoch = std::chrono::system_clock::now().time_since_epoch();
+    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    int64_t pastTime = curTime - 1000;
+    const std::vector<std::string> labels = {"expired_a", "expired_b", "expired_c"};
+    for (const auto &label : labels) {
+        sptr<NotificationRequest> request = BuildRecoverableLiveViewRequest(userId, label);
+        ASSERT_NE(request, nullptr);
+        request->SetUpdateDeadLine(pastTime);
+        request->SetFinishDeadLine(pastTime);
+        sptr<NotificationBundleOption> bundle = new NotificationBundleOption("recover_test", 1);
+        AdvancedNotificationService::NotificationRequestDb requestDb =
+            { .request = request, .bundleOption = bundle };
+        ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDb(requestDb), ERR_OK);
+    }
+
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    std::vector<std::string> removedBaseKeys;
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(
+        requestsdb, userId, &removedBaseKeys), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 0);
+    ASSERT_EQ(removedBaseKeys.size(), labels.size());
+}
+
+/**
+ * @tc.name: LiveViewRecoveryPerfBaseline001
+ * @tc.desc: Test recovery of 100 normal rows keeps behavior unchanged and reports elapsed time (AC-2.2)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, LiveViewRecoveryPerfBaseline001, Function | SmallTest | Level1)
+{
+    int32_t userId = 100;
+    constexpr int32_t rowCount = 100;
+    for (int32_t i = 0; i < rowCount; i++) {
+        sptr<NotificationRequest> request = BuildRecoverableLiveViewRequest(userId, "perf_" + std::to_string(i));
+        ASSERT_NE(request, nullptr);
+        sptr<NotificationBundleOption> bundle = new NotificationBundleOption("recover_test", 1);
+        AdvancedNotificationService::NotificationRequestDb requestDb =
+            { .request = request, .bundleOption = bundle };
+        ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDb(requestDb), ERR_OK);
+    }
+    auto start = std::chrono::steady_clock::now();
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    auto end = std::chrono::steady_clock::now();
+    auto elapsedUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    GTEST_LOG_(INFO) << "LiveViewRecoveryPerfBaseline001 elapsed us: " << elapsedUs
+                     << ", rows: " << requestsdb.size();
+    ASSERT_EQ(requestsdb.size(), rowCount);
+    for (const auto &requestDb : requestsdb) {
+        NotificationPreferences::GetInstance()->DeleteKvFromDb(requestDb.request->GetSecureKey(), userId);
+    }
 }
 }  // namespace Notification
 }  // namespace OHOS

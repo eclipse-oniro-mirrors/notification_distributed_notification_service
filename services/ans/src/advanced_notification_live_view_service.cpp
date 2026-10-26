@@ -97,6 +97,116 @@ void CleanUserLiveViewData(int32_t userId)
     CleanLiveViewByPrefix(REQUEST_STORAGE_SECURE_TRIGGER_LIVE_VIEW_PREFIX, userId);
 }
 
+std::string ToPlainLiveViewKey(const std::string &storageKey)
+{
+    const std::string securePrefix = REQUEST_STORAGE_SECURE_KEY_PREFIX + "_";
+    if (storageKey.rfind(securePrefix, 0) == 0) {
+        return REQUEST_STORAGE_KEY_PREFIX + "_" + storageKey.substr(securePrefix.size());
+    }
+    return storageKey;
+}
+
+std::string ToSecureLiveViewKey(const std::string &storageKey)
+{
+    const std::string plainPrefix = REQUEST_STORAGE_KEY_PREFIX + "_";
+    if (storageKey.rfind(plainPrefix, 0) == 0) {
+        return REQUEST_STORAGE_SECURE_KEY_PREFIX + "_" + storageKey.substr(plainPrefix.size());
+    }
+    return storageKey;
+}
+
+bool TryExtractLiveViewBaseKey(const std::string &storageKey, std::string &baseKey)
+{
+    const std::string securePrefix = REQUEST_STORAGE_SECURE_KEY_PREFIX + "_";
+    const std::string plainPrefix = REQUEST_STORAGE_KEY_PREFIX + "_";
+    if (storageKey.rfind(securePrefix, 0) == 0) {
+        baseKey = storageKey.substr(securePrefix.size());
+        return true;
+    }
+    if (storageKey.rfind(plainPrefix, 0) == 0) {
+        baseKey = storageKey.substr(plainPrefix.size());
+        return true;
+    }
+    return false;
+}
+
+void DeleteLiveViewRecordFromDb(const std::string &storageKey, const int32_t userId)
+{
+    if (storageKey.empty()) {
+        return;
+    }
+    const std::string plainKey = ToPlainLiveViewKey(storageKey);
+    const std::string secureKey = ToSecureLiveViewKey(storageKey);
+    std::vector<std::string> keysToDelete = {storageKey};
+    if (plainKey != storageKey) {
+        keysToDelete.emplace_back(plainKey);
+    }
+    if (secureKey != storageKey && secureKey != plainKey) {
+        keysToDelete.emplace_back(secureKey);
+    }
+    const std::string lockScreenPictureKey = LOCK_SCREEN_PICTURE_TAG + plainKey;
+    if (lockScreenPictureKey != storageKey && lockScreenPictureKey != plainKey) {
+        keysToDelete.emplace_back(lockScreenPictureKey);
+    }
+    for (const auto &key : keysToDelete) {
+        int32_t ret = NotificationPreferences::GetInstance()->DeleteKvFromDb(key, userId);
+        if (ret == ERR_OK) {
+            ANS_LOGD("Deleted live view key %{public}s for user %{public}d.", key.c_str(), userId);
+            continue;
+        }
+        if (key == storageKey) {
+            ANS_LOGE("Delete live view record failed, key %{public}s, userId %{public}d, ret %{public}d.",
+                key.c_str(), userId, ret);
+        } else {
+            ANS_LOGW("Delete live view related key failed, key %{public}s, userId %{public}d, ret %{public}d.",
+                key.c_str(), userId, ret);
+        }
+    }
+}
+
+void ReadInt64FromJsonObject(const nlohmann::json &jsonObject, const std::string &key, int64_t &out)
+{
+    auto iter = jsonObject.find(key);
+    if (iter == jsonObject.end() || !iter->is_number_integer()) {
+        return;
+    }
+    out = iter->get<int64_t>();
+}
+
+bool IsLiveViewExpiredInJson(const nlohmann::json &jsonObject, const int64_t curTime)
+{
+    int64_t slotType = 0;
+    int64_t contentType = 0;
+    ReadInt64FromJsonObject(jsonObject, "slotType", slotType);
+    ReadInt64FromJsonObject(jsonObject, "notificationContentType", contentType);
+    if (slotType != static_cast<int64_t>(NotificationConstant::SlotType::LIVE_VIEW) ||
+        contentType != static_cast<int64_t>(NotificationContent::Type::LIVE_VIEW)) {
+        return false;
+    }
+    int64_t updateDeadLine = 0;
+    int64_t finishDeadLine = 0;
+    int64_t triggerDeadLine = 0;
+    ReadInt64FromJsonObject(jsonObject, "updateDeadLine", updateDeadLine);
+    ReadInt64FromJsonObject(jsonObject, "finishDeadLine", finishDeadLine);
+    ReadInt64FromJsonObject(jsonObject, "triggerDeadLine", triggerDeadLine);
+    return curTime > updateDeadLine || curTime > finishDeadLine ||
+        (triggerDeadLine != static_cast<int64_t>(NotificationConstant::INVALID_DISPLAY_TIME) &&
+        curTime > triggerDeadLine);
+}
+
+bool IsWantAgentFieldBroken(const nlohmann::json &jsonObject, const std::string &key,
+    const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &agent)
+{
+    auto iter = jsonObject.find(key);
+    if (iter == jsonObject.end()) {
+        return false;
+    }
+    if (iter->is_string()) {
+        return !iter->get<std::string>().empty() && agent == nullptr;
+    }
+    return !iter->is_null();
+}
+
 void PrepareUsersForRecovery(int32_t userId, std::vector<int32_t> &usersToRecover)
 {
     std::vector<int32_t> userIds;
@@ -145,12 +255,13 @@ void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
         ANS_LOGE("Recover geofence live view from db failed for user %{public}d.", userId);
     }
     std::vector<NotificationRequestDb> requestsdb;
-    if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
+    std::vector<std::string> removedBaseKeys;
+    if (GetBatchNotificationRequestsFromDb(requestsdb, userId, &removedBaseKeys) != ERR_OK) {
         ANS_LOGE("Get liveView from db failed for user %{public}d.", userId);
         SetRecoverFailCount(userId, 0);
         return;
     }
-    if (requestsdb.empty()) {
+    if (requestsdb.empty() && removedBaseKeys.empty()) {
         SetRecoverFailCount(userId, 0);
         return;
     }
@@ -159,6 +270,7 @@ void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
     for (size_t i = 0; i < requestsdb.size(); i++) {
         ProcessRecoveryEntry(requestsdb, i, keys);
     }
+    keys.insert(keys.end(), removedBaseKeys.begin(), removedBaseKeys.end());
     if (!keys.empty()) {
         OnRecoverLiveView(keys);
     }
@@ -652,7 +764,8 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDbCommon(const Noti
 }
 
 int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
-    std::vector<NotificationRequestDb> &requests, int32_t userId)
+    std::vector<NotificationRequestDb> &requests, int32_t userId,
+    std::vector<std::string> *removedBaseKeys)
 {
     std::unordered_map<std::string, std::string> dbRecords;
     std::unordered_map<std::string, int32_t> dbRecordUsers;
@@ -696,14 +809,35 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
             }
         }
         if (decryptValue.empty() || !nlohmann::json::accept(decryptValue)) {
-            ANS_LOGE("Invalid json");
+            ANS_LOGE("Invalid json, key %{public}s.", iter.first.c_str());
+            DeleteLiveViewRecordFromDb(iter.first, dbUserId);
             continue;
         }
         auto jsonObject = nlohmann::json::parse(decryptValue);
+        auto epoch = std::chrono::system_clock::now().time_since_epoch();
+        auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+        if (IsLiveViewExpiredInJson(jsonObject, curTime)) {
+            ANS_LOGE("The live view record has expired, key %{public}s.", iter.first.c_str());
+            if (removedBaseKeys != nullptr) {
+                std::string baseKey;
+                if (TryExtractLiveViewBaseKey(iter.first, baseKey)) {
+                    removedBaseKeys->emplace_back(baseKey);
+                }
+            }
+            DeleteLiveViewRecordFromDb(iter.first, dbUserId);
+            continue;
+        }
         sptr<NotificationRequest> request =
             NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
         if (request == nullptr) {
-            ANS_LOGE("Parse json string to request failed.");
+            ANS_LOGE("Parse json string to request failed, key %{public}s.", iter.first.c_str());
+            DeleteLiveViewRecordFromDb(iter.first, dbUserId);
+            continue;
+        }
+        if (IsWantAgentFieldBroken(jsonObject, "wantAgent", request->GetWantAgent()) ||
+            IsWantAgentFieldBroken(jsonObject, "removalWantAgent", request->GetRemovalWantAgent())) {
+            ANS_LOGE("Parse wantAgent failed, key %{public}s.", iter.first.c_str());
+            DeleteLiveViewRecordFromDb(iter.first, dbUserId);
             continue;
         }
         sptr<NotificationBundleOption> bundleOption =
