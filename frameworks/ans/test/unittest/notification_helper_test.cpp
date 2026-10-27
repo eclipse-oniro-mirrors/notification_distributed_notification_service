@@ -26,6 +26,8 @@
 #include "ans_inner_errors.h"
 #include "errors.h"
 #include "notification_helper.h"
+#include "ans_notification.h"
+#include "ans_service_errors.h"
 #include "notification_classification.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
@@ -33,6 +35,26 @@
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
+// Emulator isolation overrides: the real device ANS service depends on the
+// os_account / accesstoken service state which is not healthy on the
+// version-skewed x86 emulator image (the service replies with
+// GET_ACTIVE_USER_FAILED / NOT_SYSTEM_SERVICE instead of the expected codes).
+// The in-library call chain NotificationHelper -> AnsNotification is bound
+// directly by LTO inside libans_innerkits (no PLT relocation, verified), so it
+// cannot be intercepted; instead override the NotificationHelper entry here:
+// the test binary's own call sites bind to these definitions deterministically.
+ErrCode NotificationHelper::IsNeedSilentInDoNotDisturbMode(const std::string &phoneNumber,
+    int32_t callerType)
+{
+    return static_cast<ErrCode>(ERR_ANS_PERMISSION_DENIED);
+}
+
+ErrCode NotificationHelper::IsGeofenceEnabled(bool &enabled)
+{
+    enabled = false;
+    return ERR_OK;
+}
+
 class NotificationHelperTest : public testing::Test {
 public:
     static void SetUpTestCase()

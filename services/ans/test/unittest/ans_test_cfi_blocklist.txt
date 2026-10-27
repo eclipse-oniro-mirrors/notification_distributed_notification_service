@@ -1,0 +1,9 @@
+# Test-only CFI blocklist for x86 emulator TDD targets.
+# Compiler-generated shared_ptr control-block virtual thunks are not registered
+# in the CFI jump table and abort in __cfi_check when the aliased shared_ptr is
+# released across the self-contained content-class boundary of these test
+# binaries. Block shared_ptr / control-block paths so the checks are skipped.
+fun:*__shared_count*
+fun:*_Sp_counted*
+fun:*__shared_ptr*
+fun:*shared_ptr*

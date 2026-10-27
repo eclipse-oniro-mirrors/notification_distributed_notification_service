@@ -19,6 +19,7 @@
 #undef private
 #include "advanced_aggregation_data_roaming_observer.h"
 #include "system_event_observer.h"
+#include "mock_datashare.h"
 
 extern void MockGetSystemAbilityManager(bool mockRet);
 
@@ -58,6 +59,9 @@ HWTEST_F(AdvancedDatashareObserverTest, DataShareHelperIsCreatedSuccessfully, Fu
 {
     // Arrange
     MockGetSystemAbilityManager(false);
+    // The global flag may be left true by cases from the helper suite which run
+    // before this one; restore the default so Creator returns a mock helper.
+    MockIsFailedToCreateDataShareHelper(false);
 
     // Act
     auto result = AdvancedDatashareObserver::GetInstance().CreateDataShareHelper();

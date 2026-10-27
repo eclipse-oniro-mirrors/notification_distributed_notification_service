@@ -1474,9 +1474,13 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_21500,
     sptr<Notification> notification = new (std::nothrow) Notification(req);
     EXPECT_NE(notification, nullptr);
     sptr<NotificationBundleOption> bundleOption = nullptr;
-
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     ASSERT_EQ(advancedNotificationService_->PublishPreparedNotification(req, bundleOption).GetErrCode(),
         ERR_ANS_INNER_INVALID_PARAM);
+#else
+    ASSERT_EQ(advancedNotificationService_->PublishPreparedNotification(req, bundleOption).GetErrCode(),
+        ERR_ANS_INNER_INVALID_BUNDLE);
+#endif
 
     GTEST_LOG_(INFO) << "PublishPreparedNotification_1000 test end";
 }
@@ -1893,7 +1897,11 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishPreparedNotificationInner_0100,
     AdvancedNotificationService::PublishNotificationParameter parameter;
     parameter.request = sptr<NotificationRequest>(new (std::nothrow) NotificationRequest());
     auto ret = advancedNotificationService.PublishPreparedNotificationInner(parameter);
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
     EXPECT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_PARAM);
+#else
+    EXPECT_EQ(ret.GetErrCode(), (int)ERR_ANS_INNER_INVALID_BUNDLE);
+#endif
 }
 
 /**

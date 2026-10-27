@@ -50,5 +50,9 @@ bool DistributedFlowControl::KvStoreFlowControl()
 {
     return g_mockKvStoreFlowControlRet;
 }
+
+void DistributedFlowControl::KvManagerFlowControlClear() {}
+
+void DistributedFlowControl::KvStoreFlowControlClear() {}
 }  // namespace Notification
 }  // namespace OHOS

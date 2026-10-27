@@ -53,6 +53,9 @@
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 
+extern void MockVerifyNativeToken(bool mockRet);
+extern void MockVerifyCallerPermission(bool mockRet);
+
 namespace OHOS {
 namespace Notification {
 extern void MockIsVerfyPermisson(bool isVerify);
@@ -85,6 +88,8 @@ void AdvancedNotificationRingToneServiceTest::SetUp()
     advancedNotificationService_->CancelAll("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
     MockIsSystemApp(true);
+    MockVerifyNativeToken(true);
+    MockVerifyCallerPermission(true);
     GTEST_LOG_(INFO) << "SetUp end";
 }
 
@@ -106,6 +111,7 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, SetRingtoneInfoByBundle_00001,
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(true);
+    MockVerifyNativeToken(false);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 1);
     ASSERT_NE(bundleOption, nullptr);
     sptr<NotificationRingtoneInfo> ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
@@ -125,6 +131,7 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, SetRingtoneInfoByBundle_00002,
     ASSERT_NE(advancedNotificationService_, nullptr);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+    MockVerifyCallerPermission(false);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 1);
     ASSERT_NE(bundleOption, nullptr);
     sptr<NotificationRingtoneInfo> ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
@@ -180,6 +187,7 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, GetRingtoneInfoByBundle_00001,
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
     MockIsVerfyPermisson(true);
+    MockVerifyNativeToken(false);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 1);
     ASSERT_NE(bundleOption, nullptr);
     sptr<NotificationRingtoneInfo> ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
@@ -199,6 +207,7 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, GetRingtoneInfoByBundle_00002,
     ASSERT_NE(advancedNotificationService_, nullptr);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
+    MockVerifyCallerPermission(false);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 1);
     ASSERT_NE(bundleOption, nullptr);
     sptr<NotificationRingtoneInfo> ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();

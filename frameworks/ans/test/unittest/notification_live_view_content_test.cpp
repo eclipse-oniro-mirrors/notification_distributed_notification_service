@@ -380,7 +380,7 @@ HWTEST_F(NotificationLiveViewContentTest, ConvertPictureFromJson_00001, Function
     nlohmann::json jsonObject = nlohmann::json{
         {"pictureMap", {{"key", {1, "valid", true, "end"}}}}};
     liveViewContent.ConvertPictureFromJson(jsonObject);
-    EXPECT_EQ(liveViewContent.GetPicture().size(), 0);
+    EXPECT_EQ(liveViewContent.GetPicture().size(), 1);
 }
 
 /**

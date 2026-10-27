@@ -46,11 +46,16 @@ ohos_unittest("advanced_notification_badge_manager_test") {
   sources = [
     "${test_path}/mock/mock_tokenid_kit.cpp",
     "../mock/mock_accesstoken_kit.cpp",
+    "../mock/blob.cpp",
+    "../mock/distributed_kv_data_manager.cpp",
     "../mock/mock_bluetooth.cpp",
+    "../mock/mock_bundle_manager_helper.cpp",
     "../mock/mock_bundle_mgr.cpp",
+    "../mock/mock_common_event_manager.cpp",
     "../mock/mock_datashare.cpp",
     "../mock/mock_ipc.cpp",
     "../mock/mock_notification_helper.cpp",
+    "../mock/mock_single_kv_store.cpp",
     "../mock/mock_push_callback_stub.cpp",
     "../mock/mock_time_service_client.cpp",
     "advanced_notification_badge_manager_test.cpp",
@@ -66,6 +71,12 @@ ohos_unittest("advanced_notification_badge_manager_test") {
     "${services_path}/ans:ans_service_sources_test",
     "${services_path}/infrastructure:ans_base",
   ]
+
+  if (distributed_notification_service_feature_original_distributed) {
+    defines += [ "ANS_FEATURE_ORIGINAL_DISTRIBUTED" ]
+    deps += [ "${services_path}/distributed:libans_distributed" ]
+    include_dirs += [ "${services_path}/distributed/include" ]
+  }
 
   external_deps = [
     "ability_base:configuration",

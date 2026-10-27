@@ -143,6 +143,7 @@ HWTEST_F(AnsLiveViewServiceTest, ProcForDeleteLiveView_00001, Function | SmallTe
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetSlotType(slotType);
     request->SetNotificationId(1);
+    request->SetReceiverUserId(0);
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
     auto content = std::make_shared<NotificationContent>(liveContent);
     request->SetContent(content);
@@ -155,12 +156,12 @@ HWTEST_F(AnsLiveViewServiceTest, ProcForDeleteLiveView_00001, Function | SmallTe
     ASSERT_EQ(ret, (int)ERR_OK);
 
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
-    ret = advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb);
+    ret = advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, 0);
     ASSERT_EQ(requestsdb.size(), 1);
 
     advancedNotificationService_->ProcForDeleteLiveView(record);
     requestsdb.clear();
-    ret = advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb);
+    ret = advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, 0);
     ASSERT_EQ(requestsdb.size(), 0);
 }
 

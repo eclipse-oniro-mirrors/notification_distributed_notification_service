@@ -4083,7 +4083,7 @@ HWTEST_F(AdvancedNotificationServiceTest, RecoverLiveViewFromDb_0005, Function |
     auto result = advancedNotificationService_->SetNotificationRequestToDb(requestDbObj);
     ASSERT_EQ(result, ERR_OK);
 
-    advancedNotificationService_->RecoverLiveViewFromDb();
+    advancedNotificationService_->RecoverLiveViewFromDb(100);
     SleepForFC();
     ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
     result =

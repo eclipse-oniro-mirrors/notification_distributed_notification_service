@@ -1197,6 +1197,8 @@ public:
     static void TearDownTestCase();
 
     void SetUp();
+
+    void TearDown();
     sptr<MockSystemAbilityManager> mockSAMgr_;
 };
 
@@ -1212,6 +1214,15 @@ void AnsNotificationBranchTest::SetUp()
     ON_CALL(*mockSAMgr_, GetSystemAbility(testing::_))
         .WillByDefault(Return(nullptr));
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSAMgr_;
+}
+
+void AnsNotificationBranchTest::TearDown()
+{
+    // The client singleton holds a strong reference to the mock SAMgr. Release it
+    // here, otherwise the last mock is kept alive by the static singleton and is
+    // reported as a leaked mock object at process exit.
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
+    mockSAMgr_ = nullptr;
 }
 
 /*
