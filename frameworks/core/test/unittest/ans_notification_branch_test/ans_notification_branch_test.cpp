@@ -190,8 +190,7 @@ public:
         return ERR_ANS_INNER_INVALID_PARAM;
     }
 
-    ErrCode RemoveNotificationAsAdmin(const sptr<NotificationBundleOption> &bundleOption,
-        int32_t notificationId, const std::string &label) override
+    ErrCode RemoveNotificationAsAdmin(const std::string &hashCode) override
     {
         return ERR_ANS_INNER_INVALID_PARAM;
     }

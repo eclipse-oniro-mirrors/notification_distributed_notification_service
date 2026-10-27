@@ -990,18 +990,12 @@ InnerErrorCode AnsNotification::RemoveAllNotifications(const NotificationBundleO
     return static_cast<InnerErrorCode>(proxy->RemoveAllNotifications(bo));
 }
 
-InnerErrorCode AnsNotification::RemoveNotificationAsAdmin(const NotificationBundleOption &bundleOption,
-    const int32_t notificationId, const std::string &label)
+InnerErrorCode AnsNotification::RemoveNotificationAsAdmin(const std::string &hashCode)
 {
-    ANS_LOGI("remove as admin id:%{public}d,bundle:%{public}s,label:%{public}s",
-        notificationId, bundleOption.GetBundleName().c_str(), label.c_str());
+    ANS_LOGI("remove as admin hashCode:%{public}s", hashCode.c_str());
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
-    if (notificationId < 0) {
-        ANS_LOGE("Invalid notificationId.");
-        return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
-    }
-    if (bundleOption.GetBundleName().empty()) {
-        ANS_LOGE("Invalid bundle name.");
+    if (hashCode.empty()) {
+        ANS_LOGE("Invalid hashCode.");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
 
@@ -1010,13 +1004,7 @@ InnerErrorCode AnsNotification::RemoveNotificationAsAdmin(const NotificationBund
         ANS_LOGE("Fail to GetAnsManagerProxy.");
         return ERR_ANS_INNER_SERVICE_NOT_READY;
     }
-
-    sptr<NotificationBundleOption> bo(new (std::nothrow) NotificationBundleOption(bundleOption));
-    if (bo == nullptr) {
-        ANS_LOGE("null bundleOption");
-        return ERR_ANS_INNER_NO_MEMORY;
-    }
-    return static_cast<InnerErrorCode>(proxy->RemoveNotificationAsAdmin(bo, notificationId, label));
+    return static_cast<InnerErrorCode>(proxy->RemoveNotificationAsAdmin(hashCode));
 }
 
 InnerErrorCode AnsNotification::RemoveAllNotificationsAsAdmin(int32_t userId)

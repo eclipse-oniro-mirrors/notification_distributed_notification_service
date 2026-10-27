@@ -1934,23 +1934,8 @@ HWTEST_F(NotificationHelperTest, GetNotificationSwitch_0400, Function | SmallTes
 HWTEST_F(NotificationHelperTest, RemoveNotificationAsAdmin_00001, Function | SmallTest | Level1)
 {
     NotificationHelper notificationHelper;
-    NotificationBundleOption bundleOption("", 0);
-    ErrCode ret = notificationHelper.RemoveNotificationAsAdmin(bundleOption, 1, "");
+    ErrCode ret = notificationHelper.RemoveNotificationAsAdmin("");
     EXPECT_EQ(ret, (int)ERR_ANS_INVALID_PARAM);
-}
-
-/**
- * @tc.name: RemoveNotificationAsAdmin_00002
- * @tc.desc: Test RemoveNotificationAsAdmin with negative notification id.
- * @tc.type: FUNC
- * @tc.require: issue#4424
- */
-HWTEST_F(NotificationHelperTest, RemoveNotificationAsAdmin_00002, Function | SmallTest | Level1)
-{
-    NotificationHelper notificationHelper;
-    NotificationBundleOption bundleOption("com.example.admin", 100);
-    ErrCode ret = notificationHelper.RemoveNotificationAsAdmin(bundleOption, -1, "");
-    EXPECT_EQ(ret, (int)ERR_ANS_NOTIFICATION_NOT_EXISTS);
 }
 
 /**

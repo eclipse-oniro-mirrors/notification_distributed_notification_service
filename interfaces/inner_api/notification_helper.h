@@ -669,18 +669,16 @@ public:
     static ErrCode RemoveAllNotifications(const NotificationBundleOption &bundleOption);
 
     /**
-     * @brief Removes a specified notification as admin (MDM). System live view notifications and
+     * @brief Removes a specified notification as admin (MDM) by hash code. System live view notifications and
      * user-deletable-only notifications are protected and cannot be removed by this method.
      * @note This method can be called only by a native process holding both
      * ohos.permission.MANAGE_EDM_POLICY and ohos.permission.NOTIFICATION_CONTROLLER.
      *
-     * @param bundleOption Indicates the bundle name and uid of the application whose notification is to be removed.
-     * @param notificationId Indicates the id of the notification to remove.
-     * @param label Indicates the label of the notification to remove. Empty string matches any label.
+     * @param hashCode Indicates the hash code of the notification to remove, which is the key of the
+     * notification obtained from notification query or subscription interfaces.
      * @return Returns remove notification result.
      */
-    static ErrCode RemoveNotificationAsAdmin(const NotificationBundleOption &bundleOption,
-        const int32_t notificationId, const std::string &label = "");
+    static ErrCode RemoveNotificationAsAdmin(const std::string &hashCode);
 
     /**
      * @brief Removes all notifications of a specified user as admin (MDM).

@@ -410,14 +410,10 @@ HWTEST_F(AnsNotificationUnitTest, RemoveNotificationAsAdmin_0100, Function | Med
     std::shared_ptr<AnsManagerProxy> proxy = std::make_shared<AnsManagerProxy>(iremoteObjects);
     ASSERT_NE(nullptr, proxy);
     ans_->GetAnsManagerProxy();
-    NotificationBundleOption bundleOption("", 0);
-    InnerErrorCode ret1 = ans_->RemoveNotificationAsAdmin(bundleOption, 1, "");
+    InnerErrorCode ret1 = ans_->RemoveNotificationAsAdmin("");
     EXPECT_EQ(ret1, ERR_ANS_INNER_INVALID_PARAM);
-    NotificationBundleOption bundleOption2("com.example.admin", 100);
-    InnerErrorCode ret2 = ans_->RemoveNotificationAsAdmin(bundleOption2, -1, "");
-    EXPECT_EQ(ret2, ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
-    InnerErrorCode ret3 = ans_->RemoveNotificationAsAdmin(bundleOption2, 1, "");
-    EXPECT_EQ(ret3, ERR_ANS_INNER_SERVICE_NOT_READY);
+    InnerErrorCode ret2 = ans_->RemoveNotificationAsAdmin("validHashCode");
+    EXPECT_EQ(ret2, ERR_ANS_INNER_SERVICE_NOT_READY);
 }
 
 /*
