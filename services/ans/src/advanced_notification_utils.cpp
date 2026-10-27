@@ -53,6 +53,9 @@
 #include "advanced_notification_inline.h"
 #include "notification_analytics_util.h"
 #include "notification_classification_mgr.h"
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+#include "priority_notification_degrade_manager.h"
+#endif
 #include "notification_clone_bundle_service.h"
 #include "advanced_notification_flow_control_service.h"
 #include "parameters.h"
@@ -1019,6 +1022,9 @@ void AdvancedNotificationService::OnDistributedDelete(
                 (record->notification->GetLabel() == label) && (record->notification->GetId() == id)) {
                 notification = record->notification;
                 NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+                PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
                 notificationList_.remove(record);
                 break;
             }
@@ -1368,6 +1374,9 @@ void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)
                 ProcForDeleteNotificationFromDb(record);
                 notification = record->notification;
                 NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+                PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
                 notificationList_.remove(record);
                 break;
             }

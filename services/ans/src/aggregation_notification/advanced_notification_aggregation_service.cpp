@@ -22,6 +22,9 @@
 #include "notification_ai_extension_wrapper.h"
 #include "notification_preferences.h"
 #include "os_account_manager_helper.h"
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+#include "priority_notification_degrade_manager.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -151,8 +154,10 @@ ErrCode AdvancedNotificationService::TriggerUpdateAiExtNotification(const sptr<N
             result = ERR_ANS_INNER_INVALID_PARAM;
             return;
         }
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        ProcessDelayedUpdateOnQueue(record, cacheRequest, request, notificationClassification, result);
+#else
         cacheRequest->SetInnerPriorityNotificationType(request->GetPriorityNotificationType());
-
         sptr<Notification> notification = new (std::nothrow) Notification(request);
         if (notification == nullptr) {
             ANS_LOGE("TriggerUpdatePriorityType fail, null notification");
@@ -162,11 +167,94 @@ ErrCode AdvancedNotificationService::TriggerUpdateAiExtNotification(const sptr<N
 
         // Notify subscribers about the updated notification
         NotificationSubscriberManager::GetInstance()->NotifySystemUpdate(notification, notificationClassification);
+#endif
     }));
 
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Trigger update AI extension notification.");
     ANS_LOGI("TriggerUpdateAiExtNotification key: %{public}s, result: %{public}d", request->GetKey().c_str(), result);
     return ERR_OK;
 }
+
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+void AdvancedNotificationService::ProcessDelayedUpdateOnQueue(const std::shared_ptr<NotificationRecord> &record,
+    const sptr<NotificationRequest> &cacheRequest, const sptr<NotificationRequest> &request,
+    const sptr<NotificationClassification> &notificationClassification, ErrCode &result)
+{
+    std::string notificationKey = record->notification->GetKey();
+    sptr<NotificationClassification> effectiveClassification = nullptr;
+    auto arbitrate = PriorityNotificationDegradeManager::GetInstance()->ApplyTaggingResult(
+        notificationKey, cacheRequest, notificationClassification, effectiveClassification);
+    if (arbitrate == PriorityNotificationDegradeManager::ArbitrateResult::DROP_IMMUTABLE
+        || arbitrate == PriorityNotificationDegradeManager::ArbitrateResult::DROP_DEGRADED
+        || arbitrate == PriorityNotificationDegradeManager::ArbitrateResult::CLEARED) {
+        HandleDroppedDelayedUpdate(notificationKey, request, notificationClassification,
+            effectiveClassification, result);
+        return;
+    }
+
+    HandleAcceptedDelayedUpdate(request, cacheRequest, effectiveClassification, result);
+}
+
+void AdvancedNotificationService::HandleDroppedDelayedUpdate(const std::string &notificationKey,
+    const sptr<NotificationRequest> &request,
+    const sptr<NotificationClassification> &notificationClassification,
+    const sptr<NotificationClassification> &effectiveClassification, ErrCode &result)
+{
+    if (notificationClassification == nullptr) {
+        return;
+    }
+    std::string effectiveType = NotificationConstant::PriorityNotificationType::OTHER;
+    if (effectiveClassification != nullptr) {
+        effectiveType = effectiveClassification->GetPriorityInfo().GetPriorityNotificationType();
+    }
+    sptr<NotificationRequest> payloadRequest = new (std::nothrow) NotificationRequest(*request);
+    if (payloadRequest == nullptr) {
+        ANS_LOGE("TriggerUpdateAiExtNotification fail, null payload request, key: %{public}s",
+            notificationKey.c_str());
+        result = ERR_NO_MEMORY;
+        return;
+    }
+    payloadRequest->SetInnerPriorityNotificationType(effectiveType);
+    sptr<Notification> dropNotification = new (std::nothrow) Notification(payloadRequest);
+    if (dropNotification == nullptr) {
+        ANS_LOGE("TriggerUpdateAiExtNotification fail, null notification, key: %{public}s",
+            notificationKey.c_str());
+        result = ERR_NO_MEMORY;
+        return;
+    }
+
+    NotificationSubscriberManager::GetInstance()->NotifySystemUpdate(
+        dropNotification, effectiveClassification);
+}
+
+void AdvancedNotificationService::HandleAcceptedDelayedUpdate(const sptr<NotificationRequest> &request,
+    const sptr<NotificationRequest> &cacheRequest,
+    const sptr<NotificationClassification> &effectiveClassification, ErrCode &result)
+{
+    std::string effectiveType = NotificationConstant::PriorityNotificationType::OTHER;
+    if (effectiveClassification != nullptr) {
+        effectiveType = effectiveClassification->GetPriorityInfo().GetPriorityNotificationType();
+    }
+    cacheRequest->SetInnerPriorityNotificationType(effectiveType);
+    sptr<NotificationRequest> payloadRequest = new (std::nothrow) NotificationRequest(*request);
+    if (payloadRequest == nullptr) {
+        ANS_LOGE("TriggerUpdateAiExtNotification fail, null payload request, key: %{public}s",
+            request->GetKey().c_str());
+        result = ERR_NO_MEMORY;
+        return;
+    }
+    payloadRequest->SetInnerPriorityNotificationType(effectiveType);
+    sptr<Notification> notification = new (std::nothrow) Notification(payloadRequest);
+    if (notification == nullptr) {
+        ANS_LOGE("TriggerUpdateAiExtNotification fail, null notification, key: %{public}s",
+            request->GetKey().c_str());
+        result = ERR_NO_MEMORY;
+        return;
+    }
+
+    NotificationSubscriberManager::GetInstance()->NotifySystemUpdate(
+        notification, effectiveClassification);
+}
+#endif
 }
 }

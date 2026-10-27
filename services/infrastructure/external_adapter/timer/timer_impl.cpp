@@ -44,13 +44,13 @@ void TimerImpl::CreateTimer(std::shared_ptr<MiscServices::ITimerInfo> timerOptio
     }
 }
 
-void TimerImpl::StartTimer(int64_t triggerTime)
+bool TimerImpl::StartTimer(int64_t triggerTime)
 {
     if (timer_ == nullptr) {
         ANS_LOGE("timer is null");
-        return;
+        return false;
     }
-    timer_->StartTimer(timerId_, triggerTime);
+    return timer_->StartTimer(timerId_, triggerTime);
 }
 
 void TimerImpl::StopTimer()

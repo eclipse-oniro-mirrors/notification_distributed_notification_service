@@ -62,6 +62,24 @@ namespace Notification {
         defaultClassification.Marshalling(parcel2);
         NotificationClassification::Unmarshalling(parcel2);
 
+        // Hostile parcel level injection (TEST-03 / SEC-01): the round trips above only
+        // ever feed Unmarshalling its own legal output, while the real attack surface is
+        // a crafted or corrupted parcel reaching Unmarshalling directly (a compromised
+        // client can forge the string length prefix or truncate the payload, bypassing
+        // the setter validation entirely, which is exactly how a malicious priority
+        // triple would try to sneak in). Feed the remaining raw fuzz bytes as the parcel
+        // buffer: Unmarshalling must tolerate arbitrary bytes (forged lengths, truncated
+        // payloads, extreme int64/int32 values) without crashing, hanging or escaping
+        // the value range handling. The write and read cursors of a parcel are
+        // independent (the round trips above rely on the same behavior), so the bytes
+        // written here are read back by Unmarshalling from the start.
+        Parcel hostileParcel;
+        std::string hostileBytes = fdp->ConsumeRemainingBytesAsString();
+        if (!hostileBytes.empty()) {
+            hostileParcel.WriteBuffer(hostileBytes.c_str(), hostileBytes.size());
+            NotificationClassification::Unmarshalling(hostileParcel);
+        }
+
         return true;
     }
 }

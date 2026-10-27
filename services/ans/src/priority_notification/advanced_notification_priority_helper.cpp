@@ -81,6 +81,22 @@ ErrCode AdvancedNotificationPriorityHelper::RefreshPriorityType(const std::strin
     std::vector<sptr<NotificationRequest>> requests;
     std::vector<nlohmann::json> commands;
     std::vector<sptr<NotificationClassification>> notificationClassifications;
+    FilterRequestsByStrategy(cmdType, aiStatus, originRequests, requests, commands,
+        notificationClassifications, results);
+    if (requests.empty()) {
+        ANS_LOGI("RefreshPriorityType requests empty, originRequests size: %{public}zu", originRequests.size());
+        return ERR_OK;
+    }
+    NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(requests, commands, notificationClassifications, results);
+    return ERR_OK;
+}
+
+void AdvancedNotificationPriorityHelper::FilterRequestsByStrategy(const std::string &cmdType,
+    uint32_t aiStatus, const std::vector<sptr<NotificationRequest>> &originRequests,
+    std::vector<sptr<NotificationRequest>> &requests, std::vector<nlohmann::json> &commands,
+    std::vector<sptr<NotificationClassification>> &notificationClassifications,
+    std::vector<int32_t> &results)
+{
     for (auto &request : originRequests) {
         sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
         if (bundleOption == nullptr) {
@@ -122,12 +138,6 @@ ErrCode AdvancedNotificationPriorityHelper::RefreshPriorityType(const std::strin
         results.emplace_back(NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
         notificationClassifications.emplace_back(nullptr);
     }
-    if (requests.size() <= 0) {
-        ANS_LOGI("RefreshPriorityType requests empty, originRequests size: %{public}zu", originRequests.size());
-        return ERR_OK;
-    }
-    NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(requests, commands, notificationClassifications, results);
-    return ERR_OK;
 }
 
 void AdvancedNotificationPriorityHelper::BuildPriorityCommand(std::string& cmdType,

@@ -2042,6 +2042,37 @@ public:
     ErrCode SetPriorityEnabledByBundlesInner(
         const std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> &priorityEnable);
     ErrCode SetPriorityStrategyByBundlesInner(const std::map<sptr<NotificationBundleOption>, int64_t> &strategies);
+    /**
+     * @brief Schedules one orphan cache sweep onto notificationSvrQueue_ (any queue
+     *        context, in-flight deduplicated): the sweep removes every classification
+     *        cache entry (and priority degrade registration) whose notification no
+     *        longer exists.
+     */
+    void ScheduleOrphanClassificationSweep();
+
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    /**
+     * @brief Degrades one notification on notificationSvrQueue_ (the caller must
+     *        guarantee the queue context): degrades the cached request and the
+     *        classification triple to the terminal and notifies subscribers.
+     *
+     * @param key Indicates the key of the notification to degrade.
+     * @return Returns true if the notification record exists; false means a
+     *         defensive cleanup scenario.
+     */
+    bool ProcessPriorityDegradeOnQueue(const std::string &key);
+
+    /**
+     * @brief External entry of ProcessPriorityDegradeOnQueue: wraps it with a
+     *        synchronous submit onto notificationSvrQueue_ for callers outside the
+     *        server queue.
+     *
+     * @param key Indicates the key of the notification to degrade.
+     * @return Returns true if the notification record exists; false means a
+     *         defensive cleanup scenario.
+     */
+    bool ProcessPriorityDegrade(const std::string &key);
+#endif
     void GetRequestsFromNotification(
         const std::vector<sptr<Notification>> &notifications, std::vector<sptr<NotificationRequest>> &requests);
     ErrCode SetNotDisturbEnableState(int32_t userId, bool& isDoNotDisturbEnabled);
@@ -2084,6 +2115,41 @@ private:
     };
 
     AdvancedNotificationService();
+
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    /**
+     * @brief Build the degrade callback payload: a private copy of the cached
+     *        request (after the landing points) instead of the shared record one.
+     *
+     * @param key Indicates the key of the notification being degraded.
+     * @param cacheRequest Indicates the cached request after the landing points.
+     * @return Returns the payload notification; null on allocation failure.
+     */
+    sptr<Notification> BuildDegradeNotification(
+        const std::string &key, const sptr<NotificationRequest> &cacheRequest);
+
+    /**
+     * @brief Notify the subscribers of a finished degrade; skips the callback when
+     *        both carriers already reflect OTHER, otherwise dispatches the payload
+     *        of BuildDegradeNotification through the system update chain.
+     *
+     * @param key Indicates the key of the degraded notification.
+     * @param cacheRequest Indicates the cached request after the landing points.
+     * @param oldPriorityType Indicates the priority type captured before the degrade.
+     * @param cachedClassification Indicates the classification sent to the
+     * subscribers, null when none was cached.
+     */
+    void NotifyDegradeUpdate(const std::string &key, const sptr<NotificationRequest> &cacheRequest,
+        const std::string &oldPriorityType,
+        const sptr<NotificationClassification> &cachedClassification);
+#endif
+
+    /**
+     * @brief Orphan cache sweep body (notificationSvrQueue_ context): removes every
+     *        classification cache entry (and priority degrade registration) whose
+     *        key is not among the live notifications.
+     */
+    void CleanOrphanClassificationCacheOnQueue();
 
     /**
      * @brief Set whether to allow the specified bundle to send notifications.
@@ -2654,6 +2720,53 @@ private:
      * @return Returns is exists pid in observer map
      */
     bool IsExistsPidInObservers(const int32_t pid);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    /**
+     * @brief Process one delayed update round of TriggerUpdateAiExtNotification
+     *        (server queue context, the caller verified record, notification and
+     *        cache request non null): arbitrate through the central manager entry
+     *        and dispatch by the outcome.
+     *
+     * @param record Indicates the notification record found by the caller.
+     * @param cacheRequest Indicates the cached request extracted and verified by the caller.
+     * @param request Indicates the incoming request of the delayed update round.
+     * @param notificationClassification Indicates the incoming classification, may be null.
+     * @param result Indicates the error code slot of the round, ERR_OK based.
+     */
+    void ProcessDelayedUpdateOnQueue(const std::shared_ptr<NotificationRecord> &record,
+        const sptr<NotificationRequest> &cacheRequest, const sptr<NotificationRequest> &request,
+        const sptr<NotificationClassification> &notificationClassification, ErrCode &result);
+
+    /**
+     * @brief Handle the drop family of one delayed update round: a null round is a
+     *        pure skip; a non null round distributes the system update with a deep
+     *        copy of the incoming request carrying the effective type.
+     *
+     * @param notificationKey Indicates the cached notification key.
+     * @param request Indicates the incoming request of the delayed update round.
+     * @param notificationClassification Indicates the incoming classification, may be null.
+     * @param effectiveClassification Indicates the effective value output of the manager.
+     * @param result Indicates the error code slot of the round, ERR_OK based.
+     */
+    void HandleDroppedDelayedUpdate(const std::string &notificationKey,
+        const sptr<NotificationRequest> &request,
+        const sptr<NotificationClassification> &notificationClassification,
+        const sptr<NotificationClassification> &effectiveClassification, ErrCode &result);
+
+    /**
+     * @brief Handle an accepted delayed update round: writes the effective type back
+     *        into the cached request and distributes the system update with the
+     *        effective value.
+     *
+     * @param request Indicates the incoming request of the delayed update round.
+     * @param cacheRequest Indicates the cached request of the notification record.
+     * @param effectiveClassification Indicates the effective value output of the manager.
+     * @param result Indicates the error code slot of the round, ERR_OK based.
+     */
+    void HandleAcceptedDelayedUpdate(const sptr<NotificationRequest> &request,
+        const sptr<NotificationRequest> &cacheRequest,
+        const sptr<NotificationClassification> &effectiveClassification, ErrCode &result);
+#endif
 private:
     static sptr<AdvancedNotificationService> instance_;
     static ffrt::mutex instanceMutex_;
@@ -2663,6 +2776,7 @@ private:
     static ffrt::mutex badgeQueryMutex_;
     static std::map<int32_t, sptr<IBadgeQueryCallback>> badgeQueryCallBack_;
     bool aggregateLocalSwitch_ = false;
+    std::atomic<bool> orphanSweepInFlight_ {false};
     std::set<int32_t> recoverReplayUserIds_;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;

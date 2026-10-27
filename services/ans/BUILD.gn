@@ -194,6 +194,8 @@ ohos_source_set("ans_service_sources") {
     "src/priority_notification/advanced_notification_priority_helper.cpp",
     "src/priority_notification/advanced_notification_priority_manager_service.cpp",
     "src/priority_notification/notification_ai_extension_wrapper.cpp",
+    "src/priority_notification/priority_notification_degrade_manager.cpp",
+    "src/priority_notification/single_timer_scheduler.cpp",
   ]
 
   public_configs = [ ":public_ans_config" ]
