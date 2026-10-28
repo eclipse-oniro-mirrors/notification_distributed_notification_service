@@ -172,6 +172,23 @@ HWTEST_F(SmartReminderCenterTest, IsCollaborationAllowed_NotSharedLiveView_00003
 }
 
 /**
+ * @tc.name: IsCollaborationAllowed_00004
+ * @tc.desc: Test IsCollaborationAllowed returns false when exam mode is on.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, IsCollaborationAllowed_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    NotificationPreferences::GetInstance()->SetExamStatus(true);
+    auto res = smartReminderCenter_->IsCollaborationAllowed(request);
+    ASSERT_FALSE(res);
+
+    NotificationPreferences::GetInstance()->SetExamStatus(false);
+    res = smartReminderCenter_->IsCollaborationAllowed(request);
+    ASSERT_TRUE(res);
+}
+
+/**
  * @tc.name: Test ReminderDecisionProcess
  * @tc.desc: Test ReminderDecisionProcess
  * @tc.type: FUNC

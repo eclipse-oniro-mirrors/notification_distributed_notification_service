@@ -264,8 +264,11 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         NotificationCloneManager::GetInstance().OnRestoreStart(want);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_ON) {
         NotificationPreferences::GetInstance()->SetKioskModeStatus(true);
+        int32_t kioskType = want.GetIntParam("type", 0);
+        NotificationPreferences::GetInstance()->SetExamStatus(kioskType == 1);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_KIOSK_MODE_OFF) {
         NotificationPreferences::GetInstance()->SetKioskModeStatus(false);
+        NotificationPreferences::GetInstance()->SetExamStatus(false);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_BUNDLE_SCAN_FINISHED ||
         action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_STARTED) {
         NotificationLiveViewUtils::GetInstance().NotifyLiveViewEvent(action);

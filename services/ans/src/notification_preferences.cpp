@@ -3288,6 +3288,16 @@ bool NotificationPreferences::IsKioskMode()
     return isKioskMode_;
 }
 
+void NotificationPreferences::SetExamStatus(bool isExamStatus)
+{
+    isExamMode_ = isExamStatus;
+}
+
+bool NotificationPreferences::IsExamMode()
+{
+    return isExamMode_;
+}
+
 bool NotificationPreferences::IsRestrictedMode(const int32_t &userId)
 {
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
