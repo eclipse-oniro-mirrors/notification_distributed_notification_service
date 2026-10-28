@@ -3017,6 +3017,36 @@ HWTEST_F(NotificationPreferencesTest, IsKioskMode_001, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: SetExamStatus_001
+ * @tc.desc: Test SetExamStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetExamStatus_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.SetExamStatus(true);
+    EXPECT_EQ(notificationPreferences.isExamMode_, true);
+    notificationPreferences.SetExamStatus(false);
+    EXPECT_EQ(notificationPreferences.isExamMode_, false);
+}
+
+/**
+ * @tc.name: IsExamMode_001
+ * @tc.desc: Test IsExamMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsExamMode_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.isExamMode_ = true;
+    auto ret = notificationPreferences.IsExamMode();
+    EXPECT_EQ(ret, true);
+    notificationPreferences.SetExamStatus(false);
+    ret = notificationPreferences.IsExamMode();
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: GetkioskAppTrustList_001
  * @tc.desc: Test GetkioskAppTrustList
  * @tc.type: FUNC

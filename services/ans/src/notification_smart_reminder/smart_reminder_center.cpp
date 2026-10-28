@@ -245,6 +245,10 @@ void SmartReminderCenter::ParseReminderFilterCode(
 
 bool SmartReminderCenter::IsCollaborationAllowed(const sptr<NotificationRequest>& request) const
 {
+    if (NotificationPreferences::GetInstance()->IsExamMode()) {
+        ANS_LOGW("Exam mode is on, collaboration not allowed.");
+        return false;
+    }
     std::string bundleName = request->GetOwnerBundleName();
     int32_t uid = request->GetOwnerUid();
     if (!NotificationPreferences::GetInstance()->IsCollaborationAllowed(bundleName, uid)) {

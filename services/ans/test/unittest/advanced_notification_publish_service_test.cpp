@@ -3232,6 +3232,30 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByRestrictedMode_002, Funct
 }
 
 /**
+ * @tc.name: IsDisableNotificationByRestrictedMode_003
+ * @tc.desc: Test IsDisableNotificationByRestrictedMode with exam mode exempting kiosk mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByRestrictedMode_003, Function | SmallTest | Level1)
+{
+    AAFwk::MockSetKioskStatus(ERR_INVALID_OPERATION, true);
+    std::string bundleName = "com.test.example";
+    int32_t userId = 0;
+    NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.clear();
+    NotificationPreferences::GetInstance()->preferencesInfo_.restrictedModeTrustList_.clear();
+    NotificationPreferences::GetInstance()->SetKioskModeStatus(true);
+    NotificationPreferences::GetInstance()->SetExamStatus(true);
+    bool result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId);
+    EXPECT_FALSE(result);
+
+    NotificationPreferences::GetInstance()->SetExamStatus(false);
+    result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId);
+    EXPECT_TRUE(result);
+
+    NotificationPreferences::GetInstance()->SetKioskModeStatus(false);
+}
+
+/**
  * @tc.name: IsDisableNotificationForSaByRestrictedMode_001
  * @tc.desc: Test IsDisableNotificationForSaByRestrictedMode
  * @tc.type: FUNC
@@ -3276,6 +3300,28 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_003, 
     NotificationPreferences::GetInstance()->preferencesInfo_.restrictedModeTrustList_[userId] = bundleList;
 
     EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, false));
+}
+
+/**
+ * @tc.name: IsDisableNotificationForSaByRestrictedMode_004
+ * @tc.desc: Test IsDisableNotificationForSaByRestrictedMode with exam mode exempting kiosk mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_004, Function | SmallTest | Level1)
+{
+    AAFwk::MockSetKioskStatus(ERR_INVALID_OPERATION, true);
+    int32_t userId = 0;
+    std::string bundleName = "com.test.example";
+    NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.clear();
+    NotificationPreferences::GetInstance()->preferencesInfo_.restrictedModeTrustList_.clear();
+    NotificationPreferences::GetInstance()->SetKioskModeStatus(true);
+    NotificationPreferences::GetInstance()->SetExamStatus(true);
+    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, false));
+
+    NotificationPreferences::GetInstance()->SetExamStatus(false);
+    EXPECT_TRUE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, false));
+
+    NotificationPreferences::GetInstance()->SetKioskModeStatus(false);
 }
 
 /*

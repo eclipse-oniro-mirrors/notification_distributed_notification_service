@@ -719,6 +719,10 @@ public:
 
     bool IsKioskMode();
 
+    void SetExamStatus(bool isExamStatus);
+
+    bool IsExamMode();
+
     bool GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList);
 
     bool IsExistKioskAppTrustList(const std::string &bundleName);
@@ -893,6 +897,7 @@ private:
     bool isCachedMirrorNotificationEnabledStatus_ = false;
     std::vector<std::string> mirrorNotificationEnabledStatus_ = {};
     std::atomic<bool> isKioskMode_ = false;
+    std::atomic<bool> isExamMode_ = false;
     std::atomic<bool> isKioskTrustListUpdate_ = false;
     std::atomic<bool> isRestrictedTrustListUpdate_ = false;
 
