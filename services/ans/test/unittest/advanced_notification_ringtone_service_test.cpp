@@ -248,5 +248,102 @@ HWTEST_F(AdvancedNotificationRingToneServiceTest, GetRingtoneInfoByBundle_00004,
     ASSERT_NE(getRingtoneInfo, nullptr);
     ASSERT_EQ(advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, getRingtoneInfo), ERR_OK);
 }
+/**
+ * @tc.number    : SetRingtoneInfoByBundle_00005
+ * @tc.name      : SetRingtoneInfoByBundle
+ * @tc.desc      : Test SetRingtoneInfoByBundle skips duplicate set when ringtone info is the same
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, SetRingtoneInfoByBundle_00005, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 1);
+    ASSERT_NE(bundleOption, nullptr);
+    sptr<NotificationRingtoneInfo> ringtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+    ASSERT_NE(ringtoneInfo, nullptr);
+    ringtoneInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ringtoneInfo->SetRingtoneTitle("title");
+    ringtoneInfo->SetRingtoneFileName("fileName");
+    ringtoneInfo->SetRingtoneUri("uri");
+    ASSERT_EQ(advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo), ERR_OK);
+    sptr<NotificationRingtoneInfo> getRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+    ASSERT_NE(getRingtoneInfo, nullptr);
+    ASSERT_EQ(advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, getRingtoneInfo), ERR_OK);
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneType(), NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneTitle(), "title");
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneFileName(), "fileName");
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneUri(), "uri");
+}
+
+/**
+ * @tc.number    : SetRingtoneInfoByBundle_00006
+ * @tc.name      : SetRingtoneInfoByBundle
+ * @tc.desc      : Test SetRingtoneInfoByBundle replaces ringtone when info is different
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, SetRingtoneInfoByBundle_00006, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 1);
+    ASSERT_NE(bundleOption, nullptr);
+    sptr<NotificationRingtoneInfo> firstInfo = new (std::nothrow) NotificationRingtoneInfo();
+    ASSERT_NE(firstInfo, nullptr);
+    firstInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    firstInfo->SetRingtoneTitle("titleA");
+    firstInfo->SetRingtoneFileName("fileNameA");
+    firstInfo->SetRingtoneUri("uriA");
+    ASSERT_EQ(advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, firstInfo), ERR_OK);
+    sptr<NotificationRingtoneInfo> secondInfo = new (std::nothrow) NotificationRingtoneInfo();
+    ASSERT_NE(secondInfo, nullptr);
+    secondInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    secondInfo->SetRingtoneTitle("titleB");
+    secondInfo->SetRingtoneFileName("fileNameB");
+    secondInfo->SetRingtoneUri("uriB");
+    ASSERT_EQ(advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, secondInfo), ERR_OK);
+    sptr<NotificationRingtoneInfo> getRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+    ASSERT_NE(getRingtoneInfo, nullptr);
+    ASSERT_EQ(advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, getRingtoneInfo), ERR_OK);
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneType(), NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneTitle(), "titleB");
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneFileName(), "fileNameB");
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneUri(), "uriB");
+}
+
+/**
+ * @tc.number    : SetRingtoneInfoByBundle_00007
+ * @tc.name      : SetRingtoneInfoByBundle
+ * @tc.desc      : Test SetRingtoneInfoByBundle updates info when only title differs with same uri
+ */
+HWTEST_F(AdvancedNotificationRingToneServiceTest, SetRingtoneInfoByBundle_00007, Function | SmallTest | Level1)
+{
+    ASSERT_NE(advancedNotificationService_, nullptr);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundle", 1);
+    ASSERT_NE(bundleOption, nullptr);
+    sptr<NotificationRingtoneInfo> firstInfo = new (std::nothrow) NotificationRingtoneInfo();
+    ASSERT_NE(firstInfo, nullptr);
+    firstInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    firstInfo->SetRingtoneTitle("titleA");
+    firstInfo->SetRingtoneFileName("fileName");
+    firstInfo->SetRingtoneUri("uri");
+    ASSERT_EQ(advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, firstInfo), ERR_OK);
+    sptr<NotificationRingtoneInfo> secondInfo = new (std::nothrow) NotificationRingtoneInfo();
+    ASSERT_NE(secondInfo, nullptr);
+    secondInfo->SetRingtoneType(NotificationConstant::RingtoneType::RINGTONE_TYPE_LOCAL);
+    secondInfo->SetRingtoneTitle("titleB");
+    secondInfo->SetRingtoneFileName("fileName");
+    secondInfo->SetRingtoneUri("uri");
+    ASSERT_EQ(advancedNotificationService_->SetRingtoneInfoByBundle(bundleOption, secondInfo), ERR_OK);
+    sptr<NotificationRingtoneInfo> getRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+    ASSERT_NE(getRingtoneInfo, nullptr);
+    ASSERT_EQ(advancedNotificationService_->GetRingtoneInfoByBundle(bundleOption, getRingtoneInfo), ERR_OK);
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneTitle(), "titleB");
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneFileName(), "fileName");
+    ASSERT_EQ(getRingtoneInfo->GetRingtoneUri(), "uri");
+}
 }  // namespace Notification
 }  // namespace OHOS

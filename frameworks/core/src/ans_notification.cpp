@@ -3315,7 +3315,8 @@ InnerErrorCode AnsNotification::GetAllNotificationsBySlotType(std::vector<sptr<N
 InnerErrorCode AnsNotification::SetRingtoneInfoByBundle(const NotificationBundleOption &bundle,
     const NotificationRingtoneInfo &ringtoneInfo)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("SetRingtoneInfoByBundle bundle: %{public}s, uid: %{public}d",
+        bundle.GetBundleName().c_str(), bundle.GetUid());
     if (bundle.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INNER_INVALID_PARAM;

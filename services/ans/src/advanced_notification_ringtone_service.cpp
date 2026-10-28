@@ -60,12 +60,27 @@ ErrCode AdvancedNotificationService::SetRingtoneInfoByBundle(const sptr<Notifica
         return ERR_ANS_INNER_INVALID_BUNDLE_OPTION;
     }
 
+    sptr<NotificationRingtoneInfo> savedRingtoneInfo = new (std::nothrow) NotificationRingtoneInfo();
+    bool hasSaved = savedRingtoneInfo != nullptr && (NotificationPreferences::GetInstance()->GetRingtoneInfoByBundle(
+        bundleOption, savedRingtoneInfo) == ERR_OK);
+    if (hasSaved &&
+        savedRingtoneInfo->GetRingtoneType() == ringtoneInfo->GetRingtoneType() &&
+        savedRingtoneInfo->GetRingtoneTitle() == ringtoneInfo->GetRingtoneTitle() &&
+        savedRingtoneInfo->GetRingtoneFileName() == ringtoneInfo->GetRingtoneFileName() &&
+        savedRingtoneInfo->GetRingtoneUri() == ringtoneInfo->GetRingtoneUri()) {
+        ANS_LOGI("Same ringtone info, skip set. bundle: %{public}s", bundleOption->GetBundleName().c_str());
+        return ERR_OK;
+    }
+
     NotificationPreferences::GetInstance()->RemoveRingtoneInfoByBundle(bundleOption);
 
     ReportRingtoneChanged(
         bundleOption, ringtoneInfo, NotificationConstant::RingtoneReportType::RINGTONE_UPDATE);
 
-    return NotificationPreferences::GetInstance()->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    ErrCode result = NotificationPreferences::GetInstance()->SetRingtoneInfoByBundle(bundleOption, ringtoneInfo);
+    ANS_LOGI("SetRingtoneInfoByBundle end. ringtoneInfo: %{public}s, result: %{public}d",
+        ringtoneInfo->Dump().c_str(), result);
+    return result;
 }
 
 ErrCode AdvancedNotificationService::GetRingtoneInfoByBundle(const sptr<NotificationBundleOption> &bundle,
