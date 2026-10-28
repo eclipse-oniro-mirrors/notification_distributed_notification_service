@@ -206,6 +206,44 @@ bool IsWantAgentFieldBroken(const nlohmann::json &jsonObject, const std::string 
     return !iter->get<std::string>().empty() && agent == nullptr;
 }
 
+int32_t CollectLiveViewDbRecords(const std::vector<int32_t> &userIds,
+    std::unordered_map<std::string, std::string> &dbRecords,
+    std::unordered_map<std::string, int32_t> &dbRecordUsers)
+{
+    for (const int32_t userId : userIds) {
+        std::unordered_map<std::string, std::string> records;
+        int32_t result = NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
+            REQUEST_STORAGE_KEY_PREFIX, records, userId);
+        int32_t secureResult = NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
+            REQUEST_STORAGE_SECURE_KEY_PREFIX, records, userId);
+        if (result != ERR_OK && secureResult != ERR_OK) {
+            ANS_LOGE("Get batch notification request failed.");
+            return result;
+        }
+        for (const auto &pair : records) {
+            dbRecords[pair.first] = pair.second;
+            dbRecordUsers[pair.first] = userId;
+        }
+    }
+    return ERR_OK;
+}
+
+bool DecryptLiveViewRecord(const std::string &storageKey, std::string &value)
+{
+    if (storageKey.rfind(REQUEST_STORAGE_SECURE_KEY_PREFIX, 0) != 0) {
+        return true;
+    }
+    std::string plainText;
+    ErrCode errorCode = AesGcmHelper::Decrypt(plainText, value);
+    if (errorCode != ERR_OK) {
+        ANS_LOGE("Live view record decrypt error %{public}d, key %{public}s.",
+            static_cast<int32_t>(errorCode), storageKey.c_str());
+        return false;
+    }
+    value = plainText;
+    return true;
+}
+
 // Validates one DB record and deletes it when it cannot be recovered. Returns false when the
 // record has been disposed of and the caller must skip it.
 bool PrepareLiveViewRequestFromDb(const std::string &storageKey, int32_t dbUserId,
@@ -820,37 +858,21 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
         ANS_LOGE("Get all os account failed.");
         return ret;
     }
-    for (const int32_t userId : userIds) {
-        std::unordered_map<std::string, std::string> records;
-        int32_t result =
-            NotificationPreferences::GetInstance()->GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, records, userId);
-        int32_t secureResult =
-            NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
-                REQUEST_STORAGE_SECURE_KEY_PREFIX, records, userId);
-        if (result != ERR_OK && secureResult != ERR_OK) {
-            ANS_LOGE("Get batch notification request failed.");
-            return result;
-        }
-        for (const auto& pair : records) {
-            dbRecords[pair.first] = pair.second;
-            dbRecordUsers[pair.first] = userId;
-        }
+    int32_t collectResult = CollectLiveViewDbRecords(userIds, dbRecords, dbRecordUsers);
+    if (collectResult != ERR_OK) {
+        return collectResult;
     }
     for (const auto &iter : dbRecords) {
         std::string decryptValue = iter.second;
         int32_t dbUserId = dbRecordUsers[iter.first];
-        if (iter.first.rfind(REQUEST_STORAGE_SECURE_KEY_PREFIX, 0) == 0) {
-            ErrCode errorCode = AesGcmHelper::Decrypt(decryptValue, iter.second);
-            if (errorCode != ERR_OK) {
-                ANS_LOGE("GetBatchNotificationRequestsFromDb decrypt error %{public}d", errorCode);
-                NotificationPreferences::GetInstance()->DeleteKvFromDb(iter.first, dbUserId);
-                continue;
-            }
+        if (!DecryptLiveViewRecord(iter.first, decryptValue)) {
+            NotificationPreferences::GetInstance()->DeleteKvFromDb(iter.first, dbUserId);
+            continue;
         }
         nlohmann::json jsonObject;
         sptr<NotificationRequest> request = nullptr;
         if (!PrepareLiveViewRequestFromDb(iter.first, dbUserId, decryptValue, removedBaseKeys,
-                jsonObject, request)) {
+            jsonObject, request)) {
             continue;
         }
         sptr<NotificationBundleOption> bundleOption =
