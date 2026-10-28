@@ -151,14 +151,16 @@ inline bool LiveViewKvExists(const std::string &key, int32_t userId)
     return NotificationPreferences::GetInstance()->GetKvFromDb(key, value, userId) == ERR_OK;
 }
 
-inline sptr<NotificationRequest> BuildRecoverableLiveViewRequest(int32_t userId, const std::string &label)
+constexpr int32_t TEST_CREATOR_UID = 100;
+
+sptr<NotificationRequest> BuildRecoverableLiveViewRequest(int32_t userId, const std::string &label)
 {
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
     request->SetNotificationId(1);
     request->SetLabel(label);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(userId);
     request->SetCreatorBundleName("recover_test");
     auto liveContent = std::make_shared<NotificationLiveViewContent>();
@@ -1759,8 +1761,8 @@ HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_NormalRecovery_00001, Fun
     liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(100);
     request->SetLabel("test_normal");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -1807,8 +1809,8 @@ HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_ExpiredLiveView_00001, Fu
     liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(100);
     request->SetLabel("test_expired");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -1849,8 +1851,8 @@ HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_LiveViewEnd_00001, Functi
     liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(100);
     request->SetLabel("test_end");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -1975,8 +1977,8 @@ HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_NormalEntry_00001, Functio
     liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(100);
     request->SetLabel("test_entry");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -2021,8 +2023,8 @@ HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_ExpiredEntry_00001, Functi
     liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(100);
     request->SetLabel("test_exp_e");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -2061,8 +2063,8 @@ HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_LiveViewEnd_00001, Functio
     liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(100);
     request->SetLabel("test_end_e");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -2154,8 +2156,8 @@ HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_NoContentFillFail_00001, F
 {
     advancedNotificationService_->notificationList_.clear();
     sptr<NotificationRequest> request = new NotificationRequest(1);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(100);
     request->SetLabel("test_nofill");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -2194,8 +2196,8 @@ HWTEST_F(AnsLiveViewServiceTest, ProcessRecoveryEntry_EmptyBundleName_00001, Fun
     liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(100);
     request->SetLabel("test_emptybn");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
@@ -2227,8 +2229,8 @@ HWTEST_F(AnsLiveViewServiceTest, StartRecoveryTimers_NonCommonLiveView_00001, Fu
 {
     advancedNotificationService_->notificationList_.clear();
     sptr<NotificationRequest> request = new NotificationRequest(1);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(100);
     request->SetLabel("test_nonclv");
     request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
@@ -2262,8 +2264,8 @@ HWTEST_F(AnsLiveViewServiceTest, StartRecoveryTimers_NoGeofenceTrigger_00001, Fu
     liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
     std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveViewContent);
     request->SetContent(content);
-    request->SetCreatorUid(100);
-    request->SetCreatorUserId(100);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorUserId(TEST_CREATOR_UID);
     request->SetReceiverUserId(100);
     request->SetLabel("test_nogeo");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);

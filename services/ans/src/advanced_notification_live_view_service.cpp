@@ -206,6 +206,46 @@ bool IsWantAgentFieldBroken(const nlohmann::json &jsonObject, const std::string 
     return !iter->get<std::string>().empty() && agent == nullptr;
 }
 
+// Validates one DB record and deletes it when it cannot be recovered. Returns false when the
+// record has been disposed of and the caller must skip it.
+bool PrepareLiveViewRequestFromDb(const std::string &storageKey, int32_t dbUserId,
+    const std::string &decryptValue, std::vector<std::string> *removedBaseKeys,
+    nlohmann::json &jsonObject, sptr<NotificationRequest> &request)
+{
+    if (decryptValue.empty() || !nlohmann::json::accept(decryptValue)) {
+        ANS_LOGE("Invalid json, key %{public}s.", storageKey.c_str());
+        DeleteLiveViewRecordFromDb(storageKey, dbUserId);
+        return false;
+    }
+    jsonObject = nlohmann::json::parse(decryptValue);
+    auto epoch = std::chrono::system_clock::now().time_since_epoch();
+    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    if (IsLiveViewExpiredInJson(jsonObject, curTime)) {
+        ANS_LOGE("The live view record has expired, key %{public}s.", storageKey.c_str());
+        if (removedBaseKeys != nullptr) {
+            std::string baseKey;
+            if (TryExtractLiveViewBaseKey(storageKey, baseKey)) {
+                removedBaseKeys->emplace_back(baseKey);
+            }
+        }
+        DeleteLiveViewRecordFromDb(storageKey, dbUserId);
+        return false;
+    }
+    request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
+    if (request == nullptr) {
+        ANS_LOGE("Parse json string to request failed, key %{public}s.", storageKey.c_str());
+        DeleteLiveViewRecordFromDb(storageKey, dbUserId);
+        return false;
+    }
+    if (IsWantAgentFieldBroken(jsonObject, "wantAgent", request->GetWantAgent()) ||
+        IsWantAgentFieldBroken(jsonObject, "removalWantAgent", request->GetRemovalWantAgent())) {
+        ANS_LOGE("Parse wantAgent failed, key %{public}s.", storageKey.c_str());
+        DeleteLiveViewRecordFromDb(storageKey, dbUserId);
+        return false;
+    }
+    return true;
+}
+
 void PrepareUsersForRecovery(int32_t userId, std::vector<int32_t> &usersToRecover)
 {
     std::vector<int32_t> userIds;
@@ -807,42 +847,16 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
                 continue;
             }
         }
-        if (decryptValue.empty() || !nlohmann::json::accept(decryptValue)) {
-            ANS_LOGE("Invalid json, key %{public}s.", iter.first.c_str());
-            DeleteLiveViewRecordFromDb(iter.first, dbUserId);
-            continue;
-        }
-        auto jsonObject = nlohmann::json::parse(decryptValue);
-        auto epoch = std::chrono::system_clock::now().time_since_epoch();
-        auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
-        if (IsLiveViewExpiredInJson(jsonObject, curTime)) {
-            ANS_LOGE("The live view record has expired, key %{public}s.", iter.first.c_str());
-            if (removedBaseKeys != nullptr) {
-                std::string baseKey;
-                if (TryExtractLiveViewBaseKey(iter.first, baseKey)) {
-                    removedBaseKeys->emplace_back(baseKey);
-                }
-            }
-            DeleteLiveViewRecordFromDb(iter.first, dbUserId);
-            continue;
-        }
-        sptr<NotificationRequest> request =
-            NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
-        if (request == nullptr) {
-            ANS_LOGE("Parse json string to request failed, key %{public}s.", iter.first.c_str());
-            DeleteLiveViewRecordFromDb(iter.first, dbUserId);
-            continue;
-        }
-        if (IsWantAgentFieldBroken(jsonObject, "wantAgent", request->GetWantAgent()) ||
-            IsWantAgentFieldBroken(jsonObject, "removalWantAgent", request->GetRemovalWantAgent())) {
-            ANS_LOGE("Parse wantAgent failed, key %{public}s.", iter.first.c_str());
-            DeleteLiveViewRecordFromDb(iter.first, dbUserId);
+        nlohmann::json jsonObject;
+        sptr<NotificationRequest> request = nullptr;
+        if (!PrepareLiveViewRequestFromDb(iter.first, dbUserId, decryptValue, removedBaseKeys,
+                jsonObject, request)) {
             continue;
         }
         sptr<NotificationBundleOption> bundleOption =
             NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
         if (bundleOption == nullptr) {
-            ANS_LOGE("Parse json string to bundle option failed.");
+            ANS_LOGE("Parse json string to bundle option failed, key %{public}s.", iter.first.c_str());
             (void)DoubleDeleteNotificationFromDb(request->GetKey(),
                 request->GetSecureKey(), request->GetReceiverUserId());
             continue;
