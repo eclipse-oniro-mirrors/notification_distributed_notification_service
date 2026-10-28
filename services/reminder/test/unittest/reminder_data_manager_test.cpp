@@ -1365,5 +1365,222 @@ HWTEST_F(ReminderDataManagerTest, IsActionButtonDataShareValid_001, Level1)
     auto ret = manager->IsActionButtonDataShareValid(reminder, 0);
     EXPECT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: ClickReminder_StartAbilityOnlyUIAbility_001
+ * @tc.desc: TEST ClickReminder passes userId to StartAbilityOnlyUIAbility when wantAgentInfo is valid
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, ClickReminder_StartAbilityOnlyUIAbility_001, Level1)
+{
+    IPCSkeleton::SetCallingTokenID(100);
+    sptr<ReminderRequest> timer = new ReminderRequestTimer(500);
+    timer->SetReminderId(3001);
+    timer->InitUserId(100);
+    timer->InitBundleName("com.test.click");
+    timer->InitUid(10001);
+    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    wantInfo->pkgName = "com.test.click";
+    wantInfo->abilityName = "MainAbility";
+    timer->SetWantAgentInfo(wantInfo);
+    timer->SetState(true, ReminderRequest::REMINDER_STATUS_SHOWING, "OnShow");
+    manager->AddToShowedReminders(timer);
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+        manager->reminderVector_.push_back(timer);
+    }
+    EventFwk::Want want;
+    want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 3001);
+    manager->ClickReminder(want);
+    bool foundInShowed = false;
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::SHOW_MUTEX);
+        for (auto &item : manager->showedReminderVector_) {
+            if (item->GetReminderId() == 3001) {
+                foundInShowed = true;
+                break;
+            }
+        }
+        manager->reminderVector_.clear();
+    }
+    EXPECT_FALSE(foundInShowed);
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+    }
+}
+
+/**
+ * @tc.name: ClickReminder_StartAbilityOnlyUIAbility_002
+ * @tc.desc: Test ClickReminder passes userId to StartAbilityOnlyUIAbility with different userId
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, ClickReminder_StartAbilityOnlyUIAbility_002, Level1)
+{
+    IPCSkeleton::SetCallingTokenID(200);
+    sptr<ReminderRequest> timer = new ReminderRequestTimer(500);
+    timer->SetReminderId(3002);
+    timer->InitUserId(200);
+    timer->InitBundleName("com.test.click2");
+    timer->InitUid(20002);
+    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    wantInfo->pkgName = "com.test.click2";
+    wantInfo->abilityName = "EntryAbility";
+    wantInfo->uri = "test://uri";
+    timer->SetWantAgentInfo(wantInfo);
+    timer->SetState(true, ReminderRequest::REMINDER_STATUS_SHOWING, "OnShow");
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+        manager->reminderVector_.push_back(timer);
+    }
+    EventFwk::Want want;
+    want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 3002);
+    manager->ClickReminder(want);
+    EXPECT_TRUE(timer->IsExpired());
+    EXPECT_FALSE(timer->IsShowing());
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+    }
+}
+
+/**
+ * @tc.name: ClickReminder_StartAbilityOnlyUIAbility_003
+ * @tc.desc: Test ClickReminder with wantAgentInfo but empty pkgName and abilityName (skips StartAbility)
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, ClickReminder_StartAbilityOnlyUIAbility_003, Level1)
+{
+    sptr<ReminderRequest> timer = new ReminderRequestTimer(500);
+    timer->SetReminderId(3003);
+    timer->InitUserId(100);
+    auto wantInfo = std::make_shared<ReminderRequest::WantAgentInfo>();
+    timer->SetWantAgentInfo(wantInfo);
+    timer->SetState(true, ReminderRequest::REMINDER_STATUS_SHOWING, "OnShow");
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+        manager->reminderVector_.push_back(timer);
+    }
+    EventFwk::Want want;
+    want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 3003);
+    manager->ClickReminder(want);
+    EXPECT_TRUE(timer->IsExpired());
+    EXPECT_FALSE(timer->IsShowing());
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+    }
+}
+
+/**
+ * @tc.name: HandleCustomButtonClick_StartAbilityOnlyUIAbility_001
+ * @tc.desc: Test HandleCustomButtonClick passes userId to StartAbilityOnlyUIAbility with custom button
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, HandleCustomButtonClick_StartAbilityOnlyUIAbility_001, Level1)
+{
+    IPCSkeleton::SetCallingTokenID(100);
+    sptr<ReminderRequestTimer> timer = new ReminderRequestTimer(500);
+    timer->SetReminderId(3004);
+    timer->InitUserId(100);
+    timer->InitBundleName("com.test.custom");
+    timer->InitUid(10003);
+    timer->SetSystemApp(true);
+    timer->SetRepeatInfo(60, 3);
+    timer->SetState(true, ReminderRequest::REMINDER_STATUS_SHOWING, "OnShow");
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+        manager->reminderVector_.push_back(timer);
+    }
+    EventFwk::Want want;
+    want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 3004);
+    want.SetParam("PkgName", std::string("com.test.custom"));
+    want.SetParam("AbilityName", std::string("CustomAbility"));
+    manager->HandleCustomButtonClick(want);
+    EXPECT_TRUE(timer->IsExpired());
+    EXPECT_FALSE(timer->IsShowing());
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+    }
+}
+
+/**
+ * @tc.name: HandleCustomButtonClick_StartAbilityOnlyUIAbility_002
+ * @tc.desc: Test HandleCustomButtonClick with non-system app skips StartAbilityOnlyUIAbility
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, HandleCustomButtonClick_StartAbilityOnlyUIAbility_002, Level1)
+{
+    sptr<ReminderRequest> timer = new ReminderRequestTimer(500);
+    timer->SetReminderId(3005);
+    timer->InitUserId(100);
+    timer->SetSystemApp(false);
+    timer->SetState(true, ReminderRequest::REMINDER_STATUS_SHOWING, "OnShow");
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+        manager->reminderVector_.push_back(timer);
+    }
+    EventFwk::Want want;
+    want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 3005);
+    manager->HandleCustomButtonClick(want);
+    EXPECT_TRUE(timer->IsShowing());
+    EXPECT_FALSE(timer->IsExpired());
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+    }
+}
+
+/**
+ * @tc.name: HandleCustomButtonClick_StartAbilityOnlyUIAbility_003
+ * @tc.desc: Test HandleCustomButtonClick with reminder not found (null reminder early return)
+ * @tc.type: FUNC
+ * @tc.require: issue#I9IIDE
+ */
+HWTEST_F(ReminderDataManagerTest, HandleCustomButtonClick_StartAbilityOnlyUIAbility_003, Level1)
+{
+    IPCSkeleton::SetCallingTokenID(100);
+    sptr<ReminderRequest> timer = new ReminderRequestTimer(500);
+    timer->SetReminderId(3006);
+    timer->InitUserId(300);
+    timer->InitBundleName("com.test.notfound");
+    timer->InitUid(30006);
+    timer->SetSystemApp(true);
+    timer->SetState(true, ReminderRequest::REMINDER_STATUS_SHOWING, "OnShow");
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        manager->reminderVector_.clear();
+        manager->reminderVector_.push_back(timer);
+    }
+    EventFwk::Want want;
+    want.SetParam(ReminderRequest::PARAM_REMINDER_ID, 9999);
+    want.SetParam("PkgName", std::string("com.test.notfound"));
+    want.SetParam("AbilityName", std::string("NotFoundAbility"));
+    manager->HandleCustomButtonClick(want);
+    bool stillInvector = false;
+    {
+        std::lock_guard<std::mutex> locker(ReminderDataManager::MUTEX);
+        for (auto &item : manager->reminderVector_) {
+            if (item->GetReminderId() == 3006) {
+                stillInvector = true;
+                break;
+            }
+        }
+        manager->reminderVector_.clear();
+    }
+    EXPECT_TRUE(stillInvector);
+    EXPECT_TRUE(timer->IsShowing());
+}
 }  // namespace Notification
 }  // namespace OHOS
