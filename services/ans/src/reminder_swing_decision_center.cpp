@@ -41,14 +41,36 @@ ErrCode ReminderSwingDecisionCenter::RegisterSwingCallback(const sptr<IRemoteObj
         ANS_LOGE("swingCallback is null.");
         return ERR_INVALID_VALUE;
     }
-    swingRecipient_ = new (nothrow) SwingCallbackRecipient();
-    if (!swingRecipient_) {
-        ANS_LOGE("Failed to create death Recipient ptr SwingCallbackRecipient!");
-        return ERR_NO_INIT;
+    sptr<ISwingCallBack> swingCallBackProxy = iface_cast<ISwingCallBack>(swingCallback);
+    if (swingCallBackProxy == nullptr) {
+        ANS_LOGE("swingCallback is invalid.");
+        return ERR_INVALID_VALUE;
     }
-    swingCallback->AddDeathRecipient(swingRecipient_);
-    lock_guard<mutex> lock(swingMutex_);
-    swingCallback_ = iface_cast<ISwingCallBack>(swingCallback);
+    sptr<IRemoteObject::DeathRecipient> recipient = nullptr;
+    sptr<IRemoteObject> previousCallback = nullptr;
+    {
+        lock_guard<mutex> lock(swingMutex_);
+        if (swingCallback_ != nullptr && swingCallback_->AsObject() == swingCallback) {
+            ANS_LOGI("Swing callback is already registered.");
+            return ERR_OK;
+        }
+        if (swingRecipient_ == nullptr) {
+            swingRecipient_ = new (std::nothrow) SwingCallbackRecipient();
+            if (swingRecipient_ == nullptr) {
+                ANS_LOGE("Failed to create death Recipient ptr SwingCallbackRecipient!");
+                return ERR_NO_INIT;
+            }
+        }
+        recipient = swingRecipient_;
+        if (swingCallback_ != nullptr) {
+            previousCallback = swingCallback_->AsObject();
+        }
+        swingCallback_ = swingCallBackProxy;
+    }
+    if (previousCallback != nullptr && previousCallback != swingCallback) {
+        previousCallback->RemoveDeathRecipient(recipient);
+    }
+    swingCallback->AddDeathRecipient(recipient);
     ANS_LOGI("RegisterSwingCallback OK");
     return ERR_OK;
 }
@@ -56,13 +78,21 @@ ErrCode ReminderSwingDecisionCenter::RegisterSwingCallback(const sptr<IRemoteObj
 void ReminderSwingDecisionCenter::ResetSwingCallbackProxy()
 {
     ANS_LOGD("enter");
-    lock_guard<mutex> lock(swingMutex_);
-    if (swingCallback_ == nullptr || swingCallback_->AsObject() == nullptr) {
-        ANS_LOGE("invalid proxy state");
-        return;
+    sptr<IRemoteObject> callbackObj = nullptr;
+    sptr<IRemoteObject::DeathRecipient> recipient = nullptr;
+    {
+        lock_guard<mutex> lock(swingMutex_);
+        if (swingCallback_ == nullptr || swingCallback_->AsObject() == nullptr) {
+            ANS_LOGE("invalid proxy state");
+            return;
+        }
+        callbackObj = swingCallback_->AsObject();
+        recipient = swingRecipient_;
+        swingCallback_ = nullptr;
     }
-    swingCallback_->AsObject()->RemoveDeathRecipient(swingRecipient_);
-    swingCallback_ = nullptr;
+    if (recipient != nullptr) {
+        callbackObj->RemoveDeathRecipient(recipient);
+    }
 }
 
 void SwingCallbackRecipient::OnRemoteDied(const wptr<IRemoteObject> &remote)
