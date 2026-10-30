@@ -17,6 +17,7 @@
 
 #include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
+#include "advanced_notification_service.h"
 #include "bundle_manager_helper.h"
 #include "notification_preferences.h"
 #include "notification_analytics_util.h"
@@ -30,10 +31,9 @@ void PermissionFilter::OnStart()
 void PermissionFilter::OnStop()
 {}
 
-AnsStatus PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &record)
+void PermissionFilter::ResolveBundlePublishEnable(const std::shared_ptr<NotificationRecord> &record, bool &enable)
 {
-    bool isForceControl = false;
-    bool enable = false;
+    enable = false;
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     ErrCode result =
         NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(record->bundleOption, state);
@@ -42,12 +42,21 @@ AnsStatus PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> 
             state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     }
     if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-        result = ERR_OK;
-        std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
-        if (bundleManager != nullptr) {
-            enable = bundleManager->CheckApiCompatibility(record->bundleOption);
+        if (!AdvancedNotificationService::GetInstance()->ResolveSilentAuthBundleNotExist(
+            record->bundleOption, enable)) {
+            std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
+            if (bundleManager != nullptr) {
+                enable = bundleManager->CheckApiCompatibility(record->bundleOption);
+            }
         }
     }
+}
+
+AnsStatus PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> &record)
+{
+    bool isForceControl = false;
+    bool enable = false;
+    ResolveBundlePublishEnable(record, enable);
 
     if (record->request->IsSystemLiveView()) {
         ANS_LOGE("System live view no need check switch");
@@ -56,7 +65,7 @@ AnsStatus PermissionFilter::OnPublish(const std::shared_ptr<NotificationRecord> 
 
     sptr<NotificationSlot> slot;
     NotificationConstant::SlotType slotType = record->request->GetSlotType();
-    result = NotificationPreferences::GetInstance()->GetNotificationSlot(record->bundleOption, slotType, slot);
+    ErrCode result = NotificationPreferences::GetInstance()->GetNotificationSlot(record->bundleOption, slotType, slot);
     if (result == ERR_OK) {
         if (slot != nullptr) {
             isForceControl = slot->GetForceControl();

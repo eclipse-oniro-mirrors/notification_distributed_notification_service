@@ -54,6 +54,13 @@ constexpr static const char* KEY_PRIORITY_NOTIFICATION_SWITCH_FOR_BUNDLE_V2 = "p
 constexpr static const char* KEY_PRIORITY_NOTIFICATION_STRATEGY_FOR_BUNDLE = "priorityStrategyForBundle";
 const static std::string KEY_UNDER_LINE = "_";
 constexpr size_t MAX_TEMPLATE_FILE_SIZE = 1024 * 1024;
+
+bool IsSilentAuthBundleMatched(const NotificationSilentAuth &silentAuthInfo, const std::string &bundleName)
+{
+    // Control purely by list contents, no separate enable flag.
+    const std::vector<std::string> &bundleList = silentAuthInfo.GetBundleList();
+    return std::find(bundleList.begin(), bundleList.end(), bundleName) != bundleList.end();
+}
 }
 
 int32_t NotificationPreferences::ResolveStatisticsTableUserId(const NotificationBundleOption &bundle)
@@ -2597,6 +2604,113 @@ bool NotificationPreferences::GetUserDisableNotificationInfo(int32_t userId, Not
         return false;
     }
     return true;
+}
+
+ErrCode NotificationPreferences::SetSilentAuthNotificationInfo(
+    const sptr<NotificationSilentAuth> &silentAuthInfo)
+{
+    ANS_LOGD("called");
+    if (silentAuthInfo == nullptr) {
+        ANS_LOGE("silentAuthInfo is nullptr");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return ERR_ANS_INNER_SERVICE_NOT_READY;
+    }
+    // Store to DB first, only swap in memory after DB success to keep both states consistent.
+    if (!preferncesDB_->SetSilentAuthNotificationInfo(silentAuthInfo)) {
+        ANS_LOGE("db set silent auth notification info fail");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
+    preferencesInfo.SetSilentAuthNotificationInfo(silentAuthInfo);
+    preferencesInfo_ = preferencesInfo;
+    StartCacheCleanupTimer();
+    return ERR_OK;
+}
+
+bool NotificationPreferences::GetSilentAuthNotificationInfo(NotificationSilentAuth &silentAuthInfo)
+{
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferencesInfo_.GetSilentAuthNotificationInfo(silentAuthInfo)) {
+        ANS_LOGD("info get silent auth notification success");
+        return true;
+    }
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return false;
+    }
+    if (preferncesDB_->GetSilentAuthNotificationInfo(silentAuthInfo)) {
+        ANS_LOGD("db get silent auth notification success");
+        sptr<NotificationSilentAuth> silentAuthPtr =
+            new (std::nothrow) NotificationSilentAuth(silentAuthInfo);
+        if (silentAuthPtr == nullptr) {
+            ANS_LOGE("Failed to create NotificationSilentAuth");
+            return false;
+        }
+        preferencesInfo_.SetSilentAuthNotificationInfo(silentAuthPtr);
+    } else {
+        ANS_LOGD("db get silent auth notification fail");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferences::GetUserSilentAuthNotificationInfo(
+    int32_t userId, NotificationSilentAuth &silentAuthInfo)
+{
+    if (userId <= SUBSCRIBE_USER_INIT) {
+        ANS_LOGE("Invalid userId: %{public}d, function: %{public}s", userId, __FUNCTION__);
+        return false;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (preferencesInfo_.GetUserSilentAuthNotificationInfo(userId, silentAuthInfo)) {
+        ANS_LOGD("info get user silent auth notification success");
+        return true;
+    }
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("the prefernces db is nullptr");
+        return false;
+    }
+    if (preferncesDB_->GetUserSilentAuthNotificationInfo(userId, silentAuthInfo)) {
+        ANS_LOGD("db get user silent auth notification success");
+        sptr<NotificationSilentAuth> silentAuthPtr =
+            new (std::nothrow) NotificationSilentAuth(silentAuthInfo);
+        if (silentAuthPtr == nullptr) {
+            ANS_LOGE("Failed to create NotificationSilentAuth, userId: %{public}d", userId);
+            return false;
+        }
+        silentAuthPtr->SetUserId(userId);
+        preferencesInfo_.SetSilentAuthNotificationInfo(silentAuthPtr);
+    } else {
+        ANS_LOGD("db get user silent auth notification fail");
+        return false;
+    }
+    return true;
+}
+
+bool NotificationPreferences::IsBundleSilentAuthLockedForUser(const std::string &bundleName, int32_t userId)
+{
+    if (bundleName.empty()) {
+        ANS_LOGE("bundleName is empty, function: %{public}s", __FUNCTION__);
+        return false;
+    }
+    NotificationSilentAuth globalInfo;
+    if (GetSilentAuthNotificationInfo(globalInfo) &&
+        IsSilentAuthBundleMatched(globalInfo, bundleName)) {
+        return true;
+    }
+    if (userId <= SUBSCRIBE_USER_INIT) {
+        return false;
+    }
+    NotificationSilentAuth userInfo;
+    if (GetUserSilentAuthNotificationInfo(userId, userInfo) &&
+        IsSilentAuthBundleMatched(userInfo, bundleName)) {
+        return true;
+    }
+    return false;
 }
 
 bool NotificationPreferences::GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList)

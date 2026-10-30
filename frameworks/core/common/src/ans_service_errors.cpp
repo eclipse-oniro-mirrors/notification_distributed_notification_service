@@ -70,6 +70,8 @@ static const std::vector<ServiceErrorConvertEntry> SERVICE_ERROR_CONVERT_TABLE =
         "Not system application to call the interface"},
     {ERR_ANS_INNER_NOT_ALLOWED,            ERR_ANS_NOT_ALLOWED,             ERROR_NOTIFICATION_CLOSED,
         "Notification disabled"},
+    {ERR_ANS_INNER_ENTERPRISE_POLICY_PROHIBITED, ERR_ANS_NOT_ALLOWED,        ERROR_ENTERPRISE_POLICY_PROHIBITED,
+        "This function is prohibited by enterprise management policies"},
 
     // ===== Parameter validation =====
     {ERR_ANS_INNER_INVALID_PARAM,          ERR_ANS_INVALID_PARAM,           ERROR_PARAM_INVALID,

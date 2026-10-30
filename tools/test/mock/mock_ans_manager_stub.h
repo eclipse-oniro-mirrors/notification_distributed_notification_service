@@ -910,6 +910,23 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
+    ErrCode SetSilentAuthNotificationInfo(const sptr<NotificationSilentAuth>& silentAuthInfo) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetNotificationSwitchLimitedBundles(
+        int32_t userId, std::map<std::string, bool>& switchLimited) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
+    ErrCode GetSilentAuthNotificationBundles(
+        int32_t userId, std::vector<std::string>& bundleList) override
+    {
+        return ERR_ANS_INVALID_PARAM;
+    }
+
     ErrCode DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo,
         const sptr<IAnsOperationCallback>& operationCallback) override
     {

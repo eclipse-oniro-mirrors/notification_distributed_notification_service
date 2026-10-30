@@ -1545,5 +1545,82 @@ HWTEST_F(NotificationPreferencesDatabaseBranchTest, IsSilentReminderEnabled_0090
     // reset to default for subsequent tests
     MockSetDataValue("");
 }
+
+/**
+ * @tc.name      : NotificationSilentAuth_00100
+ * @tc.number    :
+ * @tc.desc      : test SetSilentAuthNotificationInfo with null info and rdb failures
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationSilentAuth_00100, Function | SmallTest | Level1)
+{
+    sptr<NotificationSilentAuth> info = new NotificationSilentAuth();
+    info->SetBundleList({"sa_db"});
+    info->SetUserId(100);
+    // null info is rejected before the db layer
+    ASSERT_EQ(preferncesDB_->SetSilentAuthNotificationInfo(nullptr), false);
+    // rdb store unavailable
+    MockInit(false);
+    ASSERT_EQ(preferncesDB_->SetSilentAuthNotificationInfo(info), false);
+    // insert failure
+    MockInit(true);
+    MockInsertData(false);
+    ASSERT_EQ(preferncesDB_->SetSilentAuthNotificationInfo(info), false);
+    // insert success, including the -1 (SUBSCRIBE_USER_INIT) to user-0 remap
+    MockInsertData(true);
+    info->SetUserId(-1);
+    ASSERT_EQ(preferncesDB_->SetSilentAuthNotificationInfo(info), true);
+}
+
+/**
+ * @tc.name      : NotificationSilentAuth_00200
+ * @tc.number    :
+ * @tc.desc      : test GetUserSilentAuthNotificationInfo query result branches
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationSilentAuth_00200, Function | SmallTest | Level1)
+{
+    NotificationSilentAuth out;
+    // rdb store unavailable
+    MockInit(false);
+    ASSERT_EQ(preferncesDB_->GetUserSilentAuthNotificationInfo(100, out), false);
+    // query failure
+    MockInit(true);
+    MockQueryData(NativeRdb::E_ERROR);
+    ASSERT_EQ(preferncesDB_->GetUserSilentAuthNotificationInfo(100, out), false);
+    // empty result means unmanaged, an empty list is returned
+    MockQueryData(NativeRdb::E_EMPTY_VALUES_BUCKET);
+    ASSERT_EQ(preferncesDB_->GetUserSilentAuthNotificationInfo(100, out), true);
+    ASSERT_TRUE(out.GetBundleList().empty());
+    // valid stored value is parsed
+    MockSetDataValue(R"({"bundleList":["sa_db"],"userId":100})");
+    MockQueryData(NativeRdb::E_OK);
+    ASSERT_EQ(preferncesDB_->GetUserSilentAuthNotificationInfo(100, out), true);
+    ASSERT_EQ(out.GetBundleList(), std::vector<std::string>({"sa_db"}));
+    ASSERT_EQ(out.GetUserId(), 100);
+    // reset to default for subsequent tests
+    MockSetDataValue("");
+}
+
+/**
+ * @tc.name      : NotificationSilentAuth_00300
+ * @tc.number    :
+ * @tc.desc      : test GetUserSilentAuthNotificationInfo invalid json and the global delegation
+ */
+HWTEST_F(NotificationPreferencesDatabaseBranchTest, NotificationSilentAuth_00300, Function | SmallTest | Level1)
+{
+    NotificationSilentAuth out;
+    MockInit(true);
+    // invalid json value stored in the db
+    MockSetDataValue("not-a-json");
+    MockQueryData(NativeRdb::E_OK);
+    ASSERT_EQ(preferncesDB_->GetUserSilentAuthNotificationInfo(100, out), false);
+    // the global query delegates to the user-0 row
+    MockSetDataValue(R"({"bundleList":["sa_global"],"userId":0})");
+    MockQueryData(NativeRdb::E_OK);
+    ASSERT_EQ(preferncesDB_->GetSilentAuthNotificationInfo(out), true);
+    ASSERT_EQ(out.GetBundleList(), std::vector<std::string>({"sa_global"}));
+    ASSERT_EQ(out.GetUserId(), 0);
+    // reset to default for subsequent tests
+    MockSetDataValue("");
+}
 }  // namespace Notification
 }  // namespace OHOS

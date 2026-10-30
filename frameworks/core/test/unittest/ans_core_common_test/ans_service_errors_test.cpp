@@ -41,6 +41,7 @@ HWTEST_F(AnsServiceErrorsTest, InnerErrorToExternal_BasicMapping_001, TestSize.L
     EXPECT_EQ(ERROR_NOT_SYSTEM_APP, InnerErrorToExternal(ERR_ANS_INNER_NON_SYSTEM_APP));
     EXPECT_EQ(ERROR_NOT_SYSTEM_APP, InnerErrorToExternal(ERR_ANS_INNER_NOT_SYSTEM_SERVICE));
     EXPECT_EQ(ERROR_NOTIFICATION_CLOSED, InnerErrorToExternal(ERR_ANS_INNER_NOT_ALLOWED));
+    EXPECT_EQ(ERROR_ENTERPRISE_POLICY_PROHIBITED, InnerErrorToExternal(ERR_ANS_INNER_ENTERPRISE_POLICY_PROHIBITED));
 
     // 参数类
     EXPECT_EQ(ERROR_PARAM_INVALID, InnerErrorToExternal(ERR_ANS_INNER_INVALID_PARAM));
@@ -380,6 +381,8 @@ HWTEST_F(AnsServiceErrorsTest, GetExternalErrMessage_BasicMapping_001, TestSize.
     EXPECT_EQ("Not system application to call the interface",
         GetExternalErrMessage(ERROR_NOT_SYSTEM_APP));
     EXPECT_EQ("Notification disabled", GetExternalErrMessage(ERROR_NOTIFICATION_CLOSED));
+    EXPECT_EQ("This function is prohibited by enterprise management policies",
+        GetExternalErrMessage(ERROR_ENTERPRISE_POLICY_PROHIBITED));
 
     // 参数类
     EXPECT_EQ("Invalid parameter", GetExternalErrMessage(ERROR_PARAM_INVALID));

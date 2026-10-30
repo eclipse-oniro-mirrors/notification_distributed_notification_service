@@ -130,6 +130,13 @@ namespace OHOS {
         service->GetAllLiveViewEnabledBundles(bundleOptions, userId);
         sptr<Notification::NotificationDisable> notificationDisable = new Notification::NotificationDisable();
         service->DisableNotificationFeature(notificationDisable);
+        sptr<Notification::NotificationSilentAuth> silentAuthInfo = new Notification::NotificationSilentAuth();
+        silentAuthInfo->SetUserId(userId);
+        service->SetSilentAuthNotificationInfo(silentAuthInfo);
+        std::map<std::string, bool> switchLimited;
+        service->GetNotificationSwitchLimitedBundles(userId, switchLimited);
+        std::vector<std::string> silentAuthBundles;
+        service->GetSilentAuthNotificationBundles(userId, silentAuthBundles);
         service->ReplyDistributeOperation(stringData, fuzzData->ConsumeIntegral<int32_t>());
         service->UpdateNotificationTimerByUid(uid, isPaused);
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED

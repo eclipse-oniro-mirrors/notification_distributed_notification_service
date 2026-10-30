@@ -29,6 +29,8 @@ constexpr size_t SET_NOTIFICATION_SWITCH_MIN_PARA = 3;
 constexpr size_t SET_NOTIFICATION_SWITCH_MAX_PARA = 3;
 constexpr size_t GET_NOTIFICATION_SWITCH_MIN_PARA = 2;
 constexpr size_t GET_NOTIFICATION_SWITCH_MAX_PARA = 2;
+constexpr size_t GET_NOTIFICATION_SWITCH_LIMITED_MIN_PARA = 1;
+constexpr size_t GET_NOTIFICATION_SWITCH_LIMITED_MAX_PARA = 1;
 
 void CleanupAsyncCallback(napi_env env, AsyncCallbackNotificationClassificationSwitch *&asyncCallbackInfo)
 {
@@ -150,6 +152,26 @@ napi_value ParseGetNotificationSwitchParameters(
     return Common::NapiGetNull(env);
 }
 
+napi_value ParseGetNotificationSwitchLimitedParameters(
+    const napi_env &env, const napi_callback_info &info, NotificationClassificationSwitchParams &params)
+{
+    size_t argc = GET_NOTIFICATION_SWITCH_LIMITED_MAX_PARA;
+    napi_value argv[GET_NOTIFICATION_SWITCH_LIMITED_MAX_PARA] = {nullptr};
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    if (argc < GET_NOTIFICATION_SWITCH_LIMITED_MIN_PARA) {
+        ANS_LOGE("Wrong number of arguments.");
+        Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, MANDATORY_PARAMETER_ARE_LEFT_UNSPECIFIED);
+        return nullptr;
+    }
+
+    if (ParseUserIdParameter(env, argv[PARAM0], params.userId) == nullptr) {
+        return nullptr;
+    }
+
+    return Common::NapiGetNull(env);
+}
+
 void AsyncCompleteCallbackNapiSetNotificationSwitch(napi_env env, napi_status status, void *data)
 {
     ANS_LOGD("enter");
@@ -177,6 +199,46 @@ void AsyncCompleteCallbackNapiGetNotificationSwitch(napi_env env, napi_status st
         result = Common::NapiGetNull(env);
     } else {
         napi_create_int32(env, static_cast<int32_t>(asyncCallbackInfo->params.enableStatus), &result);
+    }
+    Common::CreateReturnValue(env, asyncCallbackInfo->info, result);
+    CleanupAsyncCallback(env, asyncCallbackInfo);
+}
+
+napi_value CreateSwitchLimitedBundlesMap(napi_env env, const std::map<std::string, bool> &switchLimitedBundles)
+{
+    napi_value resultMap = nullptr;
+    napi_status status = napi_create_map(env, &resultMap);
+    if (status != napi_ok) {
+        ANS_LOGE("Failed to create map, status: %{public}d", status);
+        return Common::NapiGetNull(env);
+    }
+    for (const auto &entry : switchLimitedBundles) {
+        napi_value jsKey = nullptr;
+        napi_value jsValue = nullptr;
+        napi_create_string_utf8(env, entry.first.c_str(), NAPI_AUTO_LENGTH, &jsKey);
+        napi_get_boolean(env, entry.second, &jsValue);
+        status = napi_map_set_property(env, resultMap, jsKey, jsValue);
+        if (status != napi_ok) {
+            ANS_LOGE("Failed to set map property, status: %{public}d", status);
+        }
+    }
+    return resultMap;
+}
+
+void AsyncCompleteCallbackNapiGetNotificationSwitchLimited(napi_env env, napi_status status, void *data)
+{
+    ANS_LOGD("enter");
+    if (data == nullptr) {
+        ANS_LOGE("Invalid async callback data");
+        return;
+    }
+
+    auto *asyncCallbackInfo = static_cast<AsyncCallbackNotificationClassificationSwitch *>(data);
+    napi_value result = nullptr;
+    if (asyncCallbackInfo->info.errorCode != ERR_OK) {
+        result = Common::NapiGetNull(env);
+    } else {
+        result = CreateSwitchLimitedBundlesMap(env, asyncCallbackInfo->params.switchLimitedBundles);
     }
     Common::CreateReturnValue(env, asyncCallbackInfo->info, result);
     CleanupAsyncCallback(env, asyncCallbackInfo);
@@ -278,6 +340,57 @@ napi_value NapiGetNotificationSwitch(napi_env env, napi_callback_info info)
     status = napi_queue_async_work_with_qos(env, asyncCallbackInfo->asyncWork, napi_qos_user_initiated);
     if (status != napi_ok) {
         ANS_LOGE("Queue getNotificationSwitch async work failed.");
+        return HandleAsyncWorkFailure(env, asyncCallbackInfo, promise);
+    }
+
+    return promise;
+}
+
+napi_value NapiGetNotificationSwitchLimitedBundles(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("enter");
+    NotificationClassificationSwitchParams params {};
+    if (ParseGetNotificationSwitchLimitedParameters(env, info, params) == nullptr) {
+        return Common::NapiRejectError(env, ERR_ANS_INNER_INVALID_PARAM);
+    }
+
+    auto *asyncCallbackInfo = new (std::nothrow) AsyncCallbackNotificationClassificationSwitch {
+        .env = env, .asyncWork = nullptr, .params = params
+    };
+    if (asyncCallbackInfo == nullptr) {
+        return Common::NapiRejectError(env, ERR_ANS_INNER_NO_MEMORY);
+    }
+
+    napi_value promise = nullptr;
+    Common::PaddingCallbackPromiseInfo(env, params.callback, asyncCallbackInfo->info, promise);
+
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "getNotificationSwitchLimitedBundles", NAPI_AUTO_LENGTH, &resourceName);
+    napi_status status = napi_create_async_work(env,
+        nullptr,
+        resourceName,
+        [](napi_env env, void *data) {
+            ANS_LOGD("NapiGetNotificationSwitchLimitedBundles work execute.");
+            auto *asyncCallbackInfo = static_cast<AsyncCallbackNotificationClassificationSwitch *>(data);
+            if (asyncCallbackInfo != nullptr) {
+                asyncCallbackInfo->info.errorCode =
+                    AnsNotification::GetInstance()->GetNotificationSwitchLimitedBundles(
+                        asyncCallbackInfo->params.userId, asyncCallbackInfo->params.switchLimitedBundles);
+                ANS_LOGI("GetNotificationSwitchLimitedBundles result=%{public}d, size=%{public}zu",
+                    asyncCallbackInfo->info.errorCode, asyncCallbackInfo->params.switchLimitedBundles.size());
+            }
+        },
+        AsyncCompleteCallbackNapiGetNotificationSwitchLimited,
+        static_cast<void *>(asyncCallbackInfo),
+        &asyncCallbackInfo->asyncWork);
+    if (status != napi_ok) {
+        ANS_LOGE("Create getNotificationSwitchLimitedBundles async work failed.");
+        return HandleAsyncWorkFailure(env, asyncCallbackInfo, promise);
+    }
+
+    status = napi_queue_async_work_with_qos(env, asyncCallbackInfo->asyncWork, napi_qos_user_initiated);
+    if (status != napi_ok) {
+        ANS_LOGE("Queue getNotificationSwitchLimitedBundles async work failed.");
         return HandleAsyncWorkFailure(env, asyncCallbackInfo, promise);
     }
 

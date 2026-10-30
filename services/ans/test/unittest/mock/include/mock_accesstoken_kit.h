@@ -26,6 +26,7 @@ void MockDlpType(Security::AccessToken::DlpType mockRet);
 void MockApl(Security::AccessToken::ATokenAplEnum mockRet);
 void MockIsVerfyPermisson(bool isVerify);
 void MockIsSystemApp(const bool isSystemApp);
+void MockDeniedPermission(const std::string &permission);
 
 } // namespace Notification
 } // namespace OHOS

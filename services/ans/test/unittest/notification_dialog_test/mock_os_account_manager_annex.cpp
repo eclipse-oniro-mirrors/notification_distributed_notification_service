@@ -22,6 +22,7 @@ bool g_mockQueryForgroundOsAccountRet = true;
 bool g_mockGetOsAccountLocalIdFromUidRet = true;
 int32_t g_mockIdForGetOsAccountLocalIdFromUid = 100;
 bool g_mockOsAccountExists = true;
+bool g_mockQueryAllOsAccountsRet = true;
 std::vector<OHOS::AccountSA::OsAccountInfo> g_mockOsAccountInfos;
 }
 
@@ -60,6 +61,7 @@ void ResetAccountMock()
     g_mockGetOsAccountLocalIdFromUidRet = true;
     g_mockIdForGetOsAccountLocalIdFromUid = 100;
     g_mockOsAccountExists = true;
+    g_mockQueryAllOsAccountsRet = true;
 }
 
 void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0)
@@ -72,6 +74,10 @@ void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0)
         }
         case 2: { // mock for system id
             g_mockIdForGetOsAccountLocalIdFromUid = 88; // 88 mock for system id
+            break;
+        }
+        case 3: { // mock for user-0 domain id (Anco app)
+            g_mockIdForGetOsAccountLocalIdFromUid = 0; // 0 mock for user-0 domain
             break;
         }
         default: {
@@ -87,6 +93,21 @@ void MockQueryAllCreatedOsAccounts(int32_t userId)
     OHOS::AccountSA::OsAccountInfo osAccountInfo;
     osAccountInfo.SetLocalId(userId);
     g_mockOsAccountInfos.push_back(osAccountInfo);
+}
+
+void MockQueryAllCreatedOsAccounts(const std::vector<int32_t> &userIdList)
+{
+    g_mockOsAccountInfos.clear();
+    for (auto userId : userIdList) {
+        OHOS::AccountSA::OsAccountInfo osAccountInfo;
+        osAccountInfo.SetLocalId(userId);
+        g_mockOsAccountInfos.push_back(osAccountInfo);
+    }
+}
+
+void MockQueryAllCreatedOsAccountsFailed(bool mockRet)
+{
+    g_mockQueryAllOsAccountsRet = !mockRet;
 }
 
 namespace OHOS {
@@ -114,6 +135,9 @@ ErrCode OsAccountManager::IsOsAccountExists(const int id, bool &isOsAccountExist
 
 ErrCode OsAccountManager::QueryAllCreatedOsAccounts(std::vector<OsAccountInfo> &osAccountInfos)
 {
+    if (!g_mockQueryAllOsAccountsRet) {
+        return OHOS::Notification::ERR_ANS_INNER_INVALID_OPERATION;
+    }
     osAccountInfos = g_mockOsAccountInfos;
     return ERR_OK;
 }

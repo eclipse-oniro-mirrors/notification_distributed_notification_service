@@ -136,6 +136,7 @@ extern std::string PARAMETER_VERIFICATION_FAILED;
 // Common error code
 const uint32_t ERROR_PERMISSION_DENIED = 201;          // No permission to call the interface.
 const uint32_t ERROR_NOT_SYSTEM_APP    = 202;          // Not system application to call the interface.
+const uint32_t ERROR_ENTERPRISE_POLICY_PROHIBITED = 203; // Prohibited by enterprise management policies.
 const uint32_t ERROR_PARAM_INVALID     = 401;          // Invalid input parameter.
 const uint32_t ERROR_SYSTEM_CAP_ERROR  = 801;          // The specified SystemCapability names was not found.
 

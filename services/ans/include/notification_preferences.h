@@ -688,6 +688,10 @@ public:
     ErrCode SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
     bool GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable);
+    ErrCode SetSilentAuthNotificationInfo(const sptr<NotificationSilentAuth> &silentAuthInfo);
+    bool GetSilentAuthNotificationInfo(NotificationSilentAuth &silentAuthInfo);
+    bool GetUserSilentAuthNotificationInfo(int32_t userId, NotificationSilentAuth &silentAuthInfo);
+    bool IsBundleSilentAuthLockedForUser(const std::string &bundleName, int32_t userId);
     ErrCode SetSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     ErrCode GetSubscriberExistFlag(const std::string& deviceType, bool& existFlag);
     /**

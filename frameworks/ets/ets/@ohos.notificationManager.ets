@@ -440,6 +440,7 @@ export default namespace notificationManager {
         switchName: string, switchState: boolean, userId: int): Promise<void>;
     export native function nativeGetNotificationSwitch(
         switchName: string, userId: int): Promise<SwitchState>;
+    export native function nativeGetNotificationSwitchLimitedBundles(userId: int): Promise<Map<string, boolean>>;
 
     function isInvalidParameter(doNotDisturbDate: DoNotDisturbDate): BusinessError
     {
@@ -3110,6 +3111,18 @@ export default namespace notificationManager {
         let result: Promise<SwitchState>;
         try {
             result = nativeGetNotificationSwitch(switchName, userId);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
+    }
+
+    export function getNotificationSwitchLimitedBundles(userId: int): Promise<Map<string, boolean>>
+    {
+        let result: Promise<Map<string, boolean>>;
+        try {
+            result = nativeGetNotificationSwitchLimitedBundles(userId);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
             throw error;

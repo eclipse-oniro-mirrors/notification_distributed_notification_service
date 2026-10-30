@@ -839,6 +839,60 @@ void NotificationPreferencesInfo::UpdateNotificationStatisticsByBundle(int32_t b
     notificationStatistics_.insert_or_assign(bundleId, statistics);
 }
 
+void NotificationPreferencesInfo::SetSilentAuthNotificationInfo(
+    const sptr<NotificationSilentAuth> &silentAuthInfo)
+{
+    if (silentAuthInfo == nullptr) {
+        ANS_LOGE("the silentAuthInfo is nullptr");
+        return;
+    }
+    SilentAuthNotificationInfo silentAuthEntry;
+    silentAuthEntry.initialized = true;
+    silentAuthEntry.bundleList = silentAuthInfo->GetBundleList();
+    if (silentAuthInfo->GetUserId() > 0) {
+        userSilentAuthNotificationInfo_.insert_or_assign(silentAuthInfo->GetUserId(), silentAuthEntry);
+        return;
+    }
+    silentAuthNotificationInfo_ = silentAuthEntry;
+}
+
+bool NotificationPreferencesInfo::GetSilentAuthNotificationInfo(NotificationSilentAuth &silentAuthInfo)
+{
+    if (!silentAuthNotificationInfo_.initialized) {
+        ANS_LOGD("silentAuthInfo is invalid");
+        return false;
+    }
+    silentAuthInfo.SetBundleList(silentAuthNotificationInfo_.bundleList);
+    return true;
+}
+
+bool NotificationPreferencesInfo::GetUserSilentAuthNotificationInfo(
+    int32_t userId, NotificationSilentAuth &silentAuthInfo)
+{
+    auto itr = userSilentAuthNotificationInfo_.find(userId);
+    if (itr == userSilentAuthNotificationInfo_.end()) {
+        ANS_LOGD("getUserSilentAuthInfo userId=%{public}d notFound", userId);
+        return false;
+    }
+    if (!itr->second.initialized) {
+        ANS_LOGD("silentAuthInfo is invalid");
+        return false;
+    }
+    silentAuthInfo.SetBundleList(itr->second.bundleList);
+    silentAuthInfo.SetUserId(userId);
+    return true;
+}
+
+void NotificationPreferencesInfo::AddSilentAuthNotificationInfo(const std::string &value)
+{
+    NotificationSilentAuth silentAuthInfo;
+    silentAuthInfo.FromJson(value);
+    SilentAuthNotificationInfo silentAuthEntry;
+    silentAuthEntry.initialized = true;
+    silentAuthEntry.bundleList = silentAuthInfo.GetBundleList();
+    silentAuthNotificationInfo_ = silentAuthEntry;
+}
+
 bool NotificationPreferencesInfo::GetNotificationStatisticsByBundle(int32_t bundleId,
     NotificationStatistics &statistics)
 {

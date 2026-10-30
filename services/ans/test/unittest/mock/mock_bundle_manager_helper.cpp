@@ -31,6 +31,22 @@ void MockIsNonBundleName(bool isNonBundleName)
     g_isNonBundleName = isNonBundleName;
 }
 
+// Test knobs for GetDefaultUidByBundleName(bundle, userId, appIndex), defaults keep legacy behavior.
+int32_t g_mockUidForNonZeroUser = NON_SYSTEM_APP_UID;
+int32_t g_mockUidForUserIdZero = NON_SYSTEM_APP_UID;
+void MockBundleManager::MockUidByBundleName(const int32_t uidForNonZeroUser, const int32_t uidForUserIdZero)
+{
+    g_mockUidForNonZeroUser = uidForNonZeroUser;
+    g_mockUidForUserIdZero = uidForUserIdZero;
+}
+
+// Test knob for CheckApiCompatibility, defaults keep legacy behavior.
+bool g_checkApiCompatibility = true;
+void MockBundleManager::MockCheckApiCompatibility(bool checkApiCompatibility)
+{
+    g_checkApiCompatibility = checkApiCompatibility;
+}
+
 bool g_getBundle = true;
 bool g_systemBundle = false;
 int32_t g_bundleHelperResult = 0;
@@ -128,7 +144,8 @@ int BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle, co
 int32_t BundleManagerHelper::GetDefaultUidByBundleName(const std::string &bundle, const int32_t userId,
     const int32_t appIndex)
 {
-    return NON_SYSTEM_APP_UID;
+    // Test knobs: uid lookup by userId dimension (user-0 = Anco domain), defaults keep legacy behavior.
+    return (userId == 0) ? g_mockUidForUserIdZero : g_mockUidForNonZeroUser;
 }
 
 bool BundleManagerHelper::IsSystemApp(int uid)
@@ -138,7 +155,7 @@ bool BundleManagerHelper::IsSystemApp(int uid)
 
 bool BundleManagerHelper::CheckApiCompatibility(const sptr<NotificationBundleOption> &bundleOption)
 {
-    return true;
+    return g_checkApiCompatibility;
 }
 
 bool BundleManagerHelper::GetBundleInfoByBundleName(
@@ -162,7 +179,7 @@ bool BundleManagerHelper::GetDistributedNotificationEnabled(const std::string &b
 
 bool BundleManagerHelper::CheckApiCompatibility(const std::string &bundleName, const int32_t &uid)
 {
-    return true;
+    return g_checkApiCompatibility;
 }
 
 ErrCode BundleManagerHelper::GetAllBundleOption(std::vector<NotificationBundleOption>& bundleOptions, int32_t userId)
@@ -203,6 +220,10 @@ int32_t BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
 bool BundleManagerHelper::GetBundleInfoV9(const std::string bundle, const int32_t flag,
     AppExecFwk::BundleInfo &bundleInfo, const int32_t userId)
 {
+    // Test knob: in the user-0 (Anco) domain only Anco apps are installed and resolvable.
+    if (userId == 0 && g_isAncoApp && g_mockUidForUserIdZero > 0) {
+        bundleInfo.uid = g_mockUidForUserIdZero;
+    }
     return g_getBundle;
 }
 
