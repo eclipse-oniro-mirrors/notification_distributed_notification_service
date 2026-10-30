@@ -42,9 +42,6 @@ namespace OHOS {
             if (divisor == static_cast<DivisorType>(MODULO_ZERO_FALLBACK)) {
                 return static_cast<DivisorType>(MODULO_ZERO_FALLBACK);
             }
-            if (divisor == 0) {
-                return static_cast<DivisorType>(0);
-            }
             return static_cast<DivisorType>(value % divisor);
         }
     }

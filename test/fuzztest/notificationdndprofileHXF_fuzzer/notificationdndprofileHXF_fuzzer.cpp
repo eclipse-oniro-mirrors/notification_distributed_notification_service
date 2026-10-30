@@ -22,12 +22,14 @@
 #include "parcel.h"
 #include <fuzzer/FuzzedDataProvider.h>
 #include <limits>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace OHOS {
 namespace {
 constexpr uint8_t MAX_TRUSTLIST_ENTRIES = 12;
+constexpr size_t MAX_EXTRA_PROFILES = 3;
 constexpr uint8_t HIT_OVERSIZED_PARCEL_CASE = 0;
 constexpr int32_t MAX_LENGTH = 256;
 constexpr int32_t MAX_NUM = 128;
@@ -68,9 +70,8 @@ void ExerciseParcelPaths(FuzzedDataProvider *fdp, Notification::NotificationDoNo
 {
     Parcel parcel;
     if (profile.Marshalling(parcel)) {
-        Notification::NotificationDoNotDisturbProfile *result =
-            Notification::NotificationDoNotDisturbProfile::Unmarshalling(parcel);
-        delete result;
+        std::unique_ptr<Notification::NotificationDoNotDisturbProfile> result(
+            Notification::NotificationDoNotDisturbProfile::Unmarshalling(parcel));
     }
 
     Parcel invalidSizeParcel;
@@ -123,7 +124,7 @@ void ExerciseFrameworkPaths(FuzzedDataProvider *fdp, int64_t profileId, int32_t 
     }
 
     sptr<Notification::NotificationDoNotDisturbProfile> queryProfile =
-        new Notification::NotificationDoNotDisturbProfile();
+        sptr<Notification::NotificationDoNotDisturbProfile>::MakeSptr();
     Notification::NotificationHelper::GetDoNotDisturbProfile(profileId, queryProfile);
     Notification::NotificationHelper::GetDoNotDisturbProfile(profileId, queryProfile, userId);
     Notification::NotificationHelper::GetDoNotDisturbProfile(Notification::INVALID_PROFILE_ID, queryProfile);
@@ -150,10 +151,11 @@ bool test(FuzzedDataProvider *fdp)
     ExerciseJsonPaths(fdp, profile);
 
     std::vector<sptr<Notification::NotificationDoNotDisturbProfile>> profiles;
-    profiles.emplace_back(new Notification::NotificationDoNotDisturbProfile(profileId, name, trustList));
-    size_t extraProfiles = fdp->ConsumeIntegralInRange<size_t>(0, 3);
+    profiles.emplace_back(
+        sptr<Notification::NotificationDoNotDisturbProfile>::MakeSptr(profileId, name, trustList));
+    size_t extraProfiles = fdp->ConsumeIntegralInRange<size_t>(0, MAX_EXTRA_PROFILES);
     for (size_t i = 0; i < extraProfiles; ++i) {
-        profiles.emplace_back(new Notification::NotificationDoNotDisturbProfile(
+        profiles.emplace_back(sptr<Notification::NotificationDoNotDisturbProfile>::MakeSptr(
             fdp->ConsumeIntegral<int64_t>(), fdp->ConsumeRandomLengthString(MAX_NUM), BuildTrustList(fdp)));
     }
     ExerciseFrameworkPaths(fdp, profileId, userId, profiles);
