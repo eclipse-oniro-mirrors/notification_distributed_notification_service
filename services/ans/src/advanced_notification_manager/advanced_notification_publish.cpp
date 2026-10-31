@@ -314,6 +314,40 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
     return ansStatus.GetErrCode();
 }
 
+void AdvancedNotificationService::ResetIdentityInfoForNonSystemApp(
+    const sptr<NotificationRequest> &request, bool isSystemApp, bool isSubsystem)
+{
+    if (request == nullptr) {
+        return;
+    }
+    // Owner and creator identity info must both be controlled by the server side: both fields are
+    // restored from IPC parcels and can be forged by a non-system client. The reset happens before
+    // any analytics reporting so that a forged creator cannot pollute per-bundle statistics.
+    // System apps and subsystems are trusted to specify owner/creator on behalf of other bundles,
+    // so identity info is only reset for non-system callers.
+    // ownerUserId/creatorUserId are not reset: a non-system app may legitimately set the userId,
+    // and the userId alone does not identify another bundle.
+    if (isSystemApp || isSubsystem) {
+        return;
+    }
+    if (request->GetOwnerUid() != DEFAULT_UID) {
+        ANS_LOGW("Non-system app set ownerUid %{public}d, reset it to default", request->GetOwnerUid());
+        request->SetOwnerUid(DEFAULT_UID);
+    }
+    if (!request->GetOwnerBundleName().empty()) {
+        ANS_LOGW("Non-system app set ownerBundleName, reset it to default");
+        request->SetOwnerBundleName("");
+    }
+    if (request->GetCreatorUid() != DEFAULT_UID) {
+        ANS_LOGW("Non-system app set creatorUid %{public}d, reset it to default", request->GetCreatorUid());
+        request->SetCreatorUid(DEFAULT_UID);
+    }
+    if (!request->GetCreatorBundleName().empty()) {
+        ANS_LOGW("Non-system app set creatorBundleName, reset it to default");
+        request->SetCreatorBundleName("");
+    }
+}
+
 void AdvancedNotificationService::SetIsFromSAToExtendInfo(const sptr<NotificationRequest> &request)
 {
     if (!request) {
@@ -737,6 +771,8 @@ ErrCode AdvancedNotificationService::CheckNotificationRequest(const sptr<Notific
     if (!isSystemApp && !isSubsystem && request->GetGroupInfo() != nullptr) {
         request->SetGroupInfo(nullptr);
     }
+
+    ResetIdentityInfoForNonSystemApp(request, isSystemApp, isSubsystem);
 
     return ERR_OK;
 }

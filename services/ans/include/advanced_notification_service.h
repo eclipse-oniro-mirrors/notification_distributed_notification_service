@@ -2575,6 +2575,8 @@ private:
 
     bool IsReasonClickDelete(const int32_t removeReason);
     void CheckRemovalWantAgent(const sptr<NotificationRequest> &request);
+    void ResetIdentityInfoForNonSystemApp(const sptr<NotificationRequest> &request,
+        bool isSystemApp, bool isSubsystem);
     ErrCode SetCreatorInfoWithAtomicService(const sptr<NotificationRequest> &request);
     AnsStatus CheckAndPrepareNotificationInfoWithAtomicService(
         const sptr<NotificationRequest> &request, sptr<NotificationBundleOption> &bundleOption);

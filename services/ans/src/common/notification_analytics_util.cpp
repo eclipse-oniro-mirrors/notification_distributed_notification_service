@@ -504,6 +504,10 @@ void NotificationAnalyticsUtil::ReportLiveViewNumber(const sptr<NotificationRequ
     NotificationNapi::ContentType contentType;
     std::string bundleName = request->GetOwnerBundleName().empty() ? request->GetCreatorBundleName() :
         request->GetOwnerBundleName();
+    if (bundleName.empty()) {
+        ANS_LOGW("bundleName is empty, skip liveview report");
+        return;
+    }
     NotificationNapi::AnsEnumUtil::ContentTypeCToJS(
         static_cast<NotificationContent::Type>(request->GetNotificationType()), contentType);
     if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LIVE_VIEW) {
@@ -517,17 +521,13 @@ void NotificationAnalyticsUtil::ReportLiveViewNumber(const sptr<NotificationRequ
             ANS_LOGW("liveview content cast failed, skip report");
             return;
         }
-        if (liveViewContent->GetExtraInfo() != nullptr) {
-            std::string bundle = bundleName + MESSAGE_DELIMITER +
-                liveViewContent->GetExtraInfo()->GetStringParam("event");
-                std::lock_guard<ffrt::mutex> lock(ReportLiveViewMessageMutex_);
-                if (reportType == ANS_CUSTOMIZE_CODE) {
-                    AddLiveViewSuccessNum(bundle, static_cast<int32_t>(liveViewContent->GetLiveViewStatus()));
-                } else if (reportType == PUBLISH_ERROR_EVENT_CODE) {
-                    AddLiveViewFailedNum(bundle, static_cast<int32_t>(liveViewContent->GetLiveViewStatus()));
-                }
-            CreateLiveViewTimerExecute();
+        std::lock_guard<ffrt::mutex> lock(ReportLiveViewMessageMutex_);
+        if (reportType == ANS_CUSTOMIZE_CODE) {
+            AddLiveViewSuccessNum(bundleName, static_cast<int32_t>(liveViewContent->GetLiveViewStatus()));
+        } else if (reportType == PUBLISH_ERROR_EVENT_CODE) {
+            AddLiveViewFailedNum(bundleName, static_cast<int32_t>(liveViewContent->GetLiveViewStatus()));
         }
+        CreateLiveViewTimerExecute();
     }
     if (contentType == NotificationNapi::ContentType::NOTIFICATION_CONTENT_LOCAL_LIVE_VIEW) {
         std::lock_guard<ffrt::mutex> lock(ReportLiveViewMessageMutex_);
@@ -547,7 +547,9 @@ void NotificationAnalyticsUtil::AddLiveViewSuccessNum(std::string bundle, int32_
     switch (status) {
         case LIVE_VIEW_CREATE:
             if (iter != liveViewMessages.end()) {
-                iter->second.successNum ++;
+                if (iter->second.successNum < INT32_MAX) {
+                    iter->second.successNum ++;
+                }
             } else {
                 ReportLiveViewMessage liveViewMessage;
                 liveViewMessage.FailedNum = 0;
@@ -567,7 +569,9 @@ void NotificationAnalyticsUtil::AddLiveViewFailedNum(std::string bundle, int32_t
     switch (status) {
         case LIVE_VIEW_CREATE:
             if (iter != liveViewMessages.end()) {
-                iter->second.FailedNum ++;
+                if (iter->second.FailedNum < INT32_MAX) {
+                    iter->second.FailedNum ++;
+                }
             } else {
                 ReportLiveViewMessage liveViewMessage;
                 liveViewMessage.FailedNum = 1;
@@ -585,7 +589,9 @@ void NotificationAnalyticsUtil::AddLocalLiveViewFailedNum(std::string bundle)
 {
     auto iter = liveViewMessages.find(bundle);
     if (iter != liveViewMessages.end()) {
-        iter->second.FailedNum ++;
+        if (iter->second.FailedNum < INT32_MAX) {
+            iter->second.FailedNum ++;
+        }
     } else {
         ReportLiveViewMessage liveViewMessage;
         liveViewMessage.FailedNum = 1;
@@ -599,7 +605,9 @@ void NotificationAnalyticsUtil::AddLocalLiveViewSuccessNum(std::string bundle)
 {
     auto iter = liveViewMessages.find(bundle);
     if (iter != liveViewMessages.end()) {
-        iter->second.successNum ++;
+        if (iter->second.successNum < INT32_MAX) {
+            iter->second.successNum ++;
+        }
     } else {
         ReportLiveViewMessage liveViewMessage;
         liveViewMessage.FailedNum = 0;
