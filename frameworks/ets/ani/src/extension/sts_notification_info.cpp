@@ -65,8 +65,10 @@ bool SetNotificationInfoByRequiredParameter(
         ANS_LOGE("SetNotificationInfoParameter: Set groupName failed");
     }
 
-    if (!SetPropertyOptionalByInt(env, infoObject, "appIndex", notificationInfo->GetAppIndex())) {
-        ANS_LOGE("SetNotificationInfoParameter: Set appIndex failed");
+    ani_status status = ANI_OK;
+    if (ANI_OK != (status = env->Object_SetPropertyByName_Int(
+        infoObject, "appIndex", static_cast<ani_int>(notificationInfo->GetAppIndex())))) {
+        ANS_LOGE("SetNotificationInfoParameter: set appIndex failed. status %{public}d", status);
     }
 
     ANS_LOGD("SetNotificationInfoParameter end");
