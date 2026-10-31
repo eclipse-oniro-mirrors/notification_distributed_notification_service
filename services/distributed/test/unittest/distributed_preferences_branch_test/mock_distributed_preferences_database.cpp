@@ -53,6 +53,8 @@ DistributedPreferencesDatabase::DistributedPreferencesDatabase() : DistributedFl
 DistributedPreferencesDatabase::~DistributedPreferencesDatabase()
 {}
 
+void DistributedPreferencesDatabase::GetKvDataManager() {}
+
 bool DistributedPreferencesDatabase::GetEntriesFromDistributedDB(
     const std::string &prefixKey, std::vector<Entry> &entries)
 {

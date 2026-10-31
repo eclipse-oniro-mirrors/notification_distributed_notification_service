@@ -40,6 +40,8 @@ void MockGetColumnIndex(const int ret, const int columnIndex);
 
 void MockGetStringRet(const int ret);
 
+void MockGetIntRet(const int ret, const int value);
+
 /*
  * Create a DataShareResultSet mock whose behaviour is controlled by the
  * MockXxx functions above. The mock class itself is defined in mock_datashare.cpp.

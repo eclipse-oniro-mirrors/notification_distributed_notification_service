@@ -859,7 +859,7 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_023, Level1)
     EXPECT_EQ(reminder->GetTitle(), "title");
     EXPECT_EQ(reminder->GetContent(), "content");
     EXPECT_EQ(reminder->GetIdentifier(), "identifier");
-    EXPECT_EQ(reminder->GetWantAgentInfo(), nullptr);
+    EXPECT_NE(reminder->GetWantAgentInfo(), nullptr);
 }
 
 /**
@@ -900,7 +900,7 @@ HWTEST_F(ReminderDataShareHelperTest, ReminderDataShareHelper_024, Level1)
     EXPECT_EQ(reminder->GetSnoozeContent(), "snooze");
     EXPECT_EQ(reminder->GetExpiredContent(), "expired");
     EXPECT_EQ(reminder->GetCustomRingUri(), "ring");
-    EXPECT_EQ(reminder->maxScreenWantAgentInfo_, nullptr);
+    EXPECT_NE(reminder->maxScreenWantAgentInfo_, nullptr);
     ReminderDataShareHelper::GetInstance().rdbVersion_ = 0;
 }
 

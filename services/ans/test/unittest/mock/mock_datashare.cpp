@@ -28,6 +28,8 @@ int g_goToNextRow = DataShare::E_OK;
 int g_getColumnIndexRet = DataShare::E_OK;
 int g_getColumnIndexValue = 0;
 int g_getStringRet = DataShare::E_OK;
+int g_getIntRet = DataShare::E_OK;
+int g_getIntValue = 0;
 }
 
 void MockIsFailedGoToFirstRow(const int goToFirstRow)
@@ -71,6 +73,12 @@ void MockGetStringRet(const int ret)
     g_getStringRet = ret;
 }
 
+void MockGetIntRet(const int ret, const int value)
+{
+    g_getIntRet = ret;
+    g_getIntValue = value;
+}
+
 } // namespace Notification
 
 namespace DataShare {
@@ -99,6 +107,15 @@ public:
             return Notification::g_getStringRet;
         }
         value = Notification::g_getStringValue;
+        return 0;
+    }
+
+    int GetInt(int columnIndex, int &value) override
+    {
+        if (Notification::g_getIntRet != DataShare::E_OK) {
+            return Notification::g_getIntRet;
+        }
+        value = Notification::g_getIntValue;
         return 0;
     }
 

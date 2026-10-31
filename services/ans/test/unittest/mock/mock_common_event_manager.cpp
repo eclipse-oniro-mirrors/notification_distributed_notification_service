@@ -34,5 +34,15 @@ bool CommonEventManager::PublishCommonEvent(const CommonEventData &data, const C
 {
     return Notification::g_publishCommonEventResult;
 }
+
+bool CommonEventManager::SubscribeCommonEvent(const std::shared_ptr<CommonEventSubscriber> &subscriber)
+{
+    return true;
+}
+
+bool CommonEventManager::UnSubscribeCommonEvent(const std::shared_ptr<CommonEventSubscriber> &subscriber)
+{
+    return true;
+}
 } // EventFwk
 } // OHOS

@@ -38,7 +38,7 @@
 #include "notification_record.h"
 #include "notification_subscriber.h"
 #include "refbase.h"
-#include "bundle_manager_helper.h"
+#include "mock_bundle_manager_helper.h"
 #include "mock_accesstoken_kit.h"
 #include "mock_bundle_mgr.h"
 #include "notification_extension_wrapper.h"
@@ -1915,14 +1915,13 @@ HWTEST_F(AnsUtilsTest, GetBundleVersionCode_GetActiveUserIdFailed_00001, Functio
  */
 HWTEST_F(AnsUtilsTest, GetBundleVersionCode_GetBundleInfoFailed_00001, Function | SmallTest | Level1)
 {
+    MockBundleManager::MockBundleRseult(false);
     sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("invalid.bundle", 1000);
     uint32_t versionCode = 0;
     ErrCode ret = advancedNotificationService_->GetBundleVersionCode(bundleOption, versionCode);
-    if (ret == ERR_OK) {
-        GTEST_SKIP() << "invalid.bundle should be invalid not OK";
-    }
     EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_BUNDLE);
     EXPECT_EQ(versionCode, 0u);
+    MockBundleManager::MockBundleRseult(true);
 }
 
 /**

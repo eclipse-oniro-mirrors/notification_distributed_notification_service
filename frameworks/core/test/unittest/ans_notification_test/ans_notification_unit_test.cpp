@@ -101,7 +101,15 @@ void AnsNotificationUnitTest::SetUp()
     SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = mockSAMgr_;
 }
 
-void AnsNotificationUnitTest::TearDown() {}
+void AnsNotificationUnitTest::TearDown()
+{
+    // The client singleton holds a strong reference to the mock SAMgr. Release it
+    // here, otherwise the last mock is kept alive by the static singleton and is
+    // reported as a leaked mock object at process exit.
+    SystemAbilityManagerClient::GetInstance().systemAbilityManager_ = nullptr;
+    mockSAMgr_ = nullptr;
+    mockProxy_ = nullptr;
+}
 
 class TestAnsSubscriber : public NotificationSubscriber {
 public:

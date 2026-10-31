@@ -21,10 +21,24 @@
 #include "ans_const_define.h"
 #undef private
 #include "mock_datashare.h"
+#include "os_account_manager.h"
 
 using namespace testing::ext;
 
 extern void MockGetSystemAbilityManager(bool mockRet);
+
+namespace OHOS {
+namespace AccountSA {
+// The real QueryActiveOsAccountIds depends on the device os_account service state,
+// which is not healthy on the x86 emulator. Mock it locally so Init() can enumerate
+// one active user deterministically (one user x six URIs = six observers).
+ErrCode OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t> &ids)
+{
+    ids = {100};
+    return ERR_OK;
+}
+}  // namespace AccountSA
+}  // namespace OHOS
 
 namespace OHOS {
 namespace Notification {
@@ -1115,6 +1129,9 @@ HWTEST_F(AdvancedDatashareHelperTest, GetContactResultSetInnerExact_003, Functio
     auto resultSet = advancedDatashareHelper.GetContactResultSetInner(
         contactUri, phoneNumber, "4", "1", "false");
     EXPECT_EQ(resultSet, nullptr);
+    // Restore the default value, otherwise the global mock flag stays true and
+    // pollutes all test cases running after this one (dataShareHelper nullptr).
+    MockIsFailedToCreateDataShareHelper(false);
 }
 
 /**

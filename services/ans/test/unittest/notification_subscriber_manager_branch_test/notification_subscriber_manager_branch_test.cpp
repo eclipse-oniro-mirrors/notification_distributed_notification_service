@@ -36,6 +36,7 @@
 #undef protected
 #include "ans_inner_errors.h"
 #include "mock_ipc_skeleton.h"
+#include "os_account_manager.h"
 
 extern void MockGetUserId(bool mockRet);
 extern void MockGetBundleName(bool mockRet);
@@ -46,6 +47,19 @@ extern void MockDeleteKvFromDb(int32_t mockRet);
 
 using namespace OHOS::Security::AccessToken;
 using namespace testing::ext;
+namespace OHOS {
+namespace AccountSA {
+// The real QueryActiveOsAccountIds depends on the device os_account service, which
+// is not healthy on the x86 emulator. Mock it locally so ParseFromDisturbeDB
+// enumerates one active user deterministically and IsAllowedNotify reads the
+// enabled state of the mocked user 100 instead of failing with a service error.
+ErrCode OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t> &ids)
+{
+    ids = {100};
+    return ERR_OK;
+}
+}  // namespace AccountSA
+}  // namespace OHOS
 namespace OHOS {
 namespace Notification {
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
@@ -2323,9 +2337,12 @@ HWTEST_F(NotificationSubscriberManagerBranchTest, AdvancedNotificationService_07
     request->slotType_ = NotificationConstant::SlotType::LIVE_VIEW;
     advancedNotificationService.UpdateTriggerRequest(request);
     EXPECT_EQ(request->GetDeliveryTime(), 0);
-    std::shared_ptr<NotificationMediaContent> mediaContent = std::make_shared<NotificationMediaContent>();
-    ASSERT_NE(mediaContent, nullptr);
-    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(mediaContent);
+    // UpdateTriggerRequest casts the inner content to NotificationLiveViewContent;
+    // feed a real LiveViewContent instead of a MediaContent miscast, otherwise the
+    // virtual calls on the miscast object trip CFI (cfi-vcall) and abort the binary.
+    std::shared_ptr<NotificationLiveViewContent> liveContent = std::make_shared<NotificationLiveViewContent>();
+    ASSERT_NE(liveContent, nullptr);
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(liveContent);
     ASSERT_NE(content, nullptr);
     request->SetContent(content);
     request->notificationTrigger_ = nullptr;

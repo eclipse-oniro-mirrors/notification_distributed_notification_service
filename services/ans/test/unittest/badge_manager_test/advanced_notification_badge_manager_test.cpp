@@ -33,6 +33,9 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace Notification {
+namespace {
+constexpr int32_t DB_SERVICE_SETTLE_WAIT_MS = 3000;
+}
 class AdvancedNotificationBadgeManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -46,7 +49,14 @@ private:
 
 sptr<AdvancedNotificationService> AdvancedNotificationBadgeManagerTest::advancedNotificationService_ = nullptr;
 
-void AdvancedNotificationBadgeManagerTest::SetUpTestCase() {}
+void AdvancedNotificationBadgeManagerTest::SetUpTestCase()
+{
+    // When this module runs in the full TDD sequence on the emulator, device
+    // services (RDB / distributeddb daemons) are still settling after previous
+    // modules. Wait before the first test to avoid intermittent failures of
+    // the first DB-writing cases in the sequence.
+    std::this_thread::sleep_for(std::chrono::milliseconds(DB_SERVICE_SETTLE_WAIT_MS));
+}
 
 void AdvancedNotificationBadgeManagerTest::TearDownTestCase() {}
 
@@ -66,6 +76,12 @@ void AdvancedNotificationBadgeManagerTest::SetUp()
 void AdvancedNotificationBadgeManagerTest::TearDown()
 {
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
+    if (advancedNotificationService_ != nullptr) {
+        // Drain pending tasks on the service FFRT queue before releasing the service,
+        // otherwise a still-running async task touches released state and crashes
+        // a later test at a random point.
+        advancedNotificationService_->notificationSvrQueue_.SyncSubmit(std::function<void()>([] {}));
+    }
     advancedNotificationService_ = nullptr;
     GTEST_LOG_(INFO) << "TearDown";
 }

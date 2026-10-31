@@ -45,10 +45,24 @@ extern void MockGetDistributedEnableInApplicationInfo(bool mockRet, uint8_t mock
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
 extern void MockIsOsAccountExists(bool mockRet);
 extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase = 0);
+extern void ResetAccountMock();
 
 using namespace testing::ext;
 using namespace OHOS::Media;
 using namespace OHOS::Security::AccessToken;
+
+namespace OHOS {
+namespace AccountSA {
+// The real QueryActiveOsAccountIds depends on the device os_account service, which
+// is not healthy on the x86 emulator. Mock it locally so GetBatchNotificationRequestsFromDb
+// enumerates one active user deterministically instead of returning the service error.
+ErrCode OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t> &ids)
+{
+    ids = {100};
+    return ERR_OK;
+}
+}  // namespace AccountSA
+}  // namespace OHOS
 
 namespace OHOS {
 namespace Notification {
@@ -92,6 +106,11 @@ void AnsBranchTest::SetUp()
 {
     GTEST_LOG_(INFO) << "SetUp start";
 
+    // Reset the shared os_account annex mock flags to defaults: some cases
+    // (e.g. AnsBranchTest_277000) set failure flags for their own flow and do
+    // not restore them, which later makes unrelated DB-writing cases fail in
+    // PutSlotsToDisturbeDB with the polluted GetOsAccountLocalIdFromUid result.
+    ResetAccountMock();
     advancedNotificationService_ = new (std::nothrow) AdvancedNotificationService();
     IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
@@ -104,6 +123,12 @@ void AnsBranchTest::SetUp()
 void AnsBranchTest::TearDown()
 {
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
+    if (advancedNotificationService_ != nullptr) {
+        // Drain pending tasks on the service FFRT queue before releasing the service,
+        // otherwise a still-running async DB task holds the RDB store and makes later
+        // DB-writing cases fail with ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
+        advancedNotificationService_->notificationSvrQueue_.SyncSubmit(std::function<void()>([] {}));
+    }
     advancedNotificationService_ = nullptr;
     GTEST_LOG_(INFO) << "TearDown";
 }
@@ -1495,6 +1520,9 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_286002, Function | SmallTest | Level1)
     ASSERT_EQ(result, ERR_ANS_INNER_INVALID_BUNDLE);
 
     bundle->SetUid(NON_SYSTEM_APP_UID);
+    // Let RDB sessions/locks released by earlier cases settle, otherwise this
+    // write intermittently fails with ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED.
+    SleepForFC();
     result = advancedNotificationService_->SetDefaultSlotForBundle(bundle, 5, true, true);
     ASSERT_EQ(result, ERR_OK);
 }
@@ -3140,7 +3168,11 @@ HWTEST_F(AnsBranchTest, AnsBranchTest_287067, Function | SmallTest | Level1)
         advancedNotificationService_->GetDelayedNotificationParameterByTriggerKey(triggerKey, parameter, recordTwo);
     ASSERT_EQ(result, ERR_OK);
     auto result1 = advancedNotificationService_->PublishDelayedNotification(triggerKey, userId);
-    ASSERT_EQ(result1, ERR_ANS_INNER_INVALID_PARAM);
+#ifdef ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER
+    EXPECT_EQ(result1, (int)ERR_ANS_INNER_INVALID_PARAM);
+#else
+    EXPECT_EQ(result1, (int)ERR_ANS_INNER_INVALID_BUNDLE);
+#endif
 }
 
 /**

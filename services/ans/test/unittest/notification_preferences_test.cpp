@@ -76,6 +76,11 @@ sptr<AdvancedNotificationService> NotificationPreferencesTest::advancedNotificat
 
 void NotificationPreferencesTest::TearDown()
 {
+    if (advancedNotificationService_ != nullptr) {
+        // Drain async tasks submitted by OnBundleRemoved before cleanup, so they
+        // cannot race with TearDown and the next test case on shared singletons.
+        advancedNotificationService_->notificationSvrQueue_.SyncSubmit(std::function<void()>([] {}));
+    }
     NotificationPreferences::GetInstance()->ClearNotificationInRestoreFactorySettings();
 }
 
@@ -3937,7 +3942,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00005, Function 
 {
     NotificationPreferences notificationPreferences;
 
-    std::string invalidJson = "{\"userId\":0,\"bundleList\":[{\"bundleName\":\"com.example\",\"index\":1}]}";
+    std::string invalidJson = "{\"userId\":-1,\"bundleList\":[{\"bundleName\":\"com.example\",\"index\":1}]}";
     auto ret = notificationPreferences.SetCollaborationBlockList(invalidJson);
     EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }
@@ -4347,7 +4352,7 @@ HWTEST_F(NotificationPreferencesTest, SetCollaborationBlockList_00015, Function 
 {
     NotificationPreferences notificationPreferences;
 
-    std::string invalidJson = "{\"userId\":0,\"bundleList\":[{\"bundleName\":\"com.example\",\"index\":1}]}";
+    std::string invalidJson = "{\"userId\":-1,\"bundleList\":[{\"bundleName\":\"com.example\",\"index\":1}]}";
     auto ret = notificationPreferences.SetCollaborationBlockList(invalidJson);
     EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
 }

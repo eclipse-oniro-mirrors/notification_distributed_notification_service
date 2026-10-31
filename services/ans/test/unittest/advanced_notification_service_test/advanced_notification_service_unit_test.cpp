@@ -1339,6 +1339,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, QueryDoNotDisturbProfile_300, Func
     std::string enable;
     std::string profileId;
     DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->SetIsDataShareReady(true);
+    DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->dataShareItems_.clear();
     DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->Init();
     MockIsFailedToCreateDataShareHelper(false);
     MockIsFailedToQueryDataShareResultSet(false);
@@ -1388,6 +1389,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, CheckDoNotDisturbProfile_100, Func
     request->SetClassification("ANS_VERIFICATION_CODE"); // ANS_VERIFICATION_CODE
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->SetIsDataShareReady(true);
+    DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->dataShareItems_.clear();
     MockIsFailedToCreateDataShareHelper(false);
     MockIsFailedToQueryDataShareResultSet(false);
     MockIsFailedGoToFirstRow(0);
