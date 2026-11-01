@@ -55,7 +55,13 @@ static void TestNotificationDoNotDisturbProfile(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     profile2.Marshalling(parcel);
-    NotificationDoNotDisturbProfile::Unmarshalling(parcel);
+    auto unmarshalledProfile = NotificationDoNotDisturbProfile::Unmarshalling(parcel);
+    if (unmarshalledProfile != nullptr) {
+        unmarshalledProfile->GetProfileId();
+        unmarshalledProfile->GetProfileName();
+        delete unmarshalledProfile;
+        unmarshalledProfile = nullptr;
+    }
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)

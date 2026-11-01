@@ -53,7 +53,12 @@ static void TestNotificationCheckRequest(FuzzedDataProvider* fuzzData)
 
     Parcel parcel;
     request2.Marshalling(parcel);
-    NotificationCheckRequest::Unmarshalling(parcel);
+    auto unmarshalledRequest = NotificationCheckRequest::Unmarshalling(parcel);
+    if (unmarshalledRequest != nullptr) {
+        unmarshalledRequest->Dump();
+        delete unmarshalledRequest;
+        unmarshalledRequest = nullptr;
+    }
 }
 
 static void TestNotificationCheckInfo(FuzzedDataProvider* fuzzData)

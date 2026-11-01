@@ -46,7 +46,13 @@ static void TestNotificationApplicationChangeInfo(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     info.Marshalling(parcel);
-    NotificationApplicationChangeInfo::Unmarshalling(parcel);
+    auto unmarshalled = NotificationApplicationChangeInfo::Unmarshalling(parcel);
+    if (unmarshalled != nullptr) {
+        unmarshalled->GetChangeType();
+        unmarshalled->Dump();
+        delete unmarshalled;
+        unmarshalled = nullptr;
+    }
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)

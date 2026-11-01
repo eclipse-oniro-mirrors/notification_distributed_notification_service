@@ -61,7 +61,12 @@ static void TestNotificationDistributedBundle(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     bundle.Marshalling(parcel);
-    NotificationDistributedBundle::Unmarshalling(parcel);
+    auto unmarshalledBundle = NotificationDistributedBundle::Unmarshalling(parcel);
+    if (unmarshalledBundle != nullptr) {
+        unmarshalledBundle->Dump();
+        delete unmarshalledBundle;
+        unmarshalledBundle = nullptr;
+    }
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)

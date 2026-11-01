@@ -33,7 +33,10 @@ static void TestDistributedNotificationManager(FuzzedDataProvider *fuzzData)
     std::string label = fuzzData->ConsumeRandomLengthString();
     int32_t id = fuzzData->ConsumeIntegral<int32_t>();
 
-    sptr<NotificationRequest> request = new NotificationRequest();
+    sptr<NotificationRequest> request = sptr<NotificationRequest>::MakeSptr();
+    if (request == nullptr) {
+        return;
+    }
     request->SetNotificationId(id);
     manager->Publish(bundleName, label, id, request);
     manager->Update(bundleName, label, id, request);
@@ -44,10 +47,17 @@ static void TestDistributedNotificationManager(FuzzedDataProvider *fuzzData)
 
     DistributedNotificationManager::IDistributedCallback callback;
     manager->RegisterCallback(callback);
+    // The API is declared as UngegisterCallback() in distributed_notification_manager.h, so the
+    // upstream spelling is kept here to match the real symbol instead of the correct "Unregister".
     manager->UngegisterCallback();
 
     std::vector<sptr<NotificationRequest>> requestList;
     manager->GetCurrentDistributedNotification(requestList);
+    for (const auto &distributedRequest : requestList) {
+        if (distributedRequest != nullptr) {
+            distributedRequest->Dump();
+        }
+    }
 
     DistributedDatabase::DeviceInfo deviceInfo;
     manager->GetLocalDeviceInfo(deviceInfo);
@@ -66,7 +76,10 @@ static void TestDistributedPreferences(FuzzedDataProvider *fuzzData)
 
     std::string bundleName = fuzzData->ConsumeRandomLengthString();
     int32_t uid = fuzzData->ConsumeIntegral<int32_t>();
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption(bundleName, uid);
+    sptr<NotificationBundleOption> bundleOption = sptr<NotificationBundleOption>::MakeSptr(bundleName, uid);
+    if (bundleOption == nullptr) {
+        return;
+    }
     preferences->SetDistributedBundleEnable(bundleOption, isEnable);
     preferences->GetDistributedBundleEnable(bundleOption, isEnable);
     preferences->DeleteDistributedBundleInfo(bundleOption);

@@ -74,7 +74,12 @@ static void TestNotificationTrigger(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     trigger2.Marshalling(parcel);
-    NotificationTrigger::Unmarshalling(parcel);
+    auto unmarshalledTrigger = NotificationTrigger::Unmarshalling(parcel);
+    if (unmarshalledTrigger != nullptr) {
+        unmarshalledTrigger->Dump();
+        delete unmarshalledTrigger;
+        unmarshalledTrigger = nullptr;
+    }
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)

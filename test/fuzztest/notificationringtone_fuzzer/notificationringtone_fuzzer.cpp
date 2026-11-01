@@ -54,7 +54,12 @@ static void TestNotificationRingtoneInfo(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     info2.Marshalling(parcel);
-    NotificationRingtoneInfo::Unmarshalling(parcel);
+    auto unmarshalledInfo = NotificationRingtoneInfo::Unmarshalling(parcel);
+    if (unmarshalledInfo != nullptr) {
+        unmarshalledInfo->Dump();
+        delete unmarshalledInfo;
+        unmarshalledInfo = nullptr;
+    }
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)

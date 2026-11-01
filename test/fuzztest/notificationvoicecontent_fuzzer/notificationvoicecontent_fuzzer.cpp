@@ -37,7 +37,12 @@ static void TestNotificationVoiceContent(FuzzedDataProvider *fuzzData)
     NotificationVoiceContent content2(content);
     Parcel parcel;
     content2.Marshalling(parcel);
-    NotificationVoiceContent::Unmarshalling(parcel);
+    auto unmarshalledContent = NotificationVoiceContent::Unmarshalling(parcel);
+    if (unmarshalledContent != nullptr) {
+        unmarshalledContent->Dump();
+        delete unmarshalledContent;
+        unmarshalledContent = nullptr;
+    }
 }
 
 static void TestVoiceContentOption(FuzzedDataProvider *fuzzData)
@@ -54,7 +59,12 @@ static void TestVoiceContentOption(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     option3.Marshalling(parcel);
-    VoiceContentOption::Unmarshalling(parcel);
+    auto unmarshalledOption = VoiceContentOption::Unmarshalling(parcel);
+    if (unmarshalledOption != nullptr) {
+        unmarshalledOption->GetEnabled();
+        delete unmarshalledOption;
+        unmarshalledOption = nullptr;
+    }
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)

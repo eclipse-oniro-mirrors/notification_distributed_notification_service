@@ -76,7 +76,12 @@ static void TestNotificationLocalLiveViewContent(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     content.Marshalling(parcel);
-    NotificationLocalLiveViewContent::Unmarshalling(parcel);
+    auto unmarshalledContent = NotificationLocalLiveViewContent::Unmarshalling(parcel);
+    if (unmarshalledContent != nullptr) {
+        unmarshalledContent->Dump();
+        delete unmarshalledContent;
+        unmarshalledContent = nullptr;
+    }
 }
 
 static void TestNotificationLocalLiveViewButton(FuzzedDataProvider *fuzzData)
@@ -96,7 +101,12 @@ static void TestNotificationLocalLiveViewButton(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     button.Marshalling(parcel);
-    NotificationLocalLiveViewButton::Unmarshalling(parcel);
+    auto unmarshalledButton = NotificationLocalLiveViewButton::Unmarshalling(parcel);
+    if (unmarshalledButton != nullptr) {
+        unmarshalledButton->Dump();
+        delete unmarshalledButton;
+        unmarshalledButton = nullptr;
+    }
 }
 
 static void TestNotificationProgress(FuzzedDataProvider *fuzzData)
@@ -120,7 +130,12 @@ static void TestNotificationProgress(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     progress.Marshalling(parcel);
-    NotificationProgress::Unmarshalling(parcel);
+    auto unmarshalledProgress = NotificationProgress::Unmarshalling(parcel);
+    if (unmarshalledProgress != nullptr) {
+        unmarshalledProgress->Dump();
+        delete unmarshalledProgress;
+        unmarshalledProgress = nullptr;
+    }
 }
 
 static void TestNotificationTime(FuzzedDataProvider *fuzzData)
@@ -147,7 +162,12 @@ static void TestNotificationTime(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     time.Marshalling(parcel);
-    NotificationTime::Unmarshalling(parcel);
+    auto unmarshalledTime = NotificationTime::Unmarshalling(parcel);
+    if (unmarshalledTime != nullptr) {
+        unmarshalledTime->Dump();
+        delete unmarshalledTime;
+        unmarshalledTime = nullptr;
+    }
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)

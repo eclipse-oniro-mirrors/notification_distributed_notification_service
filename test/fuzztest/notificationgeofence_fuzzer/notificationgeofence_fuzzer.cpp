@@ -64,7 +64,12 @@ static void TestNotificationGeofence(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     geofence2.Marshalling(parcel);
-    NotificationGeofence::Unmarshalling(parcel);
+    auto unmarshalledGeofence = NotificationGeofence::Unmarshalling(parcel);
+    if (unmarshalledGeofence != nullptr) {
+        unmarshalledGeofence->Dump();
+        delete unmarshalledGeofence;
+        unmarshalledGeofence = nullptr;
+    }
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)

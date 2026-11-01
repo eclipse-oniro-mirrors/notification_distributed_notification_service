@@ -48,7 +48,12 @@ static void TestNotificationStatistics(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     statistics.Marshalling(parcel);
-    NotificationStatistics::Unmarshalling(parcel);
+    auto unmarshalledStatistics = NotificationStatistics::Unmarshalling(parcel);
+    if (unmarshalledStatistics != nullptr) {
+        unmarshalledStatistics->Dump();
+        delete unmarshalledStatistics;
+        unmarshalledStatistics = nullptr;
+    }
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)

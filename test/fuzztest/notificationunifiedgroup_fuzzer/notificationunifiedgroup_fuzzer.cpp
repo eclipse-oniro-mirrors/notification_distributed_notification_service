@@ -45,7 +45,12 @@ static void TestNotificationUnifiedGroupInfo(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     info.Marshalling(parcel);
-    NotificationUnifiedGroupInfo::Unmarshalling(parcel);
+    auto unmarshalledInfo = NotificationUnifiedGroupInfo::Unmarshalling(parcel);
+    if (unmarshalledInfo != nullptr) {
+        unmarshalledInfo->Dump();
+        delete unmarshalledInfo;
+        unmarshalledInfo = nullptr;
+    }
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider *fuzzData)

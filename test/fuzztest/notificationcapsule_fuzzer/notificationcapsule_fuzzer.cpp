@@ -64,7 +64,12 @@ static void TestNotificationCapsule(FuzzedDataProvider* fuzzData)
 
     Parcel parcel;
     capsule.Marshalling(parcel);
-    NotificationCapsule::Unmarshalling(parcel);
+    auto unmarshalledCapsule = NotificationCapsule::Unmarshalling(parcel);
+    if (unmarshalledCapsule != nullptr) {
+        unmarshalledCapsule->Dump();
+        delete unmarshalledCapsule;
+        unmarshalledCapsule = nullptr;
+    }
 }
 
 static void TestNotificationIconButton(FuzzedDataProvider* fuzzData)
@@ -89,20 +94,40 @@ static void TestNotificationIconButton(FuzzedDataProvider* fuzzData)
 
     Parcel parcel;
     button.Marshalling(parcel);
-    NotificationIconButton::Unmarshalling(parcel);
+    auto unmarshalledButton = NotificationIconButton::Unmarshalling(parcel);
+    if (unmarshalledButton != nullptr) {
+        unmarshalledButton->Dump();
+        delete unmarshalledButton;
+        unmarshalledButton = nullptr;
+    }
 }
 
 static void TestNotificationIconButtonWithResource(FuzzedDataProvider* fuzzData)
 {
     NotificationIconButton button;
-    std::string text = fuzzData->ConsumeRandomLengthString();
-    button.SetText(text);
-    Parcel writeParcel;
-    button.WriteIconToParcel(writeParcel);
+    button.SetText(fuzzData->ConsumeRandomLengthString());
 
-    Parcel readParcel;
-    std::shared_ptr<ResourceManager::Resource> resourceObj;
-    button.ReadResourceFromParcel(readParcel, resourceObj);
+    std::shared_ptr<ResourceManager::Resource> iconResource = std::make_shared<ResourceManager::Resource>();
+    iconResource->bundleName = fuzzData->ConsumeRandomLengthString();
+    iconResource->moduleName = fuzzData->ConsumeRandomLengthString();
+    button.SetIconResource(iconResource);
+    button.GetIconResource();
+
+    Parcel parcel;
+    if (!button.WriteIconToParcel(parcel)) {
+        return;
+    }
+    // WriteIconToParcel writes the iconImage flag and the iconResource flag before the resource strings.
+    parcel.ReadBool();
+    if (!parcel.ReadBool()) {
+        return;
+    }
+    std::shared_ptr<ResourceManager::Resource> resourceObj = std::make_shared<ResourceManager::Resource>();
+    if (!button.ReadResourceFromParcel(parcel, resourceObj)) {
+        return;
+    }
+    button.SetIconResource(resourceObj);
+    button.GetIconResource();
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData)
