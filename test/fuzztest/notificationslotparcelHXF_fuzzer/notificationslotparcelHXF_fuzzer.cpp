@@ -33,13 +33,11 @@ namespace OHOS {
         constexpr size_t SOUND_URI_LEN_FACTOR = 16;
         constexpr size_t SOUND_URI_LEN = MAX_VIBRATION_ELEMENTS * SOUND_URI_LEN_FACTOR;
         constexpr size_t SLOT_TYPE_STRING_LEN = 32;
-        constexpr uint8_t MODULO_ZERO_FALLBACK = 0;
-
         template <typename ValueType, typename DivisorType>
         DivisorType ModuloByNonZero(ValueType value, DivisorType divisor)
         {
-            if (divisor == static_cast<DivisorType>(MODULO_ZERO_FALLBACK)) {
-                return static_cast<DivisorType>(MODULO_ZERO_FALLBACK);
+            if (divisor == 0) {
+                return 0;
             }
             return static_cast<DivisorType>(value % divisor);
         }

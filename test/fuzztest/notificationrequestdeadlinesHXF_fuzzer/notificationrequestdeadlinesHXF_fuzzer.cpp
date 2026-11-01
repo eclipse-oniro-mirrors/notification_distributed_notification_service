@@ -102,13 +102,11 @@ namespace OHOS {
         constexpr uint8_t EMPTY_VECTOR_COUNT = 0;
         constexpr uint8_t SAFE_DIVISOR_FALLBACK = 1;
 
-        constexpr uint8_t MODULO_ZERO_FALLBACK = 0;
-
         template <typename ValueType, typename DivisorType>
         DivisorType ModuloByNonZero(ValueType value, DivisorType divisor)
         {
-            if (divisor == static_cast<DivisorType>(MODULO_ZERO_FALLBACK)) {
-                return static_cast<DivisorType>(MODULO_ZERO_FALLBACK);
+            if (divisor == 0) {
+                return 0;
             }
             return static_cast<DivisorType>(value % divisor);
         }

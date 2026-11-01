@@ -34,13 +34,11 @@ namespace OHOS {
         constexpr uint8_t MAX_MULTILINES     = 9;    // probe above the 7-line limit
         constexpr uint8_t SLOT_TYPE_NUM      = 8;    // SlotType enum range
 
-        constexpr uint8_t MODULO_ZERO_FALLBACK = 0;
-
         template <typename ValueType, typename DivisorType>
         DivisorType ModuloByNonZero(ValueType value, DivisorType divisor)
         {
-            if (divisor == static_cast<DivisorType>(MODULO_ZERO_FALLBACK)) {
-                return static_cast<DivisorType>(MODULO_ZERO_FALLBACK);
+            if (divisor == 0) {
+                return 0;
             }
             return static_cast<DivisorType>(value % divisor);
         }
