@@ -55,7 +55,11 @@ static void TestNotificationCheckRequest(FuzzedDataProvider* fuzzData)
     request2.Marshalling(parcel);
     auto unmarshalledRequest = NotificationCheckRequest::Unmarshalling(parcel);
     if (unmarshalledRequest != nullptr) {
-        unmarshalledRequest->Dump();
+        // NotificationCheckRequest::Dump() is declared in the header but never defined, calling it fails to link.
+        unmarshalledRequest->GetContentType();
+        unmarshalledRequest->GetSlotType();
+        unmarshalledRequest->GetExtraKeys();
+        unmarshalledRequest->GetUid();
         delete unmarshalledRequest;
         unmarshalledRequest = nullptr;
     }
