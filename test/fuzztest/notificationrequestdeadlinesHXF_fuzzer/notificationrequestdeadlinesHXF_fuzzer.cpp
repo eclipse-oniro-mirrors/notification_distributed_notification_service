@@ -28,11 +28,10 @@
 #include "notification_multiline_content.h"
 #include "notification_normal_content.h"
 #include "notification_picture_content.h"
+// Test-only access to AddConsumedDevices and IsConsumedDevices; restore the macro immediately.
 #define private public // NOLINT
-#define protected public // NOLINT
 #include "notification_request.h"
 #undef private // NOLINT
-#undef protected // NOLINT
 #include "notification_template.h"
 #include "notification_trigger.h"
 #include "notification_unified_group_Info.h"
@@ -176,9 +175,10 @@ namespace OHOS {
         int32_t rowDataSize = width * PIXEL_BYTES;
         uint32_t bufferSize = static_cast<uint32_t>(rowDataSize * height);
         void *buffer = std::malloc(bufferSize);
-        if (buffer != nullptr) {
-            pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, Media::AllocatorType::HEAP_ALLOC, nullptr);
+        if (buffer == nullptr) {
+            return nullptr;
         }
+        pixelMap->SetPixelsAddr(buffer, nullptr, bufferSize, Media::AllocatorType::HEAP_ALLOC, nullptr);
         return pixelMap;
     }
 
@@ -961,9 +961,8 @@ namespace OHOS {
             request.Dump();
             Parcel parcel;
             if (content && content->Marshalling(parcel)) {
-                Notification::NotificationContent *restoredContent =
-                    Notification::NotificationContent::Unmarshalling(parcel);
-                delete restoredContent;
+                std::unique_ptr<Notification::NotificationContent> restoredContent(
+                    Notification::NotificationContent::Unmarshalling(parcel));
             }
         }
     }
@@ -1060,12 +1059,11 @@ namespace OHOS {
     {
         std::string collaborationJson;
         liveUpdate->CollaborationToJson(collaborationJson);
-        Notification::NotificationRequest *collaborationRequest =
-            Notification::NotificationRequest::CollaborationFromJson(collaborationJson);
-        delete collaborationRequest;
-        Notification::NotificationRequest *badCollaborationRequest =
-            Notification::NotificationRequest::CollaborationFromJson(fdp->ConsumeRandomLengthString(COMMON_STRING_MAX));
-        delete badCollaborationRequest;
+        std::unique_ptr<Notification::NotificationRequest> collaborationRequest(
+            Notification::NotificationRequest::CollaborationFromJson(collaborationJson));
+        std::unique_ptr<Notification::NotificationRequest> badCollaborationRequest(
+            Notification::NotificationRequest::CollaborationFromJson(
+                fdp->ConsumeRandomLengthString(COMMON_STRING_MAX)));
     }
 
     void FuzzLiveViewRequestPaths(FuzzedDataProvider *fdp, Notification::NotificationRequest &request)
@@ -1109,41 +1107,34 @@ namespace OHOS {
         Notification::NotificationRequest defaultRequest;
         Parcel defaultParcel;
         if (defaultRequest.Marshalling(defaultParcel)) {
-            Notification::NotificationRequest *defaultRestored =
-                Notification::NotificationRequest::Unmarshalling(defaultParcel);
-            delete defaultRestored;
+            std::unique_ptr<Notification::NotificationRequest> defaultRestored(
+                Notification::NotificationRequest::Unmarshalling(defaultParcel));
         }
         nlohmann::json defaultJsonObject;
         defaultRequest.ToJson(defaultJsonObject);
-        Notification::NotificationRequest *defaultFromJson =
-            Notification::NotificationRequest::FromJson(defaultJsonObject);
-        delete defaultFromJson;
+        std::unique_ptr<Notification::NotificationRequest> defaultFromJson(
+            Notification::NotificationRequest::FromJson(defaultJsonObject));
 
         Parcel parcel;
         if (request.Marshalling(parcel)) {
-            Notification::NotificationRequest *restored =
-                Notification::NotificationRequest::Unmarshalling(parcel);
-            delete restored;
+            std::unique_ptr<Notification::NotificationRequest> restored(
+                Notification::NotificationRequest::Unmarshalling(parcel));
         }
 
         nlohmann::json jsonObject;
         request.ToJson(jsonObject);
-        Notification::NotificationRequest *fromJson =
-            Notification::NotificationRequest::FromJson(jsonObject);
-        delete fromJson;
+        std::unique_ptr<Notification::NotificationRequest> fromJson(
+            Notification::NotificationRequest::FromJson(jsonObject));
 
-        Notification::NotificationRequest *fromNullJson =
-            Notification::NotificationRequest::FromJson(nlohmann::json());
-        delete fromNullJson;
-        Notification::NotificationRequest *fromArrayJson =
-            Notification::NotificationRequest::FromJson(nlohmann::json::array());
-        delete fromArrayJson;
+        std::unique_ptr<Notification::NotificationRequest> fromNullJson(
+            Notification::NotificationRequest::FromJson(nlohmann::json()));
+        std::unique_ptr<Notification::NotificationRequest> fromArrayJson(
+            Notification::NotificationRequest::FromJson(nlohmann::json::array()));
 
         std::string collaborationJson;
         request.CollaborationToJson(collaborationJson);
-        Notification::NotificationRequest *fromCollaborationJson =
-            Notification::NotificationRequest::CollaborationFromJson(collaborationJson);
-        delete fromCollaborationJson;
+        std::unique_ptr<Notification::NotificationRequest> fromCollaborationJson(
+            Notification::NotificationRequest::CollaborationFromJson(collaborationJson));
     }
 
     bool FuzzNotificationRequestDeadlines(FuzzedDataProvider *fdp)

@@ -20,6 +20,7 @@
 #include "uri.h"
 #include <fuzzer/FuzzedDataProvider.h>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -127,9 +128,8 @@ namespace OHOS {
 
         Parcel parcel;
         if (slot.Marshalling(parcel)) {
-            Notification::NotificationSlot *restored =
-                Notification::NotificationSlot::Unmarshalling(parcel);
-            delete restored;
+            std::unique_ptr<Notification::NotificationSlot> restored(
+                Notification::NotificationSlot::Unmarshalling(parcel));
         }
     }
 

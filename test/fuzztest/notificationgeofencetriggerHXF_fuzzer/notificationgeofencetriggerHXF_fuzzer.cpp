@@ -102,8 +102,8 @@ void FuzzGeofenceParcel(const Notification::NotificationGeofence &geofence)
 {
     Parcel parcel;
     if (geofence.Marshalling(parcel)) {
-        Notification::NotificationGeofence *restored = Notification::NotificationGeofence::Unmarshalling(parcel);
-        delete restored;
+        std::unique_ptr<Notification::NotificationGeofence> restored(
+            Notification::NotificationGeofence::Unmarshalling(parcel));
     }
 }
 
@@ -111,16 +111,16 @@ void FuzzGeofenceJson(const Notification::NotificationGeofence &geofence)
 {
     nlohmann::json jsonObject;
     geofence.ToJson(jsonObject);
-    Notification::NotificationGeofence *restored = Notification::NotificationGeofence::FromJson(jsonObject);
-    delete restored;
+    std::unique_ptr<Notification::NotificationGeofence> restored(
+        Notification::NotificationGeofence::FromJson(jsonObject));
 }
 
 void FuzzTriggerParcel(const Notification::NotificationTrigger &trigger)
 {
     Parcel parcel;
     if (trigger.Marshalling(parcel)) {
-        Notification::NotificationTrigger *restored = Notification::NotificationTrigger::Unmarshalling(parcel);
-        delete restored;
+        std::unique_ptr<Notification::NotificationTrigger> restored(
+            Notification::NotificationTrigger::Unmarshalling(parcel));
     }
 }
 
@@ -128,8 +128,8 @@ void FuzzTriggerJson(const Notification::NotificationTrigger &trigger)
 {
     nlohmann::json jsonObject;
     trigger.ToJson(jsonObject);
-    Notification::NotificationTrigger *restored = Notification::NotificationTrigger::FromJson(jsonObject);
-    delete restored;
+    std::unique_ptr<Notification::NotificationTrigger> restored(
+        Notification::NotificationTrigger::FromJson(jsonObject));
 }
 
 void ConfigureTrigger(Notification::NotificationTrigger &trigger, const TriggerFuzzData &fuzzData)

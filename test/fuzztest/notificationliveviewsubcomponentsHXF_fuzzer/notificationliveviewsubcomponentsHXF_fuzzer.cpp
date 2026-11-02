@@ -22,6 +22,7 @@
 #include "notification_voice_content.h"
 #include "parcel.h"
 #include <fuzzer/FuzzedDataProvider.h>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -52,9 +53,8 @@ namespace OHOS {
 
         Parcel p;
         if (ugi.Marshalling(p)) {
-            Notification::NotificationUnifiedGroupInfo *r =
-                Notification::NotificationUnifiedGroupInfo::Unmarshalling(p);
-            delete r;
+            std::unique_ptr<Notification::NotificationUnifiedGroupInfo> r(
+                Notification::NotificationUnifiedGroupInfo::Unmarshalling(p));
         }
     }
 
@@ -69,16 +69,14 @@ namespace OHOS {
 
         Parcel p;
         if (gi.Marshalling(p)) {
-            Notification::NotificationGroupInfo *r =
-                Notification::NotificationGroupInfo::Unmarshalling(p);
-            delete r;
+            std::unique_ptr<Notification::NotificationGroupInfo> r(
+                Notification::NotificationGroupInfo::Unmarshalling(p));
         }
 
         nlohmann::json j;
         gi.ToJson(j);
-        Notification::NotificationGroupInfo *rj =
-            Notification::NotificationGroupInfo::FromJson(j);
-        delete rj;
+        std::unique_ptr<Notification::NotificationGroupInfo> rj(
+            Notification::NotificationGroupInfo::FromJson(j));
     }
 
     void FuzzVoiceContent(FuzzedDataProvider *fdp)
@@ -91,9 +89,8 @@ namespace OHOS {
 
         Parcel p;
         if (vc.Marshalling(p)) {
-            Notification::NotificationVoiceContent *r =
-                Notification::NotificationVoiceContent::Unmarshalling(p);
-            delete r;
+            std::unique_ptr<Notification::NotificationVoiceContent> r(
+                Notification::NotificationVoiceContent::Unmarshalling(p));
         }
 
         Notification::NotificationVoiceContent vc2(vc);
@@ -117,16 +114,14 @@ namespace OHOS {
 
         Parcel p;
         if (prog.Marshalling(p)) {
-            Notification::NotificationProgress *r =
-                Notification::NotificationProgress::Unmarshalling(p);
-            delete r;
+            std::unique_ptr<Notification::NotificationProgress> r(
+                Notification::NotificationProgress::Unmarshalling(p));
         }
 
         nlohmann::json j;
         prog.ToJson(j);
-        Notification::NotificationProgress *rj =
-            Notification::NotificationProgress::FromJson(j);
-        delete rj;
+        std::unique_ptr<Notification::NotificationProgress> rj(
+            Notification::NotificationProgress::FromJson(j));
     }
 
     void FuzzCapsule(FuzzedDataProvider *fdp)
@@ -153,16 +148,14 @@ namespace OHOS {
 
         Parcel p;
         if (capsule.Marshalling(p)) {
-            Notification::NotificationCapsule *r =
-                Notification::NotificationCapsule::Unmarshalling(p);
-            delete r;
+            std::unique_ptr<Notification::NotificationCapsule> r(
+                Notification::NotificationCapsule::Unmarshalling(p));
         }
 
         nlohmann::json j;
         capsule.ToJson(j);
-        Notification::NotificationCapsule *rj =
-            Notification::NotificationCapsule::FromJson(j);
-        delete rj;
+        std::unique_ptr<Notification::NotificationCapsule> rj(
+            Notification::NotificationCapsule::FromJson(j));
 
         capsule.ResetIcon();
     }

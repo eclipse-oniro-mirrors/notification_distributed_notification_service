@@ -106,9 +106,8 @@ namespace OHOS {
     {
         Parcel parcel;
         if (request.Marshalling(parcel)) {
-            Notification::NotificationRequest *restored =
-                Notification::NotificationRequest::Unmarshalling(parcel);
-            delete restored;
+            std::unique_ptr<Notification::NotificationRequest> restored(
+                Notification::NotificationRequest::Unmarshalling(parcel));
         }
     }
 
@@ -117,9 +116,8 @@ namespace OHOS {
         if (content) {
             Parcel contentParcel;
             if (content->Marshalling(contentParcel)) {
-                Notification::NotificationContent *restoredContent =
-                    Notification::NotificationContent::Unmarshalling(contentParcel);
-                delete restoredContent;
+                std::unique_ptr<Notification::NotificationContent> restoredContent(
+                    Notification::NotificationContent::Unmarshalling(contentParcel));
             }
         }
     }
