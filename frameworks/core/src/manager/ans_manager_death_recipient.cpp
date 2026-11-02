@@ -42,7 +42,16 @@ void AnsManagerDeathRecipient::SubscribeSAManager()
     }
 }
 void AnsManagerDeathRecipient::SystemAbilityStatusChangeListener::OnAddSystemAbility(
-    int32_t systemAbilityId, const std::string& deviceId) {}
+    int32_t systemAbilityId, const std::string& deviceId)
+{
+    if (systemAbilityId != ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID) {
+        return;
+    }
+    // ANS service has come back online (e.g. subfoundation re-spawned by samgr):
+    // re-register all subscriptions still alive in this process so subscribers
+    // recover transparently (design ADR-7, BR-12).
+    AnsNotification::GetInstance()->ReSubscribeNotifications();
+}
 
 void AnsManagerDeathRecipient::SystemAbilityStatusChangeListener::OnRemoveSystemAbility(
     int32_t systemAbilityId, const std::string& deviceId)

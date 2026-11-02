@@ -32,6 +32,10 @@ public:
     static void MockInstallBundle(const NotificationBundleOption& bundleOption);
     static void MockUninstallBundle(const NotificationBundleOption& bundleOption);
     static void MockIsAncoApp(bool isAncoApp);
+    // Call-count guards for per-publish BMS query dedup (design ADR-4, AC-2.4)
+    static void MockBundleQueryCountReset();
+    static int32_t GetBundleNameByUidCallCount();
+    static int32_t GetAppIndexByUidCallCount();
 };
 }  // namespace OHOS::Notification
 
