@@ -59,6 +59,7 @@ constexpr const char *FORMAT_PHONE_NUMBER = "format_phone_number";
 constexpr const char *FAVORITE = "favorite";
 constexpr const char *FOCUS_MODE_LIST = "focus_mode_list";
 constexpr const char *MODE_ID = "modeId";
+constexpr const char *FEATURES = "features";
 constexpr const char *ADVANCED_DATA_COLUMN_KEYWORD = "KEYWORD";
 constexpr const char *ADVANCED_DATA_COLUMN_VALUE = "VALUE";
 constexpr const char *CALL_DIRECTION = "call_direction";
@@ -72,6 +73,9 @@ constexpr const int TYPE_ID_FIVE = 5;
 constexpr const int ERROR_QUERY_INFO_FAILED = -1;
 constexpr const int QUERY_INFO_SUCCESS = 1;
 constexpr const int PHONE_NUMBER_LAST_SPACE_POS = 4;
+constexpr const int FEATURE_OPERATOR_MAX = 1000;
+constexpr const int CALL_DIRECTION_OPERATOR_INCOMING = 0;
+constexpr const int CALL_DIRECTION_RCS_INCOMING = 1;
 std::vector<std::string> QUERY_CONTACT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FAVORITE, FOCUS_MODE_LIST, DETAIL_INFO};
 std::vector<std::string> QUERY_INTELLIGENT_COLUMN_LIST = {FORMAT_PHONE_NUMBER, FOCUS_MODE_LIST, DETAIL_INFO};
 } // namespace
@@ -502,13 +506,27 @@ bool AdvancedDatashareHelper::isRepeatCall(const std::string &phoneNumber)
         IPCSkeleton::SetCallingIdentity(identity);
         return false;
     }
-    bool isRepeat = false;
     DataShare::DataSharePredicates predicates;
     std::vector<std::string> columns;
     Uri uri(CALL_SUBSECTION);
-    predicates.EqualTo(PHONE_NUMBER, phoneNumber);
-    predicates.EqualTo(CALL_DIRECTION, 0);
-    predicates.OrderByDesc(CREATE_TIME);
+    predicates.EqualTo(PHONE_NUMBER, phoneNumber)
+        ->And()
+        ->BeginWrap()
+        ->BeginWrap()
+        ->EqualTo(CALL_DIRECTION, CALL_DIRECTION_OPERATOR_INCOMING)
+        ->And()
+        ->LessThanOrEqualTo(FEATURES, FEATURE_OPERATOR_MAX)
+        ->EndWrap()
+        ->Or()
+        ->BeginWrap()
+        ->EqualTo(CALL_DIRECTION, CALL_DIRECTION_RCS_INCOMING)
+        ->And()
+        ->GreaterThan(FEATURES, FEATURE_OPERATOR_MAX)
+        ->EndWrap()
+        ->EndWrap()
+        ->And()
+        ->GreaterThan(CREATE_TIME, time(NULL) - MAX_TIME_INTERVAL)
+        ->Limit(1, 0);
     columns.push_back(CREATE_TIME);
     auto resultSet = helper->Query(uri, predicates, columns);
     IPCSkeleton::SetCallingIdentity(identity);
@@ -518,20 +536,10 @@ bool AdvancedDatashareHelper::isRepeatCall(const std::string &phoneNumber)
     }
     int rowCount = 0;
     resultSet->GetRowCount(rowCount);
-    if (rowCount > 0) {
-        int32_t callTime = 0;
-        if (resultSet->GoToFirstRow() == 0) {
-            int32_t columnIndex;
-            resultSet->GetColumnIndex(CREATE_TIME, columnIndex);
-            resultSet->GetInt(columnIndex, callTime);
-        }
-        if (time(NULL) - callTime < MAX_TIME_INTERVAL) {
-            isRepeat = true;
-        }
-    }
     resultSet->Close();
     helper->Release();
-    return isRepeat;
+    ANS_LOGI("isRepeatCall: isRepeat = %{public}s", rowCount > 0 ? "true" : "false");
+    return rowCount > 0;
 }
 
 std::string AdvancedDatashareHelper::GetFocusModeEnableUri(const int32_t &userId) const
