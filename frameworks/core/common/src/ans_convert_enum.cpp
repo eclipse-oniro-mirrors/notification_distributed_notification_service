@@ -450,6 +450,12 @@ void AnsEnumUtil::ReasonCToJSSecondExt(const int &inType, int &outType)
         case NotificationConstant::DISTRIBUTED_COLLABORATIVE_DELETE:
             outType = static_cast<int32_t>(RemoveReason::DISTRIBUTED_COLLABORATIVE_DELETE);
             break;
+        case NotificationConstant::ADMIN_REMOVE_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::ADMIN_REMOVE_REASON_DELETE);
+            break;
+        case NotificationConstant::ADMIN_REMOVE_ALL_REASON_DELETE:
+            outType = static_cast<int32_t>(RemoveReason::ADMIN_REMOVE_ALL_REASON_DELETE);
+            break;
         default:
             outType = static_cast<int32_t>(RemoveReason::APP_CANCEL_REASON_OTHER);
             ANS_LOGD("Reason %{public}d", inType);

@@ -2476,6 +2476,7 @@ private:
     ErrCode ExcuteRemoveNotificationAsAdmin(const std::string &hashCode);
     ErrCode ExcuteRemoveAllNotificationsAsAdmin(const int32_t userId);
     ErrCode CheckAdminRemoveProtected(const std::shared_ptr<NotificationRecord> &record, int32_t notificationId);
+    ErrCode RemoveFromSnoozeDelayListAsAdmin(const std::string &key);
     void RemoveFromTriggerNotificationListByUserAsAdmin(int32_t userId);
     void GetRemoveListForRemoveAllAsAdmin(int32_t userId,
         std::vector<std::shared_ptr<NotificationRecord>> &removeList);

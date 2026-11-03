@@ -423,6 +423,22 @@ HWTEST_F(AnsLogTest, AnsConvertTest_018, TestSize.Level1)
 }
 
 /*
+ * @tc.name: AnsConvertTest_019
+ * @tc.desc: test ReasonCToJS function for admin remove reasons
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLogTest, AnsConvertTest_019, TestSize.Level1)
+{
+    int outType;
+    int inType = NotificationConstant::ADMIN_REMOVE_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::ADMIN_REMOVE_REASON_DELETE));
+    inType = NotificationConstant::ADMIN_REMOVE_ALL_REASON_DELETE;
+    NotificationNapi::AnsEnumUtil::ReasonCToJS(inType, outType);
+    EXPECT_EQ(outType, static_cast<int32_t>(NotificationNapi::RemoveReason::ADMIN_REMOVE_ALL_REASON_DELETE));
+}
+
+/*
  * @tc.name: AnsConvertTest_009
  * @tc.desc: test DoNotDisturbTypeJSToC function
  * @tc.type: FUNC

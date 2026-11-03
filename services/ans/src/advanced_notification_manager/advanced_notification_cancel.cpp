@@ -646,6 +646,10 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotificationAsAdmin(const std::
         }
     }
 
+    if (result == ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS) {
+        result = RemoveFromSnoozeDelayListAsAdmin(hashCode);
+    }
+
     if (notification != nullptr) {
         CancelWantAgent(notification);
         UpdateRecentNotification(notification, true, removeReason);
@@ -658,6 +662,53 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotificationAsAdmin(const std::
     }
     TriggerRemoveWantAgent(notificationRequest, removeReason, isThirdParty);
     return result;
+}
+
+static std::string WithoutSnoozeTime(const std::string &key)
+{
+    size_t pos = key.rfind('_');
+    if (pos == std::string::npos) {
+        return key;
+    }
+    std::string tail = key.substr(pos + 1);
+    const size_t int32MaxDigits = 10;
+    if (tail.size() <= int32MaxDigits || tail.find_first_not_of("0123456789") != std::string::npos) {
+        return key;
+    }
+    return key.substr(0, pos);
+}
+
+static bool IsSnoozeRecordKeyMatched(const std::string &snoozeKey, const std::string &hashCode)
+{
+    return WithoutSnoozeTime(snoozeKey) == WithoutSnoozeTime(hashCode);
+}
+
+ErrCode AdvancedNotificationService::RemoveFromSnoozeDelayListAsAdmin(const std::string &key)
+{
+    bool removed = false;
+    {
+        std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
+        for (auto it = snoozeDelayTimerList_.begin(); it != snoozeDelayTimerList_.end();) {
+            if ((*it) == nullptr || (*it)->notification == nullptr || (*it)->request == nullptr ||
+                !IsSnoozeRecordKeyMatched((*it)->notification->GetKey(), key)) {
+                ++it;
+                continue;
+            }
+            ErrCode protectedResult = CheckAdminRemoveProtected(*it, (*it)->notification->GetId());
+            if (protectedResult != ERR_OK) {
+                return protectedResult;
+            }
+            DeleteSnoozeNotificationFromDB(*it);
+            it = snoozeDelayTimerList_.erase(it);
+            removed = true;
+        }
+        if (!removed) {
+            return ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS;
+        }
+    }
+    ANS_LOGI("AdminRemove-Snooze-%{public}s", key.c_str());
+    CheckSnoozeTimer();
+    return ERR_OK;
 }
 
 ErrCode AdvancedNotificationService::RemoveAllNotificationsAsAdmin(int32_t userId)

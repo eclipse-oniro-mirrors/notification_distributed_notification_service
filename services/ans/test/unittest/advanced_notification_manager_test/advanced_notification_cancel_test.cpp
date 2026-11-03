@@ -664,5 +664,163 @@ HWTEST_F(AdvancedNotificationCancelTest, RemoveAllNotificationsAsAdmin_CleansTri
     EXPECT_EQ(service->snoozeDelayTimerList_.size(), 0);
 }
 
+/**
+ * @tc.name: RemoveNotificationAsAdmin_SnoozeDelete_00001
+ * @tc.desc: Test RemoveNotificationAsAdmin removes snoozed notification from snooze delay list
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_SnoozeDelete_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    service->notificationList_.clear();
+    service->snoozeDelayTimerList_.clear();
+    sptr<NotificationRequest> snoozeRequest = new NotificationRequest();
+    snoozeRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    snoozeRequest->SetNotificationId(1);
+    snoozeRequest->SetLabel("snoozeLabel");
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    snoozeRequest->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    auto preSnoozeRecord = service->MakeNotificationRecord(snoozeRequest, bundle);
+    std::string hashCode = preSnoozeRecord->notification->GetKey();
+
+    snoozeRequest->SetSnoozeDelayTime(1730000000000);
+    auto snoozeRecord = service->MakeNotificationRecord(snoozeRequest, bundle);
+    service->InsertsnoozeDelayTimer(snoozeRecord);
+    ASSERT_EQ(service->snoozeDelayTimerList_.size(), 1);
+    ASSERT_NE(snoozeRecord->notification->GetKey(), hashCode);
+
+    auto result = service->RemoveNotificationAsAdmin(hashCode);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(service->snoozeDelayTimerList_.size(), 0);
+    EXPECT_EQ(service->notificationList_.size(), 0);
+}
+
+/**
+ * @tc.name: RemoveNotificationAsAdmin_SnoozeUserDeletableOnly_00001
+ * @tc.desc: Test RemoveNotificationAsAdmin keeps snoozed userDeletableOnly notification in snooze delay list
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_SnoozeUserDeletableOnly_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    service->notificationList_.clear();
+    service->snoozeDelayTimerList_.clear();
+    sptr<NotificationRequest> snoozeRequest = new NotificationRequest();
+    snoozeRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    snoozeRequest->SetNotificationId(1);
+    snoozeRequest->SetLabel("snoozeLabel");
+    snoozeRequest->SetUserDeletableOnly(true);
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    snoozeRequest->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+    auto preSnoozeRecord = service->MakeNotificationRecord(snoozeRequest, bundle);
+    std::string hashCode = preSnoozeRecord->notification->GetKey();
+
+    snoozeRequest->SetSnoozeDelayTime(1730000000000);
+    auto snoozeRecord = service->MakeNotificationRecord(snoozeRequest, bundle);
+    service->InsertsnoozeDelayTimer(snoozeRecord);
+    ASSERT_EQ(service->snoozeDelayTimerList_.size(), 1);
+
+    auto result = service->RemoveNotificationAsAdmin(hashCode);
+    EXPECT_EQ(result, ERR_ANS_INNER_ADMIN_NOTIFICATION_USER_DELETABLE_ONLY);
+    EXPECT_EQ(service->snoozeDelayTimerList_.size(), 1);
+}
+
+/**
+ * @tc.name: RemoveNotificationAsAdmin_SnoozeKeyPrefixCollision_00001
+ * @tc.desc: Test RemoveNotificationAsAdmin does not delete prefix-related notification's snoozed record
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_SnoozeKeyPrefixCollision_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    service->notificationList_.clear();
+    service->snoozeDelayTimerList_.clear();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    sptr<NotificationRequest> requestA = new NotificationRequest();
+    requestA->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    requestA->SetNotificationId(5);
+    requestA->SetLabel("meeting");
+    auto contentA = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    requestA->SetContent(contentA);
+    auto preSnoozeRecordA = service->MakeNotificationRecord(requestA, bundle);
+    std::string hashCodeA = preSnoozeRecordA->notification->GetKey();
+    requestA->SetSnoozeDelayTime(1730000000000);
+    auto snoozeRecordA = service->MakeNotificationRecord(requestA, bundle);
+    service->InsertsnoozeDelayTimer(snoozeRecordA);
+    ASSERT_EQ(service->snoozeDelayTimerList_.size(), 1);
+
+    sptr<NotificationRequest> requestB = new NotificationRequest();
+    requestB->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    requestB->SetNotificationId(3);
+    requestB->SetLabel("meeting_5");
+    auto contentB = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    requestB->SetContent(contentB);
+    auto preSnoozeRecordB = service->MakeNotificationRecord(requestB, bundle);
+    std::string hashCodeB = preSnoozeRecordB->notification->GetKey();
+    requestB->SetSnoozeDelayTime(1730003600000);
+    auto snoozeRecordB = service->MakeNotificationRecord(requestB, bundle);
+    service->InsertsnoozeDelayTimer(snoozeRecordB);
+    ASSERT_EQ(service->snoozeDelayTimerList_.size(), 2);
+    ASSERT_TRUE(hashCodeB.find(hashCodeA + "_") == 0);
+
+    auto result = service->RemoveNotificationAsAdmin(hashCodeB);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(service->snoozeDelayTimerList_.size(), 1);
+    EXPECT_EQ(service->snoozeDelayTimerList_.front(), snoozeRecordA);
+}
+
+/**
+ * @tc.name: RemoveNotificationAsAdmin_SnoozeKeyWithPrevTime_00001
+ * @tc.desc: Test RemoveNotificationAsAdmin removes snoozed record by key carrying previous snooze time
+ * @tc.type: FUNC
+ * @tc.require: issue#4424
+ */
+HWTEST_F(AdvancedNotificationCancelTest, RemoveNotificationAsAdmin_SnoozeKeyWithPrevTime_00001,
+    Function | SmallTest | Level1)
+{
+    NotificationClassificationMgr::GetInstance().Clear();
+    auto service = GetService();
+    service->notificationList_.clear();
+    service->snoozeDelayTimerList_.clear();
+    sptr<NotificationRequest> snoozeRequest = new NotificationRequest();
+    snoozeRequest->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    snoozeRequest->SetNotificationId(1);
+    snoozeRequest->SetLabel("snoozeLabel");
+    auto content = std::make_shared<NotificationContent>(
+        std::make_shared<NotificationNormalContent>());
+    snoozeRequest->SetContent(content);
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 100);
+
+    snoozeRequest->SetSnoozeDelayTime(1730000000000);
+    auto rePublishedRecord = service->MakeNotificationRecord(snoozeRequest, bundle);
+    std::string hashCode = rePublishedRecord->notification->GetKey();
+
+    snoozeRequest->SetSnoozeDelayTime(1730003600000);
+    auto snoozeRecord = service->MakeNotificationRecord(snoozeRequest, bundle);
+    service->InsertsnoozeDelayTimer(snoozeRecord);
+    ASSERT_EQ(service->snoozeDelayTimerList_.size(), 1);
+    ASSERT_NE(snoozeRecord->notification->GetKey(), hashCode);
+
+    auto result = service->RemoveNotificationAsAdmin(hashCode);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(service->snoozeDelayTimerList_.size(), 0);
+}
+
 }  // namespace Notification
 }  // namespace OHOS
