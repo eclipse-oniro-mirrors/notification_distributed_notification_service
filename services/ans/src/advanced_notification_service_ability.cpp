@@ -98,6 +98,12 @@ bool AdvancedNotificationServiceAbility::SubscribeCommonEvent()
     if (isDatashaReready_) {
         return false;
     }
+    if (subscriber_ != nullptr) {
+        // Already subscribed (e.g. CES re-online while datashare not ready):
+        // the existing subscription is kept alive by the CES client SDK
+        // self-healing, do not subscribe again to avoid duplicate delivery.
+        return true;
+    }
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent("usual.event.DATA_SHARE_READY");
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
@@ -107,7 +113,11 @@ bool AdvancedNotificationServiceAbility::SubscribeCommonEvent()
         ANS_LOGD("subscriber_ is nullptr");
         return false;
     }
-    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+    if (!EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_)) {
+        // Reset so that the next OnAddSystemAbility(CES) can retry.
+        subscriber_ = nullptr;
+        return false;
+    }
 
     return true;
 }

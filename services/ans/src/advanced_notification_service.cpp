@@ -523,7 +523,8 @@ AnsStatus AdvancedNotificationService::PrepareNotificationInfo(
             request->GetOwnerUid());
     } else {
         if ((!sourceBundleName.empty() &&
-            NotificationPreferences::GetInstance()->IsAgentRelationship(GetClientBundleName(), sourceBundleName) &&
+            NotificationPreferences::GetInstance()->IsAgentRelationship(request->GetCreatorBundleName(),
+                sourceBundleName) &&
             !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_AGENT_CONTROLLER))) {
             request->SetCreatorUid(request->GetOwnerUid());
             request->SetCreatorBundleName(request->GetOwnerBundleName());

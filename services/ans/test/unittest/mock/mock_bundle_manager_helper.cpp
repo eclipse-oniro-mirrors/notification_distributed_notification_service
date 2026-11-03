@@ -37,6 +37,24 @@ int32_t g_bundleHelperResult = 0;
 std::string g_bundleIconData;
 std::vector<NotificationBundleOption> g_installedBundles;
 bool g_isAncoApp = false;
+int32_t g_getBundleNameByUidCount = 0;
+int32_t g_getAppIndexByUidCount = 0;
+
+void MockBundleManager::MockBundleQueryCountReset()
+{
+    g_getBundleNameByUidCount = 0;
+    g_getAppIndexByUidCount = 0;
+}
+
+int32_t MockBundleManager::GetBundleNameByUidCallCount()
+{
+    return g_getBundleNameByUidCount;
+}
+
+int32_t MockBundleManager::GetAppIndexByUidCallCount()
+{
+    return g_getAppIndexByUidCount;
+}
 
 void MockBundleManager::MockBundleInterfaceResult(const int32_t result)
 {
@@ -91,6 +109,7 @@ void BundleManagerHelper::OnRemoteDied(const wptr<IRemoteObject> &object)
 
 std::string BundleManagerHelper::GetBundleNameByUid(int uid)
 {
+    g_getBundleNameByUidCount++;
     if (g_isNonBundleName || uid == NON_BUNDLE_NAME_UID) {
         return "";
     }
@@ -174,6 +193,7 @@ bool BundleManagerHelper::GetBundleInfos(
 
 int32_t BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
 {
+    g_getAppIndexByUidCount++;
     if (uid == 100 * 200000 + 1000 + 0) return 0;
     if (uid == 100 * 200000 + 1000 + 1) return 1;
     if (uid == 100 * 200000 + 1000 + 2) return 2;

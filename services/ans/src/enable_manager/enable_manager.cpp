@@ -37,7 +37,7 @@
 
 namespace OHOS {
 namespace Notification {
-constexpr int32_t ANS_USERID = 5523;
+constexpr int32_t ANS_USERID = 6061;
 const static std::string BUNDLE_NAME_ZYT = "com.zhuoyi.appstore.lite";
 const static std::string BUNDLE_NAME_ABROAD = "com.easy.abroad";
 const static std::string INSTALL_SOURCE_EASYABROAD = "com.easy.abroad";
