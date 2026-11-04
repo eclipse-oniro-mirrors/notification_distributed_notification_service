@@ -19,7 +19,6 @@
 namespace OHOS {
 namespace Notification {
 void MockPublishCommonEventResult(bool result);
-void MockSubscribeCommonEventResult(bool result);
 } // Notification
 } // OHOS
 

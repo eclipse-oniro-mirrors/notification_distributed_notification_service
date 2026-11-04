@@ -85,7 +85,6 @@ ohos_shared_library("ans_innerkits") {
     "${core_path}/common/src/notification_want_params_helper.cpp",
     "${core_path}/src/ans_image_util.cpp",
     "${core_path}/src/ans_notification.cpp",
-    "${core_path}/src/ans_notification_resubscribe.cpp",
     "${core_path}/src/dialog_status_data.cpp",
     "${core_path}/src/hitrace_util.cpp",
     "${core_path}/src/listener/ans_subscriber_listener.cpp",

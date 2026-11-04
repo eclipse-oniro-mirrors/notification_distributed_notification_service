@@ -18,7 +18,6 @@
 
 #include <list>
 #include <memory>
-#include <vector>
 
 #include "ans_dialog_host_client.h"
 #include "ans_subscriber_listener.h"
@@ -29,7 +28,6 @@
 #include "notification_extension_subscription_info.h"
 #include "notification_local_live_view_subscriber.h"
 #include "notification_parameters.h"
-#include "notification_subscribe_info.h"
 #include "notification_subscriber.h"
 #include "notification_statistics.h"
 #include "want_params.h"
@@ -1610,12 +1608,6 @@ public:
     void OnServiceDied();
 
     /**
-     * @brief Ans service has come back online: re-register all subscriptions still
-     * alive in this process (design ADR-7, called by AnsManagerDeathRecipient).
-     */
-    void ReSubscribeNotifications();
-
-    /**
      * @brief Update Notification Timer by uid.
      *
      * @param uid uid.
@@ -2052,25 +2044,8 @@ public:
     static std::shared_ptr<AnsNotification> GetInstance();
 
 private:
-    // Subscription context kept for auto re-subscription after the ANS service restarts
-    // (design ADR-7): the SDK hosts two subscription paths — the shared_ptr style via
-    // SubscriberListener (subscribers_) and the reference style via
-    // NotificationSubscriber::SubscriberImpl (NAPI/ArkTS chain); weak references avoid
-    // extending the lifetime of any subscriber object.
-    struct SubscriptionRecord {
-        sptr<NotificationSubscribeInfo> subscribeInfo;
-        bool isSelf = false;
-        bool isV26 = false;
-        uint32_t subscribedFlags = 0;
-    };
-    void AddSubscriptionRecord(const sptr<IAnsSubscriber> &stub,
-        const sptr<NotificationSubscribeInfo> &subscribeInfo, bool isSelf, bool isV26, uint32_t subscribedFlags);
-    void RemoveSubscriptionRecord(const sptr<IAnsSubscriber> &stub);
-    void RemoveSubscriptionRecordLocked(const sptr<IAnsSubscriber> &stub);
-
     std::mutex subscriberMutex_;
     std::map<std::shared_ptr<NotificationSubscriber>, sptr<SubscriberListener>> subscribers_;
-    std::vector<std::pair<wptr<IAnsSubscriber>, SubscriptionRecord>> subscriptionRecords_;
     std::mutex badgeQueryMutex_;
     std::map<std::shared_ptr<IBadgeQueryCallback>, sptr<BadgeQueryListener>> badgeQueryCallbacks_;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED

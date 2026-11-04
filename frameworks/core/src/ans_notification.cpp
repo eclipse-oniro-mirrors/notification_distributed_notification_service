@@ -655,7 +655,6 @@ InnerErrorCode AnsNotification::SubscribeNotificationV26(const std::shared_ptr<N
         subscriber->SetPictureOption(subscribeInfo->GetPictureOption());
     }
     DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
-    AddSubscriptionRecord(listener, subscribeInfo, false, true, subscriber->GetSubscribedFlags());
 
     if (subscribeInfo == nullptr) {
         return static_cast<InnerErrorCode>(proxy->SubscribeNotification(listener, subscriber->GetSubscribedFlags()));
@@ -678,7 +677,6 @@ InnerErrorCode AnsNotification::SubscribeNotification(const NotificationSubscrib
         ANS_LOGE("null subscriberSptr");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
-    AddSubscriptionRecord(subscriberSptr, nullptr, false, false, subscriber.GetSubscribedFlags());
     return static_cast<InnerErrorCode>(proxy->Subscribe(subscriberSptr, subscriber.GetSubscribedFlags()));
 }
 
@@ -696,7 +694,6 @@ InnerErrorCode AnsNotification::SubscribeNotificationSelf(const NotificationSubs
         ANS_LOGE("null subscriberSptr");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
-    AddSubscriptionRecord(subscriberSptr, nullptr, true, false, subscriber.GetSubscribedFlags());
     return static_cast<InnerErrorCode>(proxy->SubscribeSelf(subscriberSptr, subscriber.GetSubscribedFlags()));
 }
 
@@ -745,7 +742,6 @@ InnerErrorCode AnsNotification::SubscribeNotification(
     if (subscribeInfo.GetPictureOption() != nullptr) {
         subscriberSptr->subscriber_.SetPictureOption(subscribeInfo.GetPictureOption());
     }
-    AddSubscriptionRecord(subscriberSptr, sptrInfo, false, false, subscriber.GetSubscribedFlags());
     return static_cast<InnerErrorCode>(proxy->Subscribe(subscriberSptr, sptrInfo, subscriber.GetSubscribedFlags()));
 }
 
@@ -763,11 +759,7 @@ InnerErrorCode AnsNotification::UnSubscribeNotification(NotificationSubscriber &
         ANS_LOGE("null subscriberSptr");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
-    ErrCode unsubscribeResult = proxy->Unsubscribe(subscriberSptr);
-    if (unsubscribeResult == ERR_OK) {
-        RemoveSubscriptionRecord(subscriberSptr);
-    }
-    return static_cast<InnerErrorCode>(unsubscribeResult);
+    return static_cast<InnerErrorCode>(proxy->Unsubscribe(subscriberSptr));
 }
 
 InnerErrorCode AnsNotification::UnSubscribeNotification(
@@ -796,11 +788,7 @@ InnerErrorCode AnsNotification::UnSubscribeNotification(
         ANS_LOGE("null subscriberSptr");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
-    ErrCode unsubscribeResult = proxy->Unsubscribe(subscriberSptr, sptrInfo);
-    if (unsubscribeResult == ERR_OK) {
-        RemoveSubscriptionRecord(subscriberSptr);
-    }
-    return static_cast<InnerErrorCode>(unsubscribeResult);
+    return static_cast<InnerErrorCode>(proxy->Unsubscribe(subscriberSptr, sptrInfo));
 }
 
 InnerErrorCode AnsNotification::SubscribeNotification(const std::shared_ptr<NotificationSubscriber> &subscriber)
@@ -830,7 +818,6 @@ InnerErrorCode AnsNotification::SubscribeNotificationSelf(const std::shared_ptr<
         return ERR_ANS_INNER_NO_MEMORY;
     }
     DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
-    AddSubscriptionRecord(listener, nullptr, true, false, subscriber->GetSubscribedFlags());
     return static_cast<InnerErrorCode>(proxy->SubscribeSelf(listener, subscriber->GetSubscribedFlags()));
 }
 
@@ -862,7 +849,6 @@ InnerErrorCode AnsNotification::SubscribeNotification(const std::shared_ptr<Noti
         subscriber->SetPictureOption(subscribeInfo->GetPictureOption());
     }
     DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
-    AddSubscriptionRecord(listener, subscribeInfo, false, false, subscriber->GetSubscribedFlags());
 
     if (subscribeInfo == nullptr) {
         return static_cast<InnerErrorCode>(proxy->Subscribe(listener, subscriber->GetSubscribedFlags()));
@@ -906,10 +892,6 @@ InnerErrorCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<No
         }
         if (ret == ERR_OK) {
             subscribers_.erase(item);
-            // caller already holds subscriberMutex_; keep the subscription record
-            // vector consistent with the registry on successful unsubscribe
-            sptr<IAnsSubscriber> listenerBase = listener;
-            RemoveSubscriptionRecordLocked(listenerBase);
         }
         return ret;
     }
@@ -3160,7 +3142,6 @@ void AnsNotification::OnServiceDied()
         item.first->OnDied();
     }
 }
-
 
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
 InnerErrorCode AnsNotification::RegisterSwingCallback(const std::function<void(bool, int)> swingCbFunc)

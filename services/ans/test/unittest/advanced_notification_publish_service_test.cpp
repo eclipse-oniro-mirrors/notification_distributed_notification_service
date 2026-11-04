@@ -1143,7 +1143,7 @@ HWTEST_F(AnsPublishServiceTest, SetNotificationsEnabledForSpecialBundle_00003, F
 {
     std::string deviceId = "";
     bool enabled = true;
-    int32_t ansUid = NotificationConstant::ANS_UID;
+    int32_t ansUid = 5523;
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption(TEST_DEFUALT_BUNDLE, NON_SYSTEM_APP_UID);
     MockIsVerfyPermisson(false);
     IPCSkeleton::SetCallingUid(12345);

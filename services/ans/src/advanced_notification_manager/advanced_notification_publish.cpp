@@ -112,10 +112,7 @@ bool AdvancedNotificationService::GrantSoundPermission(const sptr<NotificationRe
     }
     auto uid = bundleOption->GetUid();
     auto bundleName = bundleOption->GetBundleName();
-    // Reuse the appIndex resolved in the publish main chain (PrepareNotificationRequest
-    // fills request->SetAppIndex with the same owner uid key); avoids a duplicate
-    // cross-process BMS query per publish (design ADR-4 D2, AC-2.4).
-    auto appIndex = request->GetAppIndex();
+    auto appIndex = BundleManagerHelper::GetInstance()->GetAppIndexByUid(uid);
     int32_t userId = -1;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
         return false;

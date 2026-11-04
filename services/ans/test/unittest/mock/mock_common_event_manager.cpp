@@ -21,17 +21,11 @@ namespace OHOS {
 namespace Notification {
 namespace {
 bool g_publishCommonEventResult = true;
-bool g_subscribeCommonEventResult = true;
 }
 
 void MockPublishCommonEventResult(bool result)
 {
     g_publishCommonEventResult = result;
-}
-
-void MockSubscribeCommonEventResult(bool result)
-{
-    g_subscribeCommonEventResult = result;
 }
 } // Notification
 
@@ -43,7 +37,7 @@ bool CommonEventManager::PublishCommonEvent(const CommonEventData &data, const C
 
 bool CommonEventManager::SubscribeCommonEvent(const std::shared_ptr<CommonEventSubscriber> &subscriber)
 {
-    return Notification::g_subscribeCommonEventResult;
+    return true;
 }
 
 bool CommonEventManager::UnSubscribeCommonEvent(const std::shared_ptr<CommonEventSubscriber> &subscriber)

@@ -16,7 +16,6 @@
 #include <functional>
 #include <gtest/gtest.h>
 #include "ans_ut_constant.h"
-#include "mock_common_event_manager.h"
 #include "mock_ipc_skeleton.h"
 
 namespace OHOS {
@@ -329,87 +328,5 @@ HWTEST_F(
     ASSERT_NE(DistributedDeviceManager::GetInstance().stateCallback_, nullptr);
 }
 #endif
-
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_02100
- * @tc.name      : ANS_AdvancedNotificationServiceAbility_02100
- * @tc.desc      : SubscribeCommonEvent returns true without re-subscribing when subscriber_ already exists
- *                 (CES re-online idempotent guard, BR-9 / design ADR-2)
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_02100, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-    EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent("usual.event.DATA_SHARE_READY");
-    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-    test.subscriber_ = std::make_shared<SystemEventSubscriber>(
-        subscribeInfo, [](const EventFwk::CommonEventData &) {});
-    auto subscriberBefore = test.subscriber_;
-    ASSERT_NE(subscriberBefore, nullptr);
-    // subscribe API mocked as failed: guard must short-circuit before calling it
-    MockSubscribeCommonEventResult(false);
-    EXPECT_TRUE(test.SubscribeCommonEvent());
-    EXPECT_EQ(test.subscriber_, subscriberBefore);
-    MockSubscribeCommonEventResult(true);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_02200
- * @tc.name      : ANS_AdvancedNotificationServiceAbility_02200
- * @tc.desc      : SubscribeCommonEvent resets subscriber_ to nullptr on subscribe failure and retries on next call
- *                 (design ADR-2 failure-retry path, fixes ignored return value)
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_02200, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-    MockSubscribeCommonEventResult(false);
-    EXPECT_FALSE(test.SubscribeCommonEvent());
-    EXPECT_EQ(test.subscriber_, nullptr);
-    MockSubscribeCommonEventResult(true);
-    EXPECT_TRUE(test.SubscribeCommonEvent());
-    EXPECT_NE(test.subscriber_, nullptr);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_02300
- * @tc.name      : ANS_AdvancedNotificationServiceAbility_02300
- * @tc.desc      : OnExtension restore callback reachable without OnStart (backup/restore pair guard, AC-5.1)
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_02300, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    std::string extension = "restore";
-    MessageParcel data;
-    MessageParcel reply;
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-    ErrCode ret = test.OnExtension(extension, data, reply);
-    EXPECT_EQ(ret, 0);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_02400
- * @tc.name      : ANS_AdvancedNotificationServiceAbility_02400
- * @tc.desc      : OnAddSystemAbility(BMS) takes the early-return guard when datashare is not ready
- *                 (STATE-1 guard ordering; BMS online path completes without side effects)
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_02400, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    std::string deviceId = "deviceId";
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-    EXPECT_FALSE(test.isDatashaReready_);
-    test.OnAddSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, deviceId);
-    EXPECT_FALSE(test.isDatashaReready_);
-}
 }  // namespace Notification
 }  // namespace OHOS

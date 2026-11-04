@@ -28,7 +28,6 @@
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
 #include "ans_log_wrapper.h"
-#include "mock_bundle_manager_helper.h"
 #include "ans_notification.h"
 #include "ans_ut_constant.h"
 #include "common_event_manager.h"
@@ -3348,95 +3347,6 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishNotificationBySa_00013, Functio
     EXPECT_TRUE(result.Ok());
     EXPECT_TRUE(req->GetSound().empty());
     SleepForFC();
-}
-
-/**
- * @tc.number    : ANS_Publish_BmsQueryCount_0100
- * @tc.name      : ANSPublishBmsQueryCount0100
- * @tc.desc      : Standard publish issues exactly one GetBundleNameByUid (main chain) and
- *                 one GetAppIndexByUid (main chain) BMS query; the agent-relationship check
- *                 reuses request->GetCreatorBundleName() (design ADR-4 D1, AC-2.4).
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_BmsQueryCount_0100,
-    Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), true), (int)ERR_OK);
-    sptr<NotificationRequest> req = new NotificationRequest();
-    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    req->SetLabel("req's label");
-    req->SetCreatorUid(1);
-    // non-empty source bundle name drives the agent-relationship check branch (D1):
-    // the branch must evaluate request->GetCreatorBundleName() without a new BMS query
-    req->SetBundleOption(std::make_shared<NotificationBundleOption>(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID));
-    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
-    normalContent->SetText("normalContent's text");
-    normalContent->SetTitle("normalContent's title");
-    req->SetContent(std::make_shared<NotificationContent>(normalContent));
-    MockBundleManager::MockBundleQueryCountReset();
-    ASSERT_EQ(advancedNotificationService_->Publish("publish's label", req), (int)ERR_OK);
-    SleepForFC();
-    EXPECT_EQ(MockBundleManager::GetBundleNameByUidCallCount(), 1);
-    EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 1);
-}
-
-/**
- * @tc.number    : ANS_Publish_BmsQueryCount_0200
- * @tc.name      : ANSPublishBmsQueryCount0200
- * @tc.desc      : Publish with a custom uri sound still keeps GetAppIndexByUid at one query:
- *                 GrantSoundPermission reuses request->GetAppIndex() (design ADR-4 D2, AC-2.4).
- */
-HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_BmsQueryCount_0200,
-    Function | SmallTest | Level1)
-{
-    TestAddSlot(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
-    MockIsSystemApp(true);
-    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
-        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), true), (int)ERR_OK);
-    sptr<NotificationRequest> req = new NotificationRequest();
-    req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
-    req->SetLabel("req's label");
-    req->SetCreatorUid(1);
-    req->SetSound("uri::file://notification_service_publish_test/data/storage/el1/base/files/testSound.mp3");
-    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
-    normalContent->SetText("normalContent's text");
-    normalContent->SetTitle("normalContent's title");
-    req->SetContent(std::make_shared<NotificationContent>(normalContent));
-    MockBundleManager::MockBundleQueryCountReset();
-    // publish result is not asserted: GrantSoundPermission may fail at URI authorization
-    // in the test environment; reaching the appIndex consumption point is what the
-    // count guard asserts
-    advancedNotificationService_->Publish("publish's label", req);
-    SleepForFC();
-    EXPECT_EQ(MockBundleManager::GetBundleNameByUidCallCount(), 1);
-    EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 1);
-}
-/**
- * @tc.number    : GrantSoundPermission_ReuseAppIndex_00001
- * @tc.name      : GrantSoundPermission_ReuseAppIndex_00001
- * @tc.desc      : GrantSoundPermission reuses the appIndex already resolved in the publish
- *                 main chain (request->GetAppIndex()) instead of issuing another
- *                 GetAppIndexByUid BMS query (design ADR-4 D2, AC-2.4).
- * @tc.type      : FUNC
- * @tc.require: I00001
- */
-HWTEST_F(AdvancedNotificationServiceTest, GrantSoundPermission_ReuseAppIndex_00001, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request = new NotificationRequest(1);
-    int32_t uid = 2001001;
-    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("testBundle", uid);
-    ASSERT_NE(bundleOption, nullptr);
-    request->SetSound("uri::file://notification_service_publish_test/data/storage/el1/base/files/testSound.mp3");
-    MockBundleManager::MockBundleQueryCountReset();
-    // GrantSoundPermission may fail later at URI authorization in the test environment;
-    // the guard only asserts that reaching the appIndex consumption point issues no
-    // additional GetAppIndexByUid query.
-    advancedNotificationService_->GrantSoundPermission(request, bundleOption);
-    EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 0);
 }
 }  // namespace Notification
 }  // namespace OHOS
