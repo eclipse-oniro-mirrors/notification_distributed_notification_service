@@ -21,7 +21,9 @@
 #include "distributed_operation_service.h"
 #undef private
 #undef protected
+#include "ans_inner_errors.h"
 #include "ans_service_errors.h"
+#include "notification_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -35,6 +37,21 @@ public:
 };
 
 #ifdef DISTRIBUTED_FEATURE_MASTER
+/**
+ * @tc.name: TriggerJumpApplication_0100
+ * @tc.desc: Test TriggerJumpApplication with empty hashCode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedOperationServiceTest, TriggerJumpApplication_0100, Function | SmallTest | Level1)
+{
+    std::string hashCode;
+    int32_t deviceType = DistributedHardware::DmDeviceType::DEVICE_TYPE_PAD;
+    DistributedOperationService::GetInstance().TriggerJumpApplication(hashCode, deviceType);
+    sptr<NotificationRequest> notificationRequest = nullptr;
+    auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
+    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(notificationRequest, nullptr);
+}
 #else
 /**
  * @tc.name: OnOperationResponse_0100
