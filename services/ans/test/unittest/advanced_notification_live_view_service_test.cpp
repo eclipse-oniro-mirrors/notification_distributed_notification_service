@@ -2765,6 +2765,36 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewDecryptFailureCleanupTest001, Function 
 }
 
 /**
+ * @tc.name: LiveViewExpiredPlainKeyTest001
+ * @tc.desc: Test an expired legacy plain-key row reports its base key (AC-2.1)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, LiveViewExpiredPlainKeyTest001, Function | SmallTest | Level1)
+{
+    int32_t userId = TEST_CREATOR_UID;
+    sptr<NotificationRequest> request = BuildRecoverableLiveViewRequest(userId, "expired_plain_row");
+    ASSERT_NE(request, nullptr);
+    nlohmann::json jsonObject;
+    ASSERT_TRUE(NotificationJsonConverter::ConvertToJson(request, jsonObject));
+    jsonObject["wantAgent"] = "";
+    auto epoch = std::chrono::system_clock::now().time_since_epoch();
+    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    jsonObject["updateDeadLine"] = curTime - 1000;
+    jsonObject["finishDeadLine"] = curTime - 1000;
+    ASSERT_EQ(NotificationPreferences::GetInstance()->SetKvToDb(
+        request->GetKey(), jsonObject.dump(), userId), ERR_OK);
+
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    std::vector<std::string> removedBaseKeys;
+    (void)advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId, &removedBaseKeys);
+    ASSERT_EQ(requestsdb.size(), 0);
+    ASSERT_EQ(removedBaseKeys.size(), 1);
+    ASSERT_EQ(removedBaseKeys[0], request->GetBaseKey(""));
+    ASSERT_FALSE(LiveViewKvExists(request->GetKey(), userId));
+    ASSERT_FALSE(LiveViewKvExists(request->GetSecureKey(), userId));
+}
+
+/**
  * @tc.name: LiveViewExpiryMatrixTest001
  * @tc.desc: Test the three-deadline expiry predicate branches (AC-2.1/AC-2.3)
  * @tc.type: FUNC

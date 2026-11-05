@@ -143,15 +143,8 @@ void DeleteLiveViewRecordFromDb(const std::string &storageKey, const int32_t use
     };
     for (const auto &key : keysToDelete) {
         int32_t ret = NotificationPreferences::GetInstance()->DeleteKvFromDb(key, userId);
-        if (ret == ERR_OK) {
-            ANS_LOGD("Deleted live view key %{public}s for user %{public}d.", key.c_str(), userId);
-            continue;
-        }
-        if (key == storageKey) {
-            ANS_LOGE("Delete live view record failed, key %{public}s, userId %{public}d, ret %{public}d.",
-                key.c_str(), userId, ret);
-        } else {
-            ANS_LOGW("Delete live view related key failed, key %{public}s, userId %{public}d, ret %{public}d.",
+        if (ret != ERR_OK) {
+            ANS_LOGE("Delete live view key failed, key %{public}s, userId %{public}d, ret %{public}d.",
                 key.c_str(), userId, ret);
         }
     }
