@@ -1,0 +1,7 @@
+# 构建产物不入库（首次使用由 ensure_bin.sh 从上游源码构建，见 BUILD.md）
+*.exe
+*.dll
+*.cer
+*.cat
+spd_dump.exe
+build/

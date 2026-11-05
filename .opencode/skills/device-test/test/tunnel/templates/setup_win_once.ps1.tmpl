@@ -1,0 +1,82 @@
+# ============================================================================
+# setup_win_once.ps1 - RK3568 测试闭环 Windows 侧一次性安装（同事版，已个性化渲染）
+# 渲染占位符: __SERVER_IP__ / __SERVER_PORT__ / __SERVER_USER__ / __PUBKEY__
+# 需管理员 PowerShell 运行
+# ============================================================================
+$ErrorActionPreference = 'Stop'
+
+$SERVER_IP   = '__SERVER_IP__'
+$SERVER_PORT = '__SERVER_PORT__'
+$SERVER_USER = '__SERVER_USER__'
+$PUBKEY      = '__PUBKEY__'
+
+# ---------- [1/4] OpenSSH Server ----------
+Write-Host '[1/4] checking OpenSSH Server ...'
+$cap = Get-WindowsCapability -Online | Where-Object { $_.Name -like 'OpenSSH.Server*' }
+if ($cap.State -ne 'Installed') {
+    Write-Host '      installing OpenSSH.Server (1-2 min) ...'
+    Add-WindowsCapability -Online -Name $cap.Name | Out-Null
+}
+Set-Service sshd -StartupType Automatic
+Start-Service sshd
+Write-Host '      OpenSSH Server running' -ForegroundColor Green
+
+# ---------- [2/4] 安装服务器公钥 ----------
+Write-Host '[2/4] installing server public key ...'
+$sshDir = Join-Path $env:USERPROFILE '.ssh'
+if (!(Test-Path $sshDir)) { New-Item -ItemType Directory -Path $sshDir | Out-Null }
+$ak = Join-Path $sshDir 'authorized_keys'
+if (!(Test-Path $ak)) { New-Item -ItemType File -Path $ak | Out-Null }
+if (!(Select-String -Path $ak -SimpleMatch $PUBKEY -Quiet)) { Add-Content -Path $ak -Value $PUBKEY }
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($isAdmin) {
+    $adminAk = 'C:\ProgramData\ssh\administrators_authorized_keys'
+    if (!(Test-Path $adminAk)) { New-Item -ItemType File -Path $adminAk | Out-Null }
+    if (!(Select-String -Path $adminAk -SimpleMatch $PUBKEY -Quiet)) { Add-Content -Path $adminAk -Value $PUBKEY }
+    icacls $adminAk /inheritance:r /grant 'Administrators:F' /grant 'SYSTEM:F' | Out-Null
+}
+if (!(Test-Path (Join-Path $sshDir 'id_ed25519'))) {
+    ssh-keygen -t ed25519 -f (Join-Path $sshDir 'id_ed25519') -N '""' -q 2>$null
+}
+Write-Host '      key installed' -ForegroundColor Green
+
+# ---------- [2.5/4] 把 Windows 公钥装到服务器（此后隧道永久免密） ----------
+Write-Host '[2.5/4] installing YOUR public key to server (enter SERVER password ONE LAST time) ...'
+$winPub = Get-Content (Join-Path $sshDir 'id_ed25519.pub') -Raw
+$winPub = $winPub.Trim()
+cmd /c "echo $winPub | ssh -p $SERVER_PORT -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP `"mkdir -p ~/.ssh && chmod 700 ~/.ssh && grep -qF '$winPub' ~/.ssh/authorized_keys 2>/dev/null || echo '$winPub' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys`""
+if ($LASTEXITCODE -eq 0) {
+    Write-Host '      server authorized_keys updated - tunnel is now PASSWORDLESS' -ForegroundColor Green
+} else {
+    Write-Host '      WARNING: failed to install key to server, tunnel will still ask password' -ForegroundColor Yellow
+}
+
+# ---------- [3/4] 隧道脚本（桌面 + 开机自启） ----------
+Write-Host '[3/4] creating tunnel script ...'
+$bat = @"
+@echo off
+title board-tunnel
+:loop
+echo reverse tunnel to $SERVER_IP running ... do NOT close this window
+ssh -p $SERVER_PORT -i "%USERPROFILE%\.ssh\id_ed25519" -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ExitOnForwardFailure=yes -R 12222:localhost:22 $SERVER_USER@$SERVER_IP "echo TUNNEL_UP %USERNAME% >> /tmp/opencode/tunnel_status.txt; sleep 999999"
+echo tunnel dropped, retrying in 5s ...
+timeout /t 5 >nul
+goto loop
+"@
+$batPath = Join-Path ([Environment]::GetFolderPath('Desktop')) 'board_tunnel.bat'
+Set-Content -Path $batPath -Value $bat -Encoding ASCII
+
+$startupLnk = Join-Path ([Environment]::GetFolderPath('Startup')) 'rk3568_tunnel.lnk'
+$ws = New-Object -ComObject WScript.Shell
+$sc = $ws.CreateShortcut($startupLnk)
+$sc.TargetPath = $batPath
+$sc.WindowStyle = 7
+$sc.Save()
+Write-Host "      tunnel script: $batPath (also in Startup)" -ForegroundColor Green
+
+# ---------- [4/4] 启动隧道 ----------
+Write-Host '[4/4] starting tunnel (passwordless from now on) ...'
+Start-Process -FilePath $batPath -WindowStyle Minimized
+Write-Host ''
+Write-Host 'DONE. Keep the minimized tunnel window open.' -ForegroundColor Cyan
+Write-Host 'Back on the server, the init wizard will continue automatically.'

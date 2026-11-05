@@ -1,0 +1,4 @@
+# 构建产物与二进制不入库：由 bin/ensure_bin.sh 首次使用时构建（见 bin/BUILD.md）
+bin/build/
+bin/*.exe
+bin/*.dll
