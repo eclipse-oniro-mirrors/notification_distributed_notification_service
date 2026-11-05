@@ -35,6 +35,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
+#include <set>
 #include "notification_analytics_util.h"
 #include "aes_gcm_helper.h"
 
@@ -137,17 +138,9 @@ void DeleteLiveViewRecordFromDb(const std::string &storageKey, const int32_t use
     }
     const std::string plainKey = ToPlainLiveViewKey(storageKey);
     const std::string secureKey = ToSecureLiveViewKey(storageKey);
-    std::vector<std::string> keysToDelete = {storageKey};
-    if (plainKey != storageKey) {
-        keysToDelete.emplace_back(plainKey);
-    }
-    if (secureKey != storageKey && secureKey != plainKey) {
-        keysToDelete.emplace_back(secureKey);
-    }
-    const std::string lockScreenPictureKey = LOCK_SCREEN_PICTURE_TAG + plainKey;
-    if (lockScreenPictureKey != storageKey && lockScreenPictureKey != plainKey) {
-        keysToDelete.emplace_back(lockScreenPictureKey);
-    }
+    const std::set<std::string> keysToDelete = {
+        storageKey, plainKey, secureKey, LOCK_SCREEN_PICTURE_TAG + plainKey
+    };
     for (const auto &key : keysToDelete) {
         int32_t ret = NotificationPreferences::GetInstance()->DeleteKvFromDb(key, userId);
         if (ret == ERR_OK) {
