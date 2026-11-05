@@ -276,6 +276,13 @@ void DistributedOperationService::TriggerJumpApplication(const std::string& hash
         return;
     }
 
+#ifdef NOTIFICATION_MULTI_FOREGROUND_USER
+    sptr<NotificationRequest> notificationRequest = nullptr;
+    auto result = NotificationHelper::GetNotificationRequestByHashCode(hashCode, notificationRequest);
+    if (result != ERR_OK || notificationRequest == nullptr) {
+        ANS_LOGE("Get notificationRequest failed, result: %{public}d", result);
+    }
+#else
     if (!PowerMgr::PowerMgrClient::GetInstance().IsScreenOn()) {
         auto ret = PowerMgr::PowerMgrClient::GetInstance().WakeupDevice();
         if (ret != PowerMgr::PowerErrors::ERR_OK) {
@@ -283,6 +290,7 @@ void DistributedOperationService::TriggerJumpApplication(const std::string& hash
             return;
         }
     }
+#endif
 
 #ifdef SCREENLOCK_MGR_ENABLE
     if (ScreenLock::ScreenLockManager::GetInstance()->IsScreenLocked()) {
