@@ -230,7 +230,8 @@ static void ExpectLiveViewRowKept(int32_t userId, const sptr<NotificationRequest
     const std::string &expectedLabel)
 {
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
-    EXPECT_EQ(AnsLiveViewServiceTest::advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    EXPECT_EQ(AnsLiveViewServiceTest::advancedNotificationService_->GetBatchNotificationRequestsFromDb(
+        requestsdb, userId), ERR_OK);
     EXPECT_EQ(requestsdb.size(), 1);
     EXPECT_EQ(requestsdb[0].request->GetLabel(), expectedLabel);
     NotificationPreferences::GetInstance()->DeleteKvFromDb(request->GetSecureKey(), userId);
@@ -245,7 +246,8 @@ static void CheckAllExpiredRowsRemoved(int32_t userId, int64_t pastTime)
     }
     std::vector<AdvancedNotificationService::NotificationRequestDb> allRows;
     std::vector<std::string> allBaseKeys;
-    (void)AnsLiveViewServiceTest::advancedNotificationService_->GetBatchNotificationRequestsFromDb(allRows, userId, &allBaseKeys);
+    (void)AnsLiveViewServiceTest::advancedNotificationService_->GetBatchNotificationRequestsFromDb(
+        allRows, userId, &allBaseKeys);
     EXPECT_EQ(allRows.size(), 0);
     EXPECT_EQ(allBaseKeys.size(), labels.size());
 }
@@ -2485,7 +2487,6 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewExpiredPreParseTest001, Function | Smal
     ASSERT_EQ(removedBaseKeys.size(), 1);
     ASSERT_EQ(removedBaseKeys[0], plainRequest->GetBaseKey(""));
     ASSERT_FALSE(LiveViewKvExists(plainRequest->GetKey(), userId));
-
 }
 
 /**
@@ -2567,17 +2568,7 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewExpiryMatrixTest001, Function | SmallTe
         }
     }
     // All persisted rows expired: every row is removed and each base key is reported.
-    const std::vector<std::string> allExpiredLabels = {"all_expired_a", "all_expired_b"};
-    for (const auto &label : allExpiredLabels) {
-        ASSERT_NE(WriteLiveViewRowWithOverrides(userId, label,
-            {{"updateDeadLine", pastTime}, {"finishDeadLine", pastTime}, {"triggerDeadLine", nullptr}}), nullptr);
-    }
-    std::vector<AdvancedNotificationService::NotificationRequestDb> allRows;
-    std::vector<std::string> allBaseKeys;
-    (void)advancedNotificationService_->GetBatchNotificationRequestsFromDb(allRows, userId, &allBaseKeys);
-    EXPECT_EQ(allRows.size(), 0);
-    EXPECT_EQ(allBaseKeys.size(), allExpiredLabels.size());
-
+    CheckAllExpiredRowsRemoved(userId, pastTime);
 }
 
 /**
