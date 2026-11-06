@@ -180,7 +180,6 @@ sptr<NotificationRequest> BuildRecoverableLiveViewRequest(int32_t userId, const 
     return request;
 }
 
-
 sptr<NotificationRequest> WriteLiveViewRowWithOverrides(int32_t userId, const std::string &label,
     const nlohmann::json &overrides)
 {
@@ -219,6 +218,37 @@ std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> CreateLiveViewTestWantAgen
     return AbilityRuntime::WantAgent::WantAgentHelper::GetWantAgent(info);
 }
 
+static void ExpectLiveViewRowRemoved(int32_t userId, const sptr<NotificationRequest> &request)
+{
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    (void)AnsLiveViewServiceTest::advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId);
+    EXPECT_EQ(requestsdb.size(), 0);
+    EXPECT_FALSE(LiveViewKvExists(request->GetSecureKey(), userId));
+}
+
+static void ExpectLiveViewRowKept(int32_t userId, const sptr<NotificationRequest> &request,
+    const std::string &expectedLabel)
+{
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    EXPECT_EQ(AnsLiveViewServiceTest::advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    EXPECT_EQ(requestsdb.size(), 1);
+    EXPECT_EQ(requestsdb[0].request->GetLabel(), expectedLabel);
+    NotificationPreferences::GetInstance()->DeleteKvFromDb(request->GetSecureKey(), userId);
+}
+
+static void CheckAllExpiredRowsRemoved(int32_t userId, int64_t pastTime)
+{
+    const std::vector<std::string> labels = {"all_expired_a", "all_expired_b"};
+    for (const auto &label : labels) {
+        ASSERT_NE(WriteLiveViewRowWithOverrides(userId, label,
+            {{"updateDeadLine", pastTime}, {"finishDeadLine", pastTime}, {"triggerDeadLine", nullptr}}), nullptr);
+    }
+    std::vector<AdvancedNotificationService::NotificationRequestDb> allRows;
+    std::vector<std::string> allBaseKeys;
+    (void)AnsLiveViewServiceTest::advancedNotificationService_->GetBatchNotificationRequestsFromDb(allRows, userId, &allBaseKeys);
+    EXPECT_EQ(allRows.size(), 0);
+    EXPECT_EQ(allBaseKeys.size(), labels.size());
+}
 
 /**
  * @tc.name: ProcForDeleteLiveView_00001
@@ -1003,7 +1033,6 @@ HWTEST_F(AnsLiveViewServiceTest, SetFinishTimerForCommonLiveView_100, Function |
     ErrCode res = advancedNotificationService_->SetFinishTimer(record);
     EXPECT_EQ(res, ERR_OK);
 }
-
 
 HWTEST_F(AnsLiveViewServiceTest, AddAppObserverSet_00004, Function | SmallTest | Level1)
 {
@@ -2328,7 +2357,6 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewInvalidDataCleanupTest001, Function | S
     (void)advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId);
     ASSERT_EQ(requestsdb.size(), 0);
     ASSERT_FALSE(LiveViewKvExists(decryptRequest->GetSecureKey(), userId));
-
 }
 
 /**
@@ -2346,38 +2374,23 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewRecoveryFailureCleanupTest001, Function
 
     jsonObject["wantAgent"] = "not-a-json";
     ASSERT_EQ(SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId), ERR_OK);
-    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
-    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
-    ASSERT_EQ(requestsdb.size(), 0);
-    ASSERT_FALSE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
+    ExpectLiveViewRowRemoved(userId, brokenRequest);
 
     // Non-string value is never produced by our serializer; treat it as "no agent" and keep it.
     jsonObject["wantAgent"] = 123;
     ASSERT_EQ(SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId), ERR_OK);
-    requestsdb.clear();
-    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
-    ASSERT_EQ(requestsdb.size(), 1);
-    ASSERT_TRUE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
-    NotificationPreferences::GetInstance()->DeleteKvFromDb(brokenRequest->GetSecureKey(), userId);
+    ExpectLiveViewRowKept(userId, brokenRequest, "broken_agent");
 
     // Empty string means "no agent" (normal business notification) and must be kept.
     jsonObject["wantAgent"] = "";
     ASSERT_EQ(SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId), ERR_OK);
-    requestsdb.clear();
-    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
-    ASSERT_EQ(requestsdb.size(), 1);
-    ASSERT_TRUE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
-    NotificationPreferences::GetInstance()->DeleteKvFromDb(brokenRequest->GetSecureKey(), userId);
+    ExpectLiveViewRowKept(userId, brokenRequest, "broken_agent");
 
     // Legacy data without the wantAgent key at all: normal notification without agent, keep it.
     jsonObject.erase("wantAgent");
     jsonObject.erase("removalWantAgent");
     ASSERT_EQ(SetRawLiveViewRecordToDb(brokenRequest->GetSecureKey(), jsonObject.dump(), userId), ERR_OK);
-    requestsdb.clear();
-    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
-    ASSERT_EQ(requestsdb.size(), 1);
-    ASSERT_TRUE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
-    NotificationPreferences::GetInstance()->DeleteKvFromDb(brokenRequest->GetSecureKey(), userId);
+    ExpectLiveViewRowKept(userId, brokenRequest, "broken_agent");
 
     // Business notification that never sets a WantAgent: serialized as empty strings, must recover.
     sptr<NotificationRequest> noAgentRequest = BuildRecoverableLiveViewRequest(userId, "no_agent_row");
@@ -2386,11 +2399,8 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewRecoveryFailureCleanupTest001, Function
     AdvancedNotificationService::NotificationRequestDb noAgentDb =
         { .request = noAgentRequest, .bundleOption = noAgentBundle };
     ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDb(noAgentDb), ERR_OK);
-    requestsdb.clear();
-    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
-    ASSERT_EQ(requestsdb.size(), 1);
-    ASSERT_EQ(requestsdb[0].request->GetLabel(), "no_agent_row");
-    NotificationPreferences::GetInstance()->DeleteKvFromDb(noAgentRequest->GetSecureKey(), userId);
+    ExpectLiveViewRowKept(userId, noAgentRequest, "no_agent_row");
+
     auto agent = CreateLiveViewTestWantAgent();
     if (agent != nullptr) {
         sptr<NotificationRequest> validRequest = BuildRecoverableLiveViewRequest(userId, "valid_agent_row");
@@ -2399,14 +2409,9 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewRecoveryFailureCleanupTest001, Function
         ASSERT_TRUE(NotificationJsonConverter::ConvertToJson(validRequest, validJson));
         validJson["wantAgent"] = AbilityRuntime::WantAgent::WantAgentHelper::ToStringWithEnvelope(agent);
         ASSERT_EQ(SetRawLiveViewRecordToDb(validRequest->GetSecureKey(), validJson.dump(), userId), ERR_OK);
-        requestsdb.clear();
-        ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
-        ASSERT_EQ(requestsdb.size(), 1);
-        NotificationPreferences::GetInstance()->DeleteKvFromDb(validRequest->GetSecureKey(), userId);
+        ExpectLiveViewRowKept(userId, validRequest, "valid_agent_row");
     }
-
 }
-
 /**
  * @tc.name: RecoveryFailureIsolationTest001
  * @tc.desc: Test a failed row does not block recovery of following normal rows (AC-1.4)
@@ -2483,7 +2488,6 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewExpiredPreParseTest001, Function | Smal
 
 }
 
-
 /**
  * @tc.name: LiveViewRecoveryPerfBaseline001
  * @tc.desc: Test recovery of 100 normal rows keeps behavior unchanged and reports elapsed time (AC-2.2)
@@ -2510,7 +2514,6 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewRecoveryPerfBaseline001, Function | Sma
                      << ", rows: " << requestsdb.size();
     ASSERT_EQ(requestsdb.size(), rowCount);
 }
-
 
 /**
  * @tc.name: LiveViewExpiryMatrixTest001
@@ -2576,7 +2579,6 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewExpiryMatrixTest001, Function | SmallTe
     EXPECT_EQ(allBaseKeys.size(), allExpiredLabels.size());
 
 }
-
 
 /**
  * @tc.name: SetRemoveOnProcessExitState_00001
