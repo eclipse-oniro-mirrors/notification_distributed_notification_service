@@ -379,7 +379,8 @@ HWTEST_F(
 /**
  * @tc.number    : AdvancedNotificationServiceAbilityTest_02300
  * @tc.name      : ANS_AdvancedNotificationServiceAbility_02300
- * @tc.desc      : OnExtension restore callback reachable without OnStart (backup/restore pair guard, AC-5.1)
+ * @tc.desc      : OnExtension restore callback without a valid backup fd returns clone error instead of
+ *                 crashing (backup/restore pair guard, AC-5.1)
  */
 HWTEST_F(
     AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_02300, Function | SmallTest | Level1)
@@ -391,7 +392,7 @@ HWTEST_F(
     MessageParcel reply;
     AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
     ErrCode ret = test.OnExtension(extension, data, reply);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, ANS_CLONE_ERROR);
 }
 
 /**
