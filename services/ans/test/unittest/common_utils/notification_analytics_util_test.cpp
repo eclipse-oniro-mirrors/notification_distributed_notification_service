@@ -991,6 +991,86 @@ HWTEST_F(NotificationAnalyticsUtilTest, ReportLiveViewNumber_004, Function | Sma
 }
 
 /**
+ * @tc.name: ReportLiveViewNumber_EventNotPartOfKey_001
+ * @tc.desc: Test the live view aggregation key only contains the bundle name. Different
+ *           client-controlled extraInfo "event" values must NOT create separate map entries,
+ *           otherwise an attacker could create unbounded entries (memory DoS) or squeeze out
+ *           statistics of other bundles.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, ReportLiveViewNumber_EventNotPartOfKey_001,
+    Function | SmallTest | Level1)
+{
+    // drain entries possibly left by previous cases
+    NotificationAnalyticsUtil::AggregateLiveView();
+ 
+    const std::string bundleName = "attacker.bundle";
+    const std::string fakeEvents[] = {"fake_event_a", "fake_event_b"};
+    for (const auto &fakeEvent : fakeEvents) {
+        sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+        ASSERT_NE(request, nullptr);
+        request->SetCreatorBundleName(bundleName);
+        auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+        liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+        auto extras = std::make_shared<AAFwk::WantParams>();
+        extras->SetParam("event", AAFwk::String::Box(fakeEvent));
+        liveViewContent->SetExtraInfo(extras);
+        request->SetContent(std::make_shared<NotificationContent>(liveViewContent));
+        // 0 is PUBLISH_ERROR_EVENT_CODE (file-local constant, not visible here)
+        NotificationAnalyticsUtil::ReportLiveViewNumber(request, 0);
+    }
+    {
+        // third report without extraInfo: must also be counted after the fix
+        // (no longer requires extraInfo to be present)
+        sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+        ASSERT_NE(request, nullptr);
+        request->SetCreatorBundleName(bundleName);
+        auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+        liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+        request->SetContent(std::make_shared<NotificationContent>(liveViewContent));
+        NotificationAnalyticsUtil::ReportLiveViewNumber(request, 0);
+    }
+ 
+    ReportCache reportCache = NotificationAnalyticsUtil::AggregateLiveView();
+    std::string ansData = reportCache.want.GetStringParam("ansData");
+    // all three reports collapse into one entry with aggregated failed count 3
+    EXPECT_NE(ansData.find(bundleName + ":0,3"), std::string::npos);
+    size_t count = 0;
+    size_t pos = ansData.find(bundleName);
+    while (pos != std::string::npos) {
+        count++;
+        pos = ansData.find(bundleName, pos + bundleName.length());
+    }
+    EXPECT_EQ(count, 1);
+}
+ 
+/**
+ * @tc.name: ReportLiveViewNumber_EmptyBundleNameSkip_001
+ * @tc.desc: Test ReportLiveViewNumber skips reporting when the bundle name cannot be resolved
+ *           (empty), so unresolved bundles never share or pollute one aggregation entry.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationAnalyticsUtilTest, ReportLiveViewNumber_EmptyBundleNameSkip_001,
+    Function | SmallTest | Level1)
+{
+    // drain entries possibly left by previous cases
+    NotificationAnalyticsUtil::AggregateLiveView();
+ 
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE);
+    request->SetContent(std::make_shared<NotificationContent>(liveViewContent));
+    // owner and creator bundle names are both empty by default
+ 
+    NotificationAnalyticsUtil::ReportLiveViewNumber(request, 0);
+ 
+    ReportCache reportCache = NotificationAnalyticsUtil::AggregateLiveView();
+    std::string ansData = reportCache.want.GetStringParam("ansData");
+    EXPECT_NE(ansData.find("\"data\":\"\""), std::string::npos);
+}
+
+/**
  * @tc.name: ReportBadgeChange_001
  * @tc.desc: Test ReportBadgeChange with nullptr badgeData
  * @tc.type: FUNC

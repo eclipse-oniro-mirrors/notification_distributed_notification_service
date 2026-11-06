@@ -377,5 +377,216 @@ HWTEST_F(AdvancedNotificationPublishTest, CheckNotificationRequest_UserDeletable
     MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID);
 }
 
+/**
+ * @tc.name: ResetIdentityInfoForNonSystemApp_NullRequest_00001
+ * @tc.desc: Test ResetIdentityInfoForNonSystemApp with nullptr request
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, ResetIdentityInfoForNonSystemApp_NullRequest_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> nullRequest = nullptr;
+ 
+    service->ResetIdentityInfoForNonSystemApp(nullRequest, false, false);
+    EXPECT_EQ(nullRequest, nullptr);
+}
+ 
+/**
+ * @tc.name: ResetIdentityInfoForNonSystemApp_ResetForgedOwnerInfo_00001
+ * @tc.desc: Test ResetIdentityInfoForNonSystemApp resets forged owner uid/bundleName to default
+ *           values but keeps ownerUserId, which alone does not identify another bundle.
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, ResetIdentityInfoForNonSystemApp_ResetForgedOwnerInfo_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerUid(200); // forged ownerUid, e.g. uid of the victim app
+    request->SetOwnerBundleName("com.victim.bundle"); // forged ownerBundleName
+    request->SetOwnerUserId(100); // ownerUserId is kept, not reset
+ 
+    service->ResetIdentityInfoForNonSystemApp(request, false, false);
+    EXPECT_EQ(request->GetOwnerUid(), DEFAULT_UID);
+    EXPECT_TRUE(request->GetOwnerBundleName().empty());
+    EXPECT_EQ(request->GetOwnerUserId(), 100);
+}
+ 
+/**
+ * @tc.name: ResetIdentityInfoForNonSystemApp_DefaultValueNotChanged_00001
+ * @tc.desc: Test ResetIdentityInfoForNonSystemApp keeps default owner info unchanged
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, ResetIdentityInfoForNonSystemApp_DefaultValueNotChanged_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+ 
+    service->ResetIdentityInfoForNonSystemApp(request, false, false);
+    EXPECT_EQ(request->GetOwnerUid(), DEFAULT_UID);
+    EXPECT_TRUE(request->GetOwnerBundleName().empty());
+    EXPECT_EQ(request->GetOwnerUserId(), SUBSCRIBE_USER_INIT);
+}
+ 
+/**
+ * @tc.name: ResetIdentityInfoForNonSystemApp_PartialForged_00001
+ * @tc.desc: Test ResetIdentityInfoForNonSystemApp only resets the forged field
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, ResetIdentityInfoForNonSystemApp_PartialForged_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerUid(200); // only ownerUid is forged
+ 
+    service->ResetIdentityInfoForNonSystemApp(request, false, false);
+    EXPECT_EQ(request->GetOwnerUid(), DEFAULT_UID);
+    EXPECT_TRUE(request->GetOwnerBundleName().empty());
+    EXPECT_EQ(request->GetOwnerUserId(), SUBSCRIBE_USER_INIT);
+}
+ 
+/**
+ * @tc.name: ResetIdentityInfoForNonSystemApp_ResetForgedCreatorInfo_00001
+ * @tc.desc: Test ResetIdentityInfoForNonSystemApp resets forged creator uid/bundleName to default
+ *           values but keeps creatorUserId. Creator fields are restored from IPC parcels and must
+ *           be controlled the same way as owner fields, otherwise a non-system client could spoof
+ *           creatorBundleName and pollute per-bundle statistics.
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, ResetIdentityInfoForNonSystemApp_ResetForgedCreatorInfo_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(300); // forged creatorUid, e.g. uid of the victim app
+    request->SetCreatorBundleName("com.victim.bundle"); // forged creatorBundleName
+    request->SetCreatorUserId(100); // creatorUserId is kept, not reset
+ 
+    service->ResetIdentityInfoForNonSystemApp(request, false, false);
+    EXPECT_EQ(request->GetCreatorUid(), DEFAULT_UID);
+    EXPECT_TRUE(request->GetCreatorBundleName().empty());
+    EXPECT_EQ(request->GetCreatorUserId(), 100);
+}
+ 
+/**
+ * @tc.name: ResetIdentityInfoForNonSystemApp_KeepIdentityForSystemApp_00001
+ * @tc.desc: Test ResetIdentityInfoForNonSystemApp keeps owner/creator identity when the caller is
+ *           a system app, so that agent/proxy publish capability is not broken by the reset.
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, ResetIdentityInfoForNonSystemApp_KeepIdentityForSystemApp_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerUid(200); // owner specified by trusted agent
+    request->SetOwnerBundleName("com.proxied.bundle");
+    request->SetCreatorUid(300);
+    request->SetCreatorBundleName("com.agent.bundle");
+ 
+    service->ResetIdentityInfoForNonSystemApp(request, true, false);
+    // identity kept: system app is exempt from the reset
+    EXPECT_EQ(request->GetOwnerUid(), 200);
+    EXPECT_EQ(request->GetOwnerBundleName(), "com.proxied.bundle");
+    EXPECT_EQ(request->GetCreatorUid(), 300);
+    EXPECT_EQ(request->GetCreatorBundleName(), "com.agent.bundle");
+}
+ 
+/**
+ * @tc.name: ResetIdentityInfoForNonSystemApp_KeepIdentityForSubsystem_00001
+ * @tc.desc: Test ResetIdentityInfoForNonSystemApp keeps owner/creator identity when the caller is
+ *           a subsystem (native token), matching the system-app exemption.
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, ResetIdentityInfoForNonSystemApp_KeepIdentityForSubsystem_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerUid(200);
+    request->SetOwnerBundleName("com.proxied.bundle");
+    request->SetOwnerUserId(100);
+ 
+    service->ResetIdentityInfoForNonSystemApp(request, false, true);
+    // identity kept: subsystem is exempt from the reset
+    EXPECT_EQ(request->GetOwnerUid(), 200);
+    EXPECT_EQ(request->GetOwnerBundleName(), "com.proxied.bundle");
+    EXPECT_EQ(request->GetOwnerUserId(), 100);
+}
+ 
+/**
+ * @tc.name: CheckNotificationRequest_ResetForgedIdentityForNonSystemApp_00001
+ * @tc.desc: Test CheckNotificationRequest resets forged owner/creator uid/bundleName for a
+ *           non-system app before entering the publish flow, so that early failure-reporting
+ *           branches can no longer forward a spoofed bundle name to analytics, while
+ *           ownerUserId/creatorUserId are kept.
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, CheckNotificationRequest_ResetForgedIdentityForNonSystemApp_00001,
+    Function | SmallTest | Level1)
+{
+    MockIsSystemApp(false); // non-system app
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID); // non-native token
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerUid(200);
+    request->SetOwnerBundleName("com.victim.bundle");
+    request->SetOwnerUserId(100);
+    request->SetCreatorUid(300);
+    request->SetCreatorBundleName("com.victim.bundle");
+    request->SetCreatorUserId(101);
+ 
+    auto result = service->CheckNotificationRequest(request);
+    EXPECT_EQ(result, ERR_OK);
+    // owner identity reset, ownerUserId kept
+    EXPECT_EQ(request->GetOwnerUid(), DEFAULT_UID);
+    EXPECT_TRUE(request->GetOwnerBundleName().empty());
+    EXPECT_EQ(request->GetOwnerUserId(), 100);
+    // creator identity reset, creatorUserId kept
+    EXPECT_EQ(request->GetCreatorUid(), DEFAULT_UID);
+    EXPECT_TRUE(request->GetCreatorBundleName().empty());
+    EXPECT_EQ(request->GetCreatorUserId(), 101);
+    MockIsSystemApp(true); // restore mock for subsequent tests
+}
+ 
+/**
+ * @tc.name: CheckNotificationRequest_KeepIdentityForSystemApp_00001
+ * @tc.desc: Test CheckNotificationRequest keeps owner/creator identity for a system app, so that
+ *           agent/proxy publish capability (owner specified by a trusted system component) is not
+ *           broken by the anti-spoofing reset.
+ * @tc.type: FUNC
+ * @tc.require: I00001
+ */
+HWTEST_F(AdvancedNotificationPublishTest, CheckNotificationRequest_KeepIdentityForSystemApp_00001,
+    Function | SmallTest | Level1)
+{
+    MockIsSystemApp(true); // system app
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP); // HAP token, so IsSystemApp() consults the system-app mock
+    auto service = GetService();
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetOwnerUid(200);
+    request->SetOwnerBundleName("com.proxied.bundle"); // owner specified by trusted agent
+    request->SetCreatorBundleName("com.agent.bundle");
+
+    auto result = service->CheckNotificationRequest(request);
+    EXPECT_EQ(result, ERR_OK);
+    // identity kept: system app is exempt from the reset
+    EXPECT_EQ(request->GetOwnerUid(), 200);
+    EXPECT_EQ(request->GetOwnerBundleName(), "com.proxied.bundle");
+    EXPECT_EQ(request->GetCreatorBundleName(), "com.agent.bundle");
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_INVALID); // restore mock for subsequent tests
+}
+
 }  // namespace Notification
 }  // namespace OHOS
