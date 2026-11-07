@@ -19,6 +19,8 @@
 #undef private
 #undef protected
 #include "notificationgeofence_fuzzer.h"
+
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
@@ -60,15 +62,16 @@ static void TestNotificationGeofence(FuzzedDataProvider *fuzzData)
 
     nlohmann::json jsonObject;
     geofence2.ToJson(jsonObject);
-    NotificationGeofence::FromJson(jsonObject);
+    std::unique_ptr<NotificationGeofence> fromJsonGeofence(NotificationGeofence::FromJson(jsonObject));
+    if (fromJsonGeofence != nullptr) {
+        fromJsonGeofence->Dump();
+    }
 
     Parcel parcel;
     geofence2.Marshalling(parcel);
-    auto unmarshalledGeofence = NotificationGeofence::Unmarshalling(parcel);
+    auto unmarshalledGeofence = std::unique_ptr<NotificationGeofence>(NotificationGeofence::Unmarshalling(parcel));
     if (unmarshalledGeofence != nullptr) {
         unmarshalledGeofence->Dump();
-        delete unmarshalledGeofence;
-        unmarshalledGeofence = nullptr;
     }
 }
 

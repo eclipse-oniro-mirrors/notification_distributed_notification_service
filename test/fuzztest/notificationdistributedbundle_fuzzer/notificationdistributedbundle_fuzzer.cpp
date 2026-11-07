@@ -19,6 +19,8 @@
 #undef private
 #undef protected
 #include "notificationdistributedbundle_fuzzer.h"
+
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
@@ -61,11 +63,10 @@ static void TestNotificationDistributedBundle(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     bundle.Marshalling(parcel);
-    auto unmarshalledBundle = NotificationDistributedBundle::Unmarshalling(parcel);
+    auto unmarshalledBundle = std::unique_ptr<NotificationDistributedBundle>(
+        NotificationDistributedBundle::Unmarshalling(parcel));
     if (unmarshalledBundle != nullptr) {
         unmarshalledBundle->Dump();
-        delete unmarshalledBundle;
-        unmarshalledBundle = nullptr;
     }
 }
 

@@ -19,6 +19,8 @@
 #undef private
 #undef protected
 #include "notificationstatistics_fuzzer.h"
+
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
@@ -44,15 +46,17 @@ static void TestNotificationStatistics(FuzzedDataProvider *fuzzData)
 
     nlohmann::json jsonObject;
     statistics.ToJson(jsonObject);
-    NotificationStatistics::FromJson(jsonObject);
+    std::unique_ptr<NotificationStatistics> fromJsonStatistics(NotificationStatistics::FromJson(jsonObject));
+    if (fromJsonStatistics != nullptr) {
+        fromJsonStatistics->Dump();
+    }
 
     Parcel parcel;
     statistics.Marshalling(parcel);
-    auto unmarshalledStatistics = NotificationStatistics::Unmarshalling(parcel);
+    auto unmarshalledStatistics = std::unique_ptr<NotificationStatistics>(
+        NotificationStatistics::Unmarshalling(parcel));
     if (unmarshalledStatistics != nullptr) {
         unmarshalledStatistics->Dump();
-        delete unmarshalledStatistics;
-        unmarshalledStatistics = nullptr;
     }
 }
 

@@ -19,6 +19,7 @@
 #include "notification_check_request.h"
 #undef private
 #undef protected
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 #include "notificationcheckrequest_fuzzer.h"
 
@@ -53,15 +54,14 @@ static void TestNotificationCheckRequest(FuzzedDataProvider* fuzzData)
 
     Parcel parcel;
     request2.Marshalling(parcel);
-    auto unmarshalledRequest = NotificationCheckRequest::Unmarshalling(parcel);
+    auto unmarshalledRequest = std::unique_ptr<NotificationCheckRequest>(
+        NotificationCheckRequest::Unmarshalling(parcel));
     if (unmarshalledRequest != nullptr) {
         // NotificationCheckRequest::Dump() is declared in the header but never defined, calling it fails to link.
         unmarshalledRequest->GetContentType();
         unmarshalledRequest->GetSlotType();
         unmarshalledRequest->GetExtraKeys();
         unmarshalledRequest->GetUid();
-        delete unmarshalledRequest;
-        unmarshalledRequest = nullptr;
     }
 }
 

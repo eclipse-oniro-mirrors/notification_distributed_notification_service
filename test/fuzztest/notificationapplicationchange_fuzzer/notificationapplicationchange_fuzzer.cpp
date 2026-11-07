@@ -19,6 +19,8 @@
 #undef private
 #undef protected
 #include "notificationapplicationchange_fuzzer.h"
+
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
@@ -46,12 +48,11 @@ static void TestNotificationApplicationChangeInfo(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     info.Marshalling(parcel);
-    auto unmarshalled = NotificationApplicationChangeInfo::Unmarshalling(parcel);
+    auto unmarshalled = std::unique_ptr<NotificationApplicationChangeInfo>(
+        NotificationApplicationChangeInfo::Unmarshalling(parcel));
     if (unmarshalled != nullptr) {
         unmarshalled->GetChangeType();
         unmarshalled->Dump();
-        delete unmarshalled;
-        unmarshalled = nullptr;
     }
 }
 

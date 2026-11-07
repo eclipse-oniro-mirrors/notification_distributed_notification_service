@@ -20,6 +20,8 @@
 #undef private
 #undef protected
 #include "notificationvoicecontent_fuzzer.h"
+
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
@@ -37,11 +39,10 @@ static void TestNotificationVoiceContent(FuzzedDataProvider *fuzzData)
     NotificationVoiceContent content2(content);
     Parcel parcel;
     content2.Marshalling(parcel);
-    auto unmarshalledContent = NotificationVoiceContent::Unmarshalling(parcel);
+    auto unmarshalledContent = std::unique_ptr<NotificationVoiceContent>(
+        NotificationVoiceContent::Unmarshalling(parcel));
     if (unmarshalledContent != nullptr) {
         unmarshalledContent->Dump();
-        delete unmarshalledContent;
-        unmarshalledContent = nullptr;
     }
 }
 
@@ -59,11 +60,9 @@ static void TestVoiceContentOption(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     option3.Marshalling(parcel);
-    auto unmarshalledOption = VoiceContentOption::Unmarshalling(parcel);
+    auto unmarshalledOption = std::unique_ptr<VoiceContentOption>(VoiceContentOption::Unmarshalling(parcel));
     if (unmarshalledOption != nullptr) {
         unmarshalledOption->GetEnabled();
-        delete unmarshalledOption;
-        unmarshalledOption = nullptr;
     }
 }
 

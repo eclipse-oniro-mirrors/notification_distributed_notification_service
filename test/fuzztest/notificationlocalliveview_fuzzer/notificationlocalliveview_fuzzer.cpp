@@ -22,6 +22,8 @@
 #undef private
 #undef protected
 #include "notificationlocalliveview_fuzzer.h"
+
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
@@ -72,15 +74,18 @@ static void TestNotificationLocalLiveViewContent(FuzzedDataProvider *fuzzData)
 
     nlohmann::json jsonObject;
     content.ToJson(jsonObject);
-    NotificationLocalLiveViewContent::FromJson(jsonObject);
+    std::unique_ptr<NotificationLocalLiveViewContent> fromJsonContent(
+        NotificationLocalLiveViewContent::FromJson(jsonObject));
+    if (fromJsonContent != nullptr) {
+        fromJsonContent->Dump();
+    }
 
     Parcel parcel;
     content.Marshalling(parcel);
-    auto unmarshalledContent = NotificationLocalLiveViewContent::Unmarshalling(parcel);
+    auto unmarshalledContent = std::unique_ptr<NotificationLocalLiveViewContent>(
+        NotificationLocalLiveViewContent::Unmarshalling(parcel));
     if (unmarshalledContent != nullptr) {
         unmarshalledContent->Dump();
-        delete unmarshalledContent;
-        unmarshalledContent = nullptr;
     }
 }
 
@@ -97,15 +102,18 @@ static void TestNotificationLocalLiveViewButton(FuzzedDataProvider *fuzzData)
 
     nlohmann::json jsonObject;
     button.ToJson(jsonObject);
-    NotificationLocalLiveViewButton::FromJson(jsonObject);
+    std::unique_ptr<NotificationLocalLiveViewButton> fromJsonButton(
+        NotificationLocalLiveViewButton::FromJson(jsonObject));
+    if (fromJsonButton != nullptr) {
+        fromJsonButton->Dump();
+    }
 
     Parcel parcel;
     button.Marshalling(parcel);
-    auto unmarshalledButton = NotificationLocalLiveViewButton::Unmarshalling(parcel);
+    auto unmarshalledButton = std::unique_ptr<NotificationLocalLiveViewButton>(
+        NotificationLocalLiveViewButton::Unmarshalling(parcel));
     if (unmarshalledButton != nullptr) {
         unmarshalledButton->Dump();
-        delete unmarshalledButton;
-        unmarshalledButton = nullptr;
     }
 }
 
@@ -126,15 +134,17 @@ static void TestNotificationProgress(FuzzedDataProvider *fuzzData)
 
     nlohmann::json jsonObject;
     progress.ToJson(jsonObject);
-    NotificationProgress::FromJson(jsonObject);
+    std::unique_ptr<NotificationProgress> fromJsonProgress(NotificationProgress::FromJson(jsonObject));
+    if (fromJsonProgress != nullptr) {
+        fromJsonProgress->Dump();
+    }
 
     Parcel parcel;
     progress.Marshalling(parcel);
-    auto unmarshalledProgress = NotificationProgress::Unmarshalling(parcel);
+    auto unmarshalledProgress = std::unique_ptr<NotificationProgress>(
+        NotificationProgress::Unmarshalling(parcel));
     if (unmarshalledProgress != nullptr) {
         unmarshalledProgress->Dump();
-        delete unmarshalledProgress;
-        unmarshalledProgress = nullptr;
     }
 }
 
@@ -158,15 +168,16 @@ static void TestNotificationTime(FuzzedDataProvider *fuzzData)
 
     nlohmann::json jsonObject;
     time.ToJson(jsonObject);
-    NotificationTime::FromJson(jsonObject);
+    std::unique_ptr<NotificationTime> fromJsonTime(NotificationTime::FromJson(jsonObject));
+    if (fromJsonTime != nullptr) {
+        fromJsonTime->Dump();
+    }
 
     Parcel parcel;
     time.Marshalling(parcel);
-    auto unmarshalledTime = NotificationTime::Unmarshalling(parcel);
+    auto unmarshalledTime = std::unique_ptr<NotificationTime>(NotificationTime::Unmarshalling(parcel));
     if (unmarshalledTime != nullptr) {
         unmarshalledTime->Dump();
-        delete unmarshalledTime;
-        unmarshalledTime = nullptr;
     }
 }
 

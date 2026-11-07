@@ -19,6 +19,8 @@
 #undef private
 #undef protected
 #include "notificationunifiedgroup_fuzzer.h"
+
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
@@ -45,11 +47,10 @@ static void TestNotificationUnifiedGroupInfo(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     info.Marshalling(parcel);
-    auto unmarshalledInfo = NotificationUnifiedGroupInfo::Unmarshalling(parcel);
+    auto unmarshalledInfo = std::unique_ptr<NotificationUnifiedGroupInfo>(
+        NotificationUnifiedGroupInfo::Unmarshalling(parcel));
     if (unmarshalledInfo != nullptr) {
         unmarshalledInfo->Dump();
-        delete unmarshalledInfo;
-        unmarshalledInfo = nullptr;
     }
 }
 

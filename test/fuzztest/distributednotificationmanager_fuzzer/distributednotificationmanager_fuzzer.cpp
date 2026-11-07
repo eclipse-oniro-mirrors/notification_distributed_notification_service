@@ -49,6 +49,7 @@ static void TestDistributedNotificationManager(FuzzedDataProvider *fuzzData)
     manager->RegisterCallback(callback);
     // The API is declared as UngegisterCallback() in distributed_notification_manager.h, so the
     // upstream spelling is kept here to match the real symbol instead of the correct "Unregister".
+    // This comment will be dropped once the upstream header is renamed.
     manager->UngegisterCallback();
 
     std::vector<sptr<NotificationRequest>> requestList;
@@ -61,6 +62,8 @@ static void TestDistributedNotificationManager(FuzzedDataProvider *fuzzData)
 
     DistributedDatabase::DeviceInfo deviceInfo;
     manager->GetLocalDeviceInfo(deviceInfo);
+    // These two are the only entry points for the corresponding implementations and are idempotent
+    // re-initialization paths, so they are kept to preserve the coverage of the manager singleton.
     manager->OnDistributedKvStoreDeathRecipient();
     manager->ResetFfrtQueue();
 }

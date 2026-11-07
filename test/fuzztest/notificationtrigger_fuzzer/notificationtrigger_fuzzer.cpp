@@ -20,6 +20,8 @@
 #undef private
 #undef protected
 #include "notificationtrigger_fuzzer.h"
+
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
@@ -70,15 +72,16 @@ static void TestNotificationTrigger(FuzzedDataProvider *fuzzData)
 
     nlohmann::json jsonObject;
     trigger2.ToJson(jsonObject);
-    NotificationTrigger::FromJson(jsonObject);
+    std::unique_ptr<NotificationTrigger> fromJsonTrigger(NotificationTrigger::FromJson(jsonObject));
+    if (fromJsonTrigger != nullptr) {
+        fromJsonTrigger->Dump();
+    }
 
     Parcel parcel;
     trigger2.Marshalling(parcel);
-    auto unmarshalledTrigger = NotificationTrigger::Unmarshalling(parcel);
+    auto unmarshalledTrigger = std::unique_ptr<NotificationTrigger>(NotificationTrigger::Unmarshalling(parcel));
     if (unmarshalledTrigger != nullptr) {
         unmarshalledTrigger->Dump();
-        delete unmarshalledTrigger;
-        unmarshalledTrigger = nullptr;
     }
 }
 

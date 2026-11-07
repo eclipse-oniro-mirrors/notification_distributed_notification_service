@@ -19,6 +19,7 @@
 #include "notification_icon_button.h"
 #undef private
 #undef protected
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 #include "notificationcapsule_fuzzer.h"
 
@@ -60,15 +61,16 @@ static void TestNotificationCapsule(FuzzedDataProvider* fuzzData)
 
     nlohmann::json jsonObject;
     capsule.ToJson(jsonObject);
-    NotificationCapsule::FromJson(jsonObject);
+    std::unique_ptr<NotificationCapsule> fromJsonCapsule(NotificationCapsule::FromJson(jsonObject));
+    if (fromJsonCapsule != nullptr) {
+        fromJsonCapsule->Dump();
+    }
 
     Parcel parcel;
     capsule.Marshalling(parcel);
-    auto unmarshalledCapsule = NotificationCapsule::Unmarshalling(parcel);
+    auto unmarshalledCapsule = std::unique_ptr<NotificationCapsule>(NotificationCapsule::Unmarshalling(parcel));
     if (unmarshalledCapsule != nullptr) {
         unmarshalledCapsule->Dump();
-        delete unmarshalledCapsule;
-        unmarshalledCapsule = nullptr;
     }
 }
 
@@ -90,15 +92,16 @@ static void TestNotificationIconButton(FuzzedDataProvider* fuzzData)
 
     nlohmann::json jsonObject;
     button.ToJson(jsonObject);
-    NotificationIconButton::FromJson(jsonObject);
+    std::unique_ptr<NotificationIconButton> fromJsonButton(NotificationIconButton::FromJson(jsonObject));
+    if (fromJsonButton != nullptr) {
+        fromJsonButton->Dump();
+    }
 
     Parcel parcel;
     button.Marshalling(parcel);
-    auto unmarshalledButton = NotificationIconButton::Unmarshalling(parcel);
+    auto unmarshalledButton = std::unique_ptr<NotificationIconButton>(NotificationIconButton::Unmarshalling(parcel));
     if (unmarshalledButton != nullptr) {
         unmarshalledButton->Dump();
-        delete unmarshalledButton;
-        unmarshalledButton = nullptr;
     }
 }
 
@@ -110,24 +113,24 @@ static void TestNotificationIconButtonWithResource(FuzzedDataProvider* fuzzData)
     std::shared_ptr<ResourceManager::Resource> iconResource = std::make_shared<ResourceManager::Resource>();
     iconResource->bundleName = fuzzData->ConsumeRandomLengthString();
     iconResource->moduleName = fuzzData->ConsumeRandomLengthString();
+    iconResource->id = fuzzData->ConsumeIntegral<int32_t>();
     button.SetIconResource(iconResource);
     button.GetIconResource();
 
+    // Round trip through Marshalling/Unmarshalling so this test does not depend on the internal
+    // field order of the parcel layout. ReadFromParcel() parses the icon resource written by
+    // WriteIconToParcel() and calls ReadResourceFromParcel() on that path.
     Parcel parcel;
-    if (!button.WriteIconToParcel(parcel)) {
+    if (!button.Marshalling(parcel)) {
         return;
     }
-    // WriteIconToParcel writes the iconImage flag and the iconResource flag before the resource strings.
-    parcel.ReadBool();
-    if (!parcel.ReadBool()) {
+    std::unique_ptr<NotificationIconButton> unmarshalledButton(NotificationIconButton::Unmarshalling(parcel));
+    if (unmarshalledButton == nullptr) {
         return;
     }
-    std::shared_ptr<ResourceManager::Resource> resourceObj = std::make_shared<ResourceManager::Resource>();
-    if (!button.ReadResourceFromParcel(parcel, resourceObj)) {
-        return;
-    }
-    button.SetIconResource(resourceObj);
-    button.GetIconResource();
+    unmarshalledButton->GetText();
+    unmarshalledButton->GetIconResource();
+    unmarshalledButton->GetIconImage();
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData)

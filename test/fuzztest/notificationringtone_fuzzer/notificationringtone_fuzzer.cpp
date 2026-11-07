@@ -19,6 +19,8 @@
 #undef private
 #undef protected
 #include "notificationringtone_fuzzer.h"
+
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
@@ -54,11 +56,9 @@ static void TestNotificationRingtoneInfo(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     info2.Marshalling(parcel);
-    auto unmarshalledInfo = NotificationRingtoneInfo::Unmarshalling(parcel);
+    auto unmarshalledInfo = std::unique_ptr<NotificationRingtoneInfo>(NotificationRingtoneInfo::Unmarshalling(parcel));
     if (unmarshalledInfo != nullptr) {
         unmarshalledInfo->Dump();
-        delete unmarshalledInfo;
-        unmarshalledInfo = nullptr;
     }
 }
 

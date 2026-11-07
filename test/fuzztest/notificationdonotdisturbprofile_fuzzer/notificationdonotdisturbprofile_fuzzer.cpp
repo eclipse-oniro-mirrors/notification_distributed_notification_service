@@ -19,6 +19,8 @@
 #undef private
 #undef protected
 #include "notificationdonotdisturbprofile_fuzzer.h"
+
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
@@ -55,12 +57,11 @@ static void TestNotificationDoNotDisturbProfile(FuzzedDataProvider *fuzzData)
 
     Parcel parcel;
     profile2.Marshalling(parcel);
-    auto unmarshalledProfile = NotificationDoNotDisturbProfile::Unmarshalling(parcel);
+    auto unmarshalledProfile = std::unique_ptr<NotificationDoNotDisturbProfile>(
+        NotificationDoNotDisturbProfile::Unmarshalling(parcel));
     if (unmarshalledProfile != nullptr) {
         unmarshalledProfile->GetProfileId();
         unmarshalledProfile->GetProfileName();
-        delete unmarshalledProfile;
-        unmarshalledProfile = nullptr;
     }
 }
 
