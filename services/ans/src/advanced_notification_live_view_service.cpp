@@ -35,6 +35,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
+#include <set>
 #include "notification_analytics_util.h"
 #include "aes_gcm_helper.h"
 
@@ -97,6 +98,178 @@ void CleanUserLiveViewData(int32_t userId)
     CleanLiveViewByPrefix(REQUEST_STORAGE_SECURE_TRIGGER_LIVE_VIEW_PREFIX, userId);
 }
 
+std::string ToPlainLiveViewKey(const std::string &storageKey)
+{
+    const std::string securePrefix = REQUEST_STORAGE_SECURE_KEY_PREFIX + "_";
+    if (storageKey.rfind(securePrefix, 0) == 0) {
+        return REQUEST_STORAGE_KEY_PREFIX + "_" + storageKey.substr(securePrefix.size());
+    }
+    return storageKey;
+}
+
+std::string ToSecureLiveViewKey(const std::string &storageKey)
+{
+    const std::string plainPrefix = REQUEST_STORAGE_KEY_PREFIX + "_";
+    if (storageKey.rfind(plainPrefix, 0) == 0) {
+        return REQUEST_STORAGE_SECURE_KEY_PREFIX + "_" + storageKey.substr(plainPrefix.size());
+    }
+    return storageKey;
+}
+
+bool TryExtractLiveViewBaseKey(const std::string &storageKey, std::string &baseKey)
+{
+    const std::string securePrefix = REQUEST_STORAGE_SECURE_KEY_PREFIX + "_";
+    const std::string plainPrefix = REQUEST_STORAGE_KEY_PREFIX + "_";
+    if (storageKey.rfind(securePrefix, 0) == 0) {
+        baseKey = storageKey.substr(securePrefix.size());
+        return true;
+    }
+    if (storageKey.rfind(plainPrefix, 0) == 0) {
+        baseKey = storageKey.substr(plainPrefix.size());
+        return true;
+    }
+    return false;
+}
+
+void DeleteLiveViewRecordFromDb(const std::string &storageKey, const int32_t userId)
+{
+    if (storageKey.empty()) {
+        return;
+    }
+    const std::string plainKey = ToPlainLiveViewKey(storageKey);
+    const std::string secureKey = ToSecureLiveViewKey(storageKey);
+    const std::set<std::string> keysToDelete = {
+        storageKey, plainKey, secureKey, LOCK_SCREEN_PICTURE_TAG + plainKey
+    };
+    for (const auto &key : keysToDelete) {
+        int32_t ret = NotificationPreferences::GetInstance()->DeleteKvFromDb(key, userId);
+        if (ret != ERR_OK) {
+            ANS_LOGE("Delete live view key failed, key %{public}s, userId %{public}d, ret %{public}d.",
+                key.c_str(), userId, ret);
+        }
+    }
+}
+
+void ReadInt64FromJsonObject(const nlohmann::json &jsonObject, const std::string &key, int64_t &out)
+{
+    auto iter = jsonObject.find(key);
+    if (iter == jsonObject.end() || !iter->is_number_integer()) {
+        return;
+    }
+    out = iter->get<int64_t>();
+}
+
+bool IsLiveViewExpiredInJson(const nlohmann::json &jsonObject, const int64_t curTime)
+{
+    int64_t slotType = 0;
+    int64_t contentType = 0;
+    ReadInt64FromJsonObject(jsonObject, "slotType", slotType);
+    ReadInt64FromJsonObject(jsonObject, "notificationContentType", contentType);
+    if (slotType != static_cast<int64_t>(NotificationConstant::SlotType::LIVE_VIEW) ||
+        contentType != static_cast<int64_t>(NotificationContent::Type::LIVE_VIEW)) {
+        return false;
+    }
+    int64_t updateDeadLine = 0;
+    int64_t finishDeadLine = 0;
+    int64_t triggerDeadLine = 0;
+    ReadInt64FromJsonObject(jsonObject, "updateDeadLine", updateDeadLine);
+    ReadInt64FromJsonObject(jsonObject, "finishDeadLine", finishDeadLine);
+    ReadInt64FromJsonObject(jsonObject, "triggerDeadLine", triggerDeadLine);
+    return curTime > updateDeadLine || curTime > finishDeadLine ||
+        (triggerDeadLine != static_cast<int64_t>(NotificationConstant::INVALID_DISPLAY_TIME) &&
+        curTime > triggerDeadLine);
+}
+
+bool IsWantAgentFieldBroken(const nlohmann::json &jsonObject, const std::string &key,
+    const std::shared_ptr<AbilityRuntime::WantAgent::WantAgent> &agent)
+{
+    auto iter = jsonObject.find(key);
+    if (iter == jsonObject.end() || !iter->is_string()) {
+        // Notifications without a WantAgent are normal: a missing key or a non-string
+        // value (never produced by our serializer) is treated as "no agent" and kept.
+        return false;
+    }
+    return !iter->get<std::string>().empty() && agent == nullptr;
+}
+
+int32_t CollectLiveViewDbRecords(const std::vector<int32_t> &userIds,
+    std::unordered_map<std::string, std::string> &dbRecords,
+    std::unordered_map<std::string, int32_t> &dbRecordUsers)
+{
+    for (const int32_t userId : userIds) {
+        std::unordered_map<std::string, std::string> records;
+        int32_t result = NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
+            REQUEST_STORAGE_KEY_PREFIX, records, userId);
+        int32_t secureResult = NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
+            REQUEST_STORAGE_SECURE_KEY_PREFIX, records, userId);
+        if (result != ERR_OK && secureResult != ERR_OK) {
+            ANS_LOGE("Get batch notification request failed.");
+            return result;
+        }
+        for (const auto &pair : records) {
+            dbRecords[pair.first] = pair.second;
+            dbRecordUsers[pair.first] = userId;
+        }
+    }
+    return ERR_OK;
+}
+
+bool DecryptLiveViewRecord(const std::string &storageKey, std::string &value)
+{
+    if (storageKey.rfind(REQUEST_STORAGE_SECURE_KEY_PREFIX, 0) != 0) {
+        return true;
+    }
+    std::string plainText;
+    ErrCode errorCode = AesGcmHelper::Decrypt(plainText, value);
+    if (errorCode != ERR_OK) {
+        ANS_LOGE("Live view record decrypt error %{public}d, key %{public}s.",
+            static_cast<int32_t>(errorCode), storageKey.c_str());
+        return false;
+    }
+    value = plainText;
+    return true;
+}
+
+// Validates one DB record and deletes it when it cannot be recovered. Returns false when the
+// record has been disposed of and the caller must skip it.
+bool PrepareLiveViewRequestFromDb(const std::string &storageKey, int32_t dbUserId,
+    const std::string &decryptValue, std::vector<std::string> *removedBaseKeys,
+    nlohmann::json &jsonObject, sptr<NotificationRequest> &request)
+{
+    if (decryptValue.empty() || !nlohmann::json::accept(decryptValue)) {
+        ANS_LOGE("Invalid json, key %{public}s.", storageKey.c_str());
+        DeleteLiveViewRecordFromDb(storageKey, dbUserId);
+        return false;
+    }
+    jsonObject = nlohmann::json::parse(decryptValue);
+    auto epoch = std::chrono::system_clock::now().time_since_epoch();
+    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    if (IsLiveViewExpiredInJson(jsonObject, curTime)) {
+        ANS_LOGE("The live view record has expired, key %{public}s.", storageKey.c_str());
+        if (removedBaseKeys != nullptr) {
+            std::string baseKey;
+            if (TryExtractLiveViewBaseKey(storageKey, baseKey)) {
+                removedBaseKeys->emplace_back(baseKey);
+            }
+        }
+        DeleteLiveViewRecordFromDb(storageKey, dbUserId);
+        return false;
+    }
+    request = NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
+    if (request == nullptr) {
+        ANS_LOGE("Parse json string to request failed, key %{public}s.", storageKey.c_str());
+        DeleteLiveViewRecordFromDb(storageKey, dbUserId);
+        return false;
+    }
+    if (IsWantAgentFieldBroken(jsonObject, "wantAgent", request->GetWantAgent()) ||
+        IsWantAgentFieldBroken(jsonObject, "removalWantAgent", request->GetRemovalWantAgent())) {
+        ANS_LOGE("Parse wantAgent failed, key %{public}s.", storageKey.c_str());
+        DeleteLiveViewRecordFromDb(storageKey, dbUserId);
+        return false;
+    }
+    return true;
+}
+
 void PrepareUsersForRecovery(int32_t userId, std::vector<int32_t> &usersToRecover)
 {
     std::vector<int32_t> userIds;
@@ -145,12 +318,13 @@ void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
         ANS_LOGE("Recover geofence live view from db failed for user %{public}d.", userId);
     }
     std::vector<NotificationRequestDb> requestsdb;
-    if (GetBatchNotificationRequestsFromDb(requestsdb, userId) != ERR_OK) {
+    std::vector<std::string> removedBaseKeys;
+    if (GetBatchNotificationRequestsFromDb(requestsdb, userId, &removedBaseKeys) != ERR_OK) {
         ANS_LOGE("Get liveView from db failed for user %{public}d.", userId);
         SetRecoverFailCount(userId, 0);
         return;
     }
-    if (requestsdb.empty()) {
+    if (requestsdb.empty() && removedBaseKeys.empty()) {
         SetRecoverFailCount(userId, 0);
         return;
     }
@@ -159,6 +333,7 @@ void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
     for (size_t i = 0; i < requestsdb.size(); i++) {
         ProcessRecoveryEntry(requestsdb, i, keys);
     }
+    keys.insert(keys.end(), removedBaseKeys.begin(), removedBaseKeys.end());
     if (!keys.empty()) {
         OnRecoverLiveView(keys);
     }
@@ -652,7 +827,8 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDbCommon(const Noti
 }
 
 int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
-    std::vector<NotificationRequestDb> &requests, int32_t userId)
+    std::vector<NotificationRequestDb> &requests, int32_t userId,
+    std::vector<std::string> *removedBaseKeys)
 {
     std::unordered_map<std::string, std::string> dbRecords;
     std::unordered_map<std::string, int32_t> dbRecordUsers;
@@ -668,48 +844,27 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
         ANS_LOGE("Get all os account failed.");
         return ret;
     }
-    for (const int32_t userId : userIds) {
-        std::unordered_map<std::string, std::string> records;
-        int32_t result =
-            NotificationPreferences::GetInstance()->GetBatchKvsFromDb(REQUEST_STORAGE_KEY_PREFIX, records, userId);
-        int32_t secureResult =
-            NotificationPreferences::GetInstance()->GetBatchKvsFromDb(
-                REQUEST_STORAGE_SECURE_KEY_PREFIX, records, userId);
-        if (result != ERR_OK && secureResult != ERR_OK) {
-            ANS_LOGE("Get batch notification request failed.");
-            return result;
-        }
-        for (const auto& pair : records) {
-            dbRecords[pair.first] = pair.second;
-            dbRecordUsers[pair.first] = userId;
-        }
+    int32_t collectResult = CollectLiveViewDbRecords(userIds, dbRecords, dbRecordUsers);
+    if (collectResult != ERR_OK) {
+        return collectResult;
     }
     for (const auto &iter : dbRecords) {
         std::string decryptValue = iter.second;
         int32_t dbUserId = dbRecordUsers[iter.first];
-        if (iter.first.rfind(REQUEST_STORAGE_SECURE_KEY_PREFIX, 0) == 0) {
-            ErrCode errorCode = AesGcmHelper::Decrypt(decryptValue, iter.second);
-            if (errorCode != ERR_OK) {
-                ANS_LOGE("GetBatchNotificationRequestsFromDb decrypt error %{public}d", errorCode);
-                NotificationPreferences::GetInstance()->DeleteKvFromDb(iter.first, dbUserId);
-                continue;
-            }
-        }
-        if (decryptValue.empty() || !nlohmann::json::accept(decryptValue)) {
-            ANS_LOGE("Invalid json");
+        if (!DecryptLiveViewRecord(iter.first, decryptValue)) {
+            NotificationPreferences::GetInstance()->DeleteKvFromDb(iter.first, dbUserId);
             continue;
         }
-        auto jsonObject = nlohmann::json::parse(decryptValue);
-        sptr<NotificationRequest> request =
-            NotificationJsonConverter::ConvertFromJson<NotificationRequest>(jsonObject);
-        if (request == nullptr) {
-            ANS_LOGE("Parse json string to request failed.");
+        nlohmann::json jsonObject;
+        sptr<NotificationRequest> request = nullptr;
+        if (!PrepareLiveViewRequestFromDb(iter.first, dbUserId, decryptValue, removedBaseKeys,
+            jsonObject, request)) {
             continue;
         }
         sptr<NotificationBundleOption> bundleOption =
             NotificationJsonConverter::ConvertFromJson<NotificationBundleOption>(jsonObject);
         if (bundleOption == nullptr) {
-            ANS_LOGE("Parse json string to bundle option failed.");
+            ANS_LOGE("Parse json string to bundle option failed, key %{public}s.", iter.first.c_str());
             (void)DoubleDeleteNotificationFromDb(request->GetKey(),
                 request->GetSecureKey(), request->GetReceiverUserId());
             continue;

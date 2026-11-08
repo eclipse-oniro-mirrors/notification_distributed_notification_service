@@ -2382,7 +2382,7 @@ private:
     static int32_t SetNotificationRequestToDb(const NotificationRequestDb &requestDb);
     static int32_t SetNotificationRequestToDbCommon(const NotificationRequestDb &requestDb);
     static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests,
-        int32_t userId = -1);
+        int32_t userId = -1, std::vector<std::string> *removedBaseKeys = nullptr);
     static int32_t DoubleDeleteNotificationFromDb(const std::string &key,
         const std::string &secureKey, const int32_t userId);
     static int32_t DeleteNotificationRequestFromDb(const std::string &key, const int32_t userId);

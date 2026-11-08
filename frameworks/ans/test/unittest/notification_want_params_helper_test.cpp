@@ -330,5 +330,50 @@ HWTEST_F(NotificationWantParamsHelperTest, ParseWantAgent_00003, Function | Smal
     EXPECT_EQ(bundleName, "com.ohos.launcher");
 }
 
+/**
+ * @tc.name: WantAgentEnvelopeSerializeGuardTest001
+ * @tc.desc: Guard: production WantAgent serialization stays on the envelope interface (AC-3.1).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationWantParamsHelperTest, WantAgentEnvelopeSerializeGuardTest001, Function | SmallTest | Level1)
+{
+    auto agent = NotificationWantParamsHelperTest::CreateWantAgent();
+    ASSERT_NE(agent, nullptr);
+
+    std::string out = NotificationWantParamsHelper::SerializeWantAgent(agent);
+
+    EXPECT_FALSE(out.empty());
+    EXPECT_TRUE(AbilityRuntime::WantAgent::WantAgentHelper::HasWantParamsEnvelope(out));
+    std::string legacy = AbilityRuntime::WantAgent::WantAgentHelper::ToString(agent);
+    EXPECT_NE(out, legacy);
+}
+
+/**
+ * @tc.name: WantAgentEnvelopeParseGuardTest001
+ * @tc.desc: Guard: envelope data parses via FromStringWithEnvelope, legacy data keeps FromString fallback (AC-3.2).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationWantParamsHelperTest, WantAgentEnvelopeParseGuardTest001, Function | SmallTest | Level1)
+{
+    auto agent = NotificationWantParamsHelperTest::CreateWantAgent();
+    ASSERT_NE(agent, nullptr);
+
+    std::string envelope = NotificationWantParamsHelper::SerializeWantAgent(agent);
+    ASSERT_FALSE(envelope.empty());
+    ASSERT_TRUE(AbilityRuntime::WantAgent::WantAgentHelper::HasWantParamsEnvelope(envelope));
+    auto envelopeParsed = NotificationWantParamsHelper::ParseWantAgent(envelope);
+    EXPECT_NE(envelopeParsed, nullptr);
+
+    std::string legacy = AbilityRuntime::WantAgent::WantAgentHelper::ToString(agent);
+    ASSERT_FALSE(legacy.empty());
+    EXPECT_FALSE(AbilityRuntime::WantAgent::WantAgentHelper::HasWantParamsEnvelope(legacy));
+    auto legacyParsed = NotificationWantParamsHelper::ParseWantAgent(legacy);
+    EXPECT_NE(legacyParsed, nullptr);
+    ASSERT_NE(legacyParsed, nullptr);
+    std::string bundleName;
+    EXPECT_EQ(AbilityRuntime::WantAgent::WantAgentHelper::GetBundleName(legacyParsed, bundleName), ERR_OK);
+    EXPECT_EQ(bundleName, "com.ohos.launcher");
+}
+
 }  // namespace Notification
 }  // namespace OHOS
