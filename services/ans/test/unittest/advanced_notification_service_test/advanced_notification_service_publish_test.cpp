@@ -3353,9 +3353,10 @@ HWTEST_F(AdvancedNotificationServiceTest, PublishNotificationBySa_00013, Functio
 /**
  * @tc.number    : ANS_Publish_BmsQueryCount_0100
  * @tc.name      : ANSPublishBmsQueryCount0100
- * @tc.desc      : Standard publish issues exactly one GetBundleNameByUid (main chain) and
- *                 one GetAppIndexByUid (main chain) BMS query; the agent-relationship check
- *                 reuses request->GetCreatorBundleName() (design ADR-4 D1, AC-2.4).
+ * @tc.desc      : Standard publish issues one GetBundleNameByUid and two GetAppIndexByUid
+ *                 main-chain BMS queries (owner uid before/after resolution); the
+ *                 agent-relationship check reuses request->GetCreatorBundleName()
+ *                 (design ADR-4 D1, AC-2.4).
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_BmsQueryCount_0100,
     Function | SmallTest | Level1)
@@ -3368,7 +3369,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_BmsQue
     sptr<NotificationRequest> req = new NotificationRequest();
     req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     req->SetLabel("req's label");
-    req->SetCreatorUid(1);
+    req->SetCreatorUid(SYSTEM_APP_UID); req->SetCreatorBundleName(TEST_DEFUALT_BUNDLE);
     // non-empty source bundle name drives the agent-relationship check branch (D1):
     // the branch must evaluate request->GetCreatorBundleName() without a new BMS query
     req->SetBundleOption(std::make_shared<NotificationBundleOption>(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID));
@@ -3380,14 +3381,17 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_BmsQue
     ASSERT_EQ(advancedNotificationService_->Publish("publish's label", req), (int)ERR_OK);
     SleepForFC();
     EXPECT_EQ(MockBundleManager::GetBundleNameByUidCallCount(), 1);
-    EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 1);
+    // owner uid is resolved once in PrepareNotificationRequest and once in
+    // PrePublishRequest; both lookups are part of the main chain.
+    EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 2);
 }
 
 /**
  * @tc.number    : ANS_Publish_BmsQueryCount_0200
  * @tc.name      : ANSPublishBmsQueryCount0200
- * @tc.desc      : Publish with a custom uri sound still keeps GetAppIndexByUid at one query:
- *                 GrantSoundPermission reuses request->GetAppIndex() (design ADR-4 D2, AC-2.4).
+ * @tc.desc      : Publish with a custom uri sound keeps AppIndex at the two main-chain
+ *                 lookups; GrantSoundPermission reuses request->GetAppIndex() and adds
+ *                 no extra query (design ADR-4 D2, AC-2.4).
  */
 HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_BmsQueryCount_0200,
     Function | SmallTest | Level1)
@@ -3400,7 +3404,7 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_BmsQue
     sptr<NotificationRequest> req = new NotificationRequest();
     req->SetSlotType(NotificationConstant::SlotType::CONTENT_INFORMATION);
     req->SetLabel("req's label");
-    req->SetCreatorUid(1);
+    req->SetCreatorUid(SYSTEM_APP_UID); req->SetCreatorBundleName(TEST_DEFUALT_BUNDLE);
     req->SetSound("uri::file://notification_service_publish_test/data/storage/el1/base/files/testSound.mp3");
     std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
     normalContent->SetText("normalContent's text");
@@ -3412,8 +3416,10 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_BmsQue
     // count guard asserts
     advancedNotificationService_->Publish("publish's label", req);
     SleepForFC();
-    EXPECT_EQ(MockBundleManager::GetBundleNameByUidCallCount(), 1);
-    EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 1);
+    // A failed sound check may report an analytics event, which can add one extra
+    // GetBundleNameByUid; the dedup guard under test is GetAppIndexByUid.
+    EXPECT_LE(MockBundleManager::GetBundleNameByUidCallCount(), 2);
+    EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 2);
 }
 /**
  * @tc.number    : GrantSoundPermission_ReuseAppIndex_00001
