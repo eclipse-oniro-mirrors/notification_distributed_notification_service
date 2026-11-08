@@ -51,7 +51,7 @@ ohos_unittest("reminder_test") {
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
-    "access_token:libnativetoken",
+    "access_token:libnativetoken_shared",
     "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "cJSON:cjson",

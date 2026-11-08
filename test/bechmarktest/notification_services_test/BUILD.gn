@@ -44,7 +44,7 @@ ohos_benchmarktest("Benchmark_Notification_Servece_Test") {
     "ability_base:zuri",
     "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
-    "access_token:libnativetoken",
+    "access_token:libnativetoken_shared",
     "access_token:libtoken_setproc",
     "bluetooth:btframework",
     "cJSON:cjson",
