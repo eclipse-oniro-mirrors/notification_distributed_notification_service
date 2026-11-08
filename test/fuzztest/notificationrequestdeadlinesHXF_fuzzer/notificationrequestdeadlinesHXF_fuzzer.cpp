@@ -28,10 +28,7 @@
 #include "notification_multiline_content.h"
 #include "notification_normal_content.h"
 #include "notification_picture_content.h"
-// Test-only access to AddConsumedDevices and IsConsumedDevices; restore the macro immediately.
-#define private public // NOLINT
 #include "notification_request.h"
-#undef private // NOLINT
 #include "notification_template.h"
 #include "notification_trigger.h"
 #include "notification_unified_group_Info.h"
@@ -70,6 +67,7 @@ namespace OHOS {
         constexpr int32_t SMALL_PIXEL_SIZE      = 16;
         constexpr int32_t LARGE_PIXEL_SIZE      = 256;
         constexpr int32_t PIXEL_BYTES           = 4;
+        constexpr int32_t MIN_PIXEL_DIMENSION   = 1;
         constexpr int64_t NEGATIVE_TIME         = -1;
         constexpr int64_t ZERO_TIME             = 0;
         constexpr int64_t ONE_TIME              = 1;
@@ -158,7 +156,7 @@ namespace OHOS {
 
     std::shared_ptr<Media::PixelMap> MakePixelMap(int32_t width, int32_t height)
     {
-        if (width <= ZERO_TIME || height <= ZERO_TIME) {
+        if (width < MIN_PIXEL_DIMENSION || height < MIN_PIXEL_DIMENSION) {
             return nullptr;
         }
         auto pixelMap = std::make_shared<Media::PixelMap>();
@@ -728,9 +726,7 @@ namespace OHOS {
             Notification::NotificationConstant::HEADSET_DEVICE_TYPE);
         request.AdddeviceStatu(deviceType, fdp->ConsumeRandomLengthString(DEVICE_STRING_MAX));
         request.GetdeviceStatus();
-        request.AddConsumedDevices(Notification::NotificationConstant::HEADSET_DEVICE_TYPE);
-        request.IsConsumedDevices(Notification::NotificationConstant::HEADSET_DEVICE_TYPE);
-        request.IsConsumedDevices(deviceType);
+        request.GetConsumedDeviceFlag();
         request.IsAtomicServiceNotification();
         request.GetLittleIconType();
     }

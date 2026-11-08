@@ -30,7 +30,8 @@ namespace OHOS {
 namespace {
 constexpr uint8_t MAX_TRUSTLIST_ENTRIES = 12;
 constexpr size_t MAX_EXTRA_PROFILES = 3;
-constexpr uint8_t HIT_OVERSIZED_PARCEL_CASE = 0;
+constexpr uint8_t HIT_BOUNDED_PARCEL_CASE = 0;
+constexpr size_t MAX_TRUSTLIST_PROBE_ENTRIES = 100;
 constexpr int32_t MAX_LENGTH = 256;
 constexpr int32_t MAX_NUM = 128;
 constexpr int32_t MAX_SIZE_TYPE = 512;
@@ -74,6 +75,7 @@ void ExerciseParcelPaths(FuzzedDataProvider *fdp, Notification::NotificationDoNo
             Notification::NotificationDoNotDisturbProfile::Unmarshalling(parcel));
     }
 
+    // Exercise the oversized input guard without allocating an oversized trust list.
     Parcel invalidSizeParcel;
     invalidSizeParcel.WriteInt64(profile.GetProfileId());
     invalidSizeParcel.WriteString(profile.GetProfileName());
@@ -81,13 +83,12 @@ void ExerciseParcelPaths(FuzzedDataProvider *fdp, Notification::NotificationDoNo
         static_cast<uint32_t>(Notification::MAX_PARCELABLE_VECTOR_NUM + 1));
     profile.ReadFromParcel(invalidSizeParcel);
 
-    if (fdp->remaining_bytes() > 0 && fdp->ConsumeIntegral<uint8_t>() == HIT_OVERSIZED_PARCEL_CASE) {
-        std::vector<Notification::NotificationBundleOption> oversizedTrustList(
-            static_cast<size_t>(Notification::MAX_PARCELABLE_VECTOR_NUM + 1));
-        Notification::NotificationDoNotDisturbProfile oversizedProfile(
-            profile.GetProfileId(), profile.GetProfileName(), oversizedTrustList);
-        Parcel oversizedParcel;
-        oversizedProfile.Marshalling(oversizedParcel);
+    if (fdp->remaining_bytes() > 0 && fdp->ConsumeIntegral<uint8_t>() == HIT_BOUNDED_PARCEL_CASE) {
+        std::vector<Notification::NotificationBundleOption> boundedTrustList(MAX_TRUSTLIST_PROBE_ENTRIES);
+        Notification::NotificationDoNotDisturbProfile boundedProfile(
+            profile.GetProfileId(), profile.GetProfileName(), boundedTrustList);
+        Parcel boundedParcel;
+        boundedProfile.Marshalling(boundedParcel);
     }
 }
 
