@@ -249,6 +249,32 @@ ErrCode AdvancedNotificationService::SetNotificationsSystemEnabledForSpecialBund
         deviceId, bundleOption, enabled, updateUnEnableTime, true);
 }
 
+NotificationConstant::SWITCH_STATE AdvancedNotificationService::ResolveEnableSwitchState(
+    bool enabled, bool isSystemCall)
+{
+    if (isSystemCall) {
+        return enabled ? NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON
+            : NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    }
+    return enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON
+        : NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF;
+}
+
+ErrCode AdvancedNotificationService::CheckSilentAuthDisableProhibited(
+    const sptr<NotificationBundleOption> &bundle, const sptr<NotificationBundleOption> &bundleOption,
+    bool enabled, bool isSystemCall, HaMetaMessage &message)
+{
+    if (isSystemCall || enabled || !IsBundleSilentAuthLocked(bundle)) {
+        return ERR_OK;
+    }
+    ANS_LOGE("bundle %{public}s notification switch is locked by silent auth",
+        bundle->GetBundleName().c_str());
+    message.ErrorCode(ERR_ANS_INNER_ENTERPRISE_POLICY_PROHIBITED).BranchId(BRANCH_9);
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    SendEnableNotificationHiSysEvent(bundleOption, enabled, ERR_ANS_INNER_ENTERPRISE_POLICY_PROHIBITED);
+    return ERR_ANS_INNER_ENTERPRISE_POLICY_PROHIBITED;
+}
+
 ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundleImpl(
     const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled,
     bool updateUnEnableTime, bool isSystemCall)
@@ -263,11 +289,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundleImpl
         return ERR_ANS_INNER_INVALID_BUNDLE;
     }
 
-    NotificationConstant::SWITCH_STATE state = isSystemCall ?
-        (enabled ? NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
-            NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF) :
-        (enabled ? NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON :
-            NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+    NotificationConstant::SWITCH_STATE state = ResolveEnableSwitchState(enabled, isSystemCall);
 
     message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
             " st:" + std::to_string(static_cast<int32_t>(state)) +
@@ -295,6 +317,12 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundleImpl
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         ANS_LOGE(" Bundle is nullptr.");
         return ERR_ANS_INNER_INVALID_BUNDLE;
+    }
+
+    // Silent auth locked bundles reject disable operations.
+    ErrCode rejectResult = CheckSilentAuthDisableProhibited(bundle, bundleOption, enabled, isSystemCall, message);
+    if (rejectResult != ERR_OK) {
+        return rejectResult;
     }
 
     sptr<EnabledNotificationCallbackData> bundleData = new (std::nothrow)
@@ -589,6 +617,9 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
     allowed = false;
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
+    if (result == ERR_OK && !allowed) {
+        ApplySilentAuthGlobalSwitchExemption(bundleOption, allowed);
+    }
     if (result == ERR_OK && allowed) {
         result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, state);
         if (result == ERR_OK) {
@@ -597,9 +628,11 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
         }
         if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
-            // FA model app can publish notification without user confirm
-            allowed = CheckApiCompatibility(bundleOption);
-            SetDefaultNotificationEnabled(bundleOption, allowed);
+            if (!ResolveSilentAuthBundleNotExist(bundleOption, allowed)) {
+                // FA model app can publish notification without user confirm
+                allowed = CheckApiCompatibility(bundleOption);
+                SetDefaultNotificationEnabled(bundleOption, allowed);
+            }
         }
     }
     ANS_LOGI("ntfAuth %{public}s %{public}d allowed:%{public}d",
@@ -631,11 +664,9 @@ ErrCode AdvancedNotificationService::IsSpecialUserAllowedNotify(int32_t userId, 
     return result;
 }
 
-ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
-    const sptr<NotificationBundleOption> &bundleOption, bool &allowed)
+ErrCode AdvancedNotificationService::CheckSpecialCallerAndResolveTarget(
+    const sptr<NotificationBundleOption> &bundleOption, sptr<NotificationBundleOption> &targetBundle)
 {
-    ANS_LOGD("%{public}s", __FUNCTION__);
-
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         ANS_LOGE("Not system application");
@@ -647,16 +678,53 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
 
-    sptr<NotificationBundleOption> targetBundle = nullptr;
+    targetBundle = nullptr;
     if (isSubsystem) {
         if (bundleOption != nullptr) {
             targetBundle = GenerateValidBundleOption(bundleOption);
         }
-    } else {
-        ErrCode result = GetAppTargetBundle(bundleOption, targetBundle);
-        if (result != ERR_OK) {
-            return result;
+        return ERR_OK;
+    }
+    return GetAppTargetBundle(bundleOption, targetBundle);
+}
+
+ErrCode AdvancedNotificationService::CheckSpecialBundleSwitchAllowed(
+    const sptr<NotificationBundleOption> &bundleOption,
+    const sptr<NotificationBundleOption> &targetBundle, int32_t userId, bool &allowed)
+{
+    ErrCode result = ERR_OK;
+    allowed = false;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
+    if (result == ERR_OK && !allowed) {
+        ApplySilentAuthGlobalSwitchExemption(targetBundle, allowed);
+    }
+    if (result == ERR_OK && allowed) {
+        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(targetBundle, state);
+        if (result == ERR_OK) {
+            allowed = (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+                state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
         }
+        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
+            result = ERR_OK;
+            if (!ResolveSilentAuthBundleNotExist(targetBundle, allowed)) {
+                allowed = CheckApiCompatibility(targetBundle);
+                SetNotificationsSystemEnabledForSpecialBundle("", bundleOption, allowed);
+            }
+        }
+    }
+    return result;
+}
+
+ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
+    const sptr<NotificationBundleOption> &bundleOption, bool &allowed)
+{
+    ANS_LOGD("%{public}s", __FUNCTION__);
+
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    ErrCode targetResult = CheckSpecialCallerAndResolveTarget(bundleOption, targetBundle);
+    if (targetResult != ERR_OK) {
+        return targetResult;
     }
 
     if (targetBundle == nullptr) {
@@ -674,23 +742,7 @@ ErrCode AdvancedNotificationService::IsSpecialBundleAllowedNotify(
     }
 #endif
 
-    ErrCode result = ERR_OK;
-    allowed = false;
-    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
-    result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
-    if (result == ERR_OK && allowed) {
-        result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(targetBundle, state);
-        if (result == ERR_OK) {
-            allowed = (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
-                state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
-        }
-        if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
-            result = ERR_OK;
-            allowed = CheckApiCompatibility(targetBundle);
-            SetNotificationsSystemEnabledForSpecialBundle("", bundleOption, allowed);
-        }
-    }
-    return result;
+    return CheckSpecialBundleSwitchAllowed(bundleOption, targetBundle, userId, allowed);
 }
 
 ErrCode AdvancedNotificationService::CanPublishAsBundle(const std::string &representativeBundle, bool &canPublish)

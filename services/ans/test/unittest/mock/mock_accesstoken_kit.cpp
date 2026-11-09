@@ -27,6 +27,7 @@ ATokenAplEnum g_mockApl = ATokenAplEnum::APL_NORMAL;
 bool g_mockVerfyPermisson = true;
 bool g_isSystemApp = false;
 bool g_isAtomicService = false;
+std::string g_mockDeniedPermission;
 }
 
 void MockGetTokenTypeFlag(ATokenTypeEnum mockRet)
@@ -56,6 +57,11 @@ void MockIsAtomicServiceByFullTokenID(bool isAtomicService)
 {
     g_isAtomicService = isAtomicService;
 }
+
+void MockDeniedPermission(const std::string &permission)
+{
+    g_mockDeniedPermission = permission;
+}
 }
 }
 namespace OHOS {
@@ -64,6 +70,10 @@ namespace AccessToken {
 int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& permissionName)
 {
     if (!Notification::g_mockVerfyPermisson) {
+        return PERMISSION_DENIED;
+    }
+
+    if (permissionName == Notification::g_mockDeniedPermission) {
         return PERMISSION_DENIED;
     }
 

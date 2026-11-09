@@ -197,6 +197,7 @@
                 "notification_normal_content.h",
                 "notification_picture_content.h",
                 "notification_request.h",
+                "notification_silent_auth.h",
                 "notification_slot.h",
                 "notification_sorting.h",
                 "notification_sorting_map.h",

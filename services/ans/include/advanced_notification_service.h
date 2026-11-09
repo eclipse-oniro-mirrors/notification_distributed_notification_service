@@ -46,6 +46,7 @@
 #include "notification_load_utils.h"
 #include "notification_parameters.h"
 #include "notification_record.h"
+#include "notification_silent_auth.h"
 #include "notification_slot_filter.h"
 #include "notification_sorting_map.h"
 #include "permission_filter.h"
@@ -64,6 +65,8 @@
 
 namespace OHOS {
 namespace Notification {
+class HaMetaMessage;
+
 static const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
 static const uint32_t SILENT_REMINDER__SLOT_FLAGS = 32; // 0b100000
 constexpr char REMINDER_CAPABILITY[] = "reminder_capability";
@@ -1880,6 +1883,14 @@ public:
 
     ErrCode DisableNotificationFeature(const sptr<NotificationDisable> &notificationDisable) override;
 
+    ErrCode SetSilentAuthNotificationInfo(const sptr<NotificationSilentAuth> &silentAuthInfo) override;
+
+    ErrCode GetNotificationSwitchLimitedBundles(
+        int32_t userId, std::map<std::string, bool> &switchLimited) override;
+
+    ErrCode GetSilentAuthNotificationBundles(
+        int32_t userId, std::vector<std::string> &bundleList) override;
+
     bool IsDisableNotification(const std::string &bundleName);
 
     bool IsDisableNotification(const sptr<NotificationBundleOption> &bundleOption);
@@ -1892,6 +1903,59 @@ public:
         const int32_t &userId, bool directAgency);
 
     bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
+    
+    bool IsBundleSilentAuthLocked(const sptr<NotificationBundleOption> &bundleOption);
+
+    bool IsAncoBundleSilentAuthLocked(const sptr<NotificationBundleOption> &bundleOption, int32_t userId);
+
+    /**
+     * @brief Single policy point: silent auth locked bundles are exempt from the user-level global switch.
+     *
+     * @param bundleOption Indicates the target bundle.
+     * @param allowed Indicates the current global switch state, set to true when the bundle is locked.
+     */
+    void ApplySilentAuthGlobalSwitchExemption(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
+
+    /**
+     * @brief Single policy point: for a bundle without a switch record, silent auth locked ones are
+     *        allowed to publish and the locked-on record is lazily written.
+     *
+     * @param bundleOption Indicates the target bundle.
+     * @param allowed Indicates the resolved publish permission.
+     * @return Returns true when the silent auth policy handled the case, false otherwise.
+     */
+    bool ResolveSilentAuthBundleNotExist(const sptr<NotificationBundleOption> &bundleOption, bool &allowed);
+
+    static ErrCode CheckSpecialCallerAndResolveTarget(
+        const sptr<NotificationBundleOption> &bundleOption, sptr<NotificationBundleOption> &targetBundle);
+
+    ErrCode CheckSpecialBundleSwitchAllowed(const sptr<NotificationBundleOption> &bundleOption,
+        const sptr<NotificationBundleOption> &targetBundle, int32_t userId, bool &allowed);
+
+    ErrCode CheckSilentAuthCallerPermission();
+
+    ErrCode ResolveSilentAuthUserId(int32_t &userId);
+
+    void ForceEnableSilentAuthBundles(const std::vector<std::string> &bundleList, int32_t userId);
+
+    void ForceEnableSilentAuthBundleInstance(
+        const std::string &bundleName, int32_t userId, int32_t appIndex);
+
+    ErrCode ForceEnableSilentAuthBundle(const sptr<NotificationBundleOption> &bundleOption);
+
+    void PublishSilentAuthChangeEvent(int32_t userId);
+
+    ErrCode GetNotificationSwitchLimitedBundlesInner(
+        int32_t userId, std::map<std::string, bool> &switchLimited);
+
+    void CollectSilentAuthSwitchLimited(const NotificationSilentAuth &silentAuthInfo,
+        int32_t userId, std::map<std::string, bool> &switchLimited);
+
+    void CollectDisabledBundles(int32_t userId, std::map<std::string, bool> &switchLimited);
+
+    void CollectSilentAuthBundleNames(int32_t userId, std::vector<std::string> &bundleList);
+
+    bool GetSilentAuthBundleSwitchEnabled(const std::string &bundleName, int32_t userId);
 
     void SetAndPublishSubscriberExistFlag(const std::string& deviceType, bool existFlag);
     static sptr<NotificationBundleOption> GenerateBundleOption();
@@ -2160,6 +2224,12 @@ private:
     ErrCode SetNotificationsEnabledForSpecialBundleImpl(
         const std::string &deviceId, const sptr<NotificationBundleOption> &bundleOption, bool enabled,
         bool updateUnEnableTime = true, bool isSystemCall = false);
+
+    static NotificationConstant::SWITCH_STATE ResolveEnableSwitchState(bool enabled, bool isSystemCall);
+
+    ErrCode CheckSilentAuthDisableProhibited(const sptr<NotificationBundleOption> &bundle,
+        const sptr<NotificationBundleOption> &bundleOption, bool enabled, bool isSystemCall,
+        HaMetaMessage &message);
 
     void StartFilters();
     void StopFilters();

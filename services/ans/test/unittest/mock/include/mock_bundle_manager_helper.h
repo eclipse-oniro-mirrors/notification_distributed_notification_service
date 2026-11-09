@@ -29,6 +29,8 @@ public:
     static void MockClearInstalledBundle();
     static void MockBundleInterfaceResult(const int32_t result);
     static void MockBundleIconData(const std::string &iconData);
+    static void MockUidByBundleName(const int32_t uidForNonZeroUser, const int32_t uidForUserIdZero);
+    static void MockCheckApiCompatibility(bool checkApiCompatibility);
     static void MockInstallBundle(const NotificationBundleOption& bundleOption);
     static void MockUninstallBundle(const NotificationBundleOption& bundleOption);
     static void MockIsAncoApp(bool isAncoApp);

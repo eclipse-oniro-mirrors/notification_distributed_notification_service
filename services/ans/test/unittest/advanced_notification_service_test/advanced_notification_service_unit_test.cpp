@@ -54,6 +54,7 @@ extern void MockQueryForgroundOsAccountId(bool mockRet, uint8_t mockCase);
 extern void MockIsOsAccountExists(bool mockRet);
 extern void MockEncrypt(bool mockRet);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0);
+extern void ResetAccountMock();
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
@@ -3824,6 +3825,31 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetIsFromSAToExtendInfo_500, Funct
     advancedNotificationService_->SetIsFromSAToExtendInfo(request);
     EXPECT_FALSE(advancedNotificationService_->IsFromAccountNotification(request));
     EXPECT_EQ(request->GetExtendInfo()->GetStringParam("notification_publish_by_sa"), "1");
+}
+
+/**
+ * @tc.name: SetSilentAuthNotificationInfo_100
+ * @tc.desc: Set silent auth info with a db write failure returns DB_OPERATION_FAILED.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SetSilentAuthNotificationInfo_100, Function | SmallTest | Level1)
+{
+    ResetAccountMock();
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_NATIVE);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    IPCSkeleton::SetCallingTokenID(NATIVE_TOKEN);
+    sptr<NotificationSilentAuth> info = new (std::nothrow) NotificationSilentAuth();
+    ASSERT_NE(info, nullptr);
+    info->SetBundleList({"sa_db_fail"});
+    info->SetUserId(-1); // SUBSCRIBE_USER_INIT: resolves to the active user
+    // db write failure propagates as DB_OPERATION_FAILED instead of success.
+    MockInit(true);
+    MockInsertData(false);
+    ASSERT_EQ(advancedNotificationService_->SetSilentAuthNotificationInfo(info),
+        ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    MockInsertData(true);
 }
 }
 }

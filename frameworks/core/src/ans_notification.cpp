@@ -3207,6 +3207,47 @@ InnerErrorCode AnsNotification::DisableNotificationFeature(const NotificationDis
     return static_cast<InnerErrorCode>(proxy->DisableNotificationFeature(reqPtr));
 }
 
+InnerErrorCode AnsNotification::SetSilentAuthNotificationInfo(
+    const std::vector<std::string> &bundleList, int32_t userId)
+{
+    ANS_LOGD("called");
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("SetSilentAuthNotificationInfo fail");
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
+    }
+    sptr<NotificationSilentAuth> reqPtr = new (std::nothrow) NotificationSilentAuth();
+    if (reqPtr == nullptr) {
+        ANS_LOGE("null reqPtr");
+        return ERR_ANS_INNER_NO_MEMORY;
+    }
+    reqPtr->SetBundleList(bundleList);
+    reqPtr->SetUserId(userId);
+    return static_cast<InnerErrorCode>(proxy->SetSilentAuthNotificationInfo(reqPtr));
+}
+
+InnerErrorCode AnsNotification::GetNotificationSwitchLimitedBundles(
+    int32_t userId, std::map<std::string, bool> &switchLimited)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
+    }
+    return static_cast<InnerErrorCode>(proxy->GetNotificationSwitchLimitedBundles(userId, switchLimited));
+}
+
+InnerErrorCode AnsNotification::GetSilentAuthNotificationBundles(
+    int32_t userId, std::vector<std::string> &bundleList)
+{
+    sptr<IAnsManager> proxy = GetAnsManagerProxy();
+    if (!proxy) {
+        ANS_LOGE("Fail to GetAnsManagerProxy.");
+        return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
+    }
+    return static_cast<InnerErrorCode>(proxy->GetSilentAuthNotificationBundles(userId, bundleList));
+}
+
 InnerErrorCode AnsNotification::GetAllLiveViewEnabledBundles(std::vector<NotificationBundleOption> &bundleOption)
 {
     sptr<IAnsManager> proxy = GetAnsManagerProxy();

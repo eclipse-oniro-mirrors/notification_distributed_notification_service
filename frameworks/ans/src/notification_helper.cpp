@@ -1295,6 +1295,30 @@ ErrCode NotificationHelper::DisableNotificationFeature(const NotificationDisable
     return InnerErrorToNative(result);
 }
 
+ErrCode NotificationHelper::SetSilentAuthNotificationInfo(
+    const std::vector<std::string> &bundleList, int32_t userId)
+{
+    InnerErrorCode result =
+        AnsNotification::GetInstance()->SetSilentAuthNotificationInfo(bundleList, userId);
+    return InnerErrorToNative(result);
+}
+
+ErrCode NotificationHelper::GetNotificationSwitchLimitedBundles(
+    int32_t userId, std::map<std::string, bool> &switchLimited)
+{
+    InnerErrorCode result =
+        AnsNotification::GetInstance()->GetNotificationSwitchLimitedBundles(userId, switchLimited);
+    return InnerErrorToNative(result);
+}
+
+ErrCode NotificationHelper::GetSilentAuthNotificationBundles(
+    int32_t userId, std::vector<std::string> &bundleList)
+{
+    InnerErrorCode result =
+        AnsNotification::GetInstance()->GetSilentAuthNotificationBundles(userId, bundleList);
+    return InnerErrorToNative(result);
+}
+
 ErrCode NotificationHelper::SetHashCodeRule(const uint32_t type)
 {
     InnerErrorCode result =

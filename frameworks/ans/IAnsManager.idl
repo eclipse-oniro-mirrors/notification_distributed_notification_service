@@ -28,6 +28,7 @@ sequenceable OHOS.Notification.NotificationDoNotDisturbDate;
 sequenceable OHOS.Notification.NotificationDoNotDisturbProfile;
 sequenceable OHOS.Notification.NotificationExtensionSubscriptionInfo;
 sequenceable OHOS.Notification.NotificationRequest;
+sequenceable OHOS.Notification.NotificationSilentAuth;
 sequenceable OHOS.Notification.NotificationSlot;
 sequenceable OHOS.Notification.NotificationSubscribeInfo;
 sequenceable OHOS.Notification.NotificationStatistics;
@@ -493,4 +494,10 @@ interface OHOS.Notification.IAnsManager {
     void RemoveNotificationAsAdmin([in] String hashCode);
 
     void RemoveAllNotificationsAsAdmin([in] int userId);
+
+    void SetSilentAuthNotificationInfo([in] sptr<NotificationSilentAuth> silentAuthInfo);
+
+    void GetNotificationSwitchLimitedBundles([in] int userId, [out] OrderedMap<String, boolean> switchLimited);
+
+    void GetSilentAuthNotificationBundles([in] int userId, [out] String[] bundleList);
 }

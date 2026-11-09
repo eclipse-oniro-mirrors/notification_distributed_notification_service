@@ -20,6 +20,7 @@
 #include "notification_local_live_view_button.h"
 #include "notification_local_live_view_content.h"
 #include "notification_operation_info.h"
+#include "notification_silent_auth.h"
 #include "notification_unified_group_Info.h"
 #include "resource_manager.h"
 #include "notificationparcel_fuzzer.h"
@@ -79,19 +80,40 @@ namespace Notification {
         std::vector<std::string> bundleList;
         bool disabled = fdp->ConsumeBool();
         Parcel parcel;
-    
+
         bundleList.emplace_back(fdp->ConsumeRandomLengthString());
         notificationDisable.SetDisabled(disabled);
         notificationDisable.GetDisabled();
         notificationDisable.SetBundleList(bundleList);
         notificationDisable.GetBundleList();
-    
+
         notificationDisable.Marshalling(parcel);
         notificationDisable.ReadFromParcel(parcel);
         notificationDisable.Unmarshalling(parcel);
-    
+
         std::string jsonObj = notificationDisable.ToJson();
         notificationDisable.FromJson(jsonObj);
+    }
+
+    void TestNotificationSilentAuthParcel(FuzzedDataProvider *fdp)
+    {
+        NotificationSilentAuth silentAuth;
+        std::vector<std::string> bundleList;
+        int32_t userId = fdp->ConsumeIntegral<int32_t>();
+        Parcel parcel;
+
+        bundleList.emplace_back(fdp->ConsumeRandomLengthString());
+        silentAuth.SetBundleList(bundleList);
+        silentAuth.GetBundleList();
+        silentAuth.SetUserId(userId);
+        silentAuth.GetUserId();
+
+        silentAuth.Marshalling(parcel);
+        silentAuth.ReadFromParcel(parcel);
+        silentAuth.Unmarshalling(parcel);
+
+        std::string jsonObj = silentAuth.ToJson();
+        silentAuth.FromJson(jsonObj);
     }
 
     void TestNotificationLiveViewContentParcel(FuzzedDataProvider *fdp)
@@ -237,6 +259,7 @@ namespace Notification {
         TestNotificationCapsuleParcel(fdp);
         TestNotificationDoNotDisturbProfileParcel(fdp);
         TestNotificationDisableParcel(fdp);
+        TestNotificationSilentAuthParcel(fdp);
         TestNotificationLiveViewContentParcel(fdp);
         TestNotificationLocalLiveViewButtonParcel(fdp);
         TestNotificationLocalLiveViewContentParcel(fdp);

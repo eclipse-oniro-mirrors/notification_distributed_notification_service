@@ -29,6 +29,7 @@
 #include "notification_live_view_content.h"
 #include "notification_parameters.h"
 #include "notification_request.h"
+#include "notification_silent_auth.h"
 #include "notification_slot.h"
 #include "notification_sorting_map.h"
 #include "notification_subscriber.h"
@@ -1621,6 +1622,38 @@ public:
      * @return Returns set result.
      */
     static ErrCode DisableNotificationFeature(const NotificationDisable &notificationDisable);
+
+    /**
+     * @brief Set silent auth info of notification feature.
+     *
+     * @param bundleList Bundle name list of silent auth management, empty list means cancel the management.
+     * @param userId Indicates the user id, SUBSCRIBE_USER_INIT means current active user.
+     * @return Returns set result.
+     */
+    static ErrCode SetSilentAuthNotificationInfo(
+        const std::vector<std::string> &bundleList, int32_t userId);
+
+    /**
+     * @brief Obtains the notification switch limited bundles of the specified user.
+     *
+     * @param userId Indicates the user id.
+     * @param switchLimited Indicates the bundle name and switch state map.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode GetNotificationSwitchLimitedBundles(
+        int32_t userId, std::map<std::string, bool> &switchLimited);
+
+    /**
+     * @brief Obtains the silent auth managed bundle name list of the specified user.
+     *
+     * Only the silent auth control list is returned.
+     *
+     * @param userId Indicates the user id.
+     * @param bundleList Indicates the silent auth managed bundle name list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    static ErrCode GetSilentAuthNotificationBundles(
+        int32_t userId, std::vector<std::string> &bundleList);
 
     /**
      * @brief Whether reminders are allowed.

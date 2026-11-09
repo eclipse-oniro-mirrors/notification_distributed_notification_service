@@ -595,6 +595,9 @@ AnsStatus AdvancedNotificationService::AssignValidNotificationSlot(const std::sh
     ErrCode result = NotificationPreferences::GetInstance()->GetNotificationSlot(bundleOption, slotType, slot);
     if ((result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) ||
         (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_SLOT_TYPE_NOT_EXIST)) {
+        if (IsBundleSilentAuthLocked(bundleOption)) {
+            ForceEnableSilentAuthBundle(bundleOption);
+        }
         slot = new (std::nothrow) NotificationSlot(slotType);
         if (slot == nullptr) {
             ANS_LOGE("Failed to create NotificationSlot instance");

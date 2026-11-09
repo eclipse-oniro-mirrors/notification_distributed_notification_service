@@ -17,6 +17,7 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_ETS_ANI_INCLUDE_ANI_NOTIFICATION_SWITCH_H
 
 #include <cstdint>
+#include <map>
 #include <string>
 
 #include "ani.h"
@@ -28,6 +29,7 @@ namespace NotificationManagerSts {
 enum NotificationSwitchFunctionType {
     NOTIFICATION_SWITCH_FUNCTION_NONE = 0,
     GET_NOTIFICATION_SWITCH,
+    GET_NOTIFICATION_SWITCH_LIMITED_BUNDLES,
 };
 
 struct AsyncCallbackNotificationSwitchInfo {
@@ -40,6 +42,7 @@ struct AsyncCallbackNotificationSwitchInfo {
     bool switchState = false;
     int32_t userId = 0;
     int32_t enableStatus = 0;
+    std::map<std::string, bool> switchLimitedBundles;
 };
 
 void HandleNotificationSwitchCallbackComplete(ani_env *env,
@@ -47,6 +50,7 @@ void HandleNotificationSwitchCallbackComplete(ani_env *env,
 
 ani_object AniSetNotificationSwitch(ani_env *env, ani_string switchName, ani_boolean switchState, ani_int userId);
 ani_object AniGetNotificationSwitch(ani_env *env, ani_string switchName, ani_int userId);
+ani_object AniGetNotificationSwitchLimitedBundles(ani_env *env, ani_int userId);
 } // namespace NotificationManagerSts
 } // namespace OHOS
 

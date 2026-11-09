@@ -1938,6 +1938,11 @@ ErrCode AdvancedNotificationService::UpdateNotificationSwitchState(
     NotificationConstant::SWITCH_STATE targetState = bundleInfo.applicationInfo.allowEnableNotification ?
         NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
         NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    // Silent auth locked bundles are always kept on during install/scan initialization, so that
+    // apps installed after the enterprise config also get the locked-on switch.
+    if (AdvancedNotificationService::GetInstance()->IsBundleSilentAuthLocked(bundleOption)) {
+        return AdvancedNotificationService::GetInstance()->ForceEnableSilentAuthBundle(bundleOption);
+    }
     bool enable = false;
     NotificationConstant::SWITCH_STATE currentState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     ErrCode result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
@@ -2653,6 +2658,14 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForEnable(
     const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)
 {
     NotificationConstant::SWITCH_STATE state = cloneBundleInfo.GetEnableNotification();
+    if (IsBundleSilentAuthLocked(bundle) && state != NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
+        // Deterministically write the locked-on state for silent auth managed bundles during clone
+        // restore, so that historical data inheritance does not break enterprise management.
+        ANS_LOGI("bundle %{public}s is locked by silent auth, force switch on for clone restore",
+            bundle->GetBundleName().c_str());
+        ForceEnableSilentAuthBundle(bundle);
+        return;
+    }
     ErrCode result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle, state);
     if (result == ERR_OK) {
         SetSlotFlagsTrustlistsAsBundle(bundle);

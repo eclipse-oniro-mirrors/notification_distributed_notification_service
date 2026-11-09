@@ -112,6 +112,7 @@ napi_value NotificationManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getNotificationSetting", NapiGetNotificationSettings),
         DECLARE_NAPI_FUNCTION("setNotificationSwitch", NapiSetNotificationSwitch),
         DECLARE_NAPI_FUNCTION("getNotificationSwitch", NapiGetNotificationSwitch),
+        DECLARE_NAPI_FUNCTION("getNotificationSwitchLimitedBundles", NapiGetNotificationSwitchLimitedBundles),
         DECLARE_NAPI_FUNCTION("setSilentReminderEnabled", NapiSetSilentReminderEnabled),
         DECLARE_NAPI_FUNCTION("isSilentReminderEnabled", NapiIsSilentReminderEnabled),
         DECLARE_NAPI_FUNCTION("setRingtoneInfoByBundle", NapiSetRingtoneInfoByBundle),

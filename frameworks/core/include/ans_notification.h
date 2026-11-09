@@ -1632,6 +1632,36 @@ public:
     InnerErrorCode DisableNotificationFeature(const NotificationDisable &notificationDisable);
 
     /**
+     * @brief Set bundle list of silent auth notification.
+     *
+     * @param bundleList Bundle name list of silent auth management, empty list means cancel the management.
+     * @param userId Indicates the user id, SUBSCRIBE_USER_INIT means current active user.
+     * @return Returns set result.
+     */
+    InnerErrorCode SetSilentAuthNotificationInfo(
+        const std::vector<std::string> &bundleList, int32_t userId);
+
+    /**
+     * @brief Obtains the notification switch limited bundles of the specified user.
+     *
+     * @param userId Indicates the user id.
+     * @param switchLimited Indicates the bundle name and switch state map.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    InnerErrorCode GetNotificationSwitchLimitedBundles(
+        int32_t userId, std::map<std::string, bool> &switchLimited);
+
+    /**
+     * @brief Obtains the silent auth managed bundle name list of the specified user.
+     *
+     * @param userId Indicates the user id.
+     * @param bundleList Indicates the silent auth managed bundle name list.
+     * @return Returns ERR_OK on success, others on failure.
+     */
+    InnerErrorCode GetSilentAuthNotificationBundles(
+        int32_t userId, std::vector<std::string> &bundleList);
+
+    /**
      * @brief Obtains allow liveview application list.
      *
      * @param bundleOption Indicates the bundle bundleOption.

@@ -946,6 +946,23 @@ public:
         return ERR_ANS_INNER_INVALID_PARAM;
     }
 
+    ErrCode SetSilentAuthNotificationInfo(const sptr<NotificationSilentAuth> &silentAuthInfo) override
+    {
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
+    ErrCode GetNotificationSwitchLimitedBundles(
+        int32_t userId, std::map<std::string, bool> &switchLimited) override
+    {
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
+    ErrCode GetSilentAuthNotificationBundles(
+        int32_t userId, std::vector<std::string> &bundleList) override
+    {
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+
     ErrCode DistributeOperation(const sptr<NotificationOperationInfo>& operationInfo,
         const sptr<IAnsOperationCallback>& operationCallback) override
     {
@@ -1591,6 +1608,54 @@ HWTEST_F(AnsNotificationBranchTest, NotificationExtensionSubscribePriority_0100,
     ASSERT_NE(notification, nullptr);
     int32_t priorityStrategy = 0;
     InnerErrorCode ret = notification->NotificationExtensionSubscribe(priorityStrategy);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: SetSilentAuthNotificationInfo_0100
+ * @tc.desc: 1.Test SetSilentAuthNotificationInfo
+ *           2.GetAnsManagerProxy is false
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsNotificationBranchTest, SetSilentAuthNotificationInfo_0100, Function | MediumTest | Level1)
+{
+    auto ansNotification = std::make_shared<AnsNotification>();
+    EXPECT_NE(ansNotification, nullptr);
+    std::vector<std::string> bundleList = {"sa_client"};
+    InnerErrorCode ret = ansNotification->SetSilentAuthNotificationInfo(bundleList, 100);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetNotificationSwitchLimitedBundles_0100
+ * @tc.desc: 1.Test GetNotificationSwitchLimitedBundles
+ *           2.GetAnsManagerProxy is false
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsNotificationBranchTest, GetNotificationSwitchLimitedBundles_0100, Function | MediumTest | Level1)
+{
+    auto ansNotification = std::make_shared<AnsNotification>();
+    EXPECT_NE(ansNotification, nullptr);
+    std::map<std::string, bool> switchLimited;
+    InnerErrorCode ret = ansNotification->GetNotificationSwitchLimitedBundles(100, switchLimited);
+    EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
+}
+
+/*
+ * @tc.name: GetSilentAuthNotificationBundles_0100
+ * @tc.desc: 1.Test GetSilentAuthNotificationBundles
+ *           2.GetAnsManagerProxy is false
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsNotificationBranchTest, GetSilentAuthNotificationBundles_0100, Function | MediumTest | Level1)
+{
+    auto ansNotification = std::make_shared<AnsNotification>();
+    EXPECT_NE(ansNotification, nullptr);
+    std::vector<std::string> bundleList;
+    InnerErrorCode ret = ansNotification->GetSilentAuthNotificationBundles(100, bundleList);
     EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
 }  // namespace Notification

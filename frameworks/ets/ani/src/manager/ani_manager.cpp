@@ -125,6 +125,8 @@ static std::array kitManagerFunctions = {
         reinterpret_cast<void *>(AniSetNotificationSwitch)},
     ani_native_function {"nativeGetNotificationSwitch", nullptr,
         reinterpret_cast<void *>(AniGetNotificationSwitch)},
+    ani_native_function {"nativeGetNotificationSwitchLimitedBundles", nullptr,
+        reinterpret_cast<void *>(AniGetNotificationSwitchLimitedBundles)},
     ani_native_function {"nativeSetNotificationSnooze", nullptr,
         reinterpret_cast<void *>(AniSetNotificationSnooze)},
     ani_native_function {"nativeGetNotificationStatisticsByBundle", nullptr,

@@ -29,6 +29,7 @@
 #include "advanced_notification_service.h"
 #include "notification_clone_bundle_info.h"
 #include "notification_disable.h"
+#include "notification_silent_auth.h"
 #include "notification_constant.h"
 #include "notification_ringtone_info.h"
 #include "notification_statistics.h"
@@ -382,10 +383,14 @@ public:
     void SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
     void AddDisableNotificationInfo(const std::string &value);
+    void SetSilentAuthNotificationInfo(const sptr<NotificationSilentAuth> &silentAuthInfo);
+    bool GetSilentAuthNotificationInfo(NotificationSilentAuth &silentAuthInfo);
+    void AddSilentAuthNotificationInfo(const std::string &value);
     ErrCode GetAllLiveViewEnabledBundles(const int32_t userId, std::vector<NotificationBundleOption> &bundleOption);
     void SetkioskAppTrustList(const std::vector<std::string> &kioskAppTrustList);
     bool GetkioskAppTrustList(std::vector<std::string> &kioskAppTrustList) const;
     bool GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable);
+    bool GetUserSilentAuthNotificationInfo(int32_t userId, NotificationSilentAuth &silentAuthInfo);
     bool IsRestrictedMode(const int32_t &userId);
     void SetRestrictedModeTrustList(const std::unordered_map<int32_t,
         std::vector<std::string>> &restrictedModeTrustList);
@@ -436,6 +441,13 @@ private:
     };
     DisableNotificationInfo disableNotificationInfo_;
     std::map<int32_t, DisableNotificationInfo> userDisableNotificationInfo_;
+
+    struct SilentAuthNotificationInfo {
+        bool initialized = false;
+        std::vector<std::string> bundleList;
+    };
+    SilentAuthNotificationInfo silentAuthNotificationInfo_;
+    std::map<int32_t, SilentAuthNotificationInfo> userSilentAuthNotificationInfo_;
     std::map<int32_t, NotificationStatistics> notificationStatistics_ = {};
 };
 }  // namespace Notification

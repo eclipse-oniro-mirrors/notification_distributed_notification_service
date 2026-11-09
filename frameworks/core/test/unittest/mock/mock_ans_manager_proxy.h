@@ -227,6 +227,9 @@ public:
     MOCK_METHOD3(AllowUseReminder, ErrCode(const std::string&, const int32_t userId, bool&));
     MOCK_METHOD2(UpdateNotificationTimerByUid, ErrCode(int32_t, bool));
     MOCK_METHOD1(DisableNotificationFeature, ErrCode(const sptr<NotificationDisable>&));
+    MOCK_METHOD1(SetSilentAuthNotificationInfo, ErrCode(const sptr<NotificationSilentAuth>&));
+    MOCK_METHOD2(GetNotificationSwitchLimitedBundles, ErrCode(int32_t, std::map<std::string, bool>&));
+    MOCK_METHOD2(GetSilentAuthNotificationBundles, ErrCode(int32_t, std::vector<std::string>&));
     MOCK_METHOD2(GetTargetDeviceStatus, ErrCode(const std::string&, int32_t&));
     MOCK_METHOD2(DistributeOperation,
         ErrCode(const sptr<NotificationOperationInfo>&, const sptr<IAnsOperationCallback>&));

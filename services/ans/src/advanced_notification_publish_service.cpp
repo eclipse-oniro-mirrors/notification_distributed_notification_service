@@ -375,6 +375,9 @@ ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<Notific
     allowed = false;
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
+    if (result == ERR_OK && !allowed) {
+        ApplySilentAuthGlobalSwitchExemption(bundleOption, allowed);
+    }
     if (result == ERR_OK && allowed) {
         result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, state);
         if (result == ERR_OK) {
@@ -383,8 +386,10 @@ ErrCode AdvancedNotificationService::IsAllowedNotifyForBundle(const sptr<Notific
         }
         if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
-            // FA model app can publish notification without user confirm
-            allowed = CheckApiCompatibility(bundleOption);
+            if (!ResolveSilentAuthBundleNotExist(bundleOption, allowed)) {
+                // FA model app can publish notification without user confirm
+                allowed = CheckApiCompatibility(bundleOption);
+            }
         }
     }
     return result;

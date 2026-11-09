@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_NOTIFICATION_SWITCH_H
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_FRAMEWORKS_JS_NAPI_NOTIFICATION_SWITCH_H
 
+#include <map>
 #include <string>
 
 #include "common.h"
@@ -29,6 +30,7 @@ struct NotificationClassificationSwitchParams {
     int32_t userId = SUBSCRIBE_USER_INIT;
     napi_ref callback = nullptr;
     NotificationConstant::SWITCH_STATE enableStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    std::map<std::string, bool> switchLimitedBundles;
 };
 
 struct AsyncCallbackNotificationClassificationSwitch {
@@ -40,6 +42,7 @@ struct AsyncCallbackNotificationClassificationSwitch {
 
 napi_value NapiSetNotificationSwitch(napi_env env, napi_callback_info info);
 napi_value NapiGetNotificationSwitch(napi_env env, napi_callback_info info);
+napi_value NapiGetNotificationSwitchLimitedBundles(napi_env env, napi_callback_info info);
 
 }  // namespace NotificationNapi
 }  // namespace OHOS

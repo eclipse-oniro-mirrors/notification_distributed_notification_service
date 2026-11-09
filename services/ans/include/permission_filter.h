@@ -42,6 +42,18 @@ public:
      * @return Returns the filter result.
      */
     AnsStatus OnPublish(const std::shared_ptr<NotificationRecord> &record) override;
+
+private:
+    /**
+     * @brief Resolves whether the bundle's notification switch allows publishing.
+     *
+     * Silent auth locked bundles are allowed and the locked-on switch record is lazily
+     * written when no record exists yet; otherwise the API compatibility check applies.
+     *
+     * @param record Indicates the NotificationRecord.
+     * @param enable Indicates whether publishing is allowed by the bundle switch.
+     */
+    void ResolveBundlePublishEnable(const std::shared_ptr<NotificationRecord> &record, bool &enable);
 };
 }  // namespace Notification
 }  // namespace OHOS

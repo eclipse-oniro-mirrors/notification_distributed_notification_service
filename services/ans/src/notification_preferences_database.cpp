@@ -311,6 +311,7 @@ const static std::string KEY_HASH_CODE_RULE = "hashCodeRule";
 const static std::string CLONE_BUNDLE = "bundle_";
 const static std::string CLONE_PRIORITY = "priority_";
 const static std::string KEY_DISABLE_NOTIFICATION = "disableNotificationFeature";
+const static std::string KEY_SILENT_AUTH_NOTIFICATION = "silentAuthNotification";
 const static std::string NITIFICATION_CREATE_TYPE = "1";
 constexpr int32_t ZERO_USER_ID = 0;
 const static int32_t DISTRIBUTED_KEY_NUM = 4;
@@ -1004,6 +1005,7 @@ bool NotificationPreferencesDatabase::ParseFromDisturbeDB(NotificationPreference
         GetDoNotDisturbProfile(info, iter);
     }
     GetDisableNotificationInfo(info);
+    GetSilentAuthNotificationInfo(info);
     GetRestrictedModeTrustList(info);
 
     return true;
@@ -4445,6 +4447,54 @@ bool NotificationPreferencesDatabase::SetDisableNotificationInfo(const sptr<Noti
     return (result == NativeRdb::E_OK);
 }
 
+bool NotificationPreferencesDatabase::SetSilentAuthNotificationInfo(
+    const sptr<NotificationSilentAuth> &silentAuthInfo)
+{
+    if (silentAuthInfo == nullptr || !CheckRdbStore()) {
+        ANS_LOGE("null silentAuthInfo or rdbStore");
+        return false;
+    }
+    std::string value = silentAuthInfo->ToJson();
+    int32_t userId = silentAuthInfo->GetUserId();
+    if (userId == SUBSCRIBE_USER_INIT) {
+        userId = ZERO_USER_ID;
+    }
+    int32_t result = rdbDataManager_->InsertData(KEY_SILENT_AUTH_NOTIFICATION, value, userId);
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::GetSilentAuthNotificationInfo(
+    NotificationSilentAuth &silentAuthInfo)
+{
+    return GetUserSilentAuthNotificationInfo(ZERO_USER_ID, silentAuthInfo);
+}
+
+bool NotificationPreferencesDatabase::GetUserSilentAuthNotificationInfo(
+    int32_t userId, NotificationSilentAuth &silentAuthInfo)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null rdbStore");
+        return false;
+    }
+    std::string value;
+    int32_t result = rdbDataManager_->QueryData(KEY_SILENT_AUTH_NOTIFICATION, value, userId);
+    if (result == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        // No silent auth entry stored means not managed, return an empty list instead of an error.
+        silentAuthInfo.SetBundleList({});
+        return true;
+    }
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("getUserSilentAuthInfo rdbQueryFailed");
+        return false;
+    }
+    if (value.empty() || !nlohmann::json::accept(value)) {
+        ANS_LOGE("Invalid json string");
+        return false;
+    }
+    silentAuthInfo.FromJson(value);
+    return true;
+}
+
 bool NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationDisable &notificationDisable)
 {
     if (!CheckRdbStore()) {
@@ -4495,6 +4545,25 @@ void NotificationPreferencesDatabase::GetDisableNotificationInfo(NotificationPre
         return;
     }
     info.AddDisableNotificationInfo(value);
+}
+
+void NotificationPreferencesDatabase::GetSilentAuthNotificationInfo(NotificationPreferencesInfo &info)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null rdbStore");
+        return;
+    }
+    std::string value;
+    int32_t result = rdbDataManager_->QueryData(KEY_SILENT_AUTH_NOTIFICATION, value, ZERO_USER_ID);
+    if (result != NativeRdb::E_OK) {
+        ANS_LOGE("getSilentAuthInfo rdbQueryFailed");
+        return;
+    }
+    if (value.empty() || !nlohmann::json::accept(value)) {
+        ANS_LOGE("Invalid json string");
+        return;
+    }
+    info.AddSilentAuthNotificationInfo(value);
 }
 
 bool NotificationPreferencesDatabase::GetRestrictedModeTrustList(NotificationPreferencesInfo &info)

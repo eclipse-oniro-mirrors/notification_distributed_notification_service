@@ -529,6 +529,9 @@ public:
         const std::vector<NotificationCloneBundleInfo>& cloneBundleInfo);
     bool SetDisableNotificationInfo(const sptr<NotificationDisable> &notificationDisable);
     bool GetDisableNotificationInfo(NotificationDisable &notificationDisable);
+    bool SetSilentAuthNotificationInfo(const sptr<NotificationSilentAuth> &silentAuthInfo);
+    bool GetSilentAuthNotificationInfo(NotificationSilentAuth &silentAuthInfo);
+    bool GetUserSilentAuthNotificationInfo(int32_t userId, NotificationSilentAuth &silentAuthInfo);
     bool GetAllDistribuedEnabledBundles(int32_t userId,
         const std::string &deviceType, std::vector<NotificationBundleOption> &bundleOption);
     bool GetUserDisableNotificationInfo(int32_t userId, NotificationDisable &notificationDisable);
@@ -758,6 +761,7 @@ private:
     void GetEnableAllNotification(NotificationPreferencesInfo &info, int32_t userId);
     void GetDoNotDisturbProfile(NotificationPreferencesInfo &info, int32_t userId);
     void GetDisableNotificationInfo(NotificationPreferencesInfo &info);
+    void GetSilentAuthNotificationInfo(NotificationPreferencesInfo &info);
     void SetSoltProperty(sptr<NotificationSlot> &slot, std::string &typeStr, std::string &valueStr,
         const std::string &findString, const int32_t &userId);
     void ExecuteDisturbeDB(sptr<NotificationSlot> &slot, std::string &typeStr, std::string &valueStr,

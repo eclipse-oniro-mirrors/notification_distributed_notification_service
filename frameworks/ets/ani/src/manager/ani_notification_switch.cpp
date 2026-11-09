@@ -100,6 +100,32 @@ ani_object CreateResultOrCallbackReturn(ani_env *env,
     }
     return NotificationSts::GetNullObject(env);
 }
+
+bool CreateSwitchLimitedBundlesMap(ani_env *env, AsyncCallbackNotificationSwitchInfo *asyncCallbackInfo)
+{
+    ani_object mapObj = NotificationSts::CreateMapObject(env, "std.core.Map",
+        "X{C{std.core.Iterable}C{std.core.Null}C{std.core.ReadonlyArray}}:");
+    if (mapObj == nullptr) {
+        ANS_LOGE("CreateMapObject failed");
+        return false;
+    }
+    ani_ref mapRef = nullptr;
+    for (const auto &entry : asyncCallbackInfo->switchLimitedBundles) {
+        ani_string key = nullptr;
+        if (NotificationSts::GetAniStringByString(env, entry.first, key) != ANI_OK) {
+            ANS_LOGE("GetAniStringByString failed, bundle: %{public}s", entry.first.c_str());
+            continue;
+        }
+        ani_object val = NotificationSts::CreateBoolean(env, entry.second);
+        ani_status status = env->Object_CallMethodByName_Ref(mapObj, "set",
+            "YY:C{std.core.Map}", &mapRef, static_cast<ani_object>(key), val);
+        if (status != ANI_OK) {
+            ANS_LOGE("Failed to set switch limited map, status : %{public}d", status);
+        }
+    }
+    asyncCallbackInfo->info.result = mapObj;
+    return true;
+}
 } // namespace
 
 void HandleNotificationSwitchCallbackComplete(ani_env *env, WorkStatus status, void *data)
@@ -123,6 +149,11 @@ void HandleNotificationSwitchCallbackComplete(ani_env *env, WorkStatus status, v
             asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
         } else {
             asyncCallbackInfo->info.result = static_cast<ani_object>(switchStateItem);
+        }
+    } else if (asyncCallbackInfo->functionType == GET_NOTIFICATION_SWITCH_LIMITED_BUNDLES) {
+        if (!CreateSwitchLimitedBundlesMap(envCurr, asyncCallbackInfo)) {
+            ANS_LOGE("CreateSwitchLimitedBundlesMap failed");
+            asyncCallbackInfo->info.returnCode = ERR_ANS_INNER_TASK_ERR;
         }
     }
     NotificationSts::CreateReturnData(envCurr, asyncCallbackInfo->info);
@@ -217,6 +248,46 @@ ani_object AniGetNotificationSwitch(ani_env *env, ani_string switchName, ani_int
                         asyncCallbackInfo->switchName, asyncCallbackInfo->userId,
                         switchState);
                 asyncCallbackInfo->enableStatus = static_cast<int32_t>(switchState);
+            }
+        },
+        HandleNotificationSwitchCallbackComplete,
+        static_cast<void *>(asyncCallbackInfo), &(asyncCallbackInfo->asyncWork));
+    if (workStatus != WorkStatus::OK || QueueAsyncWork(env, asyncCallbackInfo->asyncWork) != WorkStatus::OK) {
+        ANS_LOGE("CreateAsyncWork or QueueAsyncWork failed");
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_TASK_ERR);
+    }
+    return promise;
+}
+
+ani_object AniGetNotificationSwitchLimitedBundles(ani_env *env, ani_int userId)
+{
+    auto asyncCallbackInfo = new (std::nothrow) AsyncCallbackNotificationSwitchInfo {
+        .asyncWork = nullptr,
+    };
+    if (asyncCallbackInfo == nullptr) {
+        ANS_LOGE("asyncCallbackInfo is nullptr");
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_NO_MEMORY);
+    }
+    asyncCallbackInfo->userId = userId;
+    asyncCallbackInfo->functionType = GET_NOTIFICATION_SWITCH_LIMITED_BUNDLES;
+
+    ani_object promise = nullptr;
+    NotificationSts::PaddingCallbackPromiseInfo(
+        env, asyncCallbackInfo->info.callback, asyncCallbackInfo->info, promise);
+    ani_status aniStatus = env->GetVM(&asyncCallbackInfo->vm);
+    if (aniStatus != ANI_OK) {
+        ANS_LOGE("GetVM failed, status: %{public}d", aniStatus);
+        DeleteCallBackInfo(env, asyncCallbackInfo);
+        return NotificationSts::AniJumpCbError(env, nullptr, ERR_ANS_INNER_TASK_ERR);
+    }
+    WorkStatus workStatus = CreateAsyncWork(env,
+        [](ani_env *env, void *data) {
+            auto asyncCallbackInfo = static_cast<AsyncCallbackNotificationSwitchInfo *>(data);
+            if (asyncCallbackInfo != nullptr) {
+                asyncCallbackInfo->info.returnCode =
+                    AnsNotification::GetInstance()->GetNotificationSwitchLimitedBundles(
+                        asyncCallbackInfo->userId, asyncCallbackInfo->switchLimitedBundles);
             }
         },
         HandleNotificationSwitchCallbackComplete,
