@@ -14,24 +14,21 @@
  */
 
 import bundleResourceManager from '@ohos.bundle.bundleResourceManager';
-import display from '@ohos.display';
-import window from '@ohos.window';
 import {
-  titleTrim, 
+  titleTrim,
   calContainerWidth,
   getFontSizeScale,
   sourceToVp,
   getLimitFontSize } from '../common/utils';
 import Constants from '../common/constant';
-import fs from '@ohos.file.fs';
-import configPolicy from '@ohos.configPolicy';
 import { EnableNotificationDialog } from '../ServiceExtAbility/NotificationServiceExtAbility';
-import { Callback} from '@ohos.base';
 import UIExtensionContentSession from '@ohos.app.ability.UIExtensionContentSession';
 import { MeasureOptions } from '@ohos.measure';
-import { MeasureUtils } from '@ohos.arkui.UIContext';
 import common from '@ohos.app.ability.common';
 import uiMaterial from '@ohos.arkui.uiMaterial';
+import { DialogArea, DialogHeightChangeEvent } from '../mvi/dialogScrollArea/DialogScrollEvent';
+import { DialogScrollType, DialogScrollViewModel } from '../mvi/dialogScrollArea/DialogScrollViewModel';
+import { DialogScrollState } from '../mvi/dialogScrollArea/DialogScrollState';
 
 const TAG = 'NotificationDialog_Service ';
 const mainWindowId = 'mainWindow';
@@ -40,12 +37,10 @@ const permission: Record<string, Resource> = {
   'icon': $r('app.media.ic_public_ring'),
   'reason': $r('app.string.reason'),
 };
-const bottomPopoverTypes = ['default', 'phone'];
 const defaultUiMaterial = new uiMaterial.ImmersiveMaterial({style: uiMaterial.ImmersiveStyle.ULTRA_THICK});
-const reasonHeightDifference = 150;
-const minReasonHeight = 10;
 
 let storage = LocalStorage.getShared();
+let dialogScrollViewModel: DialogScrollViewModel = new DialogScrollViewModel();
 
 @Extend(Button) function customizeButton() {
   .backgroundColor(Color.Transparent)
@@ -70,7 +65,7 @@ let storage = LocalStorage.getShared();
   .fontWeight(FontWeight.Medium)
   .height(Constants.BUTTON_HEIGHT)
   .flexGrow(Constants.FLEX_GROW)
-  .width('100%')
+  .width(Constants.FULL_WIDTH)
 }
 
 @Extend(Text) function contentText() {
@@ -112,226 +107,304 @@ struct NotificationDialogPage {
 @CustomDialog
 struct PermissionDialog {
   @State appName: string = '';
-  @State naviHeight: number = 0;
-  @State isBottomPopover: boolean = true;
   @StorageLink('clicked') clicked: boolean = false;
   @Link @Watch('updateOnPageShow') isUpdate: number;
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
   @State titleContainerWidth: string | number = 'auto';
-  @State @Watch('recalcReasonMaxHeight') maxHeight: number = 0;
-  @State iconRowHeight: number = 0;
-  @State titleRowHeight: number = 0;
-  @State doubleButtonsRowHeight: number = 0;
-  @State singleBanRowHeight: number = 0;
-  @State singleAllowRowHeight: number = 0;
-  @State dialogRowHeight: number = 0;
-  @State reasonMaxHeight: string | number = '60%';
   @State buttonVisibility: Visibility = Visibility.Visible;
   @State singleRowButtonVisibility: Visibility = Visibility.None;
+  @State dialogScrollState: DialogScrollState = dialogScrollViewModel.getViewState();
+
+  @Builder
+  DialogIconArea() {
+    Row() {
+      Image(permission.icon)
+      .width(Constants.DIALOG_ICON_WIDTH)
+      .height(Constants.DIALOG_ICON_HEIGHT)
+      .margin({
+        top: Constants.DIALOG_ICON_MARGIN_TOP
+      })
+    }
+  }
+
+  @Builder
+  DialogTitleArea() {
+    Row() {
+      Flex({ justifyContent: FlexAlign.Center }) {
+        Text($r('app.string.group_label_notification', this.appName))
+          .fontSize($r('sys.float.ohos_id_text_size_headline8'))
+          .fontColor($r('app.color.text_primary'))
+          .fontWeight(FontWeight.Bold)
+          .minFontSize(
+            getLimitFontSize(Constants.TITLE_MIN_FONT_SIZE,
+              getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX))
+          )
+          .maxFontSize(
+            getLimitFontSize(sourceToVp($r('sys.float.ohos_id_text_size_headline8')),
+              getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX))
+          )
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
+          .maxLines(2)
+          .textOverflow({overflow: TextOverflow.Ellipsis})
+          .width(this.titleContainerWidth)
+          .textAlign(TextAlign.Center)
+      }
+      .margin({
+        top: Constants.DIALOG_REQ_MARGIN_TOP,
+        bottom:Constants.DIALOG_REQ_MARGIN_BUTTOM,
+        left: Constants.DIALOG_REQ_MARGIN_LEFT,
+        right: Constants.DIALOG_REQ_MARGIN_RIGHT
+      })
+      .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
+        let containerWidth = newValue.width as number;
+        let options: MeasureOptions = {
+          textContent: $r('app.string.group_label_notification', this.appName),
+          fontSize: getLimitFontSize(sourceToVp($r('sys.float.ohos_id_text_size_headline8')),
+            getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX)),
+          fontWeight: FontWeight.Bold,
+        };
+        this.titleContainerWidth = calContainerWidth(containerWidth, options,
+          Constants.CROSS_LINE_RATIO, this.getUIContext().getMeasureUtils());
+        console.info(TAG, `onSizeChange titleContainerWidth: ${this.titleContainerWidth}`);
+      })
+    }
+  }
+
+  @Builder
+  DialogContentArea() {
+    Row() {
+      Flex({ justifyContent: FlexAlign.Center, direction: FlexDirection.Column }) {
+        Text() {
+          if (this.dialog.easyAbroad) {
+            Span($r('app.string.reason_cjy'))
+          } else if (this.dialog.innerLake) {
+            Span($r('app.string.reason_zyt'))
+          } else {
+            Span(permission.reason)
+          }
+        }
+        .contentText()
+        if(this.dialog.banAffectContent) {
+          Text() {
+            Span($r('app.string.ban_affect'))
+          }
+          .contentText()
+        }
+      }
+      .margin({
+        top: Constants.DIALOG_DESP_MARGIN_TOP,
+        left: Constants.DIALOG_DESP_MARGIN_LEFT,
+        right: Constants.DIALOG_DESP_MARGIN_RIGHT
+      })
+    }
+    .width(Constants.FULL_WIDTH)
+  }
+
+  @Builder
+  DoubleButtonsArea() {
+    Row() {
+      Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
+        Button($r('app.string.BAN'))
+          .onClick(async (): Promise<void> => {
+          await this.enableNotification(false);
+          })
+          .customizeButton()
+          .fontColor($r('sys.color.ohos_id_color_warning'))
+        Divider()
+          .color($r('app.color.comp_divider'))
+          .vertical(true)
+          .height(Constants.DIVIDER_HEIGHT)
+          .strokeWidth(Constants.DIVIDER_WIDTH)
+          .margin({left: Constants.BUTTON_LEFT, right: Constants.BUTTON_RIGHT})
+        Button($r('app.string.ALLOW'))
+          .onClick(async (): Promise<void> => {
+            await this.enableNotification(true);
+          })
+          .customizeButton()
+          .fontColor($r('app.color.button_text'))
+      }
+      .margin({
+        top: Constants.BUTTON_MARGIN_TOP,
+        left: Constants.BUTTON_MARGIN_LEFT,
+        right: Constants.BUTTON_MARGIN_RIGHT,
+        bottom: Constants.DIALOG_PADDING_BOTTOM
+       })
+    }
+    .visibility(this.buttonVisibility)
+  }
+
+  @Builder
+  SingleBanButtonArea() {
+    Row() {
+      Flex({ justifyContent: FlexAlign.Center }) {
+        Button($r('app.string.BAN'))
+          .onClick(async (): Promise<void> => {
+            await this.enableNotification(false);
+          })
+          .singleRowButton()
+          .fontColor($r('sys.color.ohos_id_color_warning'))
+          .margin({
+            left: Constants.MARGIN_ZERO,
+            right: Constants.MARGIN_ZERO,
+            bottom: Constants.BUTTON_MARGIN_ROW
+          })
+      }
+      .margin({
+        top: Constants.BUTTON_MARGIN_TOP,
+        left: Constants.BUTTON_MARGIN_LEFT,
+        right: Constants.BUTTON_MARGIN_RIGHT
+      })
+    }
+    .visibility(this.singleRowButtonVisibility)
+  }
+
+  @Builder
+  SingleAllowButtonArea() {
+    Row() {
+      Flex({ justifyContent: FlexAlign.Center }) {
+        Button($r('app.string.ALLOW'))
+          .onClick(async (): Promise<void> => {
+            await this.enableNotification(true);
+          })
+          .singleRowButton()
+          .fontColor($r('app.color.button_text'))
+          .margin({
+            left: Constants.MARGIN_ZERO,
+            right: Constants.MARGIN_ZERO
+          })
+      }
+      .margin({
+        left: Constants.BUTTON_MARGIN_LEFT,
+        right: Constants.BUTTON_MARGIN_RIGHT,
+        bottom: Constants.DIALOG_PADDING_BOTTOM_LOW
+      })
+    }
+    .visibility(this.singleRowButtonVisibility)
+  }
+
+  // Title area (icon + title), fixed in the scrolling modes
+  @Builder
+  TitleArea() {
+    Column() {
+      this.DialogIconArea();
+      this.DialogTitleArea();
+    }
+    .onAreaChange((oldValue: Area, newValue: Area) => {
+      if (newValue.height !== oldValue.height && typeof newValue.height === 'number') {
+        dialogScrollViewModel.processEvent(new DialogHeightChangeEvent(DialogArea.TITLE, newValue.height as number));
+      }
+    });
+  }
+
+  // Content area (permission usage reason), scrollable
+  @Builder
+  ContentArea() {
+    Column() {
+      this.DialogContentArea();
+    }
+    .onAreaChange((oldValue: Area, newValue: Area) => {
+      if (newValue.height !== oldValue.height && typeof newValue.height === 'number') {
+        this.updateButtomVisibility(newValue.width as number);
+        dialogScrollViewModel.processEvent(new DialogHeightChangeEvent(DialogArea.CONTENT, newValue.height as number));
+      }
+    });
+  }
+
+  // Button area
+  @Builder
+  ButtonArea() {
+    Column() {
+      this.DoubleButtonsArea();
+      this.SingleBanButtonArea();
+      this.SingleAllowButtonArea();
+    }
+    .onAreaChange((oldValue: Area, newValue: Area) => {
+      if (newValue.height !== oldValue.height && typeof newValue.height === 'number') {
+        dialogScrollViewModel.processEvent(new DialogHeightChangeEvent(DialogArea.BUTTON, newValue.height as number));
+      }
+    });
+  }
 
   build() {
-    Row(){
-      Flex({ justifyContent: FlexAlign.Center, alignItems: this.isBottomPopover ? ItemAlign.End : ItemAlign.Center }) {
-        Column() {
-          Row() {
-            Column() {
-              Row() {
-                Image(permission.icon)
-                .width(Constants.DIALOG_ICON_WIDTH)
-                .height(Constants.DIALOG_ICON_HEIGHT)
-                .margin({
-                  top: Constants.DIALOG_ICON_MARGIN_TOP
-                })
+    Column() {
+      if (this.dialogScrollState.dialogScrollType === DialogScrollType.NONE) {
+        // No scrolling. Scroll is still used here so that extreme cases remain scrollable.
+        // The flex height must be set to auto, because on some devices a Flex without an
+        // explicit height stretches to fill its container.
+        Flex({ direction: FlexDirection.Column }) {
+          Column() {
+            Scroll() {
+              Column() {
+                this.TitleArea();
+                this.ContentArea();
+                this.ButtonArea();
               }
-              .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
-                this.iconRowHeight = newValue.height as number;
-                this.recalcReasonMaxHeight();
-              })
-              Row() {
-                Flex({ justifyContent: FlexAlign.Center }) {
-                  Text($r('app.string.group_label_notification', this.appName))
-                  .fontSize($r('sys.float.ohos_id_text_size_headline8'))
-                  .fontColor($r('app.color.text_primary'))
-                  .fontWeight(FontWeight.Bold)
-                  .minFontSize(
-                    getLimitFontSize(Constants.TITLE_MIN_FONT_SIZE,
-                      getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX))
-                  )
-                  .maxFontSize(
-                    getLimitFontSize(sourceToVp($r('sys.float.ohos_id_text_size_headline8')),
-                      getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX))
-                  )
-                  .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
-                  .maxLines(2)
-                  .textOverflow({overflow: TextOverflow.Ellipsis})
-                  .width(this.titleContainerWidth)
-                  .textAlign(TextAlign.Center)
-                }
-                .margin({
-                  top: Constants.DIALOG_REQ_MARGIN_TOP,
-                  bottom:Constants.DIALOG_REQ_MARGIN_BUTTOM,
-                  left: Constants.DIALOG_REQ_MARGIN_LEFT,
-                  right: Constants.DIALOG_REQ_MARGIN_RIGHT
-                })
-                .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-                  let containerWidth = newValue.width as number;
-                  let options: MeasureOptions = {
-                    textContent: $r('app.string.group_label_notification', this.appName),
-                    fontSize: getLimitFontSize(sourceToVp($r('sys.float.ohos_id_text_size_headline8')),
-                      getFontSizeScale(getContext(this) as common.UIAbilityContext, Constants.FONT_SCALE_MAX)),
-                    fontWeight: FontWeight.Bold,
-                  };
-                  this.titleContainerWidth = calContainerWidth(containerWidth, options,
-                    Constants.CROSS_LINE_RATIO, this.getUIContext().getMeasureUtils());
-                  console.info(TAG, `onSizeChange titleContainerWidth: ${this.titleContainerWidth}`);
-                })
-              }
-              .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
-                this.titleRowHeight = newValue.height as number;
-                this.recalcReasonMaxHeight();
-              })
-              Row() {
-                Scroll() {
-                  Column() {
-                    Row() {
-                      Flex({ justifyContent: FlexAlign.Center, direction: FlexDirection.Column }) {
-                        Text() {
-                          if (this.dialog.easyAbroad) {
-                            Span($r('app.string.reason_cjy'))
-                          } else if (this.dialog.innerLake) {
-                            Span($r('app.string.reason_zyt'))
-                          } else {
-                            Span(permission.reason)
-                          }
-                        }
-                        .contentText()
-                        if(this.dialog.banAffectContent) {
-                          Text() {
-                            Span($r('app.string.ban_affect'))
-                          }
-                          .contentText()
-                        }
-                      }
-                      .margin({
-                        top: Constants.DIALOG_DESP_MARGIN_TOP,
-                        left: Constants.DIALOG_DESP_MARGIN_LEFT,
-                        right: Constants.DIALOG_DESP_MARGIN_RIGHT
-                      })
-                    }
-                    .width(Constants.FULL_WIDTH)
-                  }
-                  .width(Constants.FULL_WIDTH)
-                }
-                .width(Constants.FULL_WIDTH)
-              }
-              .width(Constants.FULL_WIDTH)
-              .constraintSize({
-                maxHeight: this.reasonMaxHeight
-              })
-              Row() {
-                Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
-                  Button($r('app.string.BAN'))
-                    .onClick(async (): Promise<void> => {
-                    await this.enableNotification(false);
-                    })
-                    .customizeButton()
-                    .fontColor($r('sys.color.ohos_id_color_warning'))
-                  Divider()
-                    .color($r('app.color.comp_divider'))
-                    .vertical(true)
-                    .height(Constants.DIVIDER_HEIGHT)
-                    .strokeWidth(Constants.DIVIDER_WIDTH)
-                    .margin({left: Constants.BUTTON_LEFT, right: Constants.BUTTON_RIGHT})
-                  Button($r('app.string.ALLOW'))
-                    .onClick(async (): Promise<void> => {
-                      await this.enableNotification(true);
-                    })
-                    .customizeButton()
-                    .fontColor($r('app.color.button_text'))
-                }
-                .margin({ 
-                  top: Constants.BUTTON_MARGIN_TOP,
-                  left: Constants.BUTTON_MARGIN_LEFT, 
-                  right: Constants.BUTTON_MARGIN_RIGHT,
-                  bottom: Constants.DIALOG_PADDING_BOTTOM
-                 })
-              }
-              .visibility(this.buttonVisibility)
-              .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
-                this.doubleButtonsRowHeight = newValue.height as number;
-                this.recalcReasonMaxHeight();
-              })
-
-              Row() {
-                Flex({ justifyContent: FlexAlign.Center }) {
-                  Button($r('app.string.BAN'))
-                  .onClick(async (): Promise<void> => {
-                    await this.enableNotification(false);
-                  })
-                  .singleRowButton()
-                  .fontColor($r('sys.color.ohos_id_color_warning'))
-                  .margin({ 
-                    left: Constants.MARGIN_ZERO,
-                    right: Constants.MARGIN_ZERO,
-                    bottom: Constants.BUTTON_MARGIN_ROW
-                  })
-                }
-                .margin({ 
-                  top: Constants.BUTTON_MARGIN_TOP,
-                  left: Constants.BUTTON_MARGIN_LEFT, 
-                  right: Constants.BUTTON_MARGIN_RIGHT 
-                })
-              }
-              .visibility(this.singleRowButtonVisibility)
-              .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
-                this.singleBanRowHeight = newValue.height as number;
-                this.recalcReasonMaxHeight();
-              })
-              
-              Row() {
-                Flex({ justifyContent: FlexAlign.Center }) {
-                  Button($r('app.string.ALLOW'))
-                    .onClick(async (): Promise<void> => {
-                      await this.enableNotification(true);
-                    })
-                    .singleRowButton()
-                    .fontColor($r('app.color.button_text'))
-                    .margin({ 
-                      left: Constants.MARGIN_ZERO, 
-                      right: Constants.MARGIN_ZERO
-                    })
-                }
-                .margin({ 
-                  left: Constants.BUTTON_MARGIN_LEFT,
-                  right: Constants.BUTTON_MARGIN_RIGHT,
-                  bottom: Constants.DIALOG_PADDING_BOTTOM_LOW
-                })
-              }
-              .visibility(this.singleRowButtonVisibility)
-              .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
-                this.singleAllowRowHeight = newValue.height as number;
-                this.recalcReasonMaxHeight();
-              })
             }
           }
         }
-        .width(Constants.FULL_WIDTH)
-        .clip(true)
-        .id(mainWindowId)
-        .onAreaChange((oldArea: Area, newArea: Area) => {
-          this.updateButtomVisibility(newArea.width as number);
-        })
+        .height('auto')
+      } else if (this.dialogScrollState.dialogScrollType === DialogScrollType.CONTENT_SCROLL) {
+        // Content scrolls, title and button stay fixed
+        Flex({ direction: FlexDirection.Column }) {
+          Column() {
+            this.TitleArea();
+          }
+          .flexShrink(0);
+
+          Scroll() {
+            this.ContentArea();
+          }
+          .edgeEffect(EdgeEffect.Spring)
+          .scrollable(ScrollDirection.Vertical);
+
+          Column() {
+            this.ButtonArea();
+          }
+          .flexShrink(0);
+        }
+        .height('auto')
+      } else if (this.dialogScrollState.dialogScrollType === DialogScrollType.TITLE_CONTENT_SCROLL) {
+        // Title and content scroll together, button stays fixed
+        Flex({ direction: FlexDirection.Column }) {
+          Scroll() {
+            Column() {
+              this.TitleArea();
+              this.ContentArea();
+            }
+          }
+          .edgeEffect(EdgeEffect.Spring)
+          .scrollable(ScrollDirection.Vertical);
+
+          Column() {
+            this.ButtonArea();
+          }
+          .flexShrink(0);
+        }
+        .height('auto')
+      } else {
+        // The whole dialog scrolls
+        Scroll() {
+          Column() {
+            this.TitleArea();
+            this.ContentArea();
+            this.ButtonArea();
+          }
+        }
+        .edgeEffect(EdgeEffect.Spring)
+        .scrollBar(BarState.Auto)
+        .scrollable(ScrollDirection.Vertical);
       }
     }
-    .constraintSize({ 
-      maxHeight: '90%',
-      maxWidth: Constants.MAX_DIALOG_WIDTH
-    })
-    .onSizeChange((_: SizeOptions, newValue: SizeOptions) => {
-      this.dialogRowHeight = newValue.height as number;
-      this.recalcReasonMaxHeight();
+    .width(Constants.FULL_WIDTH)
+    .clip(true)
+    .id(mainWindowId)
+    .onAreaChange((oldValue: Area, newValue: Area) => {
+      if (newValue.height !== oldValue.height && typeof newValue.height === 'number') {
+        dialogScrollViewModel.processEvent(new DialogHeightChangeEvent(DialogArea.DIALOG, newValue.height as number));
+        this.updateButtomVisibility(newValue.width as number);
+      }
     })
   }
 
@@ -349,24 +422,6 @@ struct PermissionDialog {
     }
   }
 
-  updateAvoidWindow(): void {
-    let type = window.AvoidAreaType.TYPE_SYSTEM;
-    try {
-      this.dialog?.extensionWindow.on('avoidAreaChange', (data): void => {
-        if (data.type == window.AvoidAreaType.TYPE_SYSTEM) {
-          console.info(TAG, `avoidAreaChange: ${JSON.stringify(data)}`);
-          this.naviHeight = data.area.bottomRect.height;
-        }
-      });
-      let avoidArea = this.dialog?.extensionWindow.getWindowAvoidArea(type);
-      if (avoidArea != undefined) {
-        console.info(TAG, `avoidArea: ${JSON.stringify(avoidArea)}`);
-        this.naviHeight = avoidArea.bottomRect.height;
-      }
-    } catch (err) {
-      console.error(TAG, `Failed to obtain the area. Cause: ${err?.code}`);
-    }
-  }
 
   updateSubWindowSize(): void {
     try {
@@ -379,67 +434,12 @@ struct PermissionDialog {
           this.dialog?.subWindow?.resize(windowRect?.width, windowRect?.height);
           this.dialog.initSubWindowSize = true;
         }
-        this.updatemaxHeight();
       });
     } catch (err) {
       console.error(TAG, `updateSubWindowSize error. Cause: ${err?.code}`);
     }
   }
 
-  updatemaxHeight(): void {
-    try {
-      let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
-      let height = windowRect?.height;
-      let navigationArea = this.dialog?.extensionWindow.getWindowAvoidArea(
-          window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR);
-      let navigationHeight = navigationArea?.bottomRect?.height;
-      let systemArea = this.dialog?.extensionWindow.getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM);
-      let statusBarHeight = systemArea?.topRect?.height;
-      console.info(TAG, `windowHeight ${windowRect?.height} 
-          navigationHeight ${navigationHeight} statusBarHeight ${statusBarHeight} `);
-      if (height > 0 && (height - navigationHeight - statusBarHeight) > 0 ) {
-        this.maxHeight = px2vp((height - navigationHeight - statusBarHeight) * 0.9);
-      }
-    } catch (err) {
-      console.error(TAG, `updatemaxHeight error. Cause: ${err?.code}`);
-    }
-  }
-
-  recalcReasonMaxHeight(): void {
-    if (this.maxHeight <= 0 || this.dialogRowHeight <= 0 ||
-      this.iconRowHeight <= 0 || this.titleRowHeight <= 0) {
-      console.info(TAG, 'recalcReasonMaxHeight not init');
-      return;
-    }
-
-    let buttonArea = 0;
-    if (this.singleRowButtonVisibility === Visibility.Visible) {
-      buttonArea = this.singleBanRowHeight + this.singleAllowRowHeight;
-    } else {
-      buttonArea = this.doubleButtonsRowHeight;
-    }
-    if (buttonArea <= 0) {
-      console.info(TAG, 'recalcReasonMaxHeight btn not init');
-      return;
-    }
-
-    let effectiveMax: number;
-    if (Math.abs(this.maxHeight - this.dialogRowHeight) <= reasonHeightDifference) {
-      effectiveMax = Math.min(this.maxHeight, this.dialogRowHeight);
-    } else {
-      effectiveMax = this.maxHeight;
-    }
-
-    let height = effectiveMax - this.iconRowHeight - this.titleRowHeight - buttonArea;
-    console.info(TAG, `recalcReasonMaxHeight maxHeight=${this.maxHeight} dialogHeight=${this.dialogRowHeight}`
-      + ` icon=${this.iconRowHeight} title=${this.titleRowHeight} btn=${buttonArea} result=${height} `);
-    if (height <= 0) {
-      height = minReasonHeight;
-    }
-    if (this.reasonMaxHeight !== height) {
-      this.reasonMaxHeight = height;
-    }
-  }
 
   updateButtomVisibility(dialogWidth: number): void {
     try {
@@ -474,56 +474,15 @@ struct PermissionDialog {
         this.buttonVisibility = Visibility.Visible;
         this.singleRowButtonVisibility = Visibility.None;
       }
-      this.recalcReasonMaxHeight();
     } catch (err) {
       console.error(TAG, `updateButtomVisibility error. Cause: ${err?.code}`);
     }
-  }
-
-  async updateIsBottomPopover(): Promise<void> {
-    let dis = display.getDefaultDisplaySync();
-    let isVertical = dis.width <= dis.height;
-    try {
-      if (display.isFoldable()) {
-        let foldStatus = display.getFoldStatus();
-        if (foldStatus == display.FoldStatus.FOLD_STATUS_EXPANDED ||
-          foldStatus == display.FoldStatus.FOLD_STATUS_HALF_FOLDED) {
-            this.isBottomPopover = false;
-            return;
-        }
-      }
-    } catch (err) {
-      console.error(TAG, 'Failed to get the device foldable status. Code: ${err?.code}');
-    }
-
-    // read ccm configs
-    let isBottomPopoverTemp = false;
-    try {
-      let filePaths = await configPolicy.getCfgFiles(Constants.CCM_CONFIG_PATH);
-      for (let i = 0; i < filePaths.length; i++) {
-        let res = fs.accessSync(filePaths[i]);
-        if (res) {
-          let fileContent = fs.readTextSync(filePaths[i]);
-          let config: NotificationConfig = JSON.parse(fileContent);
-          if (config.notificationAuthorizationWindow != undefined) {
-            let windowConfig: NotificationAuthorizationWindow = config.notificationAuthorizationWindow;
-            if (windowConfig.isBottomPopover != undefined) {
-              isBottomPopoverTemp = windowConfig.isBottomPopover;
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.log(TAG, 'Failed get ccm files, Cause: ${err?.code}');
-    }
-    this.isBottomPopover = isBottomPopoverTemp && isVertical;
   }
 
   async updateStatus(): Promise<void> {
     let bundleNameObj = this.dialog?.want.parameters?.bundleName;
     let bundleName = bundleNameObj ? bundleNameObj.toString() : '';
     await this.updateApplicationName(bundleName);
-    await this.updateIsBottomPopover();
     try {
       let componentInfo = this.getUIContext().getComponentUtils().getRectangleById(mainWindowId);
       if (componentInfo?.size?.width > 0 ) {
@@ -544,9 +503,7 @@ struct PermissionDialog {
   async aboutToAppear(): Promise<void> {
     this.dialog = storage.get('dialog') as EnableNotificationDialog;
     this.session = storage.get('session') as UIExtensionContentSession;
-    this.updateAvoidWindow();
     this.updateSubWindowSize();
-    this.updatemaxHeight();
     try {
       await this.updateStatus();
     } catch (err) {
@@ -556,24 +513,6 @@ struct PermissionDialog {
     }
   }
 
-  async registerFoldableCallback(): Promise<void> {
-    let callback: Callback<display.FoldDisplayMode> = async (data: display.FoldDisplayMode) => {
-      try {
-        let win = this.dialog.window;
-        let dis = display.getDefaultDisplaySync();
-        await win.moveWindowTo(0, 0);
-        await win.resize(dis.width, dis.height);
-        await this.updateStatus();
-      } catch (err) {
-        console.error(TAG, 'Failed to touch callback. Code: ${err?.code}');
-      }
-    };
-    try {
-      display.on('foldDisplayModeChange', callback);
-    } catch (err) {
-      console.error(TAG, 'Failed to register callback. Code: ${err?.code}');
-    }
-  }
 
   async aboutToDisappear(): Promise<void> {
     console.info(TAG, `aboutToDisappear`);
@@ -595,10 +534,3 @@ struct PermissionDialog {
   }
 }
 
-interface NotificationConfig {
-  notificationAuthorizationWindow: NotificationAuthorizationWindow;
-}
-
-interface NotificationAuthorizationWindow {
-  isBottomPopover: boolean;
-}

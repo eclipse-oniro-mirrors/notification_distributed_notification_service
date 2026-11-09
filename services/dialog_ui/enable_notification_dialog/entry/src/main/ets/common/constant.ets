@@ -151,6 +151,10 @@ export default class Constants {
   public static CROSS_LINE_RATIO = 0.2;
   public static CROSS_LINE_RESIZE_PARAM = 1.25;
 
+  // dialog scroll area
+  public static MIN_SCROLL_AREA_HEIGHT = 100;
+  public static MINIMUM_PRECISION = 1.0000000000001;
+
   public static FONT_SCALE_DEFAULT = 1;
   public static FONT_SCALE_MAX = 1.8;
   public static MAX_DIALOG_WIDTH = 400;
