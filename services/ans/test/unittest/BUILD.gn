@@ -1282,6 +1282,7 @@ ohos_unittest("notification_subscriber_manager_test") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "//base/notification/distributed_notification_service/services/ans/test/unittest/ans_test_cfi_blocklist.txt"
   }
   include_dirs = [
     ".",

@@ -84,7 +84,6 @@ void AnsSnoozeDelayTest::TearDown()
     advancedNotificationService_->SelfClean();
     NotificationPreferences::GetInstance()->StopCacheCleanupTimer();
     NotificationSubscriberManager::DestroyInstance();
-    delete advancedNotificationService_;
     advancedNotificationService_ = nullptr;
     GTEST_LOG_(INFO) << "TearDown";
 }
