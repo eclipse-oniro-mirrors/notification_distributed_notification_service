@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 
+#include <atomic>
+#include <functional>
+#include <thread>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #define private public
@@ -1658,5 +1663,39 @@ HWTEST_F(AnsNotificationBranchTest, GetSilentAuthNotificationBundles_0100, Funct
     InnerErrorCode ret = ansNotification->GetSilentAuthNotificationBundles(100, bundleList);
     EXPECT_EQ(ret, ERR_ANS_INNER_SERVICE_NOT_CONNECTED);
 }
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+/**
+ * @tc.name: RegisterSwingCallback_Concurrent_0100
+ * @tc.desc: Concurrent RegisterSwingCallback calls must not crash on the shared sptr member and
+ *           must keep returning the proxy result.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsNotificationBranchTest, RegisterSwingCallback_Concurrent_0100, Function | MediumTest | Level1)
+{
+    auto ansNotification = std::make_shared<AnsNotification>();
+    ASSERT_NE(ansNotification, nullptr);
+    sptr<MockAnsManagerInterface> mockProxy =
+        sptr<MockAnsManagerInterface>(new (std::nothrow) MockAnsManagerInterface());
+    ON_CALL(*mockSAMgr_, GetSystemAbility(testing::_)).WillByDefault(Return(mockProxy));
+
+    std::function<void(bool, int)> callback = [](bool, int) {};
+    constexpr int32_t kThreadCount = 2;
+    constexpr int32_t kLoopCount = 200;
+    std::vector<std::thread> threads;
+    for (int32_t i = 0; i < kThreadCount; i++) {
+        threads.emplace_back([&ansNotification, &callback]() {
+            for (int32_t loop = 0; loop < kLoopCount; loop++) {
+                (void)ansNotification->RegisterSwingCallback(callback);
+            }
+        });
+    }
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    auto ret = ansNotification->RegisterSwingCallback(callback);
+    EXPECT_EQ(static_cast<int32_t>(ret), static_cast<int32_t>(ERR_ANS_INNER_INVALID_PARAM));
+}
+#endif
 }  // namespace Notification
 }  // namespace OHOS

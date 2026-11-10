@@ -3172,12 +3172,16 @@ InnerErrorCode AnsNotification::RegisterSwingCallback(const std::function<void(b
         return ERR_ANS_INNER_SERVICE_NOT_CONNECTED;
     }
 
-    swingCallBackService_ = new(std::nothrow) SwingCallBackService(swingCbFunc);
-    if (swingCallBackService_ == nullptr) {
+    sptr<SwingCallBackService> service = new(std::nothrow) SwingCallBackService(swingCbFunc);
+    if (service == nullptr) {
         ANS_LOGE("null swingCallBackService");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
-    return static_cast<InnerErrorCode>(proxy->RegisterSwingCallback(swingCallBackService_->AsObject()));
+    {
+        std::lock_guard<std::mutex> lock(swingMutex_);
+        swingCallBackService_ = service;
+    }
+    return static_cast<InnerErrorCode>(proxy->RegisterSwingCallback(service->AsObject()));
 }
 #endif
 

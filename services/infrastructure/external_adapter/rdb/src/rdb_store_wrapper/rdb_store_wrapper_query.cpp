@@ -77,6 +77,10 @@ int32_t NtfRdbStoreWrapper::GetStatisticsInfos(const int64_t lastTimeMs,
     const int32_t bundleUid, const std::string &tableName, int32_t &totalCount, int64_t &lastTime)
 {
     std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+        return NativeRdb::E_ERROR;
+    }
     std::string querySql =
         "SELECT COUNT(*) as total_count, MAX(notificationTime) as max_timestamp "
         "FROM " + tableName + " "
@@ -111,11 +115,6 @@ int32_t NtfRdbStoreWrapper::GetStatisticsInfos(const int64_t lastTimeMs,
 int32_t NtfRdbStoreWrapper::QueryStatisticsInfosByBundle(const int32_t bundleUid, const int32_t userId,
     const int64_t beginTime, int32_t &totalCount, int64_t &lastTime)
 {
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
-        return NativeRdb::E_ERROR;
-    }
-
     std::string tableName = NOTIFICATION_STATISTICS_TABLENAME + "_" + std::to_string(userId);
     int32_t reuslt = GetStatisticsInfos(beginTime, bundleUid, tableName, totalCount, lastTime);
 
@@ -125,11 +124,6 @@ int32_t NtfRdbStoreWrapper::QueryStatisticsInfosByBundle(const int32_t bundleUid
 
 int32_t NtfRdbStoreWrapper::UpdateStatisticsTimeStamp(const int32_t userId, int64_t offsetMs)
 {
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
-        return NativeRdb::E_ERROR;
-    }
-
     int updatedRows = -1;
     std::string tableName = NOTIFICATION_STATISTICS_TABLENAME + "_" + std::to_string(userId);
     std::string updateSqlStr = "UPDATE " + tableName + " SET notificationTime = notificationTime + ?";
@@ -137,7 +131,15 @@ int32_t NtfRdbStoreWrapper::UpdateStatisticsTimeStamp(const int32_t userId, int6
     NativeRdb::ValueObject value(offsetMs);
     bindArgs.push_back(value);
 
-    int ret = rdbStore_->ExecuteSql(updateSqlStr, bindArgs);
+    int ret = NativeRdb::E_ERROR;
+    {
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+            return NativeRdb::E_ERROR;
+        }
+        ret = rdbStore_->ExecuteSql(updateSqlStr, bindArgs);
+    }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("rdbStore_ ExecuteSql update notificationTime fail: %{public}d", ret);
         return NativeRdb::E_ERROR;

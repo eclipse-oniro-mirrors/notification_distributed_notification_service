@@ -60,8 +60,14 @@ ohos_unittest("ans_notification_branch_test") {
     "relational_store:native_rdb",
     "samgr:samgr_proxy",
   ]
+  defines = []
+
   if (build_variant == "root") {
     defines = [ "ANM_SUPPORT_DUMP" ]
+  }
+
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
   }
 
   subsystem_name = "${subsystem_name}"
