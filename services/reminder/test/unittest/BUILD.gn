@@ -173,6 +173,7 @@ ohos_unittest("reminder_bundle_manager_helper_test") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "//base/notification/distributed_notification_service/services/ans/test/unittest/ans_test_cfi_blocklist.txt"
   }
 
   module_out_path = module_output_path
@@ -395,6 +396,7 @@ ohos_unittest("reminder_datashare_helper_test") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "//base/notification/distributed_notification_service/services/ans/test/unittest/ans_test_cfi_blocklist.txt"
   }
   module_out_path = module_output_path
   include_dirs = [
