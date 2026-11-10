@@ -20,6 +20,7 @@
 #include "notification_local_live_view_subscriber.h"
 #include "notification_local_live_view_subscriber_manager.h"
 
+#include "advanced_notification_service.h"
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
 
@@ -68,6 +69,10 @@ void NotificationLocalLiveViewSubscriberManagerTest::SetUpTestCase()
 
 void NotificationLocalLiveViewSubscriberManagerTest::TearDownTestCase()
 {
+    sptr<AdvancedNotificationService> instance = AdvancedNotificationService::GetInstance();
+    if (instance != nullptr) {
+        instance->SelfClean(false);
+    }
     subscriber_ = nullptr;
     if (notificationLocalLiveViewSubscriberManager_ != nullptr) {
         notificationLocalLiveViewSubscriberManager_->ResetFfrtQueue();

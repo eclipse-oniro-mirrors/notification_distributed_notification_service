@@ -35,6 +35,7 @@ namespace OHOS {
 namespace Notification {
 class AdvancedNotificationCancelTest : public testing::Test {
 public:
+    static void TearDownTestCase();
     void SetUp() override
     {
         MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
@@ -43,6 +44,14 @@ public:
     }
     void TearDown() override {}
 };
+
+void AdvancedNotificationCancelTest::TearDownTestCase()
+{
+    sptr<AdvancedNotificationService> instance = AdvancedNotificationService::GetInstance();
+    if (instance != nullptr) {
+        instance->SelfClean(false);
+    }
+}
 
 static sptr<AdvancedNotificationService> GetService()
 {

@@ -100,7 +100,13 @@ sptr<AdvancedNotificationService> AdvancedNotificationExtensionSubscriptionTest:
 
 void AdvancedNotificationExtensionSubscriptionTest::SetUpTestCase() {}
 
-void AdvancedNotificationExtensionSubscriptionTest::TearDownTestCase() {}
+void AdvancedNotificationExtensionSubscriptionTest::TearDownTestCase()
+{
+    sptr<AdvancedNotificationService> instance = AdvancedNotificationService::GetInstance();
+    if (instance != nullptr) {
+        instance->SelfClean(false);
+    }
+}
 
 void AdvancedNotificationExtensionSubscriptionTest::SetUp()
 {

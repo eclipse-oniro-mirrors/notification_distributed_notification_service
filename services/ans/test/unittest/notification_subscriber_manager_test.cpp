@@ -26,6 +26,7 @@
 #include "ans_const_define.h"
 #include "notification_preferences.h"
 #include "notification_extension_wrapper.h"
+#include "advanced_notification_service.h"
 #include "ans_inner_errors.h"
 #include "ans_service_errors.h"
 #include "ans_subscriber_listener.h"
@@ -187,6 +188,10 @@ void NotificationSubscriberManagerTest::SetUpTestCase()
 
 void NotificationSubscriberManagerTest::TearDownTestCase()
 {
+    sptr<AdvancedNotificationService> instance = AdvancedNotificationService::GetInstance();
+    if (instance != nullptr) {
+        instance->SelfClean(false);
+    }
     subscriber_ = nullptr;
     if (notificationSubscriberManager_ != nullptr) {
         notificationSubscriberManager_->ResetFfrtQueue();
