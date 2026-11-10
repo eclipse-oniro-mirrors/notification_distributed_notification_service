@@ -87,6 +87,10 @@ void AdvancedNotificationServiceTest::SetUpTestCase()
 
 void AdvancedNotificationServiceTest::TearDownTestCase()
 {
+    sptr<AdvancedNotificationService> instance = AdvancedNotificationService::GetInstance();
+    if (instance != nullptr) {
+        instance->SelfClean(false);
+    }
     BrokerRegistration &registration = BrokerRegistration::Get();
     std::lock_guard<std::mutex> lockGuard(registration.creatorMutex_);
     registration.isUnloading = true;

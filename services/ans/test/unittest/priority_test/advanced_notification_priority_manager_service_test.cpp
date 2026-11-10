@@ -37,7 +37,13 @@ namespace Notification {
 class PriorityManagerServiceTest : public testing::Test {
 public:
     static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
+    static void TearDownTestCase()
+    {
+        sptr<AdvancedNotificationService> instance = AdvancedNotificationService::GetInstance();
+        if (instance != nullptr) {
+            instance->SelfClean(false);
+        }
+    }
     void SetUp() override
     {
         MockIsVerfyPermisson(true);
