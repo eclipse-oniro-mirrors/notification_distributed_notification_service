@@ -220,8 +220,9 @@ int32_t BundleManagerHelper::GetAppIndexByUid(const int32_t uid)
 bool BundleManagerHelper::GetBundleInfoV9(const std::string bundle, const int32_t flag,
     AppExecFwk::BundleInfo &bundleInfo, const int32_t userId)
 {
-    // Test knob: in the user-0 (Anco) domain only Anco apps are installed and resolvable.
-    if (userId == 0 && g_isAncoApp && g_mockUidForUserIdZero > 0) {
+    // Test knob: GetBundleInfoV9 resolves Anco installs in the requested user domain,
+    // which GetDefaultUidByBundleName cannot see.
+    if (g_isAncoApp && g_mockUidForUserIdZero > 0) {
         bundleInfo.uid = g_mockUidForUserIdZero;
     }
     return g_getBundle;

@@ -150,6 +150,7 @@ ErrCode __attribute__((weak)) BundleManagerHelper::GetAllBundleOption(
         NotificationBundleOption option = NotificationBundleOption(bundle.applicationInfo.bundleName,
             bundle.applicationInfo.uid);
         option.SetAppName(bundle.label);
+        option.SetAppIndex(bundle.applicationInfo.appIndex);
         bundleOptions.emplace_back(option);
     }
 
