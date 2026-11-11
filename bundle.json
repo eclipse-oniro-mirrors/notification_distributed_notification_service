@@ -87,6 +87,7 @@
         "data_share",
         "device_usage_statistics",
         "bundle_framework",
+        "form_fwk",
         "time_service",
         "safwk",
         "media_foundation",

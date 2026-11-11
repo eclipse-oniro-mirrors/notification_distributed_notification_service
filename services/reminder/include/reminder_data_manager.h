@@ -234,7 +234,17 @@ public:
      * @param want Which contains the given reminder.
      */
     void SnoozeReminder(const OHOS::EventFwk::Want &want);
-
+    
+    /**
+    * @brief Refresh the application's forms via the form manager service when a reminder button is clicked.
+    *        Builds a want internally that carries reminderId and buttonType, then asks FMS asynchronously
+    *        (an ffrt task, never blocking the calling thread) to refresh all forms of the bundle via the
+    *        FRS independent render process, without starting the main process.
+    * @param reminder The reminder whose bundle forms should be refreshed.
+    * @param buttonType The action button type (CLOSE / SNOOZE).
+     */
+    void RefreshFormsByReminder(const sptr<ReminderRequest> &reminder,
+        ReminderRequest::ActionButtonType buttonType);
     /**
      * Starts the recent reminder timing.
      */

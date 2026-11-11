@@ -37,6 +37,7 @@
 #include "common_event_manager.h"
 #include "ability_manager_client.h"
 #include "in_process_call_wrapper.h"
+
 #ifdef PLAYER_FRAMEWORK_ENABLE
 #include "audio_stream_info.h"
 #include "audio_session_manager.h"
@@ -529,6 +530,7 @@ void ReminderDataManager::CloseReminder(const OHOS::EventFwk::Want &want, bool c
         UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::CLOSE);
         CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::CLOSE);
         CheckAndCloseShareReminder(reminder);
+        RefreshFormsByReminder(reminder, ReminderRequest::ActionButtonType::CLOSE);
     }
     StartRecentReminder();
 }
@@ -1086,6 +1088,7 @@ void ReminderDataManager::SnoozeReminder(const OHOS::EventFwk::Want &want)
     SnoozeReminderImpl(reminder);
     UpdateAppDatabase(reminder, ReminderRequest::ActionButtonType::SNOOZE);
     CheckNeedNotifyStatus(reminder, ReminderRequest::ActionButtonType::SNOOZE);
+    RefreshFormsByReminder(reminder, ReminderRequest::ActionButtonType::SNOOZE);
 }
 
 void ReminderDataManager::SnoozeReminderImpl(sptr<ReminderRequest> &reminder)

@@ -28,6 +28,7 @@
 #include "reminder_request_adaptation.h"
 #include "reminder_request_calendar.h"
 #include "ability_manager_client.h"
+#include "mock_form_mgr.h"
 #include "mock_ipc_skeleton.h"
 #include "reminder_config_change_observer.h"
 #include "reminder_timer_info.h"
@@ -39,6 +40,13 @@ using namespace testing::ext;
 using namespace OHOS::EventFwk;
 namespace OHOS {
 namespace Notification {
+
+namespace {
+constexpr int32_t REFRESH_TEST_USER_ID = 100;
+constexpr int32_t REFRESH_TEST_REMINDER_ID = 5001;
+constexpr int32_t REFRESH_TEST_WAIT_MS = 1000;
+}
+
 class ReminderDataManagerTest : public testing::Test {
 public:
     static void SetUpTestCase()
@@ -52,6 +60,7 @@ public:
     {
         manager->showedReminderVector_.clear();
         manager = nullptr;
+        ReminderDataManager::REMINDER_DATA_MANAGER = nullptr;
     }
     void SetUp() {};
     void TearDown() {};
@@ -1581,6 +1590,174 @@ HWTEST_F(ReminderDataManagerTest, HandleCustomButtonClick_StartAbilityOnlyUIAbil
     }
     EXPECT_TRUE(stillInvector);
     EXPECT_TRUE(timer->IsShowing());
+}
+
+/**
+* @tc.name: RefreshFormsByReminder_0001
+* @tc.desc: Verify that RefreshFormsByReminder returns before scheduling the form
+*           refresh task when the reminder is null. The refresh chain runs in an
+*           ffrt task and its observation point is the samgr client entry (the
+*           FormMgr call itself goes through iface_cast virtual dispatch and
+*           cannot be intercepted at link time): the case first drives a valid
+*           reminder and waits for exactly one asynchronous samgr lookup as a
+*           positive control, then resets the counter and checks the null input.
+*           The null guard runs synchronously before any task is scheduled, so
+*           the lookup count of zero is deterministic. Only with the control can
+*           count==0 really fail when the guard regresses.
+* @tc.type: FUNC
+* @tc.require: PR-30088398
+* @tc.Co-authored-by: CodeAgent
+*/
+HWTEST_F(ReminderDataManagerTest, RefreshFormsByReminder_0001, Level1)
+{
+    // Positive control: with a valid reminder the samgr lookup must be observed
+    // exactly once, otherwise the count==0 assertion below would pass vacuously.
+    // The lookup happens asynchronously in the ffrt task, so it must be awaited.
+    AppExecFwk::MockFormMgr::Reset();
+    auto valid = sptr<ReminderRequest>(new ReminderRequest());
+    valid->InitBundleName("com.test.refresh");
+    valid->InitUserId(REFRESH_TEST_USER_ID);
+    valid->SetReminderId(REFRESH_TEST_REMINDER_ID);
+    manager->RefreshFormsByReminder(valid, ReminderRequest::ActionButtonType::CLOSE);
+    ASSERT_TRUE(AppExecFwk::MockFormMgr::WaitForSystemAbilityManagerRequestCount(1, REFRESH_TEST_WAIT_MS));
+    EXPECT_EQ(AppExecFwk::MockFormMgr::GetSystemAbilityManagerRequestCount(), 1);
+
+    // Null reminder must return before any refresh task is scheduled: the guard
+    // runs synchronously, so the lookup count of zero needs no waiting.
+    AppExecFwk::MockFormMgr::Reset();
+    sptr<ReminderRequest> reminder = nullptr;
+    manager->RefreshFormsByReminder(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    EXPECT_EQ(AppExecFwk::MockFormMgr::GetSystemAbilityManagerRequestCount(), 0);
+    AppExecFwk::MockFormMgr::Reset();
+}
+
+/**
+* @tc.name: RefreshFormsByReminder_0002
+* @tc.desc: Verify that RefreshFormsByReminder returns before scheduling the form
+*           refresh task when the bundleName of the reminder is empty. Same
+*           observation point as 0001: a non-empty bundleName is driven first and
+*           awaited (exactly one asynchronous samgr lookup, positive control),
+*           then the counter is reset and the empty one is checked. The
+*           bundleName guard runs synchronously before any task is scheduled,
+*           so the lookup count of zero is deterministic.
+* @tc.type: FUNC
+* @tc.require: PR-30088398
+* @tc.Co-authored-by: CodeAgent
+*/
+HWTEST_F(ReminderDataManagerTest, RefreshFormsByReminder_0002, Level1)
+{
+    // Positive control: with a non-empty bundleName the samgr lookup must be
+    // observed exactly once, otherwise the count==0 assertion would pass
+    // vacuously. The lookup happens asynchronously, so it must be awaited.
+    AppExecFwk::MockFormMgr::Reset();
+    auto valid = sptr<ReminderRequest>(new ReminderRequest());
+    valid->InitBundleName("com.test.refresh");
+    valid->InitUserId(REFRESH_TEST_USER_ID);
+    valid->SetReminderId(REFRESH_TEST_REMINDER_ID);
+    manager->RefreshFormsByReminder(valid, ReminderRequest::ActionButtonType::CLOSE);
+    ASSERT_TRUE(AppExecFwk::MockFormMgr::WaitForSystemAbilityManagerRequestCount(1, REFRESH_TEST_WAIT_MS));
+    EXPECT_EQ(AppExecFwk::MockFormMgr::GetSystemAbilityManagerRequestCount(), 1);
+
+    // Empty bundleName must return before any refresh task is scheduled: the
+    // guard runs synchronously, so the lookup count of zero needs no waiting.
+    AppExecFwk::MockFormMgr::Reset();
+    auto reminder = sptr<ReminderRequest>(new ReminderRequest());
+    reminder->InitBundleName("");
+    reminder->InitUserId(REFRESH_TEST_USER_ID);
+    reminder->SetReminderId(REFRESH_TEST_REMINDER_ID);
+    manager->RefreshFormsByReminder(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    EXPECT_EQ(AppExecFwk::MockFormMgr::GetSystemAbilityManagerRequestCount(), 0);
+    AppExecFwk::MockFormMgr::Reset();
+}
+
+/**
+* @tc.name: RefreshFormsByReminder_0003
+* @tc.desc: Verify that RefreshFormsByReminder handles a null system ability manager
+*           without crashing: the asynchronous samgr lookup is awaited and reached
+*           exactly once, and the task then returns before touching the form
+*           manager, so no IPC is attempted at all (SendRequest count on the
+*           failing fake remote object stays zero). A missing null check would
+*           dereference the null manager and crash the test binary.
+* @tc.type: FUNC
+* @tc.require: PR-30088398
+* @tc.Co-authored-by: CodeAgent
+*/
+HWTEST_F(ReminderDataManagerTest, RefreshFormsByReminder_0003, Level1)
+{
+    AppExecFwk::MockFormMgr::Reset();
+    AppExecFwk::MockFormMgr::SetSystemAbilityManagerNull(true);
+    auto reminder = sptr<ReminderRequest>(new ReminderRequest());
+    reminder->InitBundleName("com.test.refresh");
+    reminder->InitUserId(REFRESH_TEST_USER_ID);
+    reminder->SetReminderId(REFRESH_TEST_REMINDER_ID);
+    manager->RefreshFormsByReminder(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    ASSERT_TRUE(AppExecFwk::MockFormMgr::WaitForSystemAbilityManagerRequestCount(1, REFRESH_TEST_WAIT_MS));
+    EXPECT_EQ(AppExecFwk::MockFormMgr::GetSystemAbilityManagerRequestCount(), 1);
+    EXPECT_EQ(AppExecFwk::MockFormMgr::GetFailingRemoteSendRequestCount(), 0);
+    AppExecFwk::MockFormMgr::Reset();
+}
+
+/**
+* @tc.name: RefreshFormsByReminder_0004
+* @tc.desc: Verify that RefreshFormsByReminder schedules the whole refresh chain
+*           (samgr lookup, GetSystemAbility, iface_cast to the form manager and
+*           the UpdateFormsWithReminderAgent call with the internally built want)
+*           without crashing when the input is valid and the samgr client entry
+*           behaves like in production. The chain runs asynchronously in an ffrt
+*           task, so the lookup is awaited before asserting. How deep the chain
+*           actually gets depends on whether a form manager remote object is
+*           available in the test environment, so the samgr lookup count is the
+*           deterministic assertion and the rest is crash coverage. The default
+*           chain never routes through the failing fake remote object of the mock.
+* @tc.type: FUNC
+* @tc.require: PR-30088398
+* @tc.Co-authored-by: CodeAgent
+*/
+HWTEST_F(ReminderDataManagerTest, RefreshFormsByReminder_0004, Level1)
+{
+    AppExecFwk::MockFormMgr::Reset();
+    auto reminder = sptr<ReminderRequest>(new ReminderRequest());
+    reminder->InitBundleName("com.test.refresh");
+    reminder->InitUserId(REFRESH_TEST_USER_ID);
+    reminder->SetReminderId(REFRESH_TEST_REMINDER_ID);
+    manager->RefreshFormsByReminder(reminder, ReminderRequest::ActionButtonType::SNOOZE);
+    ASSERT_TRUE(AppExecFwk::MockFormMgr::WaitForSystemAbilityManagerRequestCount(1, REFRESH_TEST_WAIT_MS));
+    EXPECT_EQ(AppExecFwk::MockFormMgr::GetSystemAbilityManagerRequestCount(), 1);
+    EXPECT_EQ(AppExecFwk::MockFormMgr::GetFailingRemoteSendRequestCount(), 0);
+    AppExecFwk::MockFormMgr::Reset();
+}
+
+/**
+* @tc.name: RefreshFormsByReminder_0005
+* @tc.desc: Verify that RefreshFormsByReminder handles a null form manager remote
+*           object without crashing: the samgr lookup succeeds but GetSystemAbility
+*           returns nullptr, because the mock returns a real samgr proxy over a
+*           remote object whose IPC always fails. The function must return before
+*           the iface_cast; a missing null check would pass the null remote object
+*           into iface_cast and depend on the form SDK to survive it. Both the
+*           samgr lookup and the failing remote object's IPC are awaited, proving
+*           that the asynchronous chain really reached GetSystemAbility.
+* @tc.type: FUNC
+* @tc.require: PR-30088398
+* @tc.Co-authored-by: CodeAgent
+*/
+HWTEST_F(ReminderDataManagerTest, RefreshFormsByReminder_0005, Level1)
+{
+    AppExecFwk::MockFormMgr::Reset();
+    AppExecFwk::MockFormMgr::SetSystemAbilityManagerRemoteNull(true);
+    auto reminder = sptr<ReminderRequest>(new ReminderRequest());
+    reminder->InitBundleName("com.test.refresh");
+    reminder->InitUserId(REFRESH_TEST_USER_ID);
+    reminder->SetReminderId(REFRESH_TEST_REMINDER_ID);
+    manager->RefreshFormsByReminder(reminder, ReminderRequest::ActionButtonType::CLOSE);
+    ASSERT_TRUE(AppExecFwk::MockFormMgr::WaitForSystemAbilityManagerRequestCount(1, REFRESH_TEST_WAIT_MS));
+    // The failing remote object's IPC happens after the samgr lookup, so it must
+    // be awaited separately: reaching it proves GetSystemAbility was really
+    // driven and returned nullptr, which is the branch this case covers. The
+    // exact count depends on the samgr version, so the >= 1 wait suffices.
+    ASSERT_TRUE(AppExecFwk::MockFormMgr::WaitForFailingRemoteSendRequestCount(1, REFRESH_TEST_WAIT_MS));
+    EXPECT_EQ(AppExecFwk::MockFormMgr::GetSystemAbilityManagerRequestCount(), 1);
+    AppExecFwk::MockFormMgr::Reset();
 }
 }  // namespace Notification
 }  // namespace OHOS
