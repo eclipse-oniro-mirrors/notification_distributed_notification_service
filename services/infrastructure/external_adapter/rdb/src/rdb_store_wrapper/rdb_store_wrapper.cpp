@@ -299,6 +299,10 @@ int32_t NtfRdbStoreWrapper::RestoreForMasterSlaver()
     int32_t result = NativeRdb::E_OK;
     {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+            return NativeRdb::E_ERROR;
+        }
         result = rdbStore_->Restore("");
     }
     ANS_LOGI("RestoreForMasterSlaver result = %{public}d", result);

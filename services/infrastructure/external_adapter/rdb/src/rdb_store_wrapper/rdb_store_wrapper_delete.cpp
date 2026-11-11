@@ -88,10 +88,6 @@ int32_t NtfRdbStoreWrapper::DeleteData(const std::string &key, const int32_t &us
 int32_t NtfRdbStoreWrapper::DeleteStatisticsByBundle(const int32_t userId,
     const std::string &bundleName, int32_t packageId)
 {
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
-        return NativeRdb::E_ERROR;
-    }
     if (userId < 0) {
         ANS_LOGE("invalid userId: %{public}d, function: %{public}s", userId, __FUNCTION__);
         return NativeRdb::E_ERROR;
@@ -108,7 +104,15 @@ int32_t NtfRdbStoreWrapper::DeleteStatisticsByBundle(const int32_t userId,
     absRdbPredicates.EqualTo("uid", packageId);
 
     int affectedRows = -1;
-    int ret = rdbStore_->Delete(affectedRows, absRdbPredicates);
+    int ret = NativeRdb::E_ERROR;
+    {
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+            return NativeRdb::E_ERROR;
+        }
+        ret = rdbStore_->Delete(affectedRows, absRdbPredicates);
+    }
     if (ret != NativeRdb::E_OK) {
         ANS_LOGE("NtfRdbStoreWrapper::DeleteStatisticsByBundle fail: %{public}d", ret);
         return NativeRdb::E_ERROR;
@@ -121,6 +125,7 @@ int32_t NtfRdbStoreWrapper::DeleteStatisticsByBundle(const int32_t userId,
 int32_t NtfRdbStoreWrapper::CleanExperDataTimer(const std::vector<int32_t> &userIds)
 {
     ANS_LOGD("NtfRdbStoreWrapper::CleanExperDataTimer");
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ == nullptr) {
         ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
         return NativeRdb::E_ERROR;
@@ -151,35 +156,44 @@ int32_t NtfRdbStoreWrapper::CleanExperDataTimer(const std::vector<int32_t> &user
 
 int32_t NtfRdbStoreWrapper::CleanExpertotal(const int32_t totalCount, const std::string &tableName)
 {
-    if (totalCount >= LINES) {
-        ANS_LOGI("data exper, begin clean: %{public}d", totalCount);
-        std::string querySqlStr =
-            "DELETE FROM " + tableName +
-            "  WHERE id IN ("
-            "  SELECT id "
-            "  FROM " + tableName + " "
-            "  ORDER BY notificationTime ASC "
-            "  LIMIT " + std::to_string(DELETEROWS) + " "
-            ");";
-        int32_t ret = NativeRdb::E_OK;
-        ret = rdbStore_->ExecuteSql(querySqlStr);
-        if (ret != NativeRdb::E_OK) {
-            ANS_LOGE("ExecuteSql fail, querySqlStr: %{public}s", querySqlStr.c_str());
-            return NativeRdb::E_ERROR;
-        }
+    if (totalCount < LINES) {
+        return NativeRdb::E_OK;
+    }
+    ANS_LOGI("data exper, begin clean: %{public}d", totalCount);
+    std::string querySqlStr =
+        "DELETE FROM " + tableName +
+        "  WHERE id IN ("
+        "  SELECT id "
+        "  FROM " + tableName + " "
+        "  ORDER BY notificationTime ASC "
+        "  LIMIT " + std::to_string(DELETEROWS) + " "
+        ");";
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+    if (rdbStore_ == nullptr) {
+        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+        return NativeRdb::E_ERROR;
+    }
+    int32_t ret = rdbStore_->ExecuteSql(querySqlStr);
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("ExecuteSql fail, querySqlStr: %{public}s", querySqlStr.c_str());
+        return NativeRdb::E_ERROR;
     }
     return NativeRdb::E_OK;
 }
 
 int32_t NtfRdbStoreWrapper::CleanExperData(const int32_t userId)
 {
-    if (rdbStore_ == nullptr) {
-        ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
-        return NativeRdb::E_ERROR;
-    }
     std::string tableName = NOTIFICATION_STATISTICS_TABLENAME + "_" + std::to_string(userId);
     std::string querySqlStr = "SELECT COUNT(*) FROM " + tableName;
-    std::shared_ptr<NativeRdb::ResultSet> rs = rdbStore_->QuerySql(querySqlStr);
+    std::shared_ptr<NativeRdb::ResultSet> rs = nullptr;
+    {
+        std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+        if (rdbStore_ == nullptr) {
+            ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
+            return NativeRdb::E_ERROR;
+        }
+        rs = rdbStore_->QuerySql(querySqlStr);
+    }
     int32_t totalCount = 0;
 
     if (rs == nullptr) {
@@ -190,9 +204,10 @@ int32_t NtfRdbStoreWrapper::CleanExperData(const int32_t userId)
     if (rs->GoToNextRow() == NativeRdb::E_OK) {
         rs->GetInt(0, totalCount);
     }
-    
+
     rs->Close();
 
+    // CleanExpertotal locks rdbStorePtrMutex_ by itself, so do not hold it here.
     return CleanExpertotal(totalCount, tableName);
 }
 

@@ -1168,4 +1168,72 @@ HWTEST_F(NtfRdbStoreWrapperStatisticsTest, DeleteStatisticsByBundle_Statistics_6
     ret = rdbWrapper.DeleteStatisticsByBundle(nonSystemUserId, "bundle/with/slash", 20010044);
     EXPECT_EQ(ret, NativeRdb::E_ERROR);
 }
+
+/**
+ * @tc.name: CleanExpertotal_Statistics_100
+ * @tc.desc: Verify CleanExpertotal skips the DB below the threshold, returns error when rdbStore_
+ *           is null and succeeds when the store is available.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, CleanExpertotal_Statistics_100, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+
+    // Below the threshold the table is left untouched and no store access happens.
+    EXPECT_EQ(rdbWrapper.CleanExpertotal(14999, "statistics_table"), NativeRdb::E_OK);
+
+    // Above the threshold with a null store the call must fail without dereferencing it.
+    rdbWrapper.rdbStore_ = nullptr;
+    EXPECT_EQ(rdbWrapper.CleanExpertotal(15000, "statistics_table"), NativeRdb::E_ERROR);
+
+    // Above the threshold with an available store the cleanup runs.
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockExecuteSqlErrCodes({NativeRdb::E_OK});
+    rdbWrapper.rdbStore_ = mockRdbStore;
+    EXPECT_EQ(rdbWrapper.CleanExpertotal(15000, "statistics_table"), NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name: RestoreForMasterSlaver_Statistics_100
+ * @tc.desc: Verify RestoreForMasterSlaver returns error instead of crashing when rdbStore_ is null.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, RestoreForMasterSlaver_Statistics_100, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.rdbStore_ = nullptr;
+
+    EXPECT_EQ(rdbWrapper.RestoreForMasterSlaver(), NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name: RestoreForMasterSlaver_Statistics_200
+ * @tc.desc: Verify RestoreForMasterSlaver forwards the restore result when rdbStore_ is available.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, RestoreForMasterSlaver_Statistics_200, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockReStoreErrCodes({NativeRdb::E_OK});
+    rdbWrapper.rdbStore_ = mockRdbStore;
+
+    EXPECT_EQ(rdbWrapper.RestoreForMasterSlaver(), NativeRdb::E_OK);
+}
 } // OHOS::Notification::Infra

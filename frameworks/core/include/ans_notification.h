@@ -2104,6 +2104,7 @@ private:
     std::mutex badgeQueryMutex_;
     std::map<std::shared_ptr<IBadgeQueryCallback>, sptr<BadgeQueryListener>> badgeQueryCallbacks_;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    std::mutex swingMutex_;
     sptr<SwingCallBackService> swingCallBackService_;
 #endif
 };
