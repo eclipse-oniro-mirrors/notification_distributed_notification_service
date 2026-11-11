@@ -3214,7 +3214,8 @@ InnerErrorCode AnsNotification::DisableNotificationFeature(const NotificationDis
 InnerErrorCode AnsNotification::SetSilentAuthNotificationInfo(
     const std::vector<std::string> &bundleList, int32_t userId)
 {
-    ANS_LOGD("called");
+    ANS_LOGI("SetSilentAuthNotificationInfo bundleList size: %{public}zu, userId: %{public}d",
+        bundleList.size(), userId);
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
         ANS_LOGE("SetSilentAuthNotificationInfo fail");

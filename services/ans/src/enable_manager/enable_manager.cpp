@@ -628,11 +628,9 @@ ErrCode AdvancedNotificationService::IsAllowedNotifySelf(const sptr<Notification
         }
         if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
-            if (!ResolveSilentAuthBundleNotExist(bundleOption, allowed)) {
-                // FA model app can publish notification without user confirm
-                allowed = CheckApiCompatibility(bundleOption);
-                SetDefaultNotificationEnabled(bundleOption, allowed);
-            }
+            // FA model app can publish notification without user confirm
+            allowed = CheckApiCompatibility(bundleOption);
+            SetDefaultNotificationEnabled(bundleOption, allowed);
         }
     }
     ANS_LOGI("ntfAuth %{public}s %{public}d allowed:%{public}d",
@@ -698,6 +696,7 @@ ErrCode AdvancedNotificationService::CheckSpecialBundleSwitchAllowed(
     result = NotificationPreferences::GetInstance()->GetNotificationsEnabled(userId, allowed);
     if (result == ERR_OK && !allowed) {
         ApplySilentAuthGlobalSwitchExemption(targetBundle, allowed);
+        return result;
     }
     if (result == ERR_OK && allowed) {
         result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(targetBundle, state);
@@ -707,10 +706,8 @@ ErrCode AdvancedNotificationService::CheckSpecialBundleSwitchAllowed(
         }
         if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
-            if (!ResolveSilentAuthBundleNotExist(targetBundle, allowed)) {
-                allowed = CheckApiCompatibility(targetBundle);
-                SetNotificationsSystemEnabledForSpecialBundle("", bundleOption, allowed);
-            }
+            allowed = CheckApiCompatibility(targetBundle);
+            SetNotificationsSystemEnabledForSpecialBundle("", bundleOption, allowed);
         }
     }
     return result;

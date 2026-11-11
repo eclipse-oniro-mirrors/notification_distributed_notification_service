@@ -1932,14 +1932,10 @@ public:
     ErrCode CheckSpecialBundleSwitchAllowed(const sptr<NotificationBundleOption> &bundleOption,
         const sptr<NotificationBundleOption> &targetBundle, int32_t userId, bool &allowed);
 
-    ErrCode CheckSilentAuthCallerPermission();
-
-    ErrCode ResolveSilentAuthUserId(int32_t &userId);
-
     void ForceEnableSilentAuthBundles(const std::vector<std::string> &bundleList, int32_t userId);
 
     void ForceEnableSilentAuthBundleInstance(
-        const std::string &bundleName, int32_t userId, int32_t appIndex);
+        const std::string &bundleName, int32_t uid, int32_t appIndex);
 
     ErrCode ForceEnableSilentAuthBundle(const sptr<NotificationBundleOption> &bundleOption);
 

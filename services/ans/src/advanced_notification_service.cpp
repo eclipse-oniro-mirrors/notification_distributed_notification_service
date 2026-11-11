@@ -18,7 +18,9 @@
 
 #include <functional>
 #include <iomanip>
+#include <set>
 #include <sstream>
+#include <unordered_map>
 
 #include "fa_ability_context.h"
 #include "ability_info.h"
@@ -142,20 +144,66 @@ int32_t GetSilentAuthUserIdFromUid(int32_t uid)
     return userId;
 }
 
+// Resolve the install uid in the requested user domain; the GetBundleInfoV9 fallback
+// covers Anco installs that GetDefaultUidByBundleName cannot see.
 int32_t ResolveSilentAuthBundleUid(const std::string &bundleName, int32_t userId, int32_t appIndex)
 {
     int32_t uid = BundleManagerHelper::GetInstance()->GetDefaultUidByBundleName(bundleName, userId, appIndex);
-    if (uid > 0 || userId == ZERO_USERID) {
+    if (uid > 0) {
         return uid;
     }
 
     AppExecFwk::BundleInfo bundleInfo;
     int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_DEFAULT);
-    if (BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleName, flags, bundleInfo, ZERO_USERID) &&
+    if (BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundleName, flags, bundleInfo, userId) &&
         bundleInfo.uid > 0) {
         return bundleInfo.uid;
     }
     return uid;
+}
+
+ErrCode CheckSilentAuthRequest(const sptr<NotificationSilentAuth> &silentAuthInfo,
+    int32_t &userId, HaMetaMessage &message)
+{
+    if (silentAuthInfo == nullptr) {
+        ANS_LOGE("silentAuthInfo is nullptr");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM));
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
+    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
+        ANS_LOGE("SetSilentAuthNotificationInfo caller is not system app");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_NON_SYSTEM_APP).BranchId(BRANCH_12));
+        return ERR_ANS_INNER_NON_SYSTEM_APP;
+    }
+    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
+        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_MANAGE_EDM_POLICY)) {
+        ANS_LOGE("SetSilentAuthNotificationInfo caller is permission denied");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_12));
+        return ERR_ANS_INNER_PERMISSION_DENIED;
+    }
+    userId = silentAuthInfo->GetUserId();
+    if (!OsAccountManagerHelper::GetInstance().CheckUserExists(userId)) {
+        ANS_LOGE("Invalid userId: %{public}d", userId);
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_INVALID_PARAM).BranchId(BRANCH_12));
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    return ERR_OK;
+}
+
+std::vector<std::string> DeduplicateBundleList(const std::vector<std::string> &bundleList)
+{
+    std::vector<std::string> deduped;
+    std::set<std::string> seen;
+    for (const auto &name : bundleList) {
+        if (seen.insert(name).second) {
+            deduped.push_back(name);
+        }
+    }
+    return deduped;
 }
 }  // namespace
 
@@ -2859,27 +2907,22 @@ ErrCode AdvancedNotificationService::SetSilentAuthNotificationInfo(
     const sptr<NotificationSilentAuth> &silentAuthInfo)
 {
     ANS_LOGD("called");
-    if (silentAuthInfo == nullptr) {
-        ANS_LOGE("silentAuthInfo is nullptr");
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
-    ErrCode checkResult = CheckSilentAuthCallerPermission();
-    if (checkResult != ERR_OK) {
-        ANS_LOGE("Check silent auth caller permission failed.");
-        return checkResult;
-    }
-    int32_t userId = silentAuthInfo->GetUserId();
-    ErrCode userIdResult = ResolveSilentAuthUserId(userId);
-    if (userIdResult != ERR_OK) {
-        ANS_LOGE("Resolve silent auth userId failed.");
-        return userIdResult;
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_13, EventBranchId::BRANCH_11);
+    int32_t userId = SUBSCRIBE_USER_INIT;
+    ErrCode errCode = CheckSilentAuthRequest(silentAuthInfo, userId, message);
+    if (errCode != ERR_OK) {
+        return errCode;
     }
     sptr<NotificationSilentAuth> storeInfo = new (std::nothrow) NotificationSilentAuth(*silentAuthInfo);
     if (storeInfo == nullptr) {
         ANS_LOGE("Failed to create silent auth info");
+        NotificationAnalyticsUtil::ReportModifyEvent(
+            message.ErrorCode(ERR_ANS_INNER_NO_MEMORY).BranchId(BRANCH_12));
         return ERR_ANS_INNER_NO_MEMORY;
     }
-    storeInfo->SetUserId(userId);
+    storeInfo->SetBundleList(DeduplicateBundleList(storeInfo->GetBundleList()));
+    message.Message("bundleList size:" + std::to_string(storeInfo->GetBundleList().size()) +
+        ", userId:" + std::to_string(userId));
     // Empty bundle list means cancel of the whole management, control purely by list contents.
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([storeInfo, &result, this]() {
@@ -2895,52 +2938,13 @@ ErrCode AdvancedNotificationService::SetSilentAuthNotificationInfo(
     }));
     if (submitResult != ERR_OK) {
         ANS_LOGE("Set silent auth notification info failed.");
+        NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(submitResult).BranchId(BRANCH_13));
         return submitResult;
     }
     ANS_LOGI("SetSilentAuthNotificationInfo bundleList size: %{public}zu, userId: %{public}d, result: %{public}d",
         storeInfo->GetBundleList().size(), storeInfo->GetUserId(), result);
+    NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).BranchId(BRANCH_13));
     return result;
-}
-
-ErrCode AdvancedNotificationService::CheckSilentAuthCallerPermission()
-{
-    bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
-        ANS_LOGE("silentAuthInfo caller is not system app");
-        return ERR_ANS_INNER_NON_SYSTEM_APP;
-    }
-
-    if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER) ||
-        !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_MANAGE_EDM_POLICY)) {
-        ANS_LOGE("silentAuthInfo caller is permission denied");
-        return ERR_ANS_INNER_PERMISSION_DENIED;
-    }
-    return ERR_OK;
-}
-
-ErrCode AdvancedNotificationService::ResolveSilentAuthUserId(int32_t &userId)
-{
-    if (userId != SUBSCRIBE_USER_INIT) {
-        if (userId < 0) {
-            ANS_LOGE("Invalid userId: %{public}d", userId);
-            return ERR_ANS_INNER_INVALID_PARAM;
-        }
-        std::vector<int32_t> userIds;
-        if (OsAccountManagerHelper::GetInstance().GetAllOsAccount(userIds) != ERR_OK) {
-            ANS_LOGE("Failed to get all os accounts");
-            return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
-        }
-        if (std::find(userIds.begin(), userIds.end(), userId) == userIds.end()) {
-            ANS_LOGE("userId %{public}d is not exist", userId);
-            return ERR_ANS_INNER_INVALID_PARAM;
-        }
-        return ERR_OK;
-    }
-    if (OsAccountManagerHelper::GetInstance().GetCurrentActiveUserId(userId) != ERR_OK) {
-        ANS_LOGE("Failed to get active userId");
-        return ERR_ANS_INNER_GET_ACTIVE_USER_FAILED;
-    }
-    return ERR_OK;
 }
 
 bool AdvancedNotificationService::IsBundleSilentAuthLocked(const sptr<NotificationBundleOption> &bundleOption)
@@ -3004,27 +3008,53 @@ bool AdvancedNotificationService::ResolveSilentAuthBundleNotExist(
 void AdvancedNotificationService::ForceEnableSilentAuthBundles(
     const std::vector<std::string> &bundleList, int32_t userId)
 {
+    if (bundleList.empty()) {
+        return;
+    }
+
+    std::vector<NotificationBundleOption> installedOptions;
+    if (BundleManagerHelper::GetInstance()->GetAllBundleOption(installedOptions, userId) != ERR_OK) {
+        // Batch query failed: degrade to the legacy per-bundle resolve path.
+        ANS_LOGW("GetAllBundleOption failed, fallback to per-bundle resolve, userId: %{public}d", userId);
+        for (const auto &bundleName : bundleList) {
+            if (bundleName.empty()) {
+                continue;
+            }
+            std::vector<int32_t> appIndexes;
+            if (!BundleManagerHelper::GetInstance()->GetCloneAppIndexes(bundleName, appIndexes, userId) ||
+                appIndexes.empty()) {
+                appIndexes.push_back(0);
+            }
+            for (int32_t appIndex : appIndexes) {
+                ForceEnableSilentAuthBundleInstance(bundleName,
+                    ResolveSilentAuthBundleUid(bundleName, userId, appIndex), appIndex);
+            }
+        }
+        return;
+    }
+
+    std::unordered_map<std::string, std::vector<NotificationBundleOption>> installedBundles;
+    for (const auto &option : installedOptions) {
+        installedBundles[option.GetBundleName()].emplace_back(option);
+    }
     for (const auto &bundleName : bundleList) {
         if (bundleName.empty()) {
             continue;
         }
-        std::vector<int32_t> appIndexes;
-        if (!BundleManagerHelper::GetInstance()->GetCloneAppIndexes(bundleName, appIndexes, userId) ||
-            appIndexes.empty()) {
-            // Not installed or clone index query failed, fallback to the main instance.
-            appIndexes.push_back(0);
+        auto it = installedBundles.find(bundleName);
+        if (it == installedBundles.end()) {
+            ANS_LOGI("bundle %{public}s not installed, skip force enable", bundleName.c_str());
+            continue;
         }
-        for (int32_t appIndex : appIndexes) {
-            ForceEnableSilentAuthBundleInstance(bundleName, userId, appIndex);
+        for (const auto &option : it->second) {
+            ForceEnableSilentAuthBundleInstance(bundleName, option.GetUid(), option.GetAppIndex());
         }
     }
 }
 
 void AdvancedNotificationService::ForceEnableSilentAuthBundleInstance(
-    const std::string &bundleName, int32_t userId, int32_t appIndex)
+    const std::string &bundleName, int32_t uid, int32_t appIndex)
 {
-    // Anco apps fall back to the user-0 domain so that the lock is written with their own uid.
-    int32_t uid = ResolveSilentAuthBundleUid(bundleName, userId, appIndex);
     if (uid <= 0) {
         ANS_LOGI("bundle %{public}s appIndex %{public}d not installed, skip force enable",
             bundleName.c_str(), appIndex);
@@ -3044,30 +3074,29 @@ void AdvancedNotificationService::ForceEnableSilentAuthBundleInstance(
 ErrCode AdvancedNotificationService::ForceEnableSilentAuthBundle(
     const sptr<NotificationBundleOption> &bundleOption)
 {
-    sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
-    if (bundle == nullptr) {
+    if (bundleOption == nullptr || bundleOption->GetUid() <= 0) {
         return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
-    ErrCode result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    ErrCode result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundleOption, state);
     bool isEnabled = state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON;
     if (result == ERR_OK && isEnabled) {
         return ERR_OK;
     }
     sptr<EnabledNotificationCallbackData> bundleData = new (std::nothrow)
-        EnabledNotificationCallbackData(bundle->GetBundleName(), bundle->GetUid(), true);
+        EnabledNotificationCallbackData(bundleOption->GetBundleName(), bundleOption->GetUid(), true);
     if (bundleData == nullptr) {
         return ERR_ANS_INNER_NO_MEMORY;
     }
-    SetSlotFlagsTrustlistsAsBundle(bundle);
+    SetSlotFlagsTrustlistsAsBundle(bundleOption);
     // Enterprise management is an explicit decision: write USER_MODIFIED_ON so the state stays
     result = NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
-        bundle, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+        bundleOption, NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     if (result == ERR_OK) {
         NotificationSubscriberManager::GetInstance()->NotifyEnabledNotificationChanged(bundleData);
-        PublishSlotChangeCommonEvent(bundle);
+        PublishSlotChangeCommonEvent(bundleOption);
     }
-    SendEnableNotificationHiSysEvent(bundle, true, result);
+    SendEnableNotificationHiSysEvent(bundleOption, true, result);
     return result;
 }
 
@@ -3216,7 +3245,6 @@ void AdvancedNotificationService::CollectSilentAuthSwitchLimited(const Notificat
 
 bool AdvancedNotificationService::GetSilentAuthBundleSwitchEnabled(const std::string &bundleName, int32_t userId)
 {
-    // Anco apps fall back to the user-0 domain to report the real stored switch state.
     int32_t uid = ResolveSilentAuthBundleUid(bundleName, userId, 0);
     if (uid <= 0) {
         // Not installed bundles have no switch record, report locked-on semantics.

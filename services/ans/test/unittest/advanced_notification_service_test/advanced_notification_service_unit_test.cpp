@@ -3847,7 +3847,7 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetSilentAuthNotificationInfo_100,
     sptr<NotificationSilentAuth> info = new (std::nothrow) NotificationSilentAuth();
     ASSERT_NE(info, nullptr);
     info->SetBundleList({"sa_db_fail"});
-    info->SetUserId(-1); // SUBSCRIBE_USER_INIT: resolves to the active user
+    info->SetUserId(0); // explicit valid userId required, no active-user fallback
     // db write failure propagates as DB_OPERATION_FAILED instead of success.
     MockInit(true);
     MockInsertData(false);

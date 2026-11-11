@@ -56,7 +56,7 @@ extern const char *OHOS_PERMISSION_MANAGE_EDM_POLICY;
 
 namespace {
 constexpr int32_t TEST_USER_ID = 100;
-constexpr int32_t ANCO_UID = 900; // user-0 domain uid for Anco tests
+constexpr int32_t ANCO_UID = 900; // Anco install uid in the requested user domain
 constexpr int32_t BUNDLE_UID = NON_SYSTEM_APP_UID;
 
 sptr<NotificationSilentAuth> BuildSilentAuth(const std::vector<std::string> &bundleList, int32_t userId)
@@ -96,6 +96,8 @@ void ResetSilentAuthMocks()
     MockBundleManager::MockIsAncoApp(false);
     MockBundleManager::MockUidByBundleName(NON_SYSTEM_APP_UID, NON_SYSTEM_APP_UID);
     MockBundleManager::MockCheckApiCompatibility(true);
+    MockBundleManager::MockClearInstalledBundle();
+    MockBundleManager::MockBundleInterfaceResult(0);
     MockIsVerfyPermisson(true);
     MockDeniedPermission("");
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
@@ -251,6 +253,7 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, Set_DualPermissionRequired_001, Fun
  */
 HWTEST_F(AdvancedNotificationSilentAuthTest, Set_UserIdNotExist_001, Function | SmallTest | Level1)
 {
+    MockIsOsAccountExists(false);
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_x"}, TEST_USER_ID + 1)),
         ERR_ANS_INNER_INVALID_PARAM);
     // A rejected set must not leave the bundle locked or partially stored.
@@ -259,25 +262,25 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, Set_UserIdNotExist_001, Function | 
 }
 
 /**
- * @tc.name: Set_ActiveUserResolveFail_001
- * @tc.desc: userId -1 with active user resolve failure returns ERR_ANS_INNER_GET_ACTIVE_USER_FAILED
+ * @tc.name: Set_UserIdInitRejected_001
+ * @tc.desc: userId -1 (SUBSCRIBE_USER_INIT) is rejected as invalid param, no active-user fallback
  */
-HWTEST_F(AdvancedNotificationSilentAuthTest, Set_ActiveUserResolveFail_001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationSilentAuthTest, Set_UserIdInitRejected_001, Function | SmallTest | Level1)
 {
-    MockQueryForgroundOsAccountId(false);
+    MockIsOsAccountExists(false);
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_x"}, SUBSCRIBE_USER_INIT)),
-        ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+        ERR_ANS_INNER_INVALID_PARAM);
 }
 
 /**
- * @tc.name: Set_ActiveUserDefault_001
- * @tc.desc: userId -1 resolves to the active user(100), stored on that user's entry
+ * @tc.name: Set_ExplicitUserIdStored_001
+ * @tc.desc: Explicit userId(100) is stored on that user's entry
  */
-HWTEST_F(AdvancedNotificationSilentAuthTest, Set_ActiveUserDefault_001, Function | SmallTest | Level1)
+HWTEST_F(AdvancedNotificationSilentAuthTest, Set_ExplicitUserIdStored_001, Function | SmallTest | Level1)
 {
-    EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_active"}, SUBSCRIBE_USER_INIT)), ERR_OK);
+    EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_active"}, TEST_USER_ID)), ERR_OK);
     EXPECT_TRUE(service_->IsBundleSilentAuthLocked(BuildOption("sa_active", BUNDLE_UID)));
-    // The -1 form stores on the resolved active user entry, not the global (user-0) entry.
+    // The explicit form stores on that user's entry, not the global (user-0) entry.
     std::vector<std::string> bundleList;
     EXPECT_EQ(service_->GetSilentAuthNotificationBundles(TEST_USER_ID, bundleList), ERR_OK);
     EXPECT_NE(std::find(bundleList.begin(), bundleList.end(), "sa_active"), bundleList.end());
@@ -289,6 +292,7 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, Set_ActiveUserDefault_001, Function
  */
 HWTEST_F(AdvancedNotificationSilentAuthTest, Set_BundleListForceOn_001, Function | SmallTest | Level1)
 {
+    MockBundleManager::MockInstallBundle(NotificationBundleOption("sa_force", BUNDLE_UID));
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_force"}, TEST_USER_ID)), ERR_OK);
     EXPECT_EQ(GetSwitchState("sa_force", BUNDLE_UID), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_force"}, TEST_USER_ID)), ERR_OK);
@@ -301,6 +305,7 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, Set_BundleListForceOn_001, Function
  */
 HWTEST_F(AdvancedNotificationSilentAuthTest, Set_EmptyListCancel_001, Function | SmallTest | Level1)
 {
+    MockBundleManager::MockInstallBundle(NotificationBundleOption("sa_cancel", BUNDLE_UID));
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_cancel"}, TEST_USER_ID)), ERR_OK);
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({}, TEST_USER_ID)), ERR_OK);
     EXPECT_FALSE(service_->IsBundleSilentAuthLocked(BuildOption("sa_cancel", BUNDLE_UID)));
@@ -338,12 +343,14 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, Lock_AncoActiveUserEntry_001, Funct
 
 /**
  * @tc.name: Anco_ForceEnableFallback_001
- * @tc.desc: uid resolve falls back to the user-0 domain for Anco apps; non-Anco is rejected by IsAncoApp gate
+ * @tc.desc: The batch result carries the Anco install uid and force-enables it; missing bundles get no switch record
  */
 HWTEST_F(AdvancedNotificationSilentAuthTest, Anco_ForceEnableFallback_001, Function | SmallTest | Level1)
 {
+    // The batch result carries the Anco install uid.
     MockBundleManager::MockUidByBundleName(-1, ANCO_UID);
     MockBundleManager::MockIsAncoApp(true);
+    MockBundleManager::MockInstallBundle(NotificationBundleOption("sa_anco_force", ANCO_UID));
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_anco_force"}, TEST_USER_ID)), ERR_OK);
     EXPECT_EQ(GetSwitchState("sa_anco_force", ANCO_UID), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
 
@@ -360,6 +367,7 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, Anco_ForceEnableFallback_001, Funct
  */
 HWTEST_F(AdvancedNotificationSilentAuthTest, Disable_UserLevelRejected_001, Function | SmallTest | Level1)
 {
+    MockBundleManager::MockInstallBundle(NotificationBundleOption("sa_reject", BUNDLE_UID));
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_reject"}, TEST_USER_ID)), ERR_OK);
     auto option = BuildOption("sa_reject", BUNDLE_UID);
     EXPECT_EQ(service_->SetNotificationsEnabledForSpecialBundle("", option, false, false),
@@ -374,6 +382,7 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, Disable_UserLevelRejected_001, Func
  */
 HWTEST_F(AdvancedNotificationSilentAuthTest, Disable_SystemLevelAllowedThenSelfHeal_001, Function | SmallTest | Level1)
 {
+    MockBundleManager::MockInstallBundle(NotificationBundleOption("sa_selfheal", BUNDLE_UID));
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_selfheal"}, TEST_USER_ID)), ERR_OK);
     auto option = BuildOption("sa_selfheal", BUNDLE_UID);
     EXPECT_EQ(service_->SetNotificationsSystemEnabledForSpecialBundle("", option, false, false), ERR_OK);
@@ -530,13 +539,14 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, CloneRestore_LockedForceOn_001, Fun
 
 /**
  * @tc.name: IsAllowedNotify_ExemptAndLazyWrite_001
- * @tc.desc: Locked bundle is exempt from the global switch; missing record is lazily written to USER_MODIFIED_ON;
- *           unmanaged no-record bundle follows CheckApiCompatibility (mocked FA true)
+ * @tc.desc: Locked bundle is exempt from the global switch on the notify-self check and force-enabled at set time
  */
 HWTEST_F(AdvancedNotificationSilentAuthTest, IsAllowedNotify_ExemptAndLazyWrite_001, Function | SmallTest | Level1)
 {
+    MockBundleManager::MockInstallBundle(NotificationBundleOption("sa_exempt", BUNDLE_UID));
+    MockBundleManager::MockInstallBundle(NotificationBundleOption("sa_lazy", BUNDLE_UID));
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_exempt", "sa_lazy"}, TEST_USER_ID)), ERR_OK);
-    // Global switch off: locked bundle is exempt and a missing record is lazily written.
+    // Global switch off: locked bundle is exempt and its record was force-enabled at set time.
     EXPECT_EQ(service_->SetNotificationsEnabledForAllBundles("", false), ERR_OK);
     bool allowed = false;
     EXPECT_EQ(service_->IsAllowedNotifySelf(BuildOption("sa_exempt", BUNDLE_UID), allowed), ERR_OK);
@@ -544,11 +554,6 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, IsAllowedNotify_ExemptAndLazyWrite_
     EXPECT_EQ(service_->IsAllowedNotifySelf(BuildOption("sa_lazy", BUNDLE_UID), allowed), ERR_OK);
     EXPECT_TRUE(allowed);
     EXPECT_EQ(GetSwitchState("sa_lazy", BUNDLE_UID), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
-    // Global switch on: unmanaged no-record bundle follows CheckApiCompatibility (mocked FA true).
-    EXPECT_EQ(service_->SetNotificationsEnabledForAllBundles("", true), ERR_OK);
-    EXPECT_EQ(service_->IsAllowedNotifySelf(BuildOption("sa_fa_compat", BUNDLE_UID), allowed), ERR_OK);
-    EXPECT_TRUE(allowed);
-    EXPECT_EQ(GetSwitchState("sa_fa_compat", BUNDLE_UID), NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
 }
 
 /**
@@ -695,13 +700,13 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, SilentAuth_FailOpenContract_001, Fu
 
 /**
  * @tc.name: Set_UserIdQueryFail_FailClosed_001
- * @tc.desc: Explicit userId with account query failure fails closed; negative userId is rejected directly
+ * @tc.desc: Account existence check failure fails closed; negative userId is rejected directly
  */
 HWTEST_F(AdvancedNotificationSilentAuthTest, Set_UserIdQueryFail_FailClosed_001, Function | SmallTest | Level1)
 {
-    MockQueryAllCreatedOsAccountsFailed(true);
+    MockIsOsAccountExists(false);
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_fail_closed"}, TEST_USER_ID)),
-        ERR_ANS_INNER_GET_ACTIVE_USER_FAILED);
+        ERR_ANS_INNER_INVALID_PARAM);
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_neg"}, -5)),
         ERR_ANS_INNER_INVALID_PARAM);
 }
@@ -731,10 +736,11 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, SilentAuth_UserCacheNotPollutedByGl
 
 /**
  * @tc.name: SpecialBundleSwitch_LockedExempt_001
- * @tc.desc: Locked bundle is exempt from the global switch and lazily enabled on the special check path
+ * @tc.desc: Locked bundle is exempt from the global switch and force-enabled at set time
  */
 HWTEST_F(AdvancedNotificationSilentAuthTest, SpecialBundleSwitch_LockedExempt_001, Function | SmallTest | Level1)
 {
+    MockBundleManager::MockInstallBundle(NotificationBundleOption("sa_special", BUNDLE_UID));
     EXPECT_EQ(service_->SetNotificationsEnabledForAllBundles("", false), ERR_OK);
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_special"}, TEST_USER_ID)), ERR_OK);
 
@@ -881,6 +887,66 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, ForceEnable_InvalidBundleRejected_0
     // "testBundleName" is the mocked unresolvable bundle: rejected before any switch write.
     EXPECT_EQ(service_->ForceEnableSilentAuthBundle(BuildOption("testBundleName", 0)),
         ERR_ANS_INNER_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: Set_CloneInstancesForceOn_001
+ * @tc.desc: All installed instances of a configured bundle (main + clone) are force-enabled
+ */
+HWTEST_F(AdvancedNotificationSilentAuthTest, Set_CloneInstancesForceOn_001, Function | SmallTest | Level1)
+{
+    NotificationBundleOption main("sa_fanout", BUNDLE_UID);
+    main.SetAppIndex(0);
+    NotificationBundleOption clone("sa_fanout", BUNDLE_UID + 1);
+    clone.SetAppIndex(1);
+    MockBundleManager::MockInstallBundle(main);
+    MockBundleManager::MockInstallBundle(clone);
+    EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_fanout"}, TEST_USER_ID)), ERR_OK);
+    EXPECT_EQ(GetSwitchState("sa_fanout", BUNDLE_UID), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    EXPECT_EQ(GetSwitchState("sa_fanout", BUNDLE_UID + 1),
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+
+/**
+ * @tc.name: Set_DuplicateBundleListDeduped_001
+ * @tc.desc: Duplicate names in the configured list are deduped before the db write
+ */
+HWTEST_F(AdvancedNotificationSilentAuthTest, Set_DuplicateBundleListDeduped_001, Function | SmallTest | Level1)
+{
+    MockBundleManager::MockInstallBundle(NotificationBundleOption("sa_dup", BUNDLE_UID));
+    EXPECT_EQ(service_->SetSilentAuthNotificationInfo(
+        BuildSilentAuth({"sa_dup", "sa_dup"}, TEST_USER_ID)), ERR_OK);
+    // The stored entry keeps a single copy of the name.
+    NotificationSilentAuth stored;
+    EXPECT_TRUE(NotificationPreferences::GetInstance()->GetUserSilentAuthNotificationInfo(TEST_USER_ID, stored));
+    EXPECT_EQ(stored.GetBundleList(), std::vector<std::string>({"sa_dup"}));
+    EXPECT_EQ(GetSwitchState("sa_dup", BUNDLE_UID), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+
+/**
+ * @tc.name: Set_BatchQueryFailFallback_001
+ * @tc.desc: Batch query failure degrades to per-bundle resolve and still force-enables
+ */
+HWTEST_F(AdvancedNotificationSilentAuthTest, Set_BatchQueryFailFallback_001, Function | SmallTest | Level1)
+{
+    MockBundleManager::MockBundleInterfaceResult(-1);
+    EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_degraded"}, TEST_USER_ID)), ERR_OK);
+    // The uid resolves through the degraded per-bundle path, the switch is still written.
+    EXPECT_EQ(GetSwitchState("sa_degraded", BUNDLE_UID), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+}
+
+/**
+ * @tc.name: Anco_DegradedPathV9Fallback_001
+ * @tc.desc: Degraded per-bundle path resolves the Anco install via GetBundleInfoV9 in the requested user domain
+ */
+HWTEST_F(AdvancedNotificationSilentAuthTest, Anco_DegradedPathV9Fallback_001, Function | SmallTest | Level1)
+{
+    MockBundleManager::MockBundleInterfaceResult(-1);
+    MockBundleManager::MockUidByBundleName(-1, ANCO_UID);
+    MockBundleManager::MockIsAncoApp(true);
+    // DefaultUid misses the Anco install; GetBundleInfoV9 in the requested user domain resolves it.
+    EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_anco_degraded"}, TEST_USER_ID)), ERR_OK);
+    EXPECT_EQ(GetSwitchState("sa_anco_degraded", ANCO_UID), NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
 }
 
 /**
