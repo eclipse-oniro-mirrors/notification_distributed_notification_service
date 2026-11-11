@@ -76,7 +76,7 @@ void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase = 0)
             g_mockIdForGetOsAccountLocalIdFromUid = 88; // 88 mock for system id
             break;
         }
-        case 3: { // mock for user-0 domain id (Anco app)
+        case 4: { // mock for user-0 domain id (Anco app)
             g_mockIdForGetOsAccountLocalIdFromUid = 0; // 0 mock for user-0 domain
             break;
         }

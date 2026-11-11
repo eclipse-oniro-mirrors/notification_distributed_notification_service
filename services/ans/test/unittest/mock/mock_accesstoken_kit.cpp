@@ -28,6 +28,7 @@ bool g_mockVerfyPermisson = true;
 bool g_isSystemApp = false;
 bool g_isAtomicService = false;
 std::string g_mockDeniedPermission;
+bool g_mockHasDeniedPermission = false;
 }
 
 void MockGetTokenTypeFlag(ATokenTypeEnum mockRet)
@@ -61,6 +62,7 @@ void MockIsAtomicServiceByFullTokenID(bool isAtomicService)
 void MockDeniedPermission(const std::string &permission)
 {
     g_mockDeniedPermission = permission;
+    g_mockHasDeniedPermission = !permission.empty();
 }
 }
 }
@@ -73,7 +75,8 @@ int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& 
         return PERMISSION_DENIED;
     }
 
-    if (permissionName == Notification::g_mockDeniedPermission) {
+    if (Notification::g_mockHasDeniedPermission &&
+        permissionName == Notification::g_mockDeniedPermission) {
         return PERMISSION_DENIED;
     }
 
