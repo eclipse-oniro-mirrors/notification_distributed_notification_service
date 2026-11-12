@@ -95,6 +95,8 @@ void AdvancedNotificationRingToneServiceTest::SetUp()
 
 void AdvancedNotificationRingToneServiceTest::TearDown()
 {
+    advancedNotificationService_->SelfClean();
+    NotificationPreferences::GetInstance()->StopCacheCleanupTimer();
     delete advancedNotificationService_;
     advancedNotificationService_ = nullptr;
     GTEST_LOG_(INFO) << "TearDown";

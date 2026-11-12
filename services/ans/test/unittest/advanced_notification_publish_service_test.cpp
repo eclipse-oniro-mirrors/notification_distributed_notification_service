@@ -55,6 +55,7 @@
 #include "all_scenarios_extension_wrapper.h"
 #include "notification_live_view_content.h"
 #include "smart_reminder_center.h"
+#include "notification_local_live_view_subscriber_manager.h"
 
 extern void MockIsOsAccountExists(bool exists);
 extern void MockGetOsAccountLocalIdFromUid(bool mockRet, uint8_t mockCase);
@@ -69,6 +70,35 @@ extern void MockIsVerfyPermisson(bool isVerify);
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
 extern void MockIsAtomicServiceByFullTokenID(bool isAtomicService);
+
+// Destroy live time-service timers before the owning records and the service
+// instance die: the time service holds ITimerCallback references that outlive
+// this process, and a callback dispatched during exit crashes inside cesfwk
+// teardown (cppcrash: OHOS.MiscServices.ITimerCallback).
+static void CancelAllNotificationTimers(AdvancedNotificationService &service)
+{
+    auto cancelRecordTimers = [&service](const std::shared_ptr<NotificationRecord> &record) {
+        if (record == nullptr || record->notification == nullptr) {
+            return;
+        }
+        service.CancelTimer(record->notification->GetAutoDeletedTimer());
+        service.CancelTimer(record->notification->GetFinishTimer());
+        service.CancelTimer(record->notification->GetUpdateTimer());
+        service.CancelTimer(record->notification->GetArchiveTimer());
+    };
+    for (auto &record : service.notificationList_) {
+        cancelRecordTimers(record);
+    }
+    for (auto &record : service.triggerNotificationList_) {
+        cancelRecordTimers(record);
+    }
+    for (auto &record : service.snoozeDelayTimerList_) {
+        cancelRecordTimers(record);
+    }
+    service.timerImpl_.StopTimer();
+    service.timerImpl_.DestroyTimer();
+}
+
 class AnsPublishServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -98,12 +128,22 @@ void AnsPublishServiceTest::TearDownTestCase()
     sptr<AdvancedNotificationService> instance = AdvancedNotificationService::GetInstance();
     if (instance != nullptr) {
         instance->SelfClean(false);
+        CancelAllNotificationTimers(*instance);
     }
     BrokerRegistration &registration = BrokerRegistration::Get();
     std::lock_guard<std::mutex> lockGuard(registration.creatorMutex_);
     registration.isUnloading = true;
     registration.objects_.clear();
     registration.creators_.clear();
+    // Release manager FFRT queues as the very last suite-level step:
+    // SelfClean(false) above re-creates these singletons (their constructors
+    // create fresh queues), and their static destructors at process exit
+    // submit to those queues, which crashes once the global FFRT runtime is
+    // already torn down (cppcrash in ffrt::queue::submit_h). ResetFfrtQueue()
+    // nulls the queue so those destructors skip the submit path.
+    NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
+    NotificationLocalLiveViewSubscriberManager::GetInstance()->ResetFfrtQueue();
+    NotificationPreferences::GetInstance()->StopCacheCleanupTimer();
 }
 
 void AnsPublishServiceTest::SetUp()
@@ -127,6 +167,7 @@ void AnsPublishServiceTest::SetUp()
 void AnsPublishServiceTest::TearDown()
 {
     advancedNotificationService_->SelfClean();
+    CancelAllNotificationTimers(*advancedNotificationService_);
     advancedNotificationService_->publishProcess_.clear();
     NotificationPreferences::GetInstance()->StopCacheCleanupTimer();
     NotificationSubscriberManager::DestroyInstance();
