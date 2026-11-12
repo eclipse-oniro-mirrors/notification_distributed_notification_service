@@ -588,14 +588,12 @@ ErrCode AdvancedNotificationService::ExcuteCancelGroupCancel(
             PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
 #endif
             notificationList_.remove(record);
-            if (record->notification != nullptr) {
-                UpdateRecentNotification(record->notification, true, reason);
-                notifications.emplace_back(record->notification);
-                timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
+            UpdateRecentNotification(record->notification, true, reason);
+            notifications.emplace_back(record->notification);
+            timerIds.emplace_back(record->notification->GetAutoDeletedTimer());
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
-                DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
+            DoDistributedDelete(record->deviceId, record->bundleName, record->notification);
 #endif
-            }
             if (notifications.size() >= MAX_CANCELED_PARCELABLE_VECTOR_NUM) {
                 std::vector<sptr<Notification>> currNotificationList = notifications;
                 NotificationSubscriberManager::GetInstance()->BatchNotifyCanceled(
