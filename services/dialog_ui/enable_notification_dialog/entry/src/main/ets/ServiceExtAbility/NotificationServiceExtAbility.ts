@@ -43,6 +43,7 @@ const enableNotificationDialogDestroyedEvent = {
 };
 
 const COMMON_EVENT_NAME = 'OnNotificationServiceDialogClicked';
+const SUBSCRIBER_PERMISSIONS = ['ohos.permission.NOTIFICATION_CONTROLLER'];
 enum DialogStatus {
   ALLOW_CLICKED,
   DENY_CLICKED,
@@ -56,6 +57,7 @@ async function handleDialogQuitException(want: Want): Promise<void> {
     {
       code: DialogStatus.DIALOG_CRASHED,
       data: want.parameters.bundleName.toString(),
+      subscriberPermissions: SUBSCRIBER_PERMISSIONS,
       parameters: {
         bundleName: want.parameters.bundleName.toString(),
         bundleUid: want.parameters.bundleUid.toString()
@@ -235,6 +237,7 @@ async readConfig(): Promise<void> {
       {
         code: enabled ? DialogStatus.ALLOW_CLICKED : DialogStatus.DENY_CLICKED,
         data: this.want.parameters.bundleName.toString(),
+        subscriberPermissions: SUBSCRIBER_PERMISSIONS,
         parameters: {
           bundleName: this.want.parameters.bundleName.toString(),
           bundleUid: this.want.parameters.bundleUid.toString()
