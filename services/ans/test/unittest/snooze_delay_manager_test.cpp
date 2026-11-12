@@ -63,7 +63,13 @@ sptr<AdvancedNotificationService> AnsSnoozeDelayTest::advancedNotificationServic
 
 void AnsSnoozeDelayTest::SetUpTestCase() {}
 
-void AnsSnoozeDelayTest::TearDownTestCase() {}
+void AnsSnoozeDelayTest::TearDownTestCase()
+{
+    sptr<AdvancedNotificationService> instance = AdvancedNotificationService::GetInstance();
+    if (instance != nullptr) {
+        instance->SelfClean(false);
+    }
+}
 
 void AnsSnoozeDelayTest::SetUp()
 {

@@ -42,6 +42,7 @@
 #include "notification_request.h"
 #include "notification_subscriber.h"
 #include "notification_subscriber_manager.h"
+#include "notification_local_live_view_subscriber_manager.h"
 #include "mock_push_callback_stub.h"
 #include "system_event_observer.h"
 #include "want_agent_info.h"
@@ -61,6 +62,34 @@ extern void MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
 extern void MockIsNonBundleName(bool isNonBundleName);
 extern void MockIsVerfyPermisson(bool isVerify);
+
+// Destroy live time-service timers before the owning records and the service
+// instance die: the time service holds ITimerCallback references that outlive
+// this process, and a callback dispatched during exit crashes inside cesfwk
+// teardown (cppcrash: OHOS.MiscServices.ITimerCallback).
+static void CancelAllNotificationTimers(AdvancedNotificationService &service)
+{
+    auto cancelRecordTimers = [&service](const std::shared_ptr<NotificationRecord> &record) {
+        if (record == nullptr || record->notification == nullptr) {
+            return;
+        }
+        service.CancelTimer(record->notification->GetAutoDeletedTimer());
+        service.CancelTimer(record->notification->GetFinishTimer());
+        service.CancelTimer(record->notification->GetUpdateTimer());
+        service.CancelTimer(record->notification->GetArchiveTimer());
+    };
+    for (auto &record : service.notificationList_) {
+        cancelRecordTimers(record);
+    }
+    for (auto &record : service.triggerNotificationList_) {
+        cancelRecordTimers(record);
+    }
+    for (auto &record : service.snoozeDelayTimerList_) {
+        cancelRecordTimers(record);
+    }
+    service.timerImpl_.StopTimer();
+    service.timerImpl_.DestroyTimer();
+}
 
 class AdvancedNotificationServiceTest : public testing::Test {
 public:
@@ -90,12 +119,22 @@ void AdvancedNotificationServiceTest::TearDownTestCase()
     sptr<AdvancedNotificationService> instance = AdvancedNotificationService::GetInstance();
     if (instance != nullptr) {
         instance->SelfClean(false);
+        CancelAllNotificationTimers(*instance);
     }
     BrokerRegistration &registration = BrokerRegistration::Get();
     std::lock_guard<std::mutex> lockGuard(registration.creatorMutex_);
     registration.isUnloading = true;
     registration.objects_.clear();
     registration.creators_.clear();
+    // Release manager FFRT queues as the very last suite-level step:
+    // SelfClean(false) above re-creates these singletons (their constructors
+    // create fresh queues), and their static destructors at process exit
+    // submit to those queues, which crashes once the global FFRT runtime is
+    // already torn down (cppcrash in ffrt::queue::submit_h). ResetFfrtQueue()
+    // nulls the queue so those destructors skip the submit path.
+    NotificationSubscriberManager::GetInstance()->ResetFfrtQueue();
+    NotificationLocalLiveViewSubscriberManager::GetInstance()->ResetFfrtQueue();
+    NotificationPreferences::GetInstance()->StopCacheCleanupTimer();
 }
 
 void AdvancedNotificationServiceTest::SetUp()
@@ -116,6 +155,9 @@ void AdvancedNotificationServiceTest::TearDown()
     IPCSkeleton::SetCallingUid(SYSTEM_APP_UID);
     constexpr int sleepMs = 500;
     std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
+    if (advancedNotificationService_ != nullptr) {
+        CancelAllNotificationTimers(*advancedNotificationService_);
+    }
     advancedNotificationService_ = nullptr;
     GTEST_LOG_(INFO) << "TearDown";
 }
@@ -3387,7 +3429,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_BmsQue
     EXPECT_EQ(MockBundleManager::GetBundleNameByUidCallCount(), 1);
     // owner uid is resolved once in PrepareNotificationRequest and once in
     // PrePublishRequest; both lookups are part of the main chain.
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 2);
+#else
+    EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 1);
+#endif
 }
 
 /**
@@ -3423,7 +3469,11 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_BmsQue
     // A failed sound check may report an analytics event, which can add one extra
     // GetBundleNameByUid; the dedup guard under test is GetAppIndexByUid.
     EXPECT_LE(MockBundleManager::GetBundleNameByUidCallCount(), 2);
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
     EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 2);
+#else
+    EXPECT_EQ(MockBundleManager::GetAppIndexByUidCallCount(), 1);
+#endif
 }
 /**
  * @tc.number    : GrantSoundPermission_ReuseAppIndex_00001

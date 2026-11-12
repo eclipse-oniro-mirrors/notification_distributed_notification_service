@@ -3026,6 +3026,10 @@ ohos_unittest("notification_service_publish_test") {
     defines += [ "ENABLE_ANS_PRIVILEGED_MESSAGE_EXT_WRAPPER" ]
   }
 
+  if (notification_smart_reminder_supported) {
+    defines += [ "NOTIFICATION_SMART_REMINDER_SUPPORTED" ]
+  }
+
   cflags = []
   if (hisysevent_usage) {
     external_deps += [ "hisysevent:libhisysevent" ]
