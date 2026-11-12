@@ -941,7 +941,8 @@ void NotificationSubscriberManager::NotifyRecordOnConsumed(
         return;
     }
     std::string deviceVoiceContent;
-    if (!content.empty() && voiceFlag.count(record->deviceType)) {
+    if (!content.empty() && voiceFlag.count(record->deviceType) &&
+        (record->subscribedFlags_ & NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_VOICE_CONTENT)) {
         deviceVoiceContent = content;
     }
     auto notificationStub = GenerateSubscribedNotification(record, notification, deviceVoiceContent);
