@@ -1666,10 +1666,7 @@ InnerErrorCode AnsNotification::PublishContinuousTaskNotification(const Notifica
     if (IsNonDistributedNotificationType(sptrReq->GetNotificationType())) {
         sptrReq->SetDistributed(false);
     }
-    if (sptrReq == nullptr) {
-        ANS_LOGE("null sptrReq");
-        return ERR_ANS_INNER_INVALID_PARAM;
-    }
+
     return static_cast<InnerErrorCode>(proxy->PublishContinuousTaskNotification(sptrReq));
 }
 

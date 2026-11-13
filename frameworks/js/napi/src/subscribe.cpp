@@ -523,8 +523,8 @@ void SubscriberInstance::OnBatchCanceled(const std::vector<std::shared_ptr<OHOS:
     auto cacheManager = PixelMapCacheManager::GetInstance();
     std::string notificationKeys = "";
     for (auto notification : requestList) {
-        notificationKeys.append(notification->GetNotificationRequest().GetKey()).append("-");
         if (notification != nullptr) {
+            notificationKeys.append(notification->GetNotificationRequest().GetKey()).append("-");
             cacheManager->RemoveCache(notification->GetNotificationRequest().GetKey());
         }
     }
@@ -560,6 +560,10 @@ void ThreadSafeOnConsumed(napi_env env, napi_value jsCallback, void* context, vo
 {
     ANS_LOGD("called");
     auto dataWorkerData = reinterpret_cast<NotificationReceiveDataWorker *>(data);
+    if (dataWorkerData == nullptr) {
+        ANS_LOGE("null dataWorkerData");
+        return;
+    }
     auto additionalData = dataWorkerData->request->GetNotificationRequest().GetAdditionalData();
     if (additionalData && additionalData->HasParam("_oh_ans_sys_traceid")) {
         std::stringstream sin(additionalData->GetStringParam("_oh_ans_sys_traceid"));
@@ -572,10 +576,6 @@ void ThreadSafeOnConsumed(napi_env env, napi_value jsCallback, void* context, vo
         }
     }
     ANS_LOGD("called");
-    if (dataWorkerData == nullptr) {
-        ANS_LOGE("null dataWorkerData");
-        return;
-    }
     auto subscriber = dataWorkerData->subscriber.lock();
     if (subscriber == nullptr) {
         ANS_LOGE("null subscriber");
