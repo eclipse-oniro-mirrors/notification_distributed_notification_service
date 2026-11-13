@@ -227,6 +227,11 @@ bool ReminderRequestCalendar::OnDateTimeChange()
         return false;
     }
     if (startDateTime_ == endDateTime_) {
+        if (IsInExcludeDate()) {
+            uint64_t triggerTime = GetNextTriggerTime(true);
+            SetTriggerTimeInMilli(triggerTime);
+            return false;
+        }
         return ReminderRequest::OnDateTimeChange();
     }
     uint64_t now = GetNowInstantMilli();

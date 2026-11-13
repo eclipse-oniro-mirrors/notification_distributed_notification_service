@@ -1191,6 +1191,89 @@ HWTEST_F(ReminderRequestCalendarTest, OnDateTimeChange_00003, Function | SmallTe
 }
 
 /**
+ * @tc.name: OnDateTimeChange_00004
+ * @tc.desc: Test OnDateTimeChange when startDateTime_ equals endDateTime_ and the trigger date is excluded.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, OnDateTimeChange_00004, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    std::vector<uint8_t> repeatMonths {1};
+    std::vector<uint8_t> repeatDays {1};
+    std::vector<uint8_t> daysOfWeek;
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+    EXPECT_NE(nullptr, calendar);
+    calendar->SetExpired(false);
+    uint64_t startDateTime = static_cast<uint64_t>(now) * ReminderRequest::MILLI_SECONDS - 60000;
+    calendar->SetDateTime(startDateTime);
+    EXPECT_TRUE(calendar->SetEndDateTime(startDateTime));
+    EXPECT_EQ(calendar->GetDateTime(), calendar->GetEndDateTime());
+    calendar->AddExcludeDate(static_cast<int64_t>(startDateTime));
+    EXPECT_EQ(calendar->IsInExcludeDate(), true);
+    calendar->SetTriggerTimeInMilli(startDateTime);
+    EXPECT_EQ(calendar->OnDateTimeChange(), false);
+    EXPECT_GT(calendar->GetTriggerTimeInMilli(), startDateTime);
+}
+
+/**
+ * @tc.name: OnDateTimeChange_00005
+ * @tc.desc: Test OnDateTimeChange when a non-repeat reminder's trigger date is excluded.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, OnDateTimeChange_00005, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+    EXPECT_NE(nullptr, calendar);
+    calendar->SetExpired(false);
+    uint64_t startDateTime = static_cast<uint64_t>(now) * ReminderRequest::MILLI_SECONDS - 60000;
+    calendar->SetDateTime(startDateTime);
+    EXPECT_TRUE(calendar->SetEndDateTime(startDateTime));
+    calendar->AddExcludeDate(static_cast<int64_t>(startDateTime));
+    EXPECT_EQ(calendar->IsInExcludeDate(), true);
+    calendar->SetTriggerTimeInMilli(startDateTime);
+    EXPECT_EQ(calendar->OnDateTimeChange(), false);
+    EXPECT_EQ(calendar->GetTriggerTimeInMilli(), ReminderRequest::INVALID_LONG_LONG_VALUE);
+}
+
+/**
+ * @tc.name: OnDateTimeChange_00006
+ * @tc.desc: Test OnDateTimeChange when startDateTime_ equals endDateTime_ and the date is not excluded.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(ReminderRequestCalendarTest, OnDateTimeChange_00006, Function | SmallTest | Level1)
+{
+    time_t now;
+    (void)time(&now);  // unit is seconds.
+    struct tm nowTime;
+    (void)localtime_r(&now, &nowTime);
+    std::vector<uint8_t> repeatMonths;
+    std::vector<uint8_t> repeatDays;
+    std::vector<uint8_t> daysOfWeek;
+    auto calendar = std::make_shared<ReminderRequestCalendar>(nowTime, repeatMonths, repeatDays, daysOfWeek);
+    EXPECT_NE(nullptr, calendar);
+    calendar->SetExpired(false);
+    uint64_t startDateTime = static_cast<uint64_t>(now) * ReminderRequest::MILLI_SECONDS - 60000;
+    calendar->SetDateTime(startDateTime);
+    EXPECT_TRUE(calendar->SetEndDateTime(startDateTime));
+    EXPECT_EQ(calendar->IsInExcludeDate(), false);
+    calendar->SetTriggerTimeInMilli(startDateTime);
+    EXPECT_EQ(calendar->OnDateTimeChange(), true);
+}
+
+/**
  * @tc.name: RecoverFromDb_00001
  * @tc.desc: Test RecoverFromDb parameters.
  * @tc.type: FUNC
