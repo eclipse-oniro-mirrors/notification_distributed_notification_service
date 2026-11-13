@@ -70,6 +70,33 @@ private:
     bool isCalled_{false};
 };
 
+class MockAnsSubscriberCaptureTest : public MockAnsSubscriber  {
+public:
+    explicit MockAnsSubscriberCaptureTest(const sptr<IRemoteObject>& remote) : MockAnsSubscriber(remote) {};
+
+    ErrCode OnConsumed(const sptr<Notification> &notification,
+        const sptr<NotificationSortingMap> &notificationMap) override
+    {
+        consumedNotification_ = notification;
+        isCalled_ = true;
+        return ERR_OK;
+    }
+
+    bool IsCalled()
+    {
+        return isCalled_;
+    }
+
+    sptr<Notification> GetConsumedNotification()
+    {
+        return consumedNotification_;
+    }
+
+private:
+    bool isCalled_{false};
+    sptr<Notification> consumedNotification_{nullptr};
+};
+
 class NotificationSubscriberManagerTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -2369,6 +2396,163 @@ HWTEST_F(NotificationSubscriberManagerTest, GenerateSubscribedNotification_WithV
 EXPECT_NE(nullptr, result);
     EXPECT_NE(nullptr, result->GetVoiceContent());
     EXPECT_EQ(result->GetVoiceContent()->GetTextContent(), voiceContent);
+}
+
+/**
+ * @tc.name: NotifyRecordOnConsumed_VoiceContent_00001
+ * @tc.desc: Test NotifyRecordOnConsumed: subscriber without SUBSCRIBE_ON_VOICE_CONTENT flag must not
+ *           receive voice content even if another subscriber of the same deviceType has subscribed it
+ *           and its deviceType is in voiceFlag (deviceType-dimension delivery regression).
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyRecordOnConsumed_VoiceContent_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(DEFAULT_UID);
+    request->SetOwnerBundleName("test");
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    auto flagsMap = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    auto flags = std::make_shared<NotificationFlags>();
+    flags->SetReminderFlags(123);
+    (*flagsMap)["tablet"] = flags;
+    request->SetDeviceFlags(flagsMap);
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+
+    sptr<MockAnsSubscriberCaptureTest> subscriber(
+        new (std::nothrow) MockAnsSubscriberCaptureTest(new MockIRemoteObject()));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->deviceType = "tablet";
+    record->userId = SUBSCRIBE_USER_ALL;
+    record->subscribedAll = true;
+    // Only subscribes consumed, NOT voice content.
+    record->subscribedFlags_ = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED;
+
+    // Another subscriber of the same deviceType has subscribed voice content, so voiceFlag contains "tablet".
+    std::set<std::string> voiceFlag = {"tablet"};
+    std::string voiceContent = "voice content for tablet";
+    std::vector<sptr<NotificationClassification>> notificationClassifications = {nullptr};
+
+    notificationSubscriberManager.NotifyRecordOnConsumed(record, notification, notificationMap,
+        voiceContent, voiceFlag, notificationClassifications);
+
+    // Regression: this subscriber must be notified without voice content.
+    ASSERT_TRUE(subscriber->IsCalled());
+    ASSERT_NE(nullptr, subscriber->GetConsumedNotification());
+    EXPECT_EQ(nullptr, subscriber->GetConsumedNotification()->GetVoiceContent());
+}
+
+/**
+ * @tc.name: NotifyRecordOnConsumed_VoiceContent_00002
+ * @tc.desc: Test NotifyRecordOnConsumed: subscriber with SUBSCRIBE_ON_VOICE_CONTENT flag receives
+ *           voice content when its deviceType is in voiceFlag.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyRecordOnConsumed_VoiceContent_00002,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(DEFAULT_UID);
+    request->SetOwnerBundleName("test");
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    auto flagsMap = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    auto flags = std::make_shared<NotificationFlags>();
+    flags->SetReminderFlags(123);
+    (*flagsMap)["tablet"] = flags;
+    request->SetDeviceFlags(flagsMap);
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+
+    sptr<MockAnsSubscriberCaptureTest> subscriber(
+        new (std::nothrow) MockAnsSubscriberCaptureTest(new MockIRemoteObject()));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->deviceType = "tablet";
+    record->userId = SUBSCRIBE_USER_ALL;
+    record->subscribedAll = true;
+    record->subscribedFlags_ = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED |
+        NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_VOICE_CONTENT;
+
+    std::set<std::string> voiceFlag = {"tablet"};
+    std::string voiceContent = "voice content for tablet";
+    std::vector<sptr<NotificationClassification>> notificationClassifications = {nullptr};
+
+    notificationSubscriberManager.NotifyRecordOnConsumed(record, notification, notificationMap,
+        voiceContent, voiceFlag, notificationClassifications);
+
+    // Subscriber with the voice content flag must be notified with voice content.
+    ASSERT_TRUE(subscriber->IsCalled());
+    ASSERT_NE(nullptr, subscriber->GetConsumedNotification());
+    ASSERT_NE(nullptr, subscriber->GetConsumedNotification()->GetVoiceContent());
+    EXPECT_EQ(voiceContent, subscriber->GetConsumedNotification()->GetVoiceContent()->GetTextContent());
+}
+
+/**
+ * @tc.name: NotifyRecordOnConsumed_VoiceContent_00003
+ * @tc.desc: Test NotifyRecordOnConsumed: subscriber with SUBSCRIBE_ON_VOICE_CONTENT flag but whose
+ *           deviceType is not in voiceFlag must not receive voice content.
+ * @tc.type: FUNC
+ * @tc.require: issueNumber
+ */
+HWTEST_F(NotificationSubscriberManagerTest, NotifyRecordOnConsumed_VoiceContent_00003,
+    Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest();
+    request->SetCreatorUid(DEFAULT_UID);
+    request->SetOwnerBundleName("test");
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetNotificationId(1);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    auto flagsMap = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    auto tabletFlags = std::make_shared<NotificationFlags>();
+    tabletFlags->SetReminderFlags(123);
+    (*flagsMap)["tablet"] = tabletFlags;
+    auto phoneFlags = std::make_shared<NotificationFlags>();
+    phoneFlags->SetReminderFlags(123);
+    (*flagsMap)["phone"] = phoneFlags;
+    request->SetDeviceFlags(flagsMap);
+    sptr<Notification> notification = new Notification(request);
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+
+    sptr<MockAnsSubscriberCaptureTest> subscriber(
+        new (std::nothrow) MockAnsSubscriberCaptureTest(new MockIRemoteObject()));
+    NotificationSubscriberManager notificationSubscriberManager;
+    std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> record =
+        notificationSubscriberManager.CreateSubscriberRecord(subscriber);
+    record->deviceType = "phone";
+    record->userId = SUBSCRIBE_USER_ALL;
+    record->subscribedAll = true;
+    record->subscribedFlags_ = NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_CONSUMED |
+        NotificationConstant::SubscribedFlag::SUBSCRIBE_ON_VOICE_CONTENT;
+
+    // Only "tablet" subscribers subscribed voice content, so voiceFlag does not contain "phone".
+    std::set<std::string> voiceFlag = {"tablet"};
+    std::string voiceContent = "voice content for tablet";
+    std::vector<sptr<NotificationClassification>> notificationClassifications = {nullptr};
+
+    notificationSubscriberManager.NotifyRecordOnConsumed(record, notification, notificationMap,
+        voiceContent, voiceFlag, notificationClassifications);
+
+    // Subscriber of a deviceType not in voiceFlag must be notified without voice content.
+    ASSERT_TRUE(subscriber->IsCalled());
+    ASSERT_NE(nullptr, subscriber->GetConsumedNotification());
+    EXPECT_EQ(nullptr, subscriber->GetConsumedNotification()->GetVoiceContent());
 }
 
 /**
