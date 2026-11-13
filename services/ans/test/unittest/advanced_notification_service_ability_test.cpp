@@ -18,6 +18,7 @@
 #include "ans_ut_constant.h"
 #include "mock_common_event_manager.h"
 #include "mock_ipc_skeleton.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace Notification {
@@ -309,6 +310,32 @@ HWTEST_F(
     AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
     test.SubscribeCommonEvent();
     EXPECT_EQ(test.isDatashaReready_, false);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_01600
+ * @tc.name      : ANS_AdvancedNotificationServiceAbility_01600
+ * @tc.desc      : OnStart reads ohos.boot.mode once and caches safe mode status
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01600, Function | SmallTest | Level1)
+{
+    int32_t systemAbilityId = 1;
+    bool runOnCreate = true;
+    std::string defaultParam = OHOS::system::GetParameter("ohos.boot.mode", "");
+    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
+
+    OHOS::system::SetParameter("ohos.boot.mode", "safemode");
+    test.OnStart();
+    EXPECT_TRUE(NotificationPreferences::GetInstance()->IsSafeMode());
+
+    OHOS::system::SetParameter("ohos.boot.mode", "normal");
+    test.OnStop();
+    test.OnStart();
+    EXPECT_FALSE(NotificationPreferences::GetInstance()->IsSafeMode());
+
+    OHOS::system::SetParameter("ohos.boot.mode", defaultParam);
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(false);
 }
 
 #ifdef ALL_SCENARIO_COLLABORATION

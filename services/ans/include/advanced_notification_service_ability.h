@@ -55,6 +55,7 @@ private:
     int32_t OnExtension(const std::string& extension, MessageParcel& data, MessageParcel& reply) override;
     bool IsBopdMode();
     bool IsBopdOrRescueMode();
+    bool IsSafeBootMode();
 
 private:
     std::atomic<bool> isDatashaReready_ {false};
