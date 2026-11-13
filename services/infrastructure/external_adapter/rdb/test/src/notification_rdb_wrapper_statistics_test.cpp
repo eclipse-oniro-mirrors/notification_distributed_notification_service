@@ -843,6 +843,28 @@ HWTEST_F(NtfRdbStoreWrapperStatisticsTest, GetStatisticsInfos_100, Function | Sm
 }
 
 /**
+ * @tc.name: GetStatisticsInfos_104
+ * @tc.desc: GetStatisticsInfos returns E_ERROR when rdbStore_ is null (wrapper not initialized).
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperStatisticsTest, GetStatisticsInfos_104, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.tableName = NOTIFICATION_STATISTICS_TABLENAME;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+
+    int32_t uid = 20010044;
+    int32_t totalCount = 0;
+    int64_t lastTime = 0;
+    int32_t ret = rdbWrapper.GetStatisticsInfos(0, uid, "", totalCount, lastTime);
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+    EXPECT_EQ(totalCount, 0);
+}
+
+/**
  * @tc.name: GetStatisticsInfos_101
  * @tc.desc: GetStatisticsInfos while All return is E_OK
  * @tc.type: FUNC

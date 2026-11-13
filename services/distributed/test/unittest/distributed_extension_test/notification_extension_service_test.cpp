@@ -1008,5 +1008,64 @@ HWTEST_F(NotificationExtensionServiceTest, Unsubscribe_ConnectionInCreatedState_
     } // ~ExtensionServiceSubscriber -> CloseConnection -> Close() -> re-entrant RemoveConnection
     EXPECT_TRUE(svc.connectionMap_.find(connectionKey) == svc.connectionMap_.end());
 }
+
+/**
+ * @tc.name   : NotifyOnReceiveMessage_CacheLimit_0100
+ * @tc.number : NotifyOnReceiveMessage_CacheLimit_0100
+ * @tc.desc   : Test NotifyOnReceiveMessage caches at most 1024 messages in CONNECTING state
+ *              and drops the oldest one when the limit is exceeded.
+ */
+HWTEST_F(NotificationExtensionServiceTest, NotifyOnReceiveMessage_CacheLimit_0100,
+    Function | SmallTest | Level1)
+{
+    ExtensionSubscriberInfo subscriberInfo;
+    subscriberInfo.bundleName = "testBundle";
+    subscriberInfo.extensionName = "testExtension";
+    subscriberInfo.uid = 1;
+    subscriberInfo.userId = 1;
+    auto onDisconnected = [](const ExtensionSubscriberInfo &info) {};
+    sptr<ExtensionServiceConnection> connection = new ExtensionServiceConnection(subscriberInfo, onDisconnected);
+    connection->state_ = ExtensionServiceConnectionState::CONNECTING;
+
+    const size_t maxCachedMessages = 1024;
+    sptr<NotificationRequest> firstRequest = new NotificationRequest(1);
+    connection->NotifyOnReceiveMessage(firstRequest);
+    for (int32_t i = 2; i <= static_cast<int32_t>(maxCachedMessages) + 1; i++) {
+        connection->NotifyOnReceiveMessage(new NotificationRequest(i));
+    }
+    EXPECT_EQ(connection->messages_.size(), maxCachedMessages);
+    EXPECT_NE(connection->messages_.front().second.notificationRequest, firstRequest);
+}
+
+/**
+ * @tc.name   : NotifyOnCancelMessages_CacheLimit_0100
+ * @tc.number : NotifyOnCancelMessages_CacheLimit_0100
+ * @tc.desc   : Test NotifyOnCancelMessages caches at most 1024 messages in CONNECTING state
+ *              and drops the oldest one when the limit is exceeded.
+ */
+HWTEST_F(NotificationExtensionServiceTest, NotifyOnCancelMessages_CacheLimit_0100,
+    Function | SmallTest | Level1)
+{
+    ExtensionSubscriberInfo subscriberInfo;
+    subscriberInfo.bundleName = "testBundle";
+    subscriberInfo.extensionName = "testExtension";
+    subscriberInfo.uid = 1;
+    subscriberInfo.userId = 1;
+    auto onDisconnected = [](const ExtensionSubscriberInfo &info) {};
+    sptr<ExtensionServiceConnection> connection = new ExtensionServiceConnection(subscriberInfo, onDisconnected);
+    connection->state_ = ExtensionServiceConnectionState::CONNECTING;
+
+    const size_t maxCachedMessages = 1024;
+    auto firstHashCodes = std::make_shared<std::vector<std::string>>();
+    firstHashCodes->push_back("hashCode_first");
+    connection->NotifyOnCancelMessages(firstHashCodes);
+    for (int32_t i = 2; i <= static_cast<int32_t>(maxCachedMessages) + 1; i++) {
+        auto hashCodes = std::make_shared<std::vector<std::string>>();
+        hashCodes->push_back("hashCode_" + std::to_string(i));
+        connection->NotifyOnCancelMessages(hashCodes);
+    }
+    EXPECT_EQ(connection->messages_.size(), maxCachedMessages);
+    EXPECT_NE(connection->messages_.front().second.hashCodes, firstHashCodes);
+}
 } // namespace Notification
 } // namespace OHOS

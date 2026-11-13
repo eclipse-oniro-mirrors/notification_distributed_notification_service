@@ -953,6 +953,9 @@ ErrCode AdvancedNotificationService::RemoveNotificationFromRecordList(
         std::vector<sptr<Notification>> notifications;
         std::vector<uint64_t> timerIds;
         for (auto& record : recordList) {
+            if (record == nullptr || record->notification == nullptr) {
+                continue;
+            }
             std::string key = record->notification->GetKey();
             sptr<Notification> notification = nullptr;
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED

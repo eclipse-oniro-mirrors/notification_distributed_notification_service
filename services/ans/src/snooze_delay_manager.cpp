@@ -15,6 +15,9 @@
 
 #include "advanced_notification_service.h"
 
+#include <cinttypes>
+#include <vector>
+
 #include "advanced_notification_priority_helper.h"
 #include "accesstoken_kit.h"
 #include "access_token_helper.h"
@@ -272,19 +275,27 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
 void AdvancedNotificationService::TriggerSnoozeDelay()
 {
     int64_t current = NotificationAnalyticsUtil::GetCurrentTime();
+    std::vector<std::shared_ptr<NotificationRecord>> dueRecords;
     {
         std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
         for (const auto &iter : snoozeDelayTimerList_) {
-            auto request = iter->request;
-            if (!request || request->GetSnoozeDelayTime() >= current) {
+            if (iter == nullptr || iter->request == nullptr) {
                 continue;
             }
-            SnoozeNotificationConsumed(iter);
-            std::string secureKey = request->GetSecureKey();
+            auto request = iter->request;
+            if (request->GetSnoozeDelayTime() >= current) {
+                continue;
+            }
             request->SetIsSnoozeTrigger(true);
             NotificationRequestDb requestDb = { .request = request, .bundleOption = iter->bundleOption};
-            SetEncryptToDB(requestDb);
+            if (!SetEncryptToDB(requestDb)) {
+                ANS_LOGE("Persist snooze triggered state to DB failed");
+            }
+            dueRecords.push_back(iter);
         }
+    }
+    for (const auto &record : dueRecords) {
+        notificationSvrQueue_.SyncSubmit([this, record]() { SnoozeNotificationConsumed(record); });
     }
 
     SetNextSnoozeTimer(current);
@@ -326,21 +337,26 @@ void AdvancedNotificationService::CreateSnoozeTimer()
 
 bool AdvancedNotificationService::StartSnoozeTimer()
 {
+    std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
     int64_t triggerTime = GetEarliestTriggerTime();
     if (triggerTime == 0) {
+        timerImpl_.StopTimer();
+        timerImpl_.DestroyTimer();
         return false;
     }
 
     timerImpl_.StopTimer();
     timerImpl_.DestroyTimer();
     CreateSnoozeTimer();
-    timerImpl_.StartTimer(triggerTime);
-    return true;
+    bool startResult = timerImpl_.StartTimer(triggerTime);
+    if (!startResult) {
+        ANS_LOGE("Start snooze timer failed, triggerTime %{public}" PRId64, triggerTime);
+    }
+    return startResult;
 }
 
 int64_t AdvancedNotificationService::GetEarliestTriggerTime()
 {
-    std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
     for (auto iter = snoozeDelayTimerList_.begin(); iter != snoozeDelayTimerList_.end();) {
         if ((*iter) == nullptr || (*iter)->request == nullptr) {
             iter = snoozeDelayTimerList_.erase(iter);
@@ -353,12 +369,6 @@ int64_t AdvancedNotificationService::GetEarliestTriggerTime()
 
 void AdvancedNotificationService::CheckSnoozeTimer()
 {
-    if (snoozeDelayTimerList_.empty()) {
-        timerImpl_.StopTimer();
-        timerImpl_.DestroyTimer();
-        return;
-    }
-
     StartSnoozeTimer();
 }
 
@@ -386,7 +396,7 @@ void AdvancedNotificationService::RemoveAllFromSnoozeDelayList(const sptr<Notifi
         std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
         for (auto it = snoozeDelayTimerList_.begin(); it != snoozeDelayTimerList_.end();) {
             if ((*it) == nullptr || (*it)->bundleOption == nullptr || (*it)->request == nullptr) {
-                ++it;
+                it = snoozeDelayTimerList_.erase(it);
                 continue;
             }
             if (((*it)->bundleOption->GetBundleName() == bundle->GetBundleName() &&
@@ -407,7 +417,15 @@ void AdvancedNotificationService::RemoveAllFromSnoozeDelayListByUser(int32_t use
     {
         std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
         for (auto it = snoozeDelayTimerList_.begin(); it != snoozeDelayTimerList_.end();) {
-            if (((*it)->notification->GetUserId() == userId)) {
+            if ((*it) == nullptr || (*it)->request == nullptr) {
+                it = snoozeDelayTimerList_.erase(it);
+                continue;
+            }
+            if ((*it)->notification == nullptr) {
+                ++it;
+                continue;
+            }
+            if ((*it)->notification->GetUserId() == userId) {
                 DeleteSnoozeNotificationFromDB(*it);
                 it = snoozeDelayTimerList_.erase(it);
             } else {
@@ -421,12 +439,18 @@ void AdvancedNotificationService::RemoveAllFromSnoozeDelayListByUser(int32_t use
 bool AdvancedNotificationService::IsSetSnooze(const std::string &key)
 {
     for (auto item : notificationList_) {
+        if (item == nullptr || item->notification == nullptr) {
+            continue;
+        }
         if (item->notification->GetKey().find(key) == 0) {
             return true;
         }
     }
     std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
     for (auto item : snoozeDelayTimerList_) {
+        if (item == nullptr || item->request == nullptr || item->notification == nullptr) {
+            continue;
+        }
         if (item->notification->GetKey().find(key) == 0) {
             return true;
         }

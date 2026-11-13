@@ -125,6 +125,25 @@ struct PermissionDialog {
   dialog?: EnableNotificationDialog;
   session?: UIExtensionContentSession;
   controller?: CustomDialogController;
+  foldStatusCallback: Callback<display.FoldStatus> = async (data: display.FoldStatus) => {
+    try {
+      console.info(TAG, `foldStatusChange waterFallMode = ${this.waterFallMode}`);
+      let dis = DisplayUtils.getCurWindowDisplay(this.dialog?.subWindow);
+      let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
+      if (this.waterFallMode || data === display.FoldStatus.FOLD_STATUS_EXPANDED ||
+        (windowRect && windowRect.height > dis.height)) {
+        this.updateContentCompoment();
+      }
+    } catch (err) {
+      console.error(TAG, `Failed to touch foldStatusChange callback. code=${err?.code} msg=${err?.message}`);
+    }
+  };
+  avoidAreaCallback: Callback<window.AvoidAreaOptions> = (data: window.AvoidAreaOptions): void => {
+    if (data.type == window.AvoidAreaType.TYPE_SYSTEM) {
+      console.info(TAG, `avoidAreaChange: ${JSON.stringify(data)}`);
+      this.naviHeight = data.area.bottomRect.height;
+    }
+  };
   @State titleContainerWidth: string | number = 'auto';
   @State contentWidth: number = Constants.PC_DIALOG_WIDTH;
   @State initContentWidth: number = Constants.PC_DIALOG_WIDTH;
@@ -283,7 +302,21 @@ struct PermissionDialog {
 
   async aboutToDisappear(): Promise<void> {
     console.info(TAG, `aboutToDisappear`);
+    this.unregisterListeners();
     this.session?.terminateSelf();
+  }
+
+  unregisterListeners(): void {
+    try {
+      display.off('foldStatusChange', this.foldStatusCallback);
+    } catch (err) {
+      console.error(TAG, `Failed to unregister foldStatusChange event. code=${err?.code}`);
+    }
+    try {
+      this.dialog?.extensionWindow.off('avoidAreaChange', this.avoidAreaCallback);
+    } catch (err) {
+      console.error(TAG, `Failed to unregister avoidAreaChange event. code=${err?.code}`);
+    }
   }
 
   async updateOnPageShow(): Promise<void> {
@@ -334,12 +367,7 @@ struct PermissionDialog {
   updateAvoidWindow(): void {
     let type = window.AvoidAreaType.TYPE_SYSTEM;
     try {
-      this.dialog?.extensionWindow.on('avoidAreaChange', (data): void => {
-        if (data.type == window.AvoidAreaType.TYPE_SYSTEM) {
-          console.info(TAG, `avoidAreaChange: ${JSON.stringify(data)}`);
-          this.naviHeight = data.area.bottomRect.height;
-        }
-      });
+      this.dialog?.extensionWindow.on('avoidAreaChange', this.avoidAreaCallback);
       let avoidArea = this.dialog?.extensionWindow.getWindowAvoidArea(type);
       if (avoidArea != undefined) {
         console.info(TAG, `avoidArea: ${JSON.stringify(avoidArea)}`);
@@ -437,21 +465,8 @@ struct PermissionDialog {
   }
 
   async registerFoldStatusChange(): Promise<void> {
-    let callback: Callback<display.FoldStatus> = async (data: display.FoldStatus) => {
-      try {
-        console.info(TAG, `foldStatusChange waterFallMode = ${this.waterFallMode}`);
-        let dis = DisplayUtils.getCurWindowDisplay(this.dialog?.subWindow);
-        let windowRect = this.dialog?.extensionWindow.properties?.uiExtensionHostWindowProxyRect;
-        if (this.waterFallMode || data === display.FoldStatus.FOLD_STATUS_EXPANDED ||
-          (windowRect && windowRect.height > dis.height)) {
-          this.updateContentCompoment();
-        }
-      } catch (err) {
-        console.error(TAG, `Failed to touch foldStatusChange callback. code=${err?.code} msg=${err?.message}`);
-      }
-    };
     try {
-      display.on('foldStatusChange', callback);
+      display.on('foldStatusChange', this.foldStatusCallback);
     } catch (err) {
       console.error(TAG, `Failed to register foldStatusChange event. code=${err?.code} msg=${err?.message}`);
     }

@@ -72,6 +72,7 @@ public:
 private:
     ffrt::mutex mapLock_;
     bool subscribeAllConnect = false;
+    ffrt::mutex localDeviceMutex_;
     DistributedDeviceInfo localDevice_;
     std::map<std::string, DistributedDeviceInfo> peerDevice_;
 };

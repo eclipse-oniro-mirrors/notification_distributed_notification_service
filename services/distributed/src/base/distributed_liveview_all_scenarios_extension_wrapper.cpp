@@ -18,6 +18,8 @@
 #include <dlfcn.h>
 #include <string>
 
+#include "ans_inner_errors.h"
+
 namespace OHOS::Notification {
 const std::string DISTRIBUTED_EXTENTION_LIVEVIEW_ALL_SCENARIOS_PATH = "libliveview.z.so";
 DistributedLiveviewAllScenariosExtensionWrapper::DistributedLiveviewAllScenariosExtensionWrapper()
@@ -154,6 +156,10 @@ ErrCode DistributedLiveviewAllScenariosExtensionWrapper::UpdateLiveviewDecodeCon
 ErrCode DistributedLiveviewAllScenariosExtensionWrapper::TriggerPushWantAgent(
     const sptr<NotificationRequest> &request, int32_t actionType, const AAFwk::WantParams extraInfo)
 {
+    if (request == nullptr) {
+        ANS_LOGE("distributed TriggerPushWantAgent request is null");
+        return ERR_ANS_INVALID_PARAM;
+    }
     if (triggerHandler_ == nullptr) {
         ANS_LOGE("distributed TriggerPushWantAgent wrapper symbol failed");
         return 0;

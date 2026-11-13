@@ -123,5 +123,32 @@ HWTEST_F(DistributedBundleHelperTest, IsAncoApp_00400, Function | SmallTest | Le
     bool ret = helper->IsAncoApp("bundleName", 100, isAnco);
     EXPECT_EQ(ret, false);
 }
+/**
+ * @tc.name: IsAncoApp_00500
+ * @tc.number : IsAncoApp_00500
+ * @tc.desc      : Test IsAncoApp resets isAnco to false when GetOsAccountLocalIdFromUid fails
+ */
+HWTEST_F(DistributedBundleHelperTest, IsAncoApp_00500, Function | SmallTest | Level1)
+{
+    bool isAnco = true;
+    MockDistributedGetOsAccountLocalIdFromUid(false, 0);
+    bool ret = DelayedSingleton<BundleResourceHelper>::GetInstance()->IsAncoApp("bundleName", 100, isAnco);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(isAnco, false);
+}
+
+/**
+ * @tc.name: IsAncoApp_00600
+ * @tc.number : IsAncoApp_00600
+ * @tc.desc      : Test IsAncoApp resets isAnco to false when userId is negative
+ */
+HWTEST_F(DistributedBundleHelperTest, IsAncoApp_00600, Function | SmallTest | Level1)
+{
+    bool isAnco = true;
+    MockDistributedGetOsAccountLocalIdFromUid(true, -1);
+    bool ret = DelayedSingleton<BundleResourceHelper>::GetInstance()->IsAncoApp("bundleName", 100, isAnco);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(isAnco, false);
+}
 } // namespace Notification
 } // namespace OHOS

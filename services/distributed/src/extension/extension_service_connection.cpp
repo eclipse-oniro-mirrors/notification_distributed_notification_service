@@ -39,6 +39,7 @@ namespace {
 constexpr const int64_t MS_PER_SECOND = 1000;
 constexpr const uint32_t FREEZE_PREPARE_TIME = 10;
 constexpr const uint32_t DEFAULT_DISCONNECT_DELAY_TIME = 1800;  //default: 30m
+constexpr const size_t MAX_CACHED_MESSAGES = 1024;
 }
 uint32_t ExtensionServiceConnection::DISCONNECT_DELAY_TIME = DEFAULT_DISCONNECT_DELAY_TIME;
 
@@ -125,9 +126,12 @@ void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationR
     if (state_ == ExtensionServiceConnectionState::DISCONNECTED) {
         return;
     }
-    if (state_ == ExtensionServiceConnectionState::CREATED ||
-        state_ == ExtensionServiceConnectionState::CONNECTING) {
+    if (state_ == ExtensionServiceConnectionState::CREATED || state_ == ExtensionServiceConnectionState::CONNECTING) {
         NotifyParam param = { .notificationRequest = notificationRequest };
+        if (messages_.size() >= MAX_CACHED_MESSAGES) {
+            messages_.erase(messages_.begin());
+            ANS_LOGW("Cached messages reach upper limit, drop oldest OnReceiveMessage");
+        }
         messages_.emplace_back(NotifyType::OnReceiveMessage, param);
         ANS_LOGD("Cache OnReceiveMessage");
         if (state_ == ExtensionServiceConnectionState::CREATED) {
@@ -152,8 +156,7 @@ void ExtensionServiceConnection::NotifyOnReceiveMessage(const sptr<NotificationR
         ErrCode callResult = proxy_->OnReceiveMessage(notificationRequest, retResult);
         ANS_LOGI("%{public}s OnReceiveMessage callResult %{public}d retResult %{public}d",
             subscriberInfo_.GetKey().c_str(), callResult, retResult);
-        std::string message = subscriberInfo_.bundleName + ", " +
-            std::to_string(subscriberInfo_.uid) +
+        std::string message = subscriberInfo_.bundleName + ", " + std::to_string(subscriberInfo_.uid) +
             " receive message " + notificationRequest->GetNotificationHashCode();
         AppendMessage(message, callResult, retResult);
         NotificationExtensionService::GetInstance().SendHaReport(
@@ -176,6 +179,10 @@ void ExtensionServiceConnection::NotifyOnCancelMessages(const std::shared_ptr<st
     if (state_ == ExtensionServiceConnectionState::CREATED ||
         state_ == ExtensionServiceConnectionState::CONNECTING) {
         NotifyParam param = { .hashCodes = hashCodes };
+        if (messages_.size() >= MAX_CACHED_MESSAGES) {
+            messages_.erase(messages_.begin());
+            ANS_LOGW("Cached messages reach upper limit, drop oldest OnCancelMessages");
+        }
         messages_.emplace_back(NotifyType::OnCancelMessages, param);
         ANS_LOGD("Cache OnCancelMessages");
         if (state_ == ExtensionServiceConnectionState::CREATED) {

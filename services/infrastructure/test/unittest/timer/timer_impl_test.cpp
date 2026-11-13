@@ -128,6 +128,18 @@ HWTEST_F(TimerImplTest, StartTimer_0001, Function | MediumTest | Level1)
 }
 
 /**
+ * @tc.number    : StartTimer_0002
+ * @tc.name      : StartTimer_0002
+ * @tc.desc      : Test StartTimer returns false when timerId_ is invalid (CreateTimer not called)
+ */
+HWTEST_F(TimerImplTest, StartTimer_0002, Function | MediumTest | Level1)
+{
+    EXPECT_EQ(timerImpl_->timerId_, 0);
+    EXPECT_FALSE(timerImpl_->StartTimer(10));
+    EXPECT_EQ(timerImpl_->timerId_, 0);
+}
+
+/**
  * @tc.number    : StopTimer_0001
  * @tc.name      : StopTimer_0001
  * @tc.desc      : Test  function

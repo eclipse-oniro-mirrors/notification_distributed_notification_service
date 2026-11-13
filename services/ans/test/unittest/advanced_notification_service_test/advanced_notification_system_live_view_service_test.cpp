@@ -20,6 +20,9 @@
 
 #include "advanced_notification_service.h"
 #include "ans_service_errors.h"
+#include "live_publish_process.h"
+#include "notification_local_live_view_subscriber.h"
+#include "notification_local_live_view_subscriber_manager.h"
 #include "advanced_datashare_helper.h"
 #include "iremote_broker.h"
 #include "notification_check_request.h"
@@ -42,10 +45,25 @@ public:
     void TearDown();
 
 private:
+    class TestAnsSubscriber : public NotificationLocalLiveViewSubscriber {
+    public:
+        void OnConnected() override
+        {}
+        void OnDisconnected() override
+        {}
+        void OnDied() override
+        {}
+        void OnResponse(int32_t notificationId, sptr<NotificationButtonOption> buttonOption) override
+        {}
+    };
+
     static sptr<AdvancedNotificationService> advancedNotificationService_;
+    static TestAnsSubscriber testAnsSubscriber_;
 };
 
 sptr<AdvancedNotificationService> AdvancedNotificationSysLiveviewServiceTest::advancedNotificationService_ = nullptr;
+AdvancedNotificationSysLiveviewServiceTest::TestAnsSubscriber
+    AdvancedNotificationSysLiveviewServiceTest::testAnsSubscriber_;
 
 void AdvancedNotificationSysLiveviewServiceTest::SetUpTestCase() {}
 
@@ -178,6 +196,61 @@ HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, SubscribeLocalLiveView_200,
     auto ret = advancedNotificationService_->SubscribeLocalLiveView(subscriber, info, isNative);
 
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: SubscribeLocalLiveView_300
+ * @tc.desc: Test SubscribeLocalLiveView with a valid subscriber and isNative reaches the live
+ *           publish process null check and records the caller uid in the subscribe state map.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, SubscribeLocalLiveView_300, Function | SmallTest | Level1)
+{
+    constexpr int32_t testUid = 20031001;
+    IPCSkeleton::SetCallingUid(testUid);
+    auto livePublishProcess = LivePublishProcess::GetInstance();
+    ASSERT_NE(livePublishProcess, nullptr);
+    livePublishProcess->localLiveViewSubscribedMap_.clear();
+
+    const sptr<IAnsSubscriberLocalLiveView> subscriber = testAnsSubscriber_.GetImpl();
+    ASSERT_NE(subscriber, nullptr);
+    const sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    auto ret = advancedNotificationService_->SubscribeLocalLiveView(subscriber, info, true);
+
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_TRUE(livePublishProcess->GetLiveViewSubscribeState(testUid));
+
+    NotificationLocalLiveViewSubscriberManager::GetInstance()->RemoveLocalLiveViewSubscriber(
+        subscriber, nullptr);
+    livePublishProcess->localLiveViewSubscribedMap_.clear();
+    IPCSkeleton::SetCallingUid(1);
+}
+
+/**
+ * @tc.name: RemoveSystemLiveViewNotifications_100
+ * @tc.desc: Test RemoveSystemLiveViewNotifications runs the live publish process null check
+ *           and erases the recorded caller uid/pid from the subscribe state map.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, RemoveSystemLiveViewNotifications_100,
+    Function | SmallTest | Level1)
+{
+    constexpr int32_t testUid = 20031002;
+    constexpr int32_t testPid = 20031003;
+    auto livePublishProcess = LivePublishProcess::GetInstance();
+    ASSERT_NE(livePublishProcess, nullptr);
+    livePublishProcess->localLiveViewSubscribedMap_.clear();
+    livePublishProcess->AddLiveViewSubscriber(testUid, testPid);
+    EXPECT_TRUE(livePublishProcess->GetLiveViewSubscribeState(testUid));
+
+    auto ret = advancedNotificationService_->RemoveSystemLiveViewNotifications("testBundle", testUid, testPid);
+
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_FALSE(livePublishProcess->GetLiveViewSubscribeState(testUid));
+
+    livePublishProcess->localLiveViewSubscribedMap_.clear();
 }
 
 /**

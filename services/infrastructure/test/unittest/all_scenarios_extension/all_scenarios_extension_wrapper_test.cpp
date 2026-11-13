@@ -138,3 +138,30 @@ HWTEST_F(AllScenariosExtensionWrapperTest, ErrorToExternal_CustomExtension_001, 
         ERROR_LIVE_VIEW_EXTENSION_NOT_FOUND);
     EXPECT_EQ(InnerErrorToExternal(ERR_ANS_INNER_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED), ERROR_NO_RIGHT);
 }
+
+/**
+ * @tc.name: CloseExtensionWrapper_001
+ * @tc.desc: Test CloseExtensionWrapper resets onNotifyDelayedNotification_ and
+ *           onNotifyClearNotification_ together with other cached symbols.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AllScenariosExtensionWrapperTest, CloseExtensionWrapper_001, Function | SmallTest | Level1)
+{
+    auto& wrapper = AllScenariosExtensionWrapper::GetInstance();
+    if (wrapper.ExtensionHandle_ == nullptr) {
+        wrapper.ExtensionHandle_ = reinterpret_cast<void *>(0x1);
+    }
+    wrapper.onNotifyDelayedNotification_ =
+        +[](const sptr<NotificationRequest> &request) -> ErrCode { return ERR_OK; };
+    wrapper.onNotifyClearNotification_ =
+        +[](const std::vector<std::string> &triggerKeys) -> ErrCode { return ERR_OK; };
+    ASSERT_NE(wrapper.ExtensionHandle_, nullptr);
+    ASSERT_NE(wrapper.onNotifyDelayedNotification_, nullptr);
+    ASSERT_NE(wrapper.onNotifyClearNotification_, nullptr);
+
+    wrapper.CloseExtensionWrapper();
+
+    EXPECT_EQ(wrapper.ExtensionHandle_, nullptr);
+    EXPECT_EQ(wrapper.onNotifyDelayedNotification_, nullptr);
+    EXPECT_EQ(wrapper.onNotifyClearNotification_, nullptr);
+}

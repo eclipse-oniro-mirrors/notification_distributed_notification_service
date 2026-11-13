@@ -167,10 +167,19 @@ ErrCode AdvancedNotificationService::TriggerUpdatePriorityType(const sptr<Notifi
     if (result != ERR_OK) {
         return result;
     }
+    if (request == nullptr) {
+        ANS_LOGE("TriggerUpdatePriorityType fail, request is null");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         auto record = GetFromNotificationList(request->GetBaseKey(""));
         if (record == nullptr) {
             ANS_LOGE("TriggerUpdatePriorityType fail, notification not exist");
+            result = ERR_ANS_INNER_INVALID_PARAM;
+            return;
+        }
+        if (record->notification == nullptr) {
+            ANS_LOGE("TriggerUpdatePriorityType fail, record notification not exist");
             result = ERR_ANS_INNER_INVALID_PARAM;
             return;
         }

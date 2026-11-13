@@ -44,6 +44,10 @@ static const int32_t OHOS_TYPE = 10;
 namespace {
 static const int32_t ADD_DEVICE_SLEEP_TIMES_MS = 1000;  // 1s
 static const uint64_t SYNC_TASK_DELAY = 7 * 1000 * 1000;
+// FFRT task_attr().delay() takes MICROSECONDS. 1000ms * 1000us/ms = 1,000,000us = 1s:
+// the same wall-clock delay as the previous sleep_for(ADD_DEVICE_SLEEP_TIMES_MS).
+static const uint64_t ADD_DEVICE_CONNECT_DELAY_US =
+    static_cast<uint64_t>(ADD_DEVICE_SLEEP_TIMES_MS) * 1000;
 }
 
 DistributedService& DistributedService::GetInstance()
@@ -88,6 +92,7 @@ int32_t DistributedService::InitService(const std::string &deviceId, uint16_t de
 
 void DistributedService::DestroyService()
 {
+    isDestroyed_.store(true);
     serviceQueue_.SyncSubmit([&]() {
         ANS_LOGI("Start destory service.");
         DistributedClient::GetInstance().ReleaseClient();
@@ -102,6 +107,10 @@ void DistributedService::DestroyService()
 
 void DistributedService::ConnectPeerDevice(DistributedDeviceInfo device)
 {
+    if (isDestroyed_.load()) {
+        ANS_LOGI("Service is destroyed, skip ConnectPeerDevice.");
+        return;
+    }
     if (!DistributedDeviceService::GetInstance().CheckDeviceNeedSync(device.deviceId_)) {
         ANS_LOGI("ConnectPeerDevice device is failed.");
         return;
@@ -109,7 +118,12 @@ void DistributedService::ConnectPeerDevice(DistributedDeviceInfo device)
 
     DistributedDeviceService::GetInstance().SyncDeviceMatch(device, MatchType::MATCH_SYN);
     DistributedDeviceService::GetInstance().IncreaseDeviceSyncCount(device.deviceId_);
-    int32_t ret = serviceQueue_.Submit([&, device]() { ConnectPeerDevice(device); },
+    int32_t ret = serviceQueue_.Submit([this, device]() {
+            if (isDestroyed_.load()) {
+                return;
+            }
+            ConnectPeerDevice(device);
+        },
         SYNC_TASK_DELAY, "sync");
     ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::ConnectPeerDevice: Submit task failed");
 }
@@ -163,10 +177,11 @@ void DistributedService::AddDevice(DistributedDeviceInfo device, const std::stri
             ANS_LOGI("Dans wait peer %{public}s.", StringAnonymous(device.deviceId_).c_str());
             return;
         }
-        // Delay linking to avoid bind failure, There is a delay in reporting of device online
-        auto sleepTime = std::chrono::milliseconds(ADD_DEVICE_SLEEP_TIMES_MS);
-        std::this_thread::sleep_for(sleepTime);
-        ConnectPeerDevice(device);
+        // Delay linking to avoid bind failure, There is a delay in reporting of device online.
+        // Unit of FFRT task_attr.delay is microseconds.
+        int32_t delayRet = serviceQueue_.Submit([this, device]() { ConnectPeerDevice(device); },
+            static_cast<uint64_t>(ADD_DEVICE_SLEEP_TIMES_MS) * 1000, "addDeviceConnect");
+        ANS_COND_DO_ERR(delayRet != ERR_OK, return, "DistributedService::AddDevice: delayed Submit failed");
     });
     ANS_COND_DO_ERR(ret != ERR_OK, return, "DistributedService::AddDevice: Submit task failed");
 }
@@ -410,6 +425,10 @@ void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& c
 bool DistributedService::OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
     const DistributedDeviceInfo& peerDevice)
 {
+    if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("OnConsumedSetFlags request or notification request point is null");
+        return false;
+    }
     std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
     sptr<NotificationRequest> requestPoint = request->GetNotificationRequestPoint();
     auto flagsMap = requestPoint->GetDeviceFlags();

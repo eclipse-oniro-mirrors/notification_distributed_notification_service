@@ -2200,6 +2200,7 @@ ohos_unittest("notification_utils_test") {
     "mock/mock_ipc.cpp",
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",
+    "mock/mock_time_service_client.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
   ]
 
@@ -2296,6 +2297,8 @@ ohos_unittest("snooze_delay_manager_test") {
     "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
   ]
 
+  version_script = "libans_test.map"
+
   defines = []
 
   sources = [
@@ -2310,6 +2313,7 @@ ohos_unittest("snooze_delay_manager_test") {
     "mock/mock_ipc.cpp",
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",
+    "mock/mock_time_service_client.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
     "snooze_delay_manager_test.cpp",
   ]
@@ -4139,6 +4143,7 @@ ohos_unittest("advanced_notification_service_unit_test") {
     "mock/mock_notification_helper.cpp",
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_time_service_client.cpp",
+    "mock/mock_common_event_manager.cpp",
     "notification_dialog_test/mock_os_account_manager_annex.cpp",
   ]
 

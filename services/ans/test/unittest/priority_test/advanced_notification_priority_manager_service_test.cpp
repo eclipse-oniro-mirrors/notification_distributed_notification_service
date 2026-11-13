@@ -22,6 +22,7 @@
 #undef private
 #undef protected
 #include "ans_inner_errors.h"
+#include "ans_const_define.h"
 #include "ans_service_errors.h"
 #include "bool_wrapper.h"
 #include "mock_accesstoken_kit.h"
@@ -883,6 +884,43 @@ HWTEST_F(PriorityManagerServiceTest, GetPriorityStrategyByBundles_0500, Function
     bundleOptions.emplace_back(nullptr);
     EXPECT_EQ(AdvancedNotificationService::GetInstance()->GetPriorityStrategyByBundles(bundleOptions, strategies),
         ERR_ANS_INNER_INVALID_BUNDLE);
+}
+
+/**
+ * @tc.name: SetPriorityStrategyByBundles_0800
+ * @tc.desc: Test SetPriorityStrategyByBundlesInner returns ERR_ANS_INNER_INVALID_PARAM when all
+ *           bundle strategies are invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PriorityManagerServiceTest, SetPriorityStrategyByBundles_0800, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle1 = new (std::nothrow) NotificationBundleOption("bundleName", 200202);
+    sptr<NotificationBundleOption> bundle2 = new (std::nothrow) NotificationBundleOption("bundleName", 200203);
+    std::map<sptr<NotificationBundleOption>, int64_t> strategies;
+    strategies[bundle1] = -1;
+    strategies[bundle2] = PRIORITY_STRATEGY_MAX + 1;
+    EXPECT_EQ(AdvancedNotificationService::GetInstance()->SetPriorityStrategyByBundlesInner(strategies),
+        ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: TriggerUpdatePriorityType_0600
+ * @tc.desc: Test TriggerUpdatePriorityType with null request returns ERR_ANS_INNER_INVALID_PARAM
+ *           after the system permission check passes.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PriorityManagerServiceTest, TriggerUpdatePriorityType_0600, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+
+    ErrCode result = AdvancedNotificationService::GetInstance()->TriggerUpdatePriorityType(nullptr);
+
+    EXPECT_NE(result, ERR_ANS_INNER_PERMISSION_DENIED);
+    EXPECT_NE(result, ERR_ANS_INNER_NON_SYSTEM_APP);
+    EXPECT_EQ(result, ERR_ANS_INNER_INVALID_PARAM);
 }
 }
 }
