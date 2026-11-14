@@ -23,6 +23,7 @@
 
 #include <gtest/gtest.h>
 
+#include "bool_wrapper.h"
 #include "errors.h"
 #include "notification_analytics_util.h"
 #include "notification_classification.h"
@@ -1986,6 +1987,139 @@ HWTEST_F(PriorityNotificationDegradeManagerTest, RemoveHook_RemoveFromNotificati
     EXPECT_EQ(NotificationClassificationMgr::GetInstance().Get(key), nullptr);
     EXPECT_EQ(manager_->GetEarliestExpiredTime(), 0);
     EXPECT_EQ(manager_->degradeList_.size(), static_cast<size_t>(0));
+    EXPECT_TRUE(service->notificationList_.empty());
+}
+
+namespace {
+// Seeds one degrade registration straight into the scheduling list. The arbitration
+// landing writes the same registration in production, but the landing relies on the
+// priority feature being compiled into the shared ans_innerkits library, which the
+// device image may not carry (the feature is off by default). The hook under test is
+// the removal performed by the delete paths, not the landing, so the registration is
+// seeded directly to keep these cases independent of the image build.
+void SeedDegradeRegistration(const std::shared_ptr<PriorityNotificationDegradeManager> &manager,
+    const std::string &key, int64_t expiredTime)
+{
+    PriorityNotificationDegradeManager::DegradeRecord record;
+    record.key = key;
+    record.expiredTime = expiredTime;
+    manager->degradeList_.push_back(record);
+}
+
+bool HasDegradeRegistration(const std::shared_ptr<PriorityNotificationDegradeManager> &manager,
+    const std::string &key)
+{
+    for (const auto &record : manager->degradeList_) {
+        if (record.key == key) {
+            return true;
+        }
+    }
+    return false;
+}
+} // namespace
+
+/**
+ * @tc.name: AdminRemove_ClearsDegrade_00001
+ * @tc.desc: Test the EDM admin single removal path: it clears the whole priority state of
+ *           the key — the classification cache entry, the degrade registration (so the
+ *           timer never fires for a deleted notification) and the notification list entry.
+ *           Regression: the registration used to be left behind on this path.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PriorityNotificationDegradeManagerTest, AdminRemove_ClearsDegrade_00001,
+    Function | SmallTest | Level1)
+{
+    sptr<AdvancedNotificationService> service = AdvancedNotificationService::GetInstance();
+    service->notificationList_.clear();
+
+    sptr<NotificationRequest> request = MakeScheduleRequest(
+        "com.example.adminremove", 200100, 100, 21, TYPE_URGENT);
+    request->SetCreatorUserId(100);
+    SeedServiceRecord(service, request);
+    std::string key = request->GetBaseKey("");
+    SeedDegradeRegistration(manager_, key, FutureTime(2 * ONE_HOUR_MILLIS));
+    ASSERT_TRUE(HasDegradeRegistration(manager_, key));
+
+    EXPECT_EQ(service->ExcuteRemoveNotificationAsAdmin(key), ERR_OK);
+
+    EXPECT_FALSE(HasDegradeRegistration(manager_, key));
+    EXPECT_EQ(manager_->GetEarliestExpiredTime(), 0);
+    EXPECT_TRUE(service->notificationList_.empty());
+}
+
+/**
+ * @tc.name: AdminRemoveAll_ClearsDegrade_00002
+ * @tc.desc: Test the EDM admin remove-all-by-user path: every removed key loses its
+ *           classification cache entry and degrade registration, while the registrations
+ *           of the other users stay untouched.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PriorityNotificationDegradeManagerTest, AdminRemoveAll_ClearsDegrade_00002,
+    Function | SmallTest | Level1)
+{
+    sptr<AdvancedNotificationService> service = AdvancedNotificationService::GetInstance();
+    service->notificationList_.clear();
+
+    // Removed by the admin call: creator user 100.
+    sptr<NotificationRequest> removedRequest = MakeScheduleRequest(
+        "com.example.adminremove", 200100, 100, 22, TYPE_URGENT);
+    removedRequest->SetCreatorUserId(100);
+    SeedServiceRecord(service, removedRequest);
+    std::string removedKey = removedRequest->GetBaseKey("");
+    SeedDegradeRegistration(manager_, removedKey, FutureTime(2 * ONE_HOUR_MILLIS));
+
+    // Kept: creator user 101.
+    sptr<NotificationRequest> keptRequest = MakeScheduleRequest(
+        "com.example.adminremove", 200100, 101, 23, TYPE_AT_ME);
+    keptRequest->SetCreatorUserId(101);
+    SeedServiceRecord(service, keptRequest);
+    std::string keptKey = keptRequest->GetBaseKey("");
+    int64_t keptExpireTime = FutureTime(3 * ONE_HOUR_MILLIS);
+    SeedDegradeRegistration(manager_, keptKey, keptExpireTime);
+
+    ASSERT_TRUE(HasDegradeRegistration(manager_, removedKey));
+    ASSERT_TRUE(HasDegradeRegistration(manager_, keptKey));
+
+    EXPECT_EQ(service->ExcuteRemoveAllNotificationsAsAdmin(100), ERR_OK);
+
+    EXPECT_FALSE(HasDegradeRegistration(manager_, removedKey));
+    EXPECT_TRUE(HasDegradeRegistration(manager_, keptKey));
+    EXPECT_EQ(manager_->GetEarliestExpiredTime(), keptExpireTime);
+    ASSERT_EQ(service->notificationList_.size(), static_cast<size_t>(1));
+    EXPECT_EQ(service->notificationList_.front()->notification->GetKey(), keptKey);
+}
+
+/**
+ * @tc.name: AccountLogout_ClearsDegrade_00003
+ * @tc.desc: Test the distributed account logout removal path: the removed account
+ *           notification loses its classification cache entry and degrade registration
+ *           together with the notification list entry.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(PriorityNotificationDegradeManagerTest, AccountLogout_ClearsDegrade_00003,
+    Function | SmallTest | Level1)
+{
+    sptr<AdvancedNotificationService> service = AdvancedNotificationService::GetInstance();
+    service->notificationList_.clear();
+
+    sptr<NotificationRequest> request = MakeScheduleRequest(
+        "com.example.accountlogout", 200100, 100, 24, TYPE_URGENT);
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    // Same literal as the production constant EXTENDINFO_IS_FROM_ACCOUNT ("isFromAccount").
+    extendInfo->SetParam("isFromAccount", AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+    SeedServiceRecord(service, request);
+    std::string key = request->GetBaseKey("");
+    SeedDegradeRegistration(manager_, key, FutureTime(2 * ONE_HOUR_MILLIS));
+    ASSERT_TRUE(HasDegradeRegistration(manager_, key));
+
+    service->DeleteNotificationsByAccountLogout(100);
+
+    EXPECT_FALSE(HasDegradeRegistration(manager_, key));
+    EXPECT_EQ(manager_->GetEarliestExpiredTime(), 0);
     EXPECT_TRUE(service->notificationList_.empty());
 }
 
