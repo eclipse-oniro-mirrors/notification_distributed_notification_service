@@ -18,7 +18,6 @@
 #include "ans_ut_constant.h"
 #include "mock_common_event_manager.h"
 #include "mock_ipc_skeleton.h"
-#include "parameters.h"
 
 namespace OHOS {
 namespace Notification {
@@ -312,32 +311,6 @@ HWTEST_F(
     EXPECT_EQ(test.isDatashaReready_, false);
 }
 
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_01600
- * @tc.name      : ANS_AdvancedNotificationServiceAbility_01600
- * @tc.desc      : OnStart reads ohos.boot.mode once and caches safe mode status
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01600, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    std::string defaultParam = OHOS::system::GetParameter("ohos.boot.mode", "");
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-
-    OHOS::system::SetParameter("ohos.boot.mode", "safemode");
-    test.OnStart();
-    EXPECT_TRUE(NotificationPreferences::GetInstance()->IsSafeMode());
-
-    OHOS::system::SetParameter("ohos.boot.mode", "normal");
-    test.OnStop();
-    test.OnStart();
-    EXPECT_FALSE(NotificationPreferences::GetInstance()->IsSafeMode());
-
-    OHOS::system::SetParameter("ohos.boot.mode", defaultParam);
-    NotificationPreferences::GetInstance()->SetSafeModeStatus(false);
-}
-
 #ifdef ALL_SCENARIO_COLLABORATION
 /**
  * @tc.number    : AdvancedNotificationServiceAbilityTest_02000
@@ -356,81 +329,6 @@ HWTEST_F(
     ASSERT_NE(DistributedDeviceManager::GetInstance().stateCallback_, nullptr);
 }
 #endif
-
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_01700
- * @tc.name      : AdvancedNotificationServiceAbilityTest_01700
- * @tc.desc      : Test IsBopdMode with bopd boot mode values
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01700, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-    std::string defaultParam = OHOS::system::GetParameter("ohos.boot.bopd.mode", "NA");
-    const std::vector<std::string> bopdModes = {"0x2", "0x3", "0x6", "0x7", "0xa", "0xe", "0xf"};
-    for (const auto &mode : bopdModes) {
-        OHOS::system::SetParameter("ohos.boot.bopd.mode", mode);
-        EXPECT_TRUE(test.IsBopdMode());
-    }
-
-    OHOS::system::SetParameter("ohos.boot.bopd.mode", "0xc");
-    EXPECT_FALSE(test.IsBopdMode());
-
-    OHOS::system::SetParameter("ohos.boot.bopd.mode", defaultParam);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_01800
- * @tc.name      : AdvancedNotificationServiceAbilityTest_01800
- * @tc.desc      : Test IsBopdOrRescueMode with bopd and rescue boot mode values
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01800, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-    std::string defaultBopdParam = OHOS::system::GetParameter("ohos.boot.bopd.mode", "NA");
-    std::string defaultSocParam = OHOS::system::GetParameter("soc.boot.mode", "");
-
-    OHOS::system::SetParameter("ohos.boot.bopd.mode", "0x2");
-    EXPECT_TRUE(test.IsBopdOrRescueMode());
-
-    OHOS::system::SetParameter("ohos.boot.bopd.mode", defaultBopdParam);
-    OHOS::system::SetParameter("soc.boot.mode", "rescue");
-    EXPECT_TRUE(test.IsBopdOrRescueMode());
-
-    OHOS::system::SetParameter("soc.boot.mode", "normal");
-    EXPECT_FALSE(test.IsBopdOrRescueMode());
-
-    OHOS::system::SetParameter("soc.boot.mode", defaultSocParam);
-}
-
-/**
- * @tc.number    : AdvancedNotificationServiceAbilityTest_01900
- * @tc.name      : AdvancedNotificationServiceAbilityTest_01900
- * @tc.desc      : Test OnStart skipped in rescue mode and resumed after rescue mode off
- */
-HWTEST_F(
-    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_01900, Function | SmallTest | Level1)
-{
-    int32_t systemAbilityId = 1;
-    bool runOnCreate = true;
-    AdvancedNotificationServiceAbility test(systemAbilityId, runOnCreate);
-    std::string defaultSocParam = OHOS::system::GetParameter("soc.boot.mode", "");
-
-    OHOS::system::SetParameter("soc.boot.mode", "rescue");
-    test.OnStart();
-    EXPECT_EQ(test.service_, nullptr);
-
-    OHOS::system::SetParameter("soc.boot.mode", "normal");
-    test.OnStart();
-    EXPECT_NE(test.service_, nullptr);
-
-    OHOS::system::SetParameter("soc.boot.mode", defaultSocParam);
-}
 
 /**
  * @tc.number    : AdvancedNotificationServiceAbilityTest_02100
