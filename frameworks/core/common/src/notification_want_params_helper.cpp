@@ -25,20 +25,29 @@ namespace Notification {
 namespace {
 using LegacyParseFunc = AAFwk::WantParams (*)(const std::string &);
 
-AAFwk::WantParams ParseWantParamsImpl(const std::string &text, LegacyParseFunc legacyFallback)
+bool TryParseWantParamsImpl(const std::string &text, LegacyParseFunc legacyFallback, AAFwk::WantParams &out)
 {
+    out = AAFwk::WantParams();
     if (text.empty()) {
-        return AAFwk::WantParams();
+        return true;
     }
-    AAFwk::WantParams out;
     if (AAFwk::WantParamWrapperJson::HasEnvelope(text)) {
         if (!AAFwk::WantParamWrapperJson::Parse(text, out)) {
             ANS_LOGW("parse want params envelope failed, return empty result");
-            return AAFwk::WantParams();
+            out = AAFwk::WantParams();
+            return false;
         }
-        return out;
+        return true;
     }
-    return legacyFallback(text);
+    out = legacyFallback(text);
+    return true;
+}
+
+AAFwk::WantParams ParseWantParamsImpl(const std::string &text, LegacyParseFunc legacyFallback)
+{
+    AAFwk::WantParams out;
+    (void)TryParseWantParamsImpl(text, legacyFallback, out);
+    return out;
 }
 }
 
@@ -61,6 +70,16 @@ AAFwk::WantParams NotificationWantParamsHelper::ParseWantParams(const std::strin
 AAFwk::WantParams NotificationWantParamsHelper::ParseWantParamsWithBrackets(const std::string &text)
 {
     return ParseWantParamsImpl(text, AAFwk::WantParamWrapper::ParseWantParamsWithBrackets);
+}
+
+bool NotificationWantParamsHelper::TryParseWantParams(const std::string &text, AAFwk::WantParams &out)
+{
+    return TryParseWantParamsImpl(text, AAFwk::WantParamWrapper::ParseWantParams, out);
+}
+
+bool NotificationWantParamsHelper::TryParseWantParamsWithBrackets(const std::string &text, AAFwk::WantParams &out)
+{
+    return TryParseWantParamsImpl(text, AAFwk::WantParamWrapper::ParseWantParamsWithBrackets, out);
 }
 
 std::string NotificationWantParamsHelper::SerializeWantAgent(

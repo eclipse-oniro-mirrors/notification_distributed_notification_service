@@ -246,6 +246,118 @@ HWTEST_F(NotificationWantParamsHelperTest, ParseWantParamsWithBrackets_00004, Fu
 }
 
 /**
+ * @tc.name: TryParseWantParams_00001
+ * @tc.desc: Try to parse an envelope-format string, should succeed and fill the result.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationWantParamsHelperTest, TryParseWantParams_00001, Function | SmallTest | Level1)
+{
+    AAFwk::WantParams params;
+    params.SetParam("key1", AAFwk::String::Box("value1"));
+    std::string serialized = NotificationWantParamsHelper::SerializeWantParams(params);
+
+    AAFwk::WantParams out;
+    EXPECT_TRUE(NotificationWantParamsHelper::TryParseWantParams(serialized, out));
+
+    EXPECT_TRUE(out.HasParam("key1"));
+    EXPECT_EQ(out.GetStringParam("key1"), "value1");
+}
+
+/**
+ * @tc.name: TryParseWantParams_00002
+ * @tc.desc: Try to parse an empty string, should succeed with an empty WantParams.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationWantParamsHelperTest, TryParseWantParams_00002, Function | SmallTest | Level1)
+{
+    AAFwk::WantParams out;
+    out.SetParam("stale", AAFwk::String::Box("staleValue"));
+
+    EXPECT_TRUE(NotificationWantParamsHelper::TryParseWantParams("", out));
+
+    EXPECT_FALSE(out.HasParam("stale"));
+    EXPECT_FALSE(out.HasParam("anyKey"));
+}
+
+/**
+ * @tc.name: TryParseWantParams_00003
+ * @tc.desc: Try to parse a malformed envelope, should report failure and reset the result.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationWantParamsHelperTest, TryParseWantParams_00003, Function | SmallTest | Level1)
+{
+    std::string malformed = std::string("{\"") + AAFwk::WantParamWrapperJson::ENVELOPE_KEY + "\":}";
+    EXPECT_TRUE(AAFwk::WantParamWrapperJson::HasEnvelope(malformed));
+
+    AAFwk::WantParams out;
+    out.SetParam("stale", AAFwk::String::Box("staleValue"));
+
+    EXPECT_FALSE(NotificationWantParamsHelper::TryParseWantParams(malformed, out));
+
+    EXPECT_FALSE(out.HasParam("stale"));
+    EXPECT_FALSE(out.HasParam("anyKey"));
+}
+
+/**
+ * @tc.name: TryParseWantParams_00004
+ * @tc.desc: Try to parse a valid envelope holding an empty WantParams, should succeed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationWantParamsHelperTest, TryParseWantParams_00004, Function | SmallTest | Level1)
+{
+    AAFwk::WantParams emptyParams;
+    std::string serialized = NotificationWantParamsHelper::SerializeWantParams(emptyParams);
+    ASSERT_FALSE(serialized.empty());
+
+    AAFwk::WantParams out;
+    EXPECT_TRUE(NotificationWantParamsHelper::TryParseWantParams(serialized, out));
+
+    EXPECT_FALSE(out.HasParam("anyKey"));
+}
+
+/**
+ * @tc.name: TryParseWantParams_00005
+ * @tc.desc: Try to parse a legacy-format string, should keep the best-effort success semantics.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationWantParamsHelperTest, TryParseWantParams_00005, Function | SmallTest | Level1)
+{
+    AAFwk::WantParams params;
+    params.SetParam("key1", AAFwk::String::Box("value1"));
+    AAFwk::WantParamWrapper wrapper(params);
+    std::string legacy = wrapper.ToString();
+
+    AAFwk::WantParams out;
+    EXPECT_TRUE(NotificationWantParamsHelper::TryParseWantParams(legacy, out));
+
+    EXPECT_TRUE(out.HasParam("key1"));
+    EXPECT_EQ(out.GetStringParam("key1"), "value1");
+}
+
+/**
+ * @tc.name: TryParseWantParamsWithBrackets_00001
+ * @tc.desc: Try to parse with the brackets variant: envelope succeeds, malformed fails, legacy succeeds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationWantParamsHelperTest, TryParseWantParamsWithBrackets_00001, Function | SmallTest | Level1)
+{
+    AAFwk::WantParams params;
+    params.SetParam("key2", AAFwk::String::Box("value2"));
+    std::string serialized = NotificationWantParamsHelper::SerializeWantParams(params);
+    AAFwk::WantParams out;
+    EXPECT_TRUE(NotificationWantParamsHelper::TryParseWantParamsWithBrackets(serialized, out));
+    EXPECT_EQ(out.GetStringParam("key2"), "value2");
+
+    std::string malformed = std::string("{\"") + AAFwk::WantParamWrapperJson::ENVELOPE_KEY + "\":}";
+    EXPECT_FALSE(NotificationWantParamsHelper::TryParseWantParamsWithBrackets(malformed, out));
+    EXPECT_FALSE(out.HasParam("key2"));
+
+    AAFwk::WantParamWrapper wrapper(params);
+    EXPECT_TRUE(NotificationWantParamsHelper::TryParseWantParamsWithBrackets(wrapper.ToString(), out));
+    EXPECT_EQ(out.GetStringParam("key2"), "value2");
+}
+
+/**
  * @tc.name: SerializeWantAgent_00001
  * @tc.desc: Serialize a null WantAgent, should return empty string.
  * @tc.type: FUNC

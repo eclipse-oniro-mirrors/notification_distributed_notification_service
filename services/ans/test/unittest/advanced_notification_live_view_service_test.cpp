@@ -37,8 +37,10 @@
 #include "notification_content.h"
 #include "notification_record.h"
 #include "want_params_wrapper.h"
+#include "want_params_wrapper_json.h"
 #include "aes_gcm_helper.h"
 #include "notification_json_convert.h"
+#include "notification_want_params_helper.h"
 #include "nlohmann/json.hpp"
 #include "want.h"
 #include "want_agent_helper.h"
@@ -199,6 +201,38 @@ sptr<NotificationRequest> WriteLiveViewRowWithOverrides(int32_t userId, const st
         } else {
             jsonObject[item.key()] = item.value();
         }
+    }
+    if (SetRawLiveViewRecordToDb(request->GetSecureKey(), jsonObject.dump(), userId) != ERR_OK) {
+        return nullptr;
+    }
+    return request;
+}
+
+sptr<NotificationRequest> WriteLiveViewRowWithContentExtraInfo(int32_t userId, const std::string &label,
+    const nlohmann::json &extraInfoValue)
+{
+    sptr<NotificationRequest> request = BuildRecoverableLiveViewRequest(userId, label);
+    if (request == nullptr) {
+        return nullptr;
+    }
+    nlohmann::json jsonObject;
+    if (!NotificationJsonConverter::ConvertToJson(request, jsonObject)) {
+        return nullptr;
+    }
+    jsonObject["wantAgent"] = "";
+    jsonObject["removalWantAgent"] = "";
+    auto contentIter = jsonObject.find("content");
+    if (contentIter == jsonObject.end() || !contentIter->is_object()) {
+        return nullptr;
+    }
+    auto innerIter = contentIter->find("content");
+    if (innerIter == contentIter->end() || !innerIter->is_object()) {
+        return nullptr;
+    }
+    if (extraInfoValue.is_null()) {
+        innerIter->erase("extraInfo");
+    } else {
+        (*innerIter)["extraInfo"] = extraInfoValue;
     }
     if (SetRawLiveViewRecordToDb(request->GetSecureKey(), jsonObject.dump(), userId) != ERR_OK) {
         return nullptr;
@@ -2415,6 +2449,100 @@ HWTEST_F(AnsLiveViewServiceTest, LiveViewRecoveryFailureCleanupTest001, Function
         ExpectLiveViewRowKept(userId, validRequest, "valid_agent_row");
     }
 }
+/**
+ * @tc.name: LiveViewBrokenWantParamsCleanupTest001
+ * @tc.desc: Test malformed WantParams envelope in extraInfo/extendInfo/content.content.extraInfo deletes the row
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, LiveViewBrokenWantParamsCleanupTest001, Function | SmallTest | Level1)
+{
+    int32_t userId = TEST_CREATOR_UID;
+    const std::string malformed = std::string("{\"") + AAFwk::WantParamWrapperJson::ENVELOPE_KEY + "\":}";
+    ASSERT_TRUE(AAFwk::WantParamWrapperJson::HasEnvelope(malformed));
+
+    for (const std::string &field : {"extraInfo", "extendInfo"}) {
+        nlohmann::json overrides;
+        overrides[field] = malformed;
+        sptr<NotificationRequest> request = WriteLiveViewRowWithOverrides(userId, "broken_" + field, overrides);
+        ASSERT_NE(request, nullptr);
+        ExpectLiveViewRowRemoved(userId, request);
+    }
+
+    sptr<NotificationRequest> nestedRequest =
+        WriteLiveViewRowWithContentExtraInfo(userId, "broken_nested_extra", malformed);
+    ASSERT_NE(nestedRequest, nullptr);
+    ExpectLiveViewRowRemoved(userId, nestedRequest);
+}
+
+/**
+ * @tc.name: LiveViewTolerantWantParamsRecoveryTest001
+ * @tc.desc: Test missing/empty/valid-empty/legacy/non-string WantParams are still recovered
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, LiveViewTolerantWantParamsRecoveryTest001, Function | SmallTest | Level1)
+{
+    int32_t userId = TEST_CREATOR_UID;
+    const std::string emptyEnvelope = NotificationWantParamsHelper::SerializeWantParams(AAFwk::WantParams());
+    ASSERT_FALSE(emptyEnvelope.empty());
+    AAFwk::WantParams legacyParams;
+    legacyParams.SetParam("legacyKey", AAFwk::Integer::Box(1));
+    AAFwk::WantParamWrapper legacyWrapper(legacyParams);
+    const std::string legacy = legacyWrapper.ToString();
+    ASSERT_FALSE(legacy.empty());
+
+    struct KeepCase {
+        std::string label;
+        nlohmann::json value;
+    };
+    const std::vector<KeepCase> keepCases = {
+        {"keep_missing", nullptr},
+        {"keep_empty", ""},
+        {"keep_empty_wp", emptyEnvelope},
+        {"keep_legacy", legacy},
+        {"keep_plain_text", "not-an-envelope"},
+        {"keep_non_string", 123},
+    };
+    for (const auto &keepCase : keepCases) {
+        nlohmann::json overrides;
+        overrides["extraInfo"] = keepCase.value;
+        overrides["extendInfo"] = keepCase.value;
+        sptr<NotificationRequest> request = WriteLiveViewRowWithOverrides(userId, keepCase.label, overrides);
+        ASSERT_NE(request, nullptr);
+        ExpectLiveViewRowKept(userId, request, keepCase.label);
+
+        sptr<NotificationRequest> nestedRequest =
+            WriteLiveViewRowWithContentExtraInfo(userId, keepCase.label + "_nested", keepCase.value);
+        ASSERT_NE(nestedRequest, nullptr);
+        ExpectLiveViewRowKept(userId, nestedRequest, keepCase.label + "_nested");
+    }
+}
+
+/**
+ * @tc.name: LiveViewBrokenWantParamsIsolationTest001
+ * @tc.desc: Test a row with broken WantParams does not block recovery of the following normal row
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, LiveViewBrokenWantParamsIsolationTest001, Function | SmallTest | Level1)
+{
+    int32_t userId = TEST_CREATOR_UID;
+    nlohmann::json badOverrides;
+    badOverrides["extendInfo"] = std::string("{\"") + AAFwk::WantParamWrapperJson::ENVELOPE_KEY + "\":}";
+    sptr<NotificationRequest> brokenRequest =
+        WriteLiveViewRowWithOverrides(userId, "broken_isolation", badOverrides);
+    ASSERT_NE(brokenRequest, nullptr);
+
+    sptr<NotificationRequest> normalRequest = WriteLiveViewRowWithContentExtraInfo(userId, "normal_isolation",
+        NotificationWantParamsHelper::SerializeWantParams(AAFwk::WantParams()));
+    ASSERT_NE(normalRequest, nullptr);
+
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    ASSERT_EQ(advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId), ERR_OK);
+    ASSERT_EQ(requestsdb.size(), 1);
+    EXPECT_EQ(requestsdb[0].request->GetLabel(), "normal_isolation");
+    EXPECT_FALSE(LiveViewKvExists(brokenRequest->GetSecureKey(), userId));
+    NotificationPreferences::GetInstance()->DeleteKvFromDb(normalRequest->GetSecureKey(), userId);
+}
+
 /**
  * @tc.name: RecoveryFailureIsolationTest001
  * @tc.desc: Test a failed row does not block recovery of following normal rows (AC-1.4)
