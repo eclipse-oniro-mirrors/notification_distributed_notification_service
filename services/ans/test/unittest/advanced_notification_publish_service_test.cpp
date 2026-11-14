@@ -4007,6 +4007,247 @@ HWTEST_F(AnsPublishServiceTest, CheckCommonLiveViewRights_NonCommonLiveView_Skip
     wrapper.checkLiveViewRights_ = nullptr;
 }
 
+namespace {
+constexpr char EVENT_CONTROL_PARAM[] = "eventControl";
+int32_t g_liveViewRightsCheckCount = 0;
+int32_t g_liveViewVoiceUpdateCount = 0;
+std::vector<std::string> g_liveViewRightsCheckOrder;
+std::string g_liveViewRightsSeenEventControl;
+ErrCode g_liveViewRightsCheckResult = ERR_OK;
+
+std::shared_ptr<AAFwk::WantParams> GetRequestLiveViewExtraInfo(const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr || request->GetContent() == nullptr ||
+        request->GetContent()->GetNotificationContent() == nullptr) {
+        return nullptr;
+    }
+    auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
+        request->GetContent()->GetNotificationContent());
+    if (liveViewContent == nullptr) {
+        return nullptr;
+    }
+    return liveViewContent->GetExtraInfo();
+}
+
+ErrCode MockCountingCheckLiveViewRights(const sptr<NotificationRequest> &request)
+{
+    g_liveViewRightsCheckCount++;
+    g_liveViewRightsCheckOrder.emplace_back("rights");
+    auto extraInfo = GetRequestLiveViewExtraInfo(request);
+    g_liveViewRightsSeenEventControl = (extraInfo != nullptr && extraInfo->HasParam(EVENT_CONTROL_PARAM)) ?
+        extraInfo->GetStringParam(EVENT_CONTROL_PARAM) : "";
+    return g_liveViewRightsCheckResult;
+}
+
+ErrCode MockCountingUpdateLiveviewVoiceContent(const sptr<NotificationRequest> &request)
+{
+    g_liveViewVoiceUpdateCount++;
+    g_liveViewRightsCheckOrder.emplace_back("voice");
+    return ERR_OK;
+}
+
+void ResetLiveViewRightsMock()
+{
+    g_liveViewRightsCheckCount = 0;
+    g_liveViewVoiceUpdateCount = 0;
+    g_liveViewRightsCheckOrder.clear();
+    g_liveViewRightsSeenEventControl.clear();
+    g_liveViewRightsCheckResult = ERR_OK;
+    auto &wrapper = Infra::AllScenariosExtensionWrapper::GetInstance();
+    wrapper.checkLiveViewRights_ = nullptr;
+    wrapper.updateLiveviewVoiceContent_ = nullptr;
+}
+
+std::shared_ptr<NotificationRecord> MakeCommonLiveViewRecord(int32_t notificationId,
+    NotificationLiveViewContent::LiveViewStatus status, const std::string &eventControl, bool withExtraInfo)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest(notificationId);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetCreatorBundleName(TEST_DEFUALT_BUNDLE);
+    request->SetCreatorUid(NON_SYSTEM_APP_UID);
+    auto liveViewContent = std::make_shared<NotificationLiveViewContent>();
+    liveViewContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW));
+    liveViewContent->SetLiveViewStatus(status);
+    if (withExtraInfo) {
+        auto extraInfo = std::make_shared<AAFwk::WantParams>();
+        if (!eventControl.empty()) {
+            extraInfo->SetParam(EVENT_CONTROL_PARAM, AAFwk::String::Box(eventControl));
+        }
+        liveViewContent->SetExtraInfo(extraInfo);
+    }
+    request->SetContent(std::make_shared<NotificationContent>(liveViewContent));
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = new (std::nothrow) Notification(request);
+    return record;
+}
+}  // namespace
+
+/**
+ * @tc.name: UpdateInNotificationList_IncrementalInheritTrustedEventControl_001
+ * @tc.desc: An incremental update must inherit the trusted eventControl of the stored record, run the
+ *           voice content refinement before the rights check, and run the rights check exactly once.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, UpdateInNotificationList_IncrementalInheritTrustedEventControl_001,
+    Function | SmallTest | Level1)
+{
+    ResetLiveViewRightsMock();
+    auto &wrapper = Infra::AllScenariosExtensionWrapper::GetInstance();
+    wrapper.checkLiveViewRights_ = MockCountingCheckLiveViewRights;
+    wrapper.updateLiveviewVoiceContent_ = MockCountingUpdateLiveviewVoiceContent;
+
+    auto oldRecord = MakeCommonLiveViewRecord(1, NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE,
+        "trustedEventControl", true);
+    auto newRecord = MakeCommonLiveViewRecord(1,
+        NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE, "forgedEventControl", true);
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->notificationList_.push_back(oldRecord);
+
+    auto ret = advancedNotificationService_->UpdateInNotificationList(newRecord);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(g_liveViewRightsCheckCount, 1);
+    EXPECT_EQ(g_liveViewVoiceUpdateCount, 1);
+    ASSERT_EQ(g_liveViewRightsCheckOrder.size(), static_cast<size_t>(2));
+    EXPECT_EQ(g_liveViewRightsCheckOrder[0], "voice");
+    EXPECT_EQ(g_liveViewRightsCheckOrder[1], "rights");
+    EXPECT_EQ(g_liveViewRightsSeenEventControl, "trustedEventControl");
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), static_cast<size_t>(1));
+    EXPECT_EQ(advancedNotificationService_->notificationList_.front(), newRecord);
+    advancedNotificationService_->notificationList_.clear();
+    ResetLiveViewRightsMock();
+}
+
+/**
+ * @tc.name: UpdateInNotificationList_FullInheritTrustedEventControl_001
+ * @tc.desc: A full update without extraInfo must still inherit the trusted eventControl of the stored
+ *           record and check the rights only once.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, UpdateInNotificationList_FullInheritTrustedEventControl_001,
+    Function | SmallTest | Level1)
+{
+    ResetLiveViewRightsMock();
+    auto &wrapper = Infra::AllScenariosExtensionWrapper::GetInstance();
+    wrapper.checkLiveViewRights_ = MockCountingCheckLiveViewRights;
+    wrapper.updateLiveviewVoiceContent_ = MockCountingUpdateLiveviewVoiceContent;
+
+    auto oldRecord = MakeCommonLiveViewRecord(2, NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE,
+        "trustedEventControl", true);
+    auto newRecord = MakeCommonLiveViewRecord(2, NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE,
+        "", false);
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->notificationList_.push_back(oldRecord);
+
+    auto ret = advancedNotificationService_->UpdateInNotificationList(newRecord);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(g_liveViewRightsCheckCount, 1);
+    EXPECT_EQ(g_liveViewRightsSeenEventControl, "trustedEventControl");
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), static_cast<size_t>(1));
+    EXPECT_EQ(advancedNotificationService_->notificationList_.front(), newRecord);
+    advancedNotificationService_->notificationList_.clear();
+    ResetLiveViewRightsMock();
+}
+
+/**
+ * @tc.name: UpdateInNotificationList_FullDropForgedEventControl_001
+ * @tc.desc: A full update must not keep the forged eventControl when the stored record has none, and the
+ *           rights check must still be invoked without eventControl.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, UpdateInNotificationList_FullDropForgedEventControl_001,
+    Function | SmallTest | Level1)
+{
+    ResetLiveViewRightsMock();
+    auto &wrapper = Infra::AllScenariosExtensionWrapper::GetInstance();
+    wrapper.checkLiveViewRights_ = MockCountingCheckLiveViewRights;
+    wrapper.updateLiveviewVoiceContent_ = MockCountingUpdateLiveviewVoiceContent;
+
+    auto oldRecord = MakeCommonLiveViewRecord(3, NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE,
+        "", false);
+    auto newRecord = MakeCommonLiveViewRecord(3, NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE,
+        "forgedEventControl", true);
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->notificationList_.push_back(oldRecord);
+
+    auto ret = advancedNotificationService_->UpdateInNotificationList(newRecord);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(g_liveViewRightsCheckCount, 1);
+    EXPECT_EQ(g_liveViewRightsSeenEventControl, "");
+    advancedNotificationService_->notificationList_.clear();
+    ResetLiveViewRightsMock();
+}
+
+/**
+ * @tc.name: UpdateInNotificationList_NoEventControlStillChecked_001
+ * @tc.desc: When neither the new request nor the stored record carries eventControl the underlying rights
+ *           check is still invoked, so special attributes without rights are rejected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, UpdateInNotificationList_NoEventControlStillChecked_001,
+    Function | SmallTest | Level1)
+{
+    ResetLiveViewRightsMock();
+    auto &wrapper = Infra::AllScenariosExtensionWrapper::GetInstance();
+    wrapper.checkLiveViewRights_ = MockCountingCheckLiveViewRights;
+    wrapper.updateLiveviewVoiceContent_ = MockCountingUpdateLiveviewVoiceContent;
+    g_liveViewRightsCheckResult = ERR_ANS_INNER_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED;
+
+    auto oldRecord = MakeCommonLiveViewRecord(4, NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE,
+        "", false);
+    auto newRecord = MakeCommonLiveViewRecord(4,
+        NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE, "", false);
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->notificationList_.push_back(oldRecord);
+
+    auto ret = advancedNotificationService_->UpdateInNotificationList(newRecord);
+    EXPECT_EQ(ret, ERR_ANS_INNER_CUSTOM_EXTENSION_RIGHTS_CHECK_FAILED);
+    EXPECT_EQ(g_liveViewRightsCheckCount, 1);
+    EXPECT_EQ(g_liveViewRightsSeenEventControl, "");
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), static_cast<size_t>(1));
+    EXPECT_EQ(advancedNotificationService_->notificationList_.front(), oldRecord);
+    advancedNotificationService_->notificationList_.clear();
+    ResetLiveViewRightsMock();
+}
+
+/**
+ * @tc.name: Publish_LiveViewCreatePushCheckFailed_NoRightsCheck_001
+ * @tc.desc: A create publish must run the rights check only after a successful PushCheck. With no push
+ *           callback registered for a non privileged caller PushCheck fails and the rights check is never
+ *           reached.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, Publish_LiveViewCreatePushCheckFailed_NoRightsCheck_001,
+    Function | SmallTest | Level1)
+{
+    ResetLiveViewRightsMock();
+    auto &wrapper = Infra::AllScenariosExtensionWrapper::GetInstance();
+    wrapper.checkLiveViewRights_ = MockCountingCheckLiveViewRights;
+    wrapper.updateLiveviewVoiceContent_ = MockCountingUpdateLiveviewVoiceContent;
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    MockIsVerfyPermisson(false);
+    MockIsAtomicServiceByFullTokenID(false);
+    advancedNotificationService_->pushCallBacks_.clear();
+    advancedNotificationService_->checkRequests_.clear();
+
+    auto createRecord = MakeCommonLiveViewRecord(9, NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_CREATE,
+        "", true);
+    auto ret = advancedNotificationService_->Publish("", createRecord->request);
+#ifdef IS_EMULATOR
+    EXPECT_NE(ret, (int)ERR_ANS_INNER_PUSH_CHECK_UNREGISTERED);
+    EXPECT_EQ(g_liveViewRightsCheckCount, 1);
+#else
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_PUSH_CHECK_UNREGISTERED);
+    EXPECT_EQ(g_liveViewRightsCheckCount, 0);
+#endif
+    EXPECT_EQ(g_liveViewVoiceUpdateCount, 0);
+    advancedNotificationService_->pushCallBacks_.clear();
+    advancedNotificationService_->checkRequests_.clear();
+    ResetLiveViewRightsMock();
+}
+
 /**
  * @tc.name: SetLiveViewShareSwitchToExtendInfo_NullRequest_00001
  * @tc.desc: Test SetLiveViewShareSwitchToExtendInfo with null request, should return without crash.

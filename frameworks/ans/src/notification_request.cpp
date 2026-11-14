@@ -3283,6 +3283,17 @@ ErrCode NotificationRequest::CheckNotificationRequest(const sptr<NotificationReq
     return CheckVersion(oldRequest);
 }
 
+namespace {
+constexpr char EVENT_CONTROL_KEY[] = "eventControl";
+
+void DropUntrustedEventControl(const std::shared_ptr<AAFwk::WantParams> &extraInfo)
+{
+    if (extraInfo != nullptr) {
+        extraInfo->Remove(EVENT_CONTROL_KEY);
+    }
+}
+}  // namespace
+
 void NotificationRequest::FillMissingParameters(const sptr<NotificationRequest> &oldRequest)
 {
     if (oldRequest == nullptr) {
@@ -3355,6 +3366,7 @@ void NotificationRequest::UpdateExtraInfo(const sptr<NotificationRequest> &oldRe
     }
 
     auto newExtraInfo = newLiveViewContent->GetExtraInfo();
+    DropUntrustedEventControl(newExtraInfo);
 
     auto oldContent = oldRequest->GetContent();
     if (oldContent == nullptr) {
@@ -3372,14 +3384,14 @@ void NotificationRequest::UpdateExtraInfo(const sptr<NotificationRequest> &oldRe
     }
 
     auto oldExtraInfo = oldLiveViewContent->GetExtraInfo();
-
-    if (oldExtraInfo != nullptr) {
-        if (oldExtraInfo->HasParam("eventControl")) {
-            if (newExtraInfo != nullptr) {
-                newExtraInfo->SetParam("eventControl", oldExtraInfo->GetParam("eventControl"));
-            }
-        }
+    if (oldExtraInfo == nullptr || !oldExtraInfo->HasParam(EVENT_CONTROL_KEY)) {
+        return;
     }
+    if (newExtraInfo == nullptr) {
+        newExtraInfo = std::make_shared<AAFwk::WantParams>();
+        newLiveViewContent->SetExtraInfo(newExtraInfo);
+    }
+    newExtraInfo->SetParam(EVENT_CONTROL_KEY, oldExtraInfo->GetParam(EVENT_CONTROL_KEY));
 }
 
 void NotificationRequest::IncrementalUpdateLiveview(const sptr<NotificationRequest> &oldRequest)
@@ -3412,10 +3424,13 @@ void NotificationRequest::IncrementalUpdateLiveview(const sptr<NotificationReque
         return;
     }
     auto oldExtraInfo = oldLiveViewContent->GetExtraInfo();
-    if (newExtraInfo == nullptr) {
-        newLiveViewContent->SetExtraInfo(oldExtraInfo);
-    } else if (oldExtraInfo != nullptr) {
-        newExtraInfo->Remove("eventControl");
+    DropUntrustedEventControl(newExtraInfo);
+    if (newExtraInfo == nullptr && oldExtraInfo != nullptr) {
+        // Avoid sharing the stored record's mutable WantParams with the new request.
+        newExtraInfo = std::make_shared<AAFwk::WantParams>();
+        newLiveViewContent->SetExtraInfo(newExtraInfo);
+    }
+    if (newExtraInfo != nullptr && oldExtraInfo != nullptr) {
         auto oldKeySet = oldExtraInfo->KeySet();
         for (const auto &key : oldKeySet) {
             if (!newExtraInfo->HasParam(key)) {

@@ -1593,6 +1593,7 @@ ErrCode AdvancedNotificationService::UpdateInNotificationList(const std::shared_
     auto iter = notificationList_.begin();
     while (iter != notificationList_.end()) {
         if ((*iter)->notification->GetKey() == record->notification->GetKey()) {
+            // Check updates only after inheriting the trusted eventControl and before replacing the record.
             record->request->FillMissingParameters((*iter)->request);
             if (record->request->IsCommonLiveView()) {
                 Infra::ALL_SCENARIOS_EXTENTION_WRAPPER.UpdateLiveviewVoiceContent(record->request);

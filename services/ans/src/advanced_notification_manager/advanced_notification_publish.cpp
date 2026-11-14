@@ -286,13 +286,14 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
         GrantSoundPermission(request, bundleOption);
         IPCSkeleton::SetCallingIdentity(identity);
 
-#ifndef IS_EMULATOR
         if (IsNeedPushCheck(request)) {
+#ifndef IS_EMULATOR
             ansStatus = PushCheck(request);
             if (!ansStatus.Ok()) {
                 NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
                 break;
             }
+#endif
             ErrCode rightsResult = CheckCommonLiveViewRights(request);
             if (rightsResult != ERR_OK) {
                 ANS_LOGE("CheckLiveViewRights failed, result: %{public}d", rightsResult);
@@ -301,7 +302,6 @@ ErrCode AdvancedNotificationService::Publish(const std::string &label, const spt
                 break;
             }
         }
-#endif
         ansStatus = PublishPreparedNotification(request, bundleOption, isUpdateByOwnerAllowed);
         if (!ansStatus.Ok()) {
             NotificationAnalyticsUtil::ReportPublishFailedEvent(request, ansStatus.BuildMessage(true));
