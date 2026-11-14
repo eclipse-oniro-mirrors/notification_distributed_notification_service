@@ -34,7 +34,7 @@ namespace OHOS {
 namespace Notification {
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
 
-constexpr int64_t PRIORITY_EXPIRE_TIME_MAX_HORIZON_MS = 72LL * 60 * 60 * 1000;
+constexpr int64_t PRIORITY_EXPIRE_TIME_MAX_HORIZON_MS = 16LL * 60 * 60 * 1000;
 
 /**
  * Arbitrates every tagging round against the classification cache, lands the
@@ -177,7 +177,7 @@ private:
 
     /**
      * @brief Lands an accepted round (in-lock) with the policy transforms: expire time
-     *        clamped to the 72h horizon, a repeated type keeps the cached expire time,
+     *        clamped to the 16h horizon, a repeated type keeps the cached expire time,
      *        type OTHER normalized to expireTime 0, an already expired triple lands
      *        directly as the terminal (the landing itself is the degrade). On
      *        allocation failure the cache stays untouched, the effective value falls

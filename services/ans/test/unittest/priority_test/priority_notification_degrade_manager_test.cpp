@@ -1358,13 +1358,13 @@ HWTEST_F(PriorityNotificationDegradeManagerTest, ApplyTaggingResult_00019, Funct
  *           bound before landing, so the landed triple, the effective classification and
  *           the degrade registration all carry the clamped time (a forged extreme stays
  *           bounded instead of locking the priority state forever), while a value inside
- *           the horizon (71 hours) lands verbatim.
+ *           the horizon (15 hours) lands verbatim.
  * @tc.type: FUNC
  * @tc.require: issue
  */
 HWTEST_F(PriorityNotificationDegradeManagerTest, ApplyTaggingResult_00020, Function | SmallTest | Level1)
 {
-    // Beyond the horizon: now + 144h gets clamped to now + 72h.
+    // Beyond the horizon: now + 32h gets clamped to now + 16h.
     std::string clampKey = "test_key_expire_clamped";
     sptr<NotificationRequest> request = MakeRequest(TYPE_URGENT);
     sptr<NotificationClassification> effective = nullptr;
@@ -1391,7 +1391,7 @@ HWTEST_F(PriorityNotificationDegradeManagerTest, ApplyTaggingResult_00020, Funct
     EXPECT_EQ(manager_->GetEarliestExpiredTime(), landedTime);
     EXPECT_EQ(manager_->degradeList_.size(), static_cast<size_t>(1));
 
-    // Inside the horizon (71h < 72h): the value lands verbatim, no clamp.
+    // Inside the horizon (15h < 16h): the value lands verbatim, no clamp.
     std::string legalKey = "test_key_expire_legal";
     int64_t legalTime = NowMillis() + PRIORITY_EXPIRE_TIME_MAX_HORIZON_MS - ONE_HOUR_MILLIS;
     auto legal = manager_->ApplyTaggingResult(legalKey, request,
