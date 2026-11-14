@@ -38,6 +38,7 @@
 #include <set>
 #include "notification_analytics_util.h"
 #include "aes_gcm_helper.h"
+#include "notification_want_params_helper.h"
 
 namespace OHOS {
 namespace Notification {
@@ -192,6 +193,38 @@ bool IsWantAgentFieldBroken(const nlohmann::json &jsonObject, const std::string 
     return !iter->get<std::string>().empty() && agent == nullptr;
 }
 
+// Only a non-empty envelope rejected by the strict JSON parser is treated as broken.
+bool IsWantParamsFieldBroken(const nlohmann::json &jsonObject, const std::string &key, bool withBrackets)
+{
+    auto iter = jsonObject.find(key);
+    if (iter == jsonObject.end() || !iter->is_string()) {
+        return false;
+    }
+    const std::string text = iter->get<std::string>();
+    if (text.empty()) {
+        return false;
+    }
+    AAFwk::WantParams params;
+    if (withBrackets) {
+        return !NotificationWantParamsHelper::TryParseWantParamsWithBrackets(text, params);
+    }
+    return !NotificationWantParamsHelper::TryParseWantParams(text, params);
+}
+
+// Live view extraInfo is stored in content.content.extraInfo.
+bool IsLiveViewContentWantParamsBroken(const nlohmann::json &jsonObject)
+{
+    auto contentIter = jsonObject.find("content");
+    if (contentIter == jsonObject.end() || !contentIter->is_object()) {
+        return false;
+    }
+    auto innerIter = contentIter->find("content");
+    if (innerIter == contentIter->end() || !innerIter->is_object()) {
+        return false;
+    }
+    return IsWantParamsFieldBroken(*innerIter, "extraInfo", true);
+}
+
 int32_t CollectLiveViewDbRecords(const std::vector<int32_t> &userIds,
     std::unordered_map<std::string, std::string> &dbRecords,
     std::unordered_map<std::string, int32_t> &dbRecordUsers)
@@ -252,6 +285,14 @@ bool PrepareLiveViewRequestFromDb(const std::string &storageKey, int32_t dbUserI
                 removedBaseKeys->emplace_back(baseKey);
             }
         }
+        DeleteLiveViewRecordFromDb(storageKey, dbUserId);
+        return false;
+    }
+    // Validate raw fields because FromJson does not propagate WantParams parse failures.
+    if (IsWantParamsFieldBroken(jsonObject, "extraInfo", false) ||
+        IsWantParamsFieldBroken(jsonObject, "extendInfo", false) ||
+        IsLiveViewContentWantParamsBroken(jsonObject)) {
+        ANS_LOGE("Parse wantParams failed, key %{public}s.", storageKey.c_str());
         DeleteLiveViewRecordFromDb(storageKey, dbUserId);
         return false;
     }

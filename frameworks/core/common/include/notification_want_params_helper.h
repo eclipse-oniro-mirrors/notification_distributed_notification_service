@@ -72,6 +72,26 @@ public:
     static AAFwk::WantParams ParseWantParamsWithBrackets(const std::string &text);
 
     /**
+     * @brief Parse WantParams and report whether a non-empty envelope is valid.
+     * Empty and legacy inputs retain the existing compatible behavior.
+     *
+     * @param text Indicates the string to parse.
+     * @param out Indicates the parsed WantParams, reset when parsing fails.
+     * @return Returns false only when a non-empty envelope cannot be parsed.
+     */
+    static bool TryParseWantParams(const std::string &text, AAFwk::WantParams &out);
+
+    /**
+     * @brief Parse WantParams with the legacy WithBrackets fallback and report envelope failures.
+     * Empty and legacy inputs retain the existing compatible behavior.
+     *
+     * @param text Indicates the string to parse.
+     * @param out Indicates the parsed WantParams, reset when parsing fails.
+     * @return Returns false only when a non-empty envelope cannot be parsed.
+     */
+    static bool TryParseWantParamsWithBrackets(const std::string &text, AAFwk::WantParams &out);
+
+    /**
      * @brief Serialize a WantAgent to the envelope-based string format.
      *
      * This is the upgrade path for the legacy WantAgentHelper::ToString. The
