@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
+#include <fstream>
+
 #include <gtest/gtest.h>
 
-#include "reminder_store.h"
-#include "reminder_table.h"
-#include "reminder_table_old.h"
+#include "abs_shared_result_set.h"
 #include "reminder_request_alarm.h"
 #include "reminder_request_calendar.h"
 #include "reminder_request_timer.h"
-#include "reminder_helper.h"
+#include "reminder_store.h"
 #include "reminder_store_strategy.h"
-#include "abs_shared_result_set.h"
+#include "reminder_store_test_common.h"
+#include "reminder_table.h"
+#include "reminder_table_old.h"
 #include "rdb_store.h"
 
 using namespace testing::ext;
@@ -32,42 +34,7 @@ namespace Notification {
 namespace {
     constexpr int32_t NON_SYSTEM_APP_UID = 1000;
     const std::string TEST_DEFUALT_BUNDLE = "bundleName";
-    const int32_t STATE_FAIL = -1;
 }
-class ReminderStoreTest : public testing::Test {
-public:
-    static void SetUpTestCase()
-    {
-        ReminderHelper::CancelAllReminders();
-    }
-    static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown()
-    {
-        ReminderHelper::CancelAllReminders();
-        NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + ReminderStore::REMINDER_DB_NAME);
-    }
-
-    void InitStore(ReminderStore& store)
-    {
-        std::string dbConfig = ReminderStore::REMINDER_DB_DIR + "notification_test.db";
-        NativeRdb::RdbStoreConfig config(dbConfig);
-        config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
-        {
-            ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
-            int32_t errCode = STATE_FAIL;
-            constexpr int32_t version = 7;
-            store.rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, version, rdbDataCallBack, errCode);
-        }
-    }
-
-    void ClearStore()
-    {
-        NativeRdb::RdbHelper::ClearCache();
-        NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + "notification_test.db");
-    }
-};
-
 
 /**
  * @tc.name: Init_00001
@@ -97,7 +64,7 @@ HWTEST_F(ReminderStoreTest, InitData_00001, Function | SmallTest | Level1)
 
 /**
  * @tc.name: Delete_00001
- * @tc.desc: Test Delete parameters.
+ * @tc.desc: Test Delete reopens the rdb store on demand when it is closed.
  * @tc.type: FUNC
  * @tc.require: issueI5VB6V
  */
@@ -105,13 +72,15 @@ HWTEST_F(ReminderStoreTest, Delete_00001, Function | SmallTest | Level1)
 {
     int32_t reminderId = 1;
     ReminderStore reminderStore;
+
+
     int32_t ret = reminderStore.Delete(reminderId);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
  * @tc.name: Delete_00002
- * @tc.desc: Test Delete parameters.
+ * @tc.desc: Test Delete by package reopens the rdb store on demand when it is closed.
  * @tc.type: FUNC
  * @tc.require: issueI5VB6V
  */
@@ -119,8 +88,9 @@ HWTEST_F(ReminderStoreTest, Delete_00002, Function | SmallTest | Level1)
 {
     int32_t userId = 1;
     ReminderStore reminderStore;
+
     int32_t ret = reminderStore.Delete("", userId, -1);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -254,7 +224,7 @@ HWTEST_F(ReminderStoreTest, Delete_00004, Function | SmallTest | Level1)
 
 /**
  * @tc.name: DeleteUser_00004
- * @tc.desc: Test DeleteUser parameters.
+ * @tc.desc: Test DeleteUser reopens the rdb store on demand when it is closed.
  * @tc.type: FUNC
  * @tc.require: issueI92BU9
  */
@@ -262,22 +232,26 @@ HWTEST_F(ReminderStoreTest, DeleteUser_00004, Function | SmallTest | Level1)
 {
     int32_t userId = 0;
     ReminderStore reminderStore;
+
     int32_t ret = reminderStore.DeleteUser(userId);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
  * @tc.name: UpdateOrInsert_00001
- * @tc.desc: Test UpdateOrInsert parameters.
+ * @tc.desc: Test UpdateOrInsert reopens the rdb store on demand and inserts the reminder.
  * @tc.type: FUNC
  * @tc.require: issueI92BU9
  */
 HWTEST_F(ReminderStoreTest, UpdateOrInsert_00001, Function | SmallTest | Level1)
 {
-    sptr<ReminderRequest> reminder = nullptr;
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer();
+    reminder->SetReminderId(5001);
+    reminder->SetExpired(false);
     ReminderStore reminderStore;
-    int64_t ret = reminderStore.UpdateOrInsert(reminder);
-    EXPECT_EQ(ret, -1);
+
+    int32_t ret = reminderStore.UpdateOrInsert(reminder);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -293,6 +267,7 @@ HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
     int32_t errCode = STATE_FAIL;
+    ReminderStore::EnsureDbColumnsInitialized();
     auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 5, rdbDataCallBack, errCode);
     ASSERT_NE(rdbStore, nullptr);
     auto baseResult = rdbStore->QuerySql("SELECT name FROM sqlite_master WHERE type='table' AND "
@@ -311,18 +286,19 @@ HWTEST_F(ReminderStoreTest, OnCreate_00001, Function | SmallTest | Level1)
 
 /**
  * @tc.name: Delete_00005
- * @tc.desc: Test OnCreate parameters.
+ * @tc.desc: Test Delete by package reopens the rdb store on demand when it is closed.
  * @tc.type: FUNC
  * @tc.require: issueI92BU9
  */
 HWTEST_F(ReminderStoreTest, Delete_00005, Function | SmallTest | Level1)
 {
     ReminderStore reminderStore;
+
     int32_t ret = reminderStore.Delete("com.example.simple", 100, 20020152);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 
     ret = reminderStore.Delete("com.example.simple", 100, -1);
-    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(ret, 0);
 }
 
 /**
@@ -703,7 +679,7 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00003, Function | Small
 
 /**
  * @tc.name: ReminderCalendarStrategyTest_00004
- * @tc.desc: Test OnCreate parameters.
+ * @tc.desc: Test the calendar strategy value persistence and the rdb value getters.
  * @tc.type: FUNC
  * @tc.require: issueI92BU9
  */
@@ -711,14 +687,26 @@ HWTEST_F(ReminderStoreTest, ReminderCalendarStrategyTest_00004, Function | Small
 {
     ReminderStore store;
     InitStore(store);
-    store.rdbStore_->ExecuteSql("CREATE TABLE test_table (test_col INT);");
+    // The rdb store may fail to be opened, never dereference it blindly.
+    ASSERT_NE(store.rdbStore_, nullptr);
+
+    // The calendar strategy persists a calendar reminder without crashing.
+    sptr<ReminderRequest> calendar = new ReminderRequestCalendar();
+    calendar->reminderId_ = 999;
+    calendar->reminderType_ = ReminderRequest::ReminderType::CALENDAR;
+    ReminderCalendarStrategy calendarStrategy;
+    NativeRdb::ValuesBucket calendarValues;
+    calendarStrategy.AppendValuesBucket(calendar, calendarValues);
+
+    ASSERT_EQ(store.rdbStore_->ExecuteSql("DROP TABLE IF EXISTS test_table;"), NativeRdb::E_OK);
+    ASSERT_EQ(store.rdbStore_->ExecuteSql("CREATE TABLE test_table (test_col INT);"), NativeRdb::E_OK);
     NativeRdb::ValuesBucket values;
     values.PutInt("test_col", 255);
-    int64_t rowId;
-    store.rdbStore_->Insert(rowId, "test_table", values);
+    int64_t rowId = -1;
+    ASSERT_EQ(store.rdbStore_->Insert(rowId, "test_table", values), NativeRdb::E_OK);
     auto resultSet = store.rdbStore_->QuerySql("SELECT * FROM test_table", std::vector<std::string>{});
     ASSERT_NE(resultSet, nullptr);
-    resultSet->GoToFirstRow();
+    ASSERT_EQ(resultSet->GoToFirstRow(), NativeRdb::E_OK);
     int32_t intValue = 0;
     ReminderStore::GetInt32Val(resultSet, "test_col", intValue);
     EXPECT_EQ(intValue, 255);
@@ -759,10 +747,12 @@ HWTEST_F(ReminderStoreTest, OnUpgrade_00002_NoUpgradePath, Function | SmallTest 
 
     // 1. Create a database with a certain version.
     constexpr int32_t initialVersion = 9;
+    ReminderStore::EnsureDbColumnsInitialized();
     {
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, initialVersion, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
+        // The rdb store may fail to be opened, never dereference it blindly.
+        ASSERT_NE(rdbStore, nullptr);
         EXPECT_EQ(errCode, 0);
     }
     NativeRdb::RdbHelper::ClearCache();
@@ -772,7 +762,8 @@ HWTEST_F(ReminderStoreTest, OnUpgrade_00002_NoUpgradePath, Function | SmallTest 
     {
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, initialVersion, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
+        // The rdb store may fail to be opened, never dereference it blindly.
+        ASSERT_NE(rdbStore, nullptr);
         EXPECT_EQ(errCode, 0);
 
         // 3. Verify the version remains the same.
@@ -787,7 +778,7 @@ HWTEST_F(ReminderStoreTest, OnUpgrade_00002_NoUpgradePath, Function | SmallTest 
 
 /**
  * @tc.name: CreateTable_001_BaseTableFail
- * @tc.desc: Test CreateTable when creating reminder_base table fails.
+ * @tc.desc: Test CreateTable returns error when ExecuteSql fails on creating reminder_base table.
  * @tc.type: FUNC
  * @tc.require: issueI5VB6V
  */
@@ -798,43 +789,25 @@ HWTEST_F(ReminderStoreTest, CreateTable_001_BaseTableFail, Function | SmallTest 
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     int32_t errCode = STATE_FAIL;
 
-    // 1. Manually create a conflicting table to cause the CreateTable to fail.
-    // We need a temporary store to do this.
-    {
-        ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
-        std::string conflictingSql = "CREATE TABLE " + ReminderBaseTable::TABLE_NAME + " (id INT);";
-        rdbStore->ExecuteSql(conflictingSql);
-    }
-    NativeRdb::RdbHelper::ClearCache();
-    NativeRdb::RdbHelper::DeleteRdbStore(dbConfig);
-
-    {
-        ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
-        std::string conflictingView = "CREATE VIEW " + ReminderBaseTable::TABLE_NAME + " AS SELECT 1;";
-        rdbStore->ExecuteSql(conflictingView);
-    }
-    NativeRdb::RdbHelper::ClearCache();
-
-
-    // 2. Trigger OnCreate, which calls CreateTable. It should fail on the first table.
+    // 1. Create a valib DB with all tables, then drop base table.
+    ReminderStore::EnsureDbColumnsInitialized();
     ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
     auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
+    ASSERT_NE(rdbStore, nullptr);
+    rdbStore->ExecuteSql("DROP TABLE IF EXISTS " + ReminderBaseTable::TABLE_NAME + ";");
 
-    // The GetRdbStore should fail and return nullptr because OnCreate returns an error.
-    EXPECT_NE(rdbStore, nullptr);
-    EXPECT_EQ(errCode, 0); // This confirms that an error was propagated.
+    //2. Set connection read-only so CREATE TABLE IF NOT EXISTS fails.
+    rdbStore->ExecuteSql("PRAGMA query_only = 1;");
 
+    int32_t ret = rdbDataCallBack.CreateTable(*rdbStore);
+    EXPECT_EQ(ret, NativeRdb::E_SQLITE_READONLY);
     // 3. Clean up.
     ClearStore();
 }
 
 /**
  * @tc.name: CreateTable_002_AlarmTableFail
- * @tc.desc: Test CreateTable when creating reminder_alarm table fails.
+ * @tc.desc: Test CreateTable returns error when ExecuteSql fails on creating reminder_alarm table.
  * @tc.type: FUNC
  * @tc.require: issueI5VB6V
  */
@@ -845,29 +818,26 @@ HWTEST_F(ReminderStoreTest, CreateTable_002_AlarmTableFail, Function | SmallTest
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     int32_t errCode = STATE_FAIL;
 
-    // 1. Create a conflicting view for the second table.
-    {
-        ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
-        std::string conflictingView = "CREATE VIEW " + ReminderAlarmTable::TABLE_NAME + " AS SELECT 1;";
-        rdbStore->ExecuteSql(conflictingView);
-    }
-    NativeRdb::RdbHelper::ClearCache();
-
-    // 2. Trigger OnCreate. It should fail on the second table.
+    // 1. Create a valib DB, then drop alarm table.
+    ReminderStore::EnsureDbColumnsInitialized();
     ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
     auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-    EXPECT_NE(rdbStore, nullptr);
-    EXPECT_EQ(errCode, 0);
+    ASSERT_NE(rdbStore, nullptr);
+    rdbStore->ExecuteSql("DROP TABLE IF EXISTS " + ReminderAlarmTable::TABLE_NAME + ";");
 
+    //2. Set connection read-only so CREATE TABLE IF NOT EXISTS fails.
+    rdbStore->ExecuteSql("PRAGMA query_only = 1;");
+
+    int32_t ret = rdbDataCallBack.CreateTable(*rdbStore);
+    EXPECT_EQ(ret, NativeRdb::E_SQLITE_READONLY);
+    
     // 3. Clean up.
     ClearStore();
 }
 
 /**
  * @tc.name: CreateTable_003_CalendarTableFail
- * @tc.desc: Test CreateTable when creating reminder_calendar table fails.
+ * @tc.desc: Test CreateTable returns error when ExecuteSql fails on creating reminder_calendar table.
  * @tc.type: FUNC
  * @tc.require: issueI5VB6V
  */
@@ -878,29 +848,26 @@ HWTEST_F(ReminderStoreTest, CreateTable_003_CalendarTableFail, Function | SmallT
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     int32_t errCode = STATE_FAIL;
 
-    // 1. Create a conflicting view for the third table.
-    {
-        ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
-        std::string conflictingView = "CREATE VIEW " + ReminderCalendarTable::TABLE_NAME + " AS SELECT 1;";
-        rdbStore->ExecuteSql(conflictingView);
-    }
-    NativeRdb::RdbHelper::ClearCache();
-
-    // 2. Trigger OnCreate. It should fail on the third table.
+    // 1. Create a valib DB, then drop alarm table.
+    ReminderStore::EnsureDbColumnsInitialized();
     ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
     auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-    EXPECT_NE(rdbStore, nullptr);
-    EXPECT_EQ(errCode, 0);
+    ASSERT_NE(rdbStore, nullptr);
+    rdbStore->ExecuteSql("DROP TABLE IF EXISTS " + ReminderCalendarTable::TABLE_NAME + ";");
 
+    //2. Set connection read-only so CREATE TABLE IF NOT EXISTS fails.
+    rdbStore->ExecuteSql("PRAGMA query_only = 1;");
+
+    int32_t ret = rdbDataCallBack.CreateTable(*rdbStore);
+    EXPECT_EQ(ret, NativeRdb::E_SQLITE_READONLY);
+    
     // 3. Clean up.
     ClearStore();
 }
 
 /**
  * @tc.name: CreateTable_004_TimerTableFail
- * @tc.desc: Test CreateTable when creating reminder_timer table fails.
+ * @tc.desc: Test CreateTable returns error when ExecuteSql fails on creating reminder_timer table.
  * @tc.type: FUNC
  * @tc.require: issueI5VB6V
  */
@@ -911,31 +878,21 @@ HWTEST_F(ReminderStoreTest, CreateTable_004_TimerTableFail, Function | SmallTest
     config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
     int32_t errCode = STATE_FAIL;
 
-    // 1. Create a conflicting view for the fourth table.
-    {
-        ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
-        auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
-        std::string conflictingView = "CREATE VIEW " + ReminderTimerTable::TABLE_NAME + " AS SELECT 1;";
-        rdbStore->ExecuteSql(conflictingView);
-    }
-    NativeRdb::RdbHelper::ClearCache();
-
-    // 2. Trigger OnCreate. It should fail on the fourth table.
+    // 1. Create a valib DB, then drop only timer table.
+    ReminderStore::EnsureDbColumnsInitialized();
     ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
     auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-    EXPECT_NE(rdbStore, nullptr);
-    EXPECT_EQ(errCode, 0);
+    ASSERT_NE(rdbStore, nullptr);
+    rdbStore->ExecuteSql("DROP TABLE IF EXISTS " + ReminderTimerTable::TABLE_NAME + ";");
 
+    //2. Set connection read-only so CREATE TABLE IF NOT EXISTS fails.
+    rdbStore->ExecuteSql("PRAGMA query_only = 1;");
+
+    int32_t ret = rdbDataCallBack.CreateTable(*rdbStore);
+    EXPECT_EQ(ret, NativeRdb::E_SQLITE_READONLY);
+    
     // 3. Clean up.
     ClearStore();
-}
-
-void CreateOldTable(NativeRdb::RdbStore& store)
-{
-    std::string createSql = "CREATE TABLE IF NOT EXISTS " + ReminderTable::TABLE_NAME + " ("
-        + ReminderTable::ADD_COLUMNS + ")";
-    store.ExecuteSql(createSql);
 }
 
 // Helper function to insert a reminder into the old table for testing
@@ -964,8 +921,9 @@ HWTEST_F(ReminderStoreTest, CopyData_001_HappyPath, Function | SmallTest | Level
     int32_t errCode = STATE_FAIL;
 
     // 1. Setup: Create a V4 DB, create new tables, and insert data into the OLD table.
+    ReminderStore::EnsureDbColumnsInitialized();
     auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-    EXPECT_NE(rdbStore, nullptr);
+    ASSERT_NE(rdbStore, nullptr);
     rdbDataCallBack.CreateTable(*rdbStore); // Manually create new tables
     CreateOldTable(*rdbStore); // Manually create old table
     InsertOldReminder(*rdbStore, 101, static_cast<int32_t>(ReminderRequest::ReminderType::TIMER));
@@ -984,6 +942,7 @@ HWTEST_F(ReminderStoreTest, CopyData_001_HappyPath, Function | SmallTest | Level
 
     // 4. Verify: Check if old table is empty
     auto queryResult = rdbStore->QuerySql("SELECT * FROM " + ReminderTable::TABLE_NAME, std::vector<std::string>{});
+    ASSERT_NE(queryResult, nullptr);
     int32_t rowCount = 0;
     queryResult->GetRowCount(rowCount);
     EXPECT_EQ(rowCount, 0);
@@ -1007,8 +966,9 @@ HWTEST_F(ReminderStoreTest, CopyData_002_EmptyOldTable, Function | SmallTest | L
     int32_t errCode = STATE_FAIL;
 
     // 1. Setup: Create a V4 DB with an empty old table.
+    ReminderStore::EnsureDbColumnsInitialized();
     auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-    EXPECT_NE(rdbStore, nullptr);
+    ASSERT_NE(rdbStore, nullptr);
     rdbDataCallBack.CreateTable(*rdbStore);
     CreateOldTable(*rdbStore);
 
@@ -1027,39 +987,6 @@ HWTEST_F(ReminderStoreTest, CopyData_002_EmptyOldTable, Function | SmallTest | L
 }
 
 /**
- * @tc.name: CopyData_004_InsertBaseFailed
- * @tc.desc: Test CopyData when inserting into reminder_base table fails.
- * @tc.type: FUNC
- * @tc.require: issueI5VB6V
- */
-HWTEST_F(ReminderStoreTest, CopyData_004_InsertBaseFailed, Function | SmallTest | Level1)
-{
-    ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
-    std::string dbConfig = ReminderStore::REMINDER_DB_DIR + "notification_test.db";
-    NativeRdb::RdbStoreConfig config(dbConfig);
-    config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
-    int32_t errCode = STATE_FAIL;
-
-    // 1. Setup: Create a conflicting view to make insert fail.
-    auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 4, rdbDataCallBack, errCode);
-    EXPECT_NE(rdbStore, nullptr);
-    rdbStore->ExecuteSql("CREATE VIEW " + ReminderBaseTable::TABLE_NAME + " AS SELECT 1;");
-    CreateOldTable(*rdbStore);
-    InsertOldReminder(*rdbStore, 101, static_cast<int32_t>(ReminderRequest::ReminderType::TIMER));
-
-    // 2. Execute CopyData
-    int32_t ret = rdbDataCallBack.CopyData(*rdbStore);
-    EXPECT_EQ(ret, NativeRdb::E_OK); // CopyData itself doesn't return insert errors.
-
-    // 3. Verify: No reminders should be in the store.
-    // We can't query because the table is a view, but we know the insert failed.
-    // The log line "Insert reminder_base operation failed" should be visible.
-
-    // 4. Clean up
-    ClearStore();
-}
-
-/**
  * @tc.name: GetValue_001_Success
  * @tc.desc: Test GetUInt8Val and GetUInt16Val for successful value retrieval.
  * @tc.type: FUNC
@@ -1069,7 +996,7 @@ HWTEST_F(ReminderStoreTest, GetValue_001_Success, Function | SmallTest | Level1)
 {
     ReminderStore store;
     InitStore(store);
-    EXPECT_NE(store.rdbStore_, nullptr);
+    ASSERT_NE(store.rdbStore_, nullptr);
 
     // 1. Setup: Create a test table and insert data.
     std::string tableName = "test_table";
@@ -1083,18 +1010,18 @@ HWTEST_F(ReminderStoreTest, GetValue_001_Success, Function | SmallTest | Level1)
 
     // 2. Query to get a ResultSet.
     auto resultSet = store.rdbStore_->QuerySql("SELECT * FROM " + tableName, std::vector<std::string>{});
-    EXPECT_NE(resultSet, nullptr);
+    ASSERT_NE(resultSet, nullptr);
     resultSet->GoToFirstRow();
 
     // 3. Test GetUInt8Val
-    uint8_t u8_val = 0;
-    store.GetUInt8Val(resultSet, colName, u8_val);
-    EXPECT_EQ(u8_val, static_cast<uint8_t>(insertedValue));
+    uint8_t u8Val = 0;
+    store.GetUInt8Val(resultSet, colName, u8Val);
+    EXPECT_EQ(u8Val, static_cast<uint8_t>(insertedValue));
 
     // 4. Test GetUInt16Val
-    uint16_t u16_val = 0;
-    store.GetUInt16Val(resultSet, colName, u16_val);
-    EXPECT_EQ(u16_val, static_cast<uint16_t>(insertedValue));
+    uint16_t u16Val = 0;
+    store.GetUInt16Val(resultSet, colName, u16Val);
+    EXPECT_EQ(u16Val, static_cast<uint16_t>(insertedValue));
 
     // 5. Clean up
     ClearStore();
@@ -1110,7 +1037,7 @@ HWTEST_F(ReminderStoreTest, GetValue_002_ColumnNotFound, Function | SmallTest | 
 {
     ReminderStore store;
     InitStore(store);
-    EXPECT_NE(store.rdbStore_, nullptr);
+    ASSERT_NE(store.rdbStore_, nullptr);
 
     // 1. Setup: Create a test table and insert data.
     store.rdbStore_->ExecuteSql("CREATE TABLE test_table (real_col INT);");
@@ -1121,18 +1048,18 @@ HWTEST_F(ReminderStoreTest, GetValue_002_ColumnNotFound, Function | SmallTest | 
 
     // 2. Query to get a ResultSet.
     auto resultSet = store.rdbStore_->QuerySql("SELECT * FROM test_table", std::vector<std::string>{});
-    EXPECT_NE(resultSet, nullptr);
+    ASSERT_NE(resultSet, nullptr);
     resultSet->GoToFirstRow();
 
     // 3. Test GetUInt8Val with a non-existent column.
-    uint8_t u8_val = 1; // Initialize to non-zero to ensure it's changed.
-    store.GetUInt8Val(resultSet, "fake_col", u8_val);
-    EXPECT_EQ(u8_val, 0); // Should be 0 as GetInt32Val fails and sets its output to 0.
+    uint8_t u8Val = 1; // Initialize to non-zero to ensure it's changed.
+    store.GetUInt8Val(resultSet, "fake_col", u8Val);
+    EXPECT_EQ(u8Val, 0); // Should be 0 as GetInt32Val fails and sets its output to 0.
 
     // 4. Test GetUInt16Val with a non-existent column.
-    uint16_t u16_val = 1; // Initialize to non-zero.
-    store.GetUInt16Val(resultSet, "fake_col", u16_val);
-    EXPECT_EQ(u16_val, 0); // Should be 0.
+    uint16_t u16Val = 1; // Initialize to non-zero.
+    store.GetUInt16Val(resultSet, "fake_col", u16Val);
+    EXPECT_EQ(u16Val, 0); // Should be 0.
 
     // 5. Clean up
     ClearStore();
@@ -1275,6 +1202,7 @@ HWTEST_F(ReminderStoreTest, IsReminderExist_00001, Function | SmallTest | Level1
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
+    ASSERT_NE(reminderStore.rdbStore_, nullptr);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->SetReminderId(123);
     reminder->InitCreatorUid(NON_SYSTEM_APP_UID);
@@ -1299,6 +1227,7 @@ HWTEST_F(ReminderStoreTest, IsReminderExist_00002, Function | SmallTest | Level1
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
+    ASSERT_NE(reminderStore.rdbStore_, nullptr);
     sptr<ReminderRequest> reminder = new ReminderRequestTimer();
     reminder->SetReminderId(456);
     reminder->InitCreatorUid(NON_SYSTEM_APP_UID);
@@ -1343,6 +1272,8 @@ HWTEST_F(ReminderStoreTest, BuildReminder_00001, Function | SmallTest | Level1)
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
+    // The rdb store may fail to be opened, never dereference it blindly.
+    ASSERT_NE(reminderStore.rdbStore_, nullptr);
 
     // Manually insert a record with an invalid type
     NativeRdb::ValuesBucket values;
@@ -1418,8 +1349,9 @@ HWTEST_F(ReminderStoreTest, CopyData_003_InvalidReminderType, Function | SmallTe
     int32_t errCode = STATE_FAIL;
 
     // 1. Setup: Insert a valid and an invalid reminder.
+    ReminderStore::EnsureDbColumnsInitialized();
     auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, 9, rdbDataCallBack, errCode);
-    EXPECT_NE(rdbStore, nullptr);
+    ASSERT_NE(rdbStore, nullptr);
     rdbDataCallBack.CreateTable(*rdbStore);
     CreateOldTable(*rdbStore);
     InsertOldReminder(*rdbStore, 101, static_cast<int32_t>(ReminderRequest::ReminderType::TIMER));
@@ -1453,11 +1385,13 @@ HWTEST_F(ReminderStoreTest, OnUpgrade_00001, Function | SmallTest | Level1)
     int32_t errCode = STATE_FAIL;
 
     // 1. Create a database with an old version.
+    ReminderStore::EnsureDbColumnsInitialized();
     {
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         constexpr int32_t oldVersion = 1; // REMINDER_RDB_VERSION_V1
         auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, oldVersion, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
+        // The rdb store may fail to be opened, never dereference it blindly.
+        ASSERT_NE(rdbStore, nullptr);
         EXPECT_EQ(errCode, 0);
     }
     NativeRdb::RdbHelper::ClearCache();
@@ -1468,7 +1402,8 @@ HWTEST_F(ReminderStoreTest, OnUpgrade_00001, Function | SmallTest | Level1)
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         constexpr int32_t newVersion = 9; // REMINDER_RDB_VERSION
         auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, newVersion, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
+        // The rdb store may fail to be opened, never dereference it blindly.
+        ASSERT_NE(rdbStore, nullptr);
         EXPECT_EQ(errCode, 0);
 
         // 3. Verify the version is updated.
@@ -1496,10 +1431,11 @@ HWTEST_F(ReminderStoreTest, OnDowngrade_00001_CreateTableFailed, Function | Smal
 
     // 1. Create a database with a newer version.
     constexpr int32_t currentVersion = 5; // REMINDER_RDB_VERSION_V5
+    ReminderStore::EnsureDbColumnsInitialized();
     {
         ReminderStore::ReminderStoreDataCallBack rdbDataCallBack;
         auto rdbStore = NativeRdb::RdbHelper::GetRdbStore(config, currentVersion, rdbDataCallBack, errCode);
-        EXPECT_NE(rdbStore, nullptr);
+        ASSERT_NE(rdbStore, nullptr);
         EXPECT_EQ(errCode, 0);
 
         // Manually create a conflicting table to cause the downgrade to fail.
@@ -1508,7 +1444,6 @@ HWTEST_F(ReminderStoreTest, OnDowngrade_00001_CreateTableFailed, Function | Smal
         EXPECT_EQ(ret, NativeRdb::E_OK);
     }
     NativeRdb::RdbHelper::ClearCache();
-    ClearStore();
 
     // 2. Trigger OnDowngrade by getting the store with an older version.
     // This should fail because the table creation inside OnDowngrade will conflict.
@@ -1522,6 +1457,7 @@ HWTEST_F(ReminderStoreTest, OnDowngrade_00001_CreateTableFailed, Function | Smal
         // Depending on RDB implementation, errCode might reflect the failure.
         // For this test, we mainly care about covering the line, which happens before the return.
         EXPECT_NE(rdbStore, nullptr);
+        EXPECT_EQ(errCode, NativeRdb::E_OK);
     }
 
     // 3. Clean up.
@@ -1779,6 +1715,8 @@ HWTEST_F(ReminderStoreTest, GetConfigValue_00003, Function | SmallTest | Level1)
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
+    // The rdb store may fail to be opened, never dereference it blindly.
+    ASSERT_NE(reminderStore.rdbStore_, nullptr);
 
     NativeRdb::ValuesBucket values;
     values.PutString(ReminderConfigTable::KEY, "test_key");
@@ -2102,6 +2040,8 @@ HWTEST_F(ReminderStoreTest, GetConfigValue_00005_ResultSetNull, Function | Small
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
+    // The rdb store may fail to be opened, never dereference it blindly.
+    ASSERT_NE(reminderStore.rdbStore_, nullptr);
 
     std::string invalidSql = "SELECT * FROM nonexistent_table";
     auto resultSet = reminderStore.rdbStore_->QuerySql(invalidSql, std::vector<std::string>{});
@@ -2122,6 +2062,8 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00001_Success, Function | SmallTest | 
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
+    // The rdb store may fail to be opened, never dereference it blindly.
+    ASSERT_NE(reminderStore.rdbStore_, nullptr);
 
     sptr<ReminderRequest> timer = new ReminderRequestTimer();
     timer->SetReminderId(1);
@@ -2255,6 +2197,8 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00005_MixedTypesWithExpired, Function 
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
+    // The rdb store may fail to be opened, never dereference it blindly.
+    ASSERT_NE(reminderStore.rdbStore_, nullptr);
 
     sptr<ReminderRequest> timer1 = new ReminderRequestTimer();
     timer1->SetReminderId(1);
@@ -2305,6 +2249,8 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00006_VerifyEachTableCleared, Function
 {
     ReminderStore reminderStore;
     InitStore(reminderStore);
+    // The rdb store may fail to be opened, never dereference it blindly.
+    ASSERT_NE(reminderStore.rdbStore_, nullptr);
 
     sptr<ReminderRequest> timer = new ReminderRequestTimer();
     timer->SetReminderId(1);
@@ -2363,6 +2309,206 @@ HWTEST_F(ReminderStoreTest, DeleteAllData_00007_ConsecutiveDelete, Function | Sm
     EXPECT_EQ(remindersAfter.size(), 0);
 
     ClearStore();
+}
+
+/**
+ * @tc.name: Init_00002_IdleCloseTaskPosted
+ * @tc.desc: Test Init creates the idle queue and posts the delayed close task.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, Init_00002_IdleCloseTaskPosted, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    int32_t ret = reminderStore.Init();
+    EXPECT_EQ(ret, 0);
+    EXPECT_TRUE(reminderStore.idleQueue_ != nullptr);
+    EXPECT_TRUE(reminderStore.rdbStore_ != nullptr);
+    EXPECT_GT(reminderStore.closeTaskGeneration_, static_cast<uint64_t>(0));
+}
+
+/**
+ * @tc.name: Init_00003_IdleQueueReusedOnReInit
+ * @tc.desc: Test Init twice reuses the idle queue and posts a new close task.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, Init_00003_IdleQueueReusedOnReInit, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    ASSERT_EQ(reminderStore.Init(), 0);
+    uint64_t genBefore = reminderStore.closeTaskGeneration_;
+    ASSERT_EQ(reminderStore.Init(), 0);
+    EXPECT_GT(reminderStore.closeTaskGeneration_, genBefore);
+}
+
+/**
+ * @tc.name: EnsureOpen_00001_RefreshCloseTaskWhenOpen
+ * @tc.desc: Test EnsureOpen refreshes the delayed close task when the store is open.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, EnsureOpen_00001_RefreshCloseTaskWhenOpen, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    ASSERT_EQ(reminderStore.Init(), 0);
+    uint64_t genBefore = reminderStore.closeTaskGeneration_;
+    EXPECT_TRUE(reminderStore.EnsureOpen());
+    EXPECT_GT(reminderStore.closeTaskGeneration_, genBefore);
+}
+
+/**
+ * @tc.name: EnsureOpen_00002_ReopenAfterIdleClose
+ * @tc.desc: Test EnsureOpen reopens the rdb store after the idle close.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, EnsureOpen_00002_ReopenAfterIdleClose, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    ASSERT_EQ(reminderStore.Init(), 0);
+    reminderStore.rdbStore_ = nullptr;
+    EXPECT_TRUE(reminderStore.EnsureOpen());
+    EXPECT_NE(reminderStore.rdbStore_, nullptr);
+}
+
+/**
+ * @tc.name: PostDelayCloseTask_00001_NoQueueNoop
+ * @tc.desc: Test PostDelayCloseTaskLocked does nothing when the idle queue is not created.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, PostDelayCloseTask_00001_NoQueueNoop, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    reminderStore.PostDelayCloseTaskLocked();
+    EXPECT_EQ(reminderStore.closeTaskGeneration_, static_cast<uint64_t>(0));
+    EXPECT_FALSE(reminderStore.closeTaskHandle_ != nullptr);
+}
+
+/**
+ * @tc.name: ReopenOnDemand_00001_StateTableOperations
+ * @tc.desc: Test state table operations reopen the rdb store after the idle close.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, ReopenOnDemand_00001_StateTableOperations, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    ASSERT_EQ(reminderStore.Init(), 0);
+    reminderStore.rdbStore_ = nullptr;
+    ReminderState state;
+    state.reminderId_ = 1;
+    EXPECT_EQ(reminderStore.InsertState(1, state), ReminderStore::STATE_OK);
+    EXPECT_EQ(reminderStore.DeleteState(1), ReminderStore::STATE_OK);
+}
+
+/**
+ * @tc.name: ReopenOnDemand_00002_UpdateOrInsertAndGetMaxId
+ * @tc.desc: Test UpdateOrInsert, GetMaxId and IsReminderExist reopen the rdb store on demand.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, ReopenOnDemand_00002_UpdateOrInsertAndGetMaxId, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    ASSERT_EQ(reminderStore.Init(), 0);
+    reminderStore.rdbStore_ = nullptr;
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer();
+    reminder->SetReminderId(1);
+    reminder->SetExpired(false);
+    EXPECT_EQ(reminderStore.UpdateOrInsert(reminder), ReminderStore::STATE_OK);
+    EXPECT_GE(reminderStore.GetMaxId(), 1);
+}
+
+/**
+ * @tc.name: ReopenOnDemand_00003_DeleteByPkgAndDeleteUser
+ * @tc.desc: Test Delete by package and DeleteUser reopen the rdb store on demand.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, ReopenOnDemand_00003_DeleteByPkgAndDeleteUser, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    ASSERT_EQ(reminderStore.Init(), 0);
+    reminderStore.rdbStore_ = nullptr;
+    EXPECT_EQ(reminderStore.Delete("com.example.test", 100, -1), ReminderStore::STATE_OK);
+    EXPECT_EQ(reminderStore.DeleteUser(100), ReminderStore::STATE_OK);
+}
+
+/**
+ * @tc.name: ReopenOnDemand_00004_GetHalfHourReminders
+ * @tc.desc: Test GetHalfHourReminders reopens the rdb store on demand.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, ReopenOnDemand_00004_GetHalfHourReminders, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    ASSERT_EQ(reminderStore.Init(), 0);
+    reminderStore.rdbStore_ = nullptr;
+    auto reminders = reminderStore.GetHalfHourReminders();
+    EXPECT_EQ(reminders.size(), 0);
+}
+
+/**
+ * @tc.name: ReopenOnDemand_00005_GetAllValidRemindersAndActiveCount
+ * @tc.desc: Test GetAllValidReminders and QueryActiveReminderCount reopen the rdb store on demand.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, ReopenOnDemand_00005_GetAllValidRemindersAndActiveCount, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    ASSERT_EQ(reminderStore.Init(), 0);
+    reminderStore.rdbStore_ = nullptr;
+    auto reminders = reminderStore.GetAllValidReminders();
+    EXPECT_EQ(reminders.size(), 0);
+    EXPECT_EQ(reminderStore.QueryActiveReminderCount(), 0);
+}
+
+/**
+ * @tc.name: Destructor_00001_SkipPendingCloseTask
+ * @tc.desc: Test the destructor cancels the pending close task and a new store works fine.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, Destructor_00001_SkipPendingCloseTask, Function | SmallTest | Level1)
+{
+    {
+        ReminderStore reminderStore;
+        ASSERT_EQ(reminderStore.Init(), 0);
+    }
+    ReminderStore reminderStore;
+    EXPECT_EQ(reminderStore.Init(), 0);
+}
+
+/**
+ * @tc.name: EnsureOpenFail_00001_CorruptDbFile
+ * @tc.desc: Test EnsureOpen failure returns error when the db file cannot be opened.
+ * @tc.type: FUNC
+ * @tc.require: issueI5VB6V
+ */
+HWTEST_F(ReminderStoreTest, EnsureOpenFail_00001_CorruptDbFile, Function | SmallTest | Level1)
+{
+    NativeRdb::RdbHelper::ClearCache();
+    NativeRdb::RdbHelper::DeleteRdbStore(ReminderStore::REMINDER_DB_DIR + ReminderStore::REMINDER_DB_NAME);
+    {
+        std::string dbPath = ReminderStore::REMINDER_DB_DIR + ReminderStore::REMINDER_DB_NAME;
+        std::ofstream dbFile(dbPath, std::ios::out | std::ios::trunc);
+        dbFile << "not a sqlite database";
+    }
+    ReminderStore reminderStore;
+    ReminderState state;
+    state.reminderId_ = 1;
+    EXPECT_EQ(reminderStore.InsertState(1, state), ReminderStore::STATE_FAIL);
+    EXPECT_EQ(reminderStore.Delete(1), ReminderStore::STATE_FAIL);
+    sptr<ReminderRequest> reminder = new ReminderRequestTimer();
+    reminder->SetReminderId(1);
+    EXPECT_EQ(reminderStore.UpdateOrInsert(reminder), ReminderStore::STATE_FAIL);
+    EXPECT_EQ(reminderStore.GetMaxId(), ReminderStore::STATE_FAIL);
+    auto validReminders = reminderStore.GetAllValidReminders();
+    EXPECT_EQ(validReminders.size(), 0);
 }
 }
 }

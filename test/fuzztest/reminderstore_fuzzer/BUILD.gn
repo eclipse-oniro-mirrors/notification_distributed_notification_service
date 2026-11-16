@@ -42,12 +42,13 @@ ohos_fuzztest("ReminderStoreFuzzTest") {
   ]
 
   external_deps = [
-    "ability_runtime:wantagent_innerkits",  
+    "ability_runtime:wantagent_innerkits",
     "ability_base:configuration",
     "ability_base:want",
     "ability_base:zuri",
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
+    "ffrt:libffrt",
     "hilog:libhilog",
     "icu:shared_icuuc",
     "image_framework:image_native",

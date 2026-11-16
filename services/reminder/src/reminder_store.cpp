@@ -15,10 +15,12 @@
 
 #include "reminder_store.h"
 
+#include <chrono>
 #include <filesystem>
 #include <sstream>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <vector>
 
 #include "fa_ability_context.h"
 #include "ans_log_wrapper.h"
@@ -29,6 +31,7 @@
 #include "reminder_request_calendar.h"
 #include "reminder_store_strategy.h"
 #include "reminder_utils.h"
+#include "ffrt_inner.h"
 
 namespace OHOS {
 namespace Notification {
@@ -56,6 +59,25 @@ const int32_t ReminderStore::STATE_OK = 0;
 const int32_t ReminderStore::STATE_FAIL = -1;
 const std::string ReminderStore::REMINDER_DB_DIR = "/data/service/el1/public/notification/";
 const std::string ReminderStore::REMINDER_DB_NAME = "notification.db";
+std::once_flag ReminderStore::dbColumnsInitFlag_;
+
+ReminderStore::~ReminderStore()
+{
+    //Cancel the pending close task to void use-after-free: the task captures bare 'this'.
+    //cancel is called outside the lock because it may block on ths FFRT queue.
+    ffrt::task_handle oldHandle = nullptr;
+    {
+        std::lock_guard<ffrt::mutex> lock(initMutex_);
+        oldHandle = closeTaskHandle_;
+        closeTaskHandle_ = nullptr;
+        //Bump generation as a fallback in case cancel fails (task already running).
+        closeTaskGeneration_++;
+        rdbStore_ = nullptr;
+    }
+    if (oldHandle != nullptr && idleQueue_ != nullptr) {
+        idleQueue_->cancel(oldHandle);
+    }
+}
 
 int32_t ReminderStore::ReminderStoreDataCallBack::OnCreate(NativeRdb::RdbStore& store)
 {
@@ -375,10 +397,8 @@ void ReminderStore::ReminderStoreDataCallBack::AddRdbColum(NativeRdb::RdbStore& 
     }
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::OpenRdbStore()
 {
-    ANSR_LOGD("Reminder store init.");
-    std::lock_guard<std::mutex> lock(initMutex_);
     if (access(REMINDER_DB_DIR.c_str(), F_OK) != 0) {
         int createDir = mkdir(REMINDER_DB_DIR.c_str(), S_IRWXU);
         if (createDir != 0) {
@@ -386,11 +406,6 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
             return STATE_FAIL;
         }
     }
-    ReminderTable::InitDbColumns();
-    ReminderBaseTable::InitDbColumns();
-    ReminderTimerTable::InitDbColumns();
-    ReminderAlarmTable::InitDbColumns();
-    ReminderCalendarTable::InitDbColumns();
 
     std::string dbConfig = REMINDER_DB_DIR + REMINDER_DB_NAME;
     NativeRdb::RdbStoreConfig config(dbConfig);
@@ -400,18 +415,96 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
     int32_t errCode = STATE_FAIL;
     rdbStore_ = NativeRdb::RdbHelper::GetRdbStore(config, REMINDER_RDB_VERSION, rdbDataCallBack, errCode);
     if (rdbStore_ == nullptr) {
-        ANSR_LOGE("ReminderStore init fail, errCode %{public}d.", errCode);
+        ANSR_LOGE("ReminderStore open fail, errCode %{public}d.", errCode);
         return STATE_FAIL;
     }
-    int32_t result = InitData();
 
-    return result;
+    return STATE_OK;
+}
+
+__attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Init()
+{
+    ANSR_LOGD("Reminder store init.");
+    std::lock_guard<ffrt::mutex> lock(initMutex_);
+    EnsureDbColumnsInitialized();
+    if (idleQueue_ == nullptr) {
+        idleQueue_ = std::make_shared<ffrt::queue>("ReminderStoreIdle");
+    }
+    if (OpenRdbStore() != STATE_OK) {
+        return STATE_FAIL;
+    }
+    int32_t ret = InitData();
+    if (ret == STATE_OK) {
+        PostDelayCloseTaskLocked();
+    }
+    return ret;
+}
+
+bool ReminderStore::EnsureOpen()
+{
+    std::lock_guard<ffrt::mutex> lock(initMutex_);
+    return EnsureOpenLocked();
+}
+
+bool ReminderStore::EnsureOpenLocked()
+{
+    if (rdbStore_ != nullptr) {
+        PostDelayCloseTaskLocked();
+        return true;
+    }
+    ANSR_LOGI("Rdb store is closed, reopening on demand.");
+    auto startTime = std::chrono::steady_clock::now();
+    int32_t ret = OpenRdbStore();
+    auto endTime = std::chrono::steady_clock::now();
+    auto durationMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+    ANSR_LOGI("Rdb store reopen latency: %{public}lld ms, result: %{public}d",
+        static_cast<long long>(durationMs), ret);
+    if (ret == STATE_OK) {
+        PostDelayCloseTaskLocked();
+    }
+    return ret == STATE_OK;
+}
+
+void ReminderStore::PostDelayCloseTaskLocked()
+{
+    if (idleQueue_ == nullptr) {
+        return;
+    }
+    if (closeTaskHandle_ != nullptr) {
+        ANSR_LOGI("Cancel previous idle close task before resubmitting.");
+        idleQueue_->cancel(closeTaskHandle_);
+        closeTaskHandle_ = nullptr;
+    }
+    closeTaskGeneration_++;
+    uint64_t myGen = closeTaskGeneration_;
+    ANSR_LOGI("Post new idle close task (gen=%{public}llu, delay=%{public}lld us).",
+        static_cast<unsigned long long>(myGen),
+        static_cast<long long>(IDLE_CLOSE_DELAY_US));
+    closeTaskHandle_ = idleQueue_->submit_h([weakThis = weak_from_this(), myGen]() {
+        auto self = weakThis.lock();
+        if (self == nullptr) {
+            return;
+        }
+        std::lock_guard<ffrt::mutex> lock(self->initMutex_);
+        if (myGen != self->closeTaskGeneration_) {
+            ANSR_LOGD("Stale idle close task skipped (gen=%{public}llu, current=%{public}llu).",
+                static_cast<unsigned long long>(myGen),
+                static_cast<unsigned long long>(self->closeTaskGeneration_));
+            return;
+        }
+        self->closeTaskHandle_ = nullptr;
+        if (self->rdbStore_ == nullptr) {
+            return;
+        }
+        ANSR_LOGI("Idle timeout reached, closing reminder DB.");
+        self->rdbStore_ = nullptr;
+    }, ffrt::task_attr().delay(IDLE_CLOSE_DELAY_US));
 }
 
 __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const int32_t reminderId)
 {
-    if (rdbStore_ == nullptr) {
-        ANSR_LOGE("Rdb store is not initialized.");
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
         return STATE_FAIL;
     }
     std::string condition = ReminderBaseTable::REMINDER_ID + " = " + std::to_string(reminderId);
@@ -456,6 +549,10 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const int32_t 
 __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::string& pkg, const int32_t userId,
     const int32_t uid)
 {
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
+        return STATE_FAIL;
+    }
     std::string assoConditon = "(SELECT " + ReminderBaseTable::REMINDER_ID + " FROM " + ReminderBaseTable::TABLE_NAME
         + " WHERE " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::PACKAGE_NAME + " = '" + pkg
         + "' AND " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::USER_ID + " = " + std::to_string(userId);
@@ -474,6 +571,10 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::Delete(const std::str
 
 __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::DeleteUser(const int32_t userId)
 {
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
+        return STATE_FAIL;
+    }
     std::string assoConditon = "(SELECT " + ReminderBaseTable::REMINDER_ID + " FROM " + ReminderBaseTable::TABLE_NAME
         + " WHERE " + ReminderBaseTable::TABLE_NAME + "." + ReminderBaseTable::USER_ID + " = "
         + std::to_string(userId) + ")";
@@ -485,8 +586,8 @@ __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::DeleteUser(const int3
 int32_t ReminderStore::UpdateOrInsert(
     const sptr<ReminderRequest>& reminder)
 {
-    if (rdbStore_ == nullptr) {
-        ANSR_LOGE("Rdb store is not initialized.");
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
         return STATE_FAIL;
     }
     if (reminder != nullptr && reminder->IsShare()) {
@@ -501,8 +602,8 @@ int32_t ReminderStore::UpdateOrInsert(
 
 int32_t ReminderStore::GetMaxId()
 {
-    if (rdbStore_ == nullptr) {
-        ANSR_LOGE("Rdb store is not initialized.");
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
         return STATE_FAIL;
     }
     std::string queryCondition = "SELECT " + ReminderBaseTable::REMINDER_ID
@@ -531,6 +632,10 @@ int32_t ReminderStore::GetMaxId()
 
 __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderStore::GetAllValidReminders()
 {
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
+        return std::vector<sptr<ReminderRequest>>();
+    }
     std::string sql = "SELECT " + ReminderBaseTable::SELECT_COLUMNS + " FROM "
         + ReminderBaseTable::TABLE_NAME + " WHERE "
         + ReminderBaseTable::IS_EXPIRED + " = 'false' ORDER BY "
@@ -541,13 +646,17 @@ __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderS
 
 __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderStore::GetHalfHourReminders()
 {
-    std::lock_guard<std::mutex> lock(initMutex_);
+    std::lock_guard<ffrt::mutex> lock(initMutex_);
+    if (!EnsureOpenLocked()) {
+        ANSR_LOGE("Failed to reopen rdb store for GetHalfHourReminders.");
+        return std::vector<sptr<ReminderRequest>>();
+    }
     int32_t recoverFailCount = 0;
     int32_t ret = GetConfigValue(RECOVER_FAIL_COUNT_KEY, recoverFailCount);
     if (ret != STATE_OK) {
         recoverFailCount = 0;
     }
-    
+
     if (recoverFailCount >= MAX_RECOVER_FILE_COUNT) {
         ANSR_LOGE("Data anomaly detected, recover_fail_count=%{public}d, deleting all reminder data", recoverFailCount);
         DeleteAllData();
@@ -556,7 +665,7 @@ __attribute__((no_sanitize("cfi"))) std::vector<sptr<ReminderRequest>> ReminderS
     }
     SetConfigValue(RECOVER_FAIL_COUNT_KEY, recoverFailCount + 1);
     ANSR_LOGI("Increment recover_fail_count: %{public}d", recoverFailCount + 1);
-    
+
     int64_t nowTime = GetCurrentTime();
     std::string sql = "SELECT * FROM " +
         ReminderBaseTable::TABLE_NAME + " WHERE (" +
@@ -639,6 +748,17 @@ void ReminderStore::GetStringVal(const std::shared_ptr<NativeRdb::ResultSet>& re
         return;
     }
     resultSet->GetString(columnIndex, value);
+}
+
+void ReminderStore::EnsureDbColumnsInitialized()
+{
+    std::call_once(dbColumnsInitFlag_, []() {
+        ReminderTable::InitDbColumns();
+        ReminderBaseTable::InitDbColumns();
+        ReminderTimerTable::InitDbColumns();
+        ReminderAlarmTable::InitDbColumns();
+        ReminderCalendarTable::InitDbColumns();
+    });
 }
 
 __attribute__((no_sanitize("cfi"))) int32_t ReminderStore::InitData()
@@ -791,7 +911,7 @@ int32_t ReminderStore::Insert(const sptr<ReminderRequest>& reminder)
     int64_t rowId = STATE_FAIL;
     NativeRdb::ValuesBucket baseValues;
     ReminderStrategy::AppendValuesBucket(reminder, baseValues);
-    
+
     rdbStore_->BeginTransaction();
     // insert reminder_base
     int32_t ret = rdbStore_->Insert(rowId, ReminderBaseTable::TABLE_NAME, baseValues);
@@ -911,6 +1031,10 @@ bool ReminderStore::IsReminderExist(const sptr<ReminderRequest>& reminder)
 
 bool ReminderStore::IsReminderExist(const int32_t reminderId, const int32_t uid)
 {
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
+        return false;
+    }
     NativeRdb::AbsRdbPredicates absRdbPredicates(ReminderBaseTable::TABLE_NAME);
     absRdbPredicates.EqualTo(ReminderBaseTable::REMINDER_ID, std::to_string(reminderId));
     absRdbPredicates.EqualTo(ReminderBaseTable::CREATOR_UID, std::to_string(uid));
@@ -1018,8 +1142,8 @@ std::shared_ptr<NativeRdb::ResultSet> ReminderStore::Query(const std::string& qu
 
 int32_t ReminderStore::QueryActiveReminderCount()
 {
-    if (rdbStore_ == nullptr) {
-        ANSR_LOGE("Rdb store is not initialized.");
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
         return 0;
     }
     std::string queryCondition = "SELECT * FROM ";
@@ -1048,8 +1172,8 @@ int32_t ReminderStore::QueryActiveReminderCount()
 
 int32_t ReminderStore::InsertState(const int32_t uid, const ReminderState& state)
 {
-    if (rdbStore_ == nullptr) {
-        ANSR_LOGE("Rdb store is not initialized.");
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
         return STATE_FAIL;
     }
     int64_t timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -1071,8 +1195,8 @@ int32_t ReminderStore::InsertState(const int32_t uid, const ReminderState& state
 
 int32_t ReminderStore::DeleteState(const int32_t uid, const int64_t timestamp)
 {
-    if (rdbStore_ == nullptr) {
-        ANSR_LOGE("Rdb store is not initialized.");
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
         return STATE_FAIL;
     }
     std::string condition;
@@ -1093,8 +1217,8 @@ int32_t ReminderStore::DeleteState(const int32_t uid, const int64_t timestamp)
 std::vector<ReminderState> ReminderStore::QueryState(const int32_t uid)
 {
     std::vector<ReminderState> states;
-    if (rdbStore_ == nullptr) {
-        ANSR_LOGE("Rdb store is not initialized.");
+    if (!EnsureOpen()) {
+        ANSR_LOGE("Rdb store is not available.");
         return states;
     }
     std::string querySql;
@@ -1179,11 +1303,11 @@ int32_t ReminderStore::SetConfigValue(const std::string& key, int32_t value)
     int32_t resultNum = 0;
     resultSet->GetRowCount(resultNum);
     resultSet->Close();
-    
+
     NativeRdb::ValuesBucket values;
     values.PutString(ReminderConfigTable::KEY, key);
     values.PutString(ReminderConfigTable::VALUE, std::to_string(value));
-    
+
     int32_t ret = STATE_FAIL;
     if (resultNum == 0) {
         int64_t rowId = STATE_FAIL;
