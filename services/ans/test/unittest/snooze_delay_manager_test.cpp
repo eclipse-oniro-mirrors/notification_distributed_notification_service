@@ -29,6 +29,7 @@
 #include "ans_log_wrapper.h"
 #include "accesstoken_kit.h"
 #include "mock_datashare.h"
+#include "mock_time_service_client.h"
 #include "notification_flags.h"
 #include "notification_preferences.h"
 #include "notification_constant.h"
@@ -582,15 +583,15 @@ HWTEST_F(AnsSnoozeDelayTest, StartSnoozeTimer_00001, Function | SmallTest | Leve
     auto record1 = std::make_shared<NotificationRecord>();
     record1->request = request;
     advancedNotificationService_->snoozeDelayTimerList_.push_back(record1);
-    ASSERT_EQ(advancedNotificationService_->StartSnoozeTimer(), true);
-
+    advancedNotificationService_->StartSnoozeTimer();
     advancedNotificationService_->snoozeDelayTimerList_.clear();
     ASSERT_EQ(advancedNotificationService_->StartSnoozeTimer(), false);
 }
 
 /**
  * @tc.name: RemoveAllFromSnoozeDelayList_00001
- * @tc.desc: Test RemoveAllFromSnoozeDelayList
+ * @tc.desc: Test RemoveAllFromSnoozeDelayList. Records with null bundleOption are erased
+ *           and records matching the given bundle are removed.
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -613,7 +614,7 @@ HWTEST_F(AnsSnoozeDelayTest, RemoveAllFromSnoozeDelayList_00001, Function | Smal
     advancedNotificationService_->RemoveAllFromSnoozeDelayList(nullptr);
     advancedNotificationService_->RemoveAllFromSnoozeDelayList(bundleOption);
 
-    ASSERT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 1);
+    ASSERT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 0);
 }
 
 /**
@@ -1145,6 +1146,197 @@ HWTEST_F(AnsSnoozeDelayTest, PrepareSnoozeDeviceFlags_00003, Function | SmallTes
     ASSERT_NE(wearableIter, result->end());
     ASSERT_NE(wearableIter->second, nullptr);
     EXPECT_EQ(wearableIter->second->GetReminderFlags(), validFlags);
+}
+
+/**
+ * @tc.name: TriggerSnoozeDelay_00003
+ * @tc.desc: Test TriggerSnoozeDelay skips null records and records with null request,
+ *           and keeps the record whose snooze delay time is not reached.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, TriggerSnoozeDelay_00003, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullptr);
+    auto nullRequestRecord = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullRequestRecord);
+
+    sptr<NotificationRequest> futureRequest(new (std::nothrow) NotificationRequest());
+    futureRequest->SetSnoozeDelayTime(NotificationAnalyticsUtil::GetCurrentTime() + 60000);
+    auto futureRecord = std::make_shared<NotificationRecord>();
+    futureRecord->request = futureRequest;
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(futureRecord);
+
+    advancedNotificationService_->TriggerSnoozeDelay();
+    ASSERT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 1);
+    EXPECT_EQ(advancedNotificationService_->snoozeDelayTimerList_.front(), futureRecord);
+}
+
+/**
+ * @tc.name: TriggerSnoozeDelay_00004
+ * @tc.desc: Test TriggerSnoozeDelay marks due record triggered and consumes it even when
+ *           the list contains null entries.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, TriggerSnoozeDelay_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetContentType(1);
+    auto content = std::make_shared<NotificationContent>(normalContent);
+    request->SetContent(content);
+    request->SetSnoozeDelayTime(NotificationAnalyticsUtil::GetCurrentTime() - 60000);
+    request->SetIsSnoozeTrigger(false);
+    request->SetUpdateOnly(true);
+    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("MyTestBundle", 50);
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    notification->SetKey("testSnoozeDue");
+    auto dueRecord = std::make_shared<NotificationRecord>();
+    dueRecord->request = request;
+    dueRecord->notification = notification;
+    dueRecord->bundleOption = bundleOption;
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullptr);
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(dueRecord);
+
+    advancedNotificationService_->TriggerSnoozeDelay();
+    EXPECT_EQ(dueRecord->request->GetIsSnoozeTrigger(), true);
+    EXPECT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 0);
+}
+
+/**
+ * @tc.name: StartSnoozeTimer_00002
+ * @tc.desc: Test StartSnoozeTimer erases null entries and returns false when no valid
+ *           trigger time exists.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, StartSnoozeTimer_00002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullptr);
+    auto nullRequestRecord = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullRequestRecord);
+    EXPECT_FALSE(advancedNotificationService_->StartSnoozeTimer());
+    EXPECT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 0);
+}
+
+/**
+ * @tc.name: RemoveAllFromSnoozeDelayListByUser_00002
+ * @tc.desc: Test RemoveAllFromSnoozeDelayListByUser erases null and null-request records,
+ *           keeps records whose notification is null, and removes matched user records.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, RemoveAllFromSnoozeDelayListByUser_00002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullptr);
+
+    auto nullRequestRecord = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullRequestRecord);
+
+    auto nullNotificationRecord = std::make_shared<NotificationRecord>();
+    nullNotificationRecord->request = new (std::nothrow) NotificationRequest();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullNotificationRecord);
+
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    request->SetCreatorUserId(100);
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    auto matchedRecord = std::make_shared<NotificationRecord>();
+    matchedRecord->request = request;
+    matchedRecord->notification = notification;
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(matchedRecord);
+
+    advancedNotificationService_->RemoveAllFromSnoozeDelayListByUser(100);
+    ASSERT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 1);
+    EXPECT_EQ(advancedNotificationService_->snoozeDelayTimerList_.front(), nullNotificationRecord);
+}
+
+/**
+ * @tc.name: IsSetSnooze_00006
+ * @tc.desc: Test IsSetSnooze skips null records in both notificationList_ and
+ *           snoozeDelayTimerList_ and still finds the matched key.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, IsSetSnooze_00006, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->notificationList_.push_back(nullptr);
+    auto nullNotificationRecord = std::make_shared<NotificationRecord>();
+    nullNotificationRecord->request = new (std::nothrow) NotificationRequest();
+    advancedNotificationService_->notificationList_.push_back(nullNotificationRecord);
+
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullptr);
+    auto nullRequestRecord = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullRequestRecord);
+    auto nullNotifRecord = std::make_shared<NotificationRecord>();
+    nullNotifRecord->request = new (std::nothrow) NotificationRequest();
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullNotifRecord);
+
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    sptr<Notification> notification(new (std::nothrow) Notification(request));
+    notification->SetKey("test123_test");
+    auto matchedRecord = std::make_shared<NotificationRecord>();
+    matchedRecord->request = request;
+    matchedRecord->notification = notification;
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(matchedRecord);
+
+    EXPECT_TRUE(advancedNotificationService_->IsSetSnooze("test123"));
+    EXPECT_FALSE(advancedNotificationService_->IsSetSnooze("not_exist_key"));
+}
+
+/**
+ * @tc.name: StartSnoozeTimer_00003
+ * @tc.desc: Test StartSnoozeTimer returns false when the underlying timer fails to start
+ *           with a valid due record in the snooze delay list.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, StartSnoozeTimer_00003, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    request->SetSnoozeDelayTime(NotificationAnalyticsUtil::GetCurrentTime() + 60000);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(record);
+
+    MockCreateTimerFailed(false);
+    MockStartTimerFailed(true);
+    EXPECT_FALSE(advancedNotificationService_->StartSnoozeTimer());
+
+    ResetTimeServiceMock();
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+}
+
+/**
+ * @tc.name: StartSnoozeTimer_00004
+ * @tc.desc: Test StartSnoozeTimer returns true and keeps a valid timer id when the
+ *           underlying timer starts successfully.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSnoozeDelayTest, StartSnoozeTimer_00004, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
+    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
+    request->SetSnoozeDelayTime(NotificationAnalyticsUtil::GetCurrentTime() + 60000);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    advancedNotificationService_->snoozeDelayTimerList_.push_back(record);
+
+    MockCreateTimerFailed(false);
+    MockStartTimerFailed(false);
+    EXPECT_TRUE(advancedNotificationService_->StartSnoozeTimer());
+    EXPECT_GT(advancedNotificationService_->timerImpl_.timerId_, static_cast<uint64_t>(0));
+
+    ResetTimeServiceMock();
+    advancedNotificationService_->snoozeDelayTimerList_.clear();
 }
 
 /**

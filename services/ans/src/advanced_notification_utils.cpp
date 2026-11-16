@@ -727,6 +727,9 @@ ErrCode AdvancedNotificationService::GetTargetRecordList(const int32_t uid, cons
     std::vector<std::shared_ptr<NotificationRecord>>& recordList)
 {
     for (auto& notification : notificationList_) {
+        if (notification == nullptr) {
+            continue;
+        }
         if (notification->request != nullptr && notification->request->GetSlotType()== slotType &&
             notification->request->GetNotificationType() == contentType &&
             notification->request->GetCreatorUid() == uid &&
@@ -745,9 +748,19 @@ ErrCode AdvancedNotificationService::GetCommonTargetRecordList(const int32_t uid
     std::vector<std::shared_ptr<NotificationRecord>>& recordList)
 {
     for (auto& notification : notificationList_) {
-        if (notification->request != nullptr && notification->request->IsCommonLiveView()) {
+        if (notification == nullptr || notification->request == nullptr) {
+            continue;
+        }
+        if (notification->request->IsCommonLiveView()) {
+            auto content = notification->request->GetContent();
+            if (content == nullptr) {
+                continue;
+            }
             auto liveViewContent = std::static_pointer_cast<NotificationLiveViewContent>(
-                notification->request->GetContent()->GetNotificationContent());
+                content->GetNotificationContent());
+            if (liveViewContent == nullptr) {
+                continue;
+            }
             if (notification->request->GetCreatorUid() == uid &&
                 notification->request->GetSlotType()== slotType &&
                 notification->request->GetNotificationType() == contentType &&

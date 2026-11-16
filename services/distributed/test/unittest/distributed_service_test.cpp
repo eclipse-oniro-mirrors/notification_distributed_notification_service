@@ -18,6 +18,7 @@
 #include "gtest/gtest.h"
 #define private public
 #include "batch_remove_box.h"
+#include "distributed_device_service.h"
 #include "distributed_publish_service.h"
 #include "distributed_send_adapter.h"
 #include "distributed_service.h"
@@ -103,12 +104,12 @@ HWTEST_F(DistributedServiceTest, DistributedServiceTest_00500, Function | SmallT
     std::vector<std::shared_ptr<Notification>> notifications;
     DistributedDeviceInfo peerDevice;
 
-    std::shared_ptr<ffrt::queue> serviceQueue = DistributedService::GetInstance().serviceQueue_;
-    DistributedService::GetInstance().serviceQueue_ = nullptr;
+    auto serviceQueue = DistributedService::GetInstance().serviceQueue_.queue_;
+    DistributedService::GetInstance().serviceQueue_.queue_ = nullptr;
     DistributedService::GetInstance().OnBatchCanceled(notifications, peerDevice);
 
-    ASSERT_EQ(DistributedService::GetInstance().serviceQueue_, nullptr);
-    DistributedService::GetInstance().serviceQueue_ = serviceQueue;
+    ASSERT_EQ(DistributedService::GetInstance().serviceQueue_.queue_, nullptr);
+    DistributedService::GetInstance().serviceQueue_.queue_ = serviceQueue;
 }
 
 /**
@@ -147,12 +148,12 @@ HWTEST_F(DistributedServiceTest, DistributedServiceTest_00700, Function | SmallT
     peerDevice.deviceId_ = 1;
     peerDevice.deviceType_ = 1;
 
-    std::shared_ptr<ffrt::queue> serviceQueue = DistributedService::GetInstance().serviceQueue_;
-    DistributedService::GetInstance().serviceQueue_ = nullptr;
+    auto serviceQueue = DistributedService::GetInstance().serviceQueue_.queue_;
+    DistributedService::GetInstance().serviceQueue_.queue_ = nullptr;
     DistributedService::GetInstance().OnCanceled(notification, peerDevice);
 
-    ASSERT_EQ(DistributedService::GetInstance().serviceQueue_, nullptr);
-    DistributedService::GetInstance().serviceQueue_ = serviceQueue;
+    ASSERT_EQ(DistributedService::GetInstance().serviceQueue_.queue_, nullptr);
+    DistributedService::GetInstance().serviceQueue_.queue_ = serviceQueue;
 }
 
 /**
@@ -312,5 +313,49 @@ HWTEST_F(DistributedServiceTest, DistributedServiceTest_StatusChange_0100, Funct
     EXPECT_NE(0, MockInvokeCounting::GetInstance().MockGetCount());
 }
 #endif
+/**
+ * @tc.name      : DistributedServiceTest_01200
+ * @tc.number    : DistributedServiceTest_01200
+ * @tc.desc      : Test OnConsumedSetFlags with a null notification and a notification
+ *                 whose request point is null.
+ */
+HWTEST_F(DistributedServiceTest, DistributedServiceTest_01200, Function | SmallTest | Level1)
+{
+    DistributedDeviceInfo peerDevice;
+    EXPECT_FALSE(DistributedService::GetInstance().OnConsumedSetFlags(nullptr, peerDevice));
+
+    sptr<NotificationRequest> nullRequest = nullptr;
+    std::shared_ptr<Notification> notification = std::make_shared<Notification>(nullRequest);
+    EXPECT_FALSE(DistributedService::GetInstance().OnConsumedSetFlags(notification, peerDevice));
+}
+
+/**
+ * @tc.name      : DistributedServiceTest_01300
+ * @tc.number    : DistributedServiceTest_01300
+ * @tc.desc      : Test ConnectPeerDevice is skipped after service destroyed (isDestroyed_ set).
+ */
+HWTEST_F(DistributedServiceTest, DistributedServiceTest_01300, Function | SmallTest | Level1)
+{
+    DistributedDeviceInfo device;
+    device.deviceId_ = "testDeviceIdSkip";
+    device.peerState_ = DeviceState::STATE_SYNC;
+    DistributedDeviceService::GetInstance().AddDeviceInfo(device);
+
+    DistributedService::GetInstance().isDestroyed_.store(true);
+    DistributedService::GetInstance().ConnectPeerDevice(device);
+    std::map<std::string, DistributedDeviceInfo> devices;
+    DistributedDeviceService::GetInstance().GetDeviceList(devices);
+    EXPECT_EQ(devices["testDeviceIdSkip"].connectedTry_, 0);
+
+    DistributedService::GetInstance().isDestroyed_.store(false);
+    DistributedService::GetInstance().ConnectPeerDevice(device);
+    devices.clear();
+    DistributedDeviceService::GetInstance().GetDeviceList(devices);
+    EXPECT_EQ(devices["testDeviceIdSkip"].connectedTry_, 1);
+
+    device.peerState_ = DeviceState::STATE_ONLINE;
+    DistributedDeviceService::GetInstance().AddDeviceInfo(device);
+    DistributedService::GetInstance().isDestroyed_.store(false);
+}
 } // namespace Notification
 } // namespace OHOS

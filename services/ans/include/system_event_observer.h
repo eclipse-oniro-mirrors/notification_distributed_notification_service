@@ -46,6 +46,8 @@ public:
     static void InitSaStartTime();
 
 private:
+    void SubscribeSystemCommonEvents();
+    void SubscribeCloneStartEvent();
     void OnReceiveEvent(const EventFwk::CommonEventData &data);
     void OnReceiveEventInner(const EventFwk::CommonEventData &data);
     sptr<NotificationBundleOption> GetBundleOption(AAFwk::Want want);

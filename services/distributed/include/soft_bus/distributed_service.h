@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <string>
+#include <atomic>
 #include "ffrt_queue_impl.h"
 #include "socket.h"
 #include "distributed_subscriber.h"
@@ -77,6 +78,7 @@ private:
 
 private:
     Infra::FfrtQueueImpl serviceQueue_;
+    std::atomic<bool> isDestroyed_ {false};
 };
 }
 }

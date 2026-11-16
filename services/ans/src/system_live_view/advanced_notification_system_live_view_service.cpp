@@ -130,7 +130,10 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
         int32_t callingUid = IPCSkeleton::GetCallingUid();
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
-            LivePublishProcess::GetInstance()->AddLiveViewSubscriber(callingUid, callingPid);
+            auto livePublishProcess = LivePublishProcess::GetInstance();
+            if (livePublishProcess != nullptr) {
+                livePublishProcess->AddLiveViewSubscriber(callingUid, callingPid);
+            }
         }));
         ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Subscribe live view.");
     }
@@ -144,7 +147,10 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotifications(
     std::vector<std::shared_ptr<NotificationRecord>> recordList;
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
-        LivePublishProcess::GetInstance()->EraseLiveViewSubscriber(uid, pid);
+        auto livePublishProcess = LivePublishProcess::GetInstance();
+        if (livePublishProcess != nullptr) {
+            livePublishProcess->EraseLiveViewSubscriber(uid, pid);
+        }
         GetTargetRecordList(uid, pid, NotificationConstant::SlotType::LIVE_VIEW,
             NotificationContent::Type::LOCAL_LIVE_VIEW, recordList);
         GetCommonTargetRecordList(uid,  NotificationConstant::SlotType::LIVE_VIEW,

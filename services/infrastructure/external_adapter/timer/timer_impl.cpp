@@ -35,6 +35,7 @@ TimerImpl::~TimerImpl()
 
 void TimerImpl::CreateTimer(std::shared_ptr<MiscServices::ITimerInfo> timerOptions)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (timer_ == nullptr) {
         ANS_LOGE("timer is null");
         return;
@@ -46,8 +47,13 @@ void TimerImpl::CreateTimer(std::shared_ptr<MiscServices::ITimerInfo> timerOptio
 
 bool TimerImpl::StartTimer(int64_t triggerTime)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (timer_ == nullptr) {
         ANS_LOGE("timer is null");
+        return false;
+    }
+    if (timerId_ == 0) {
+        ANS_LOGE("timerId is invalid");
         return false;
     }
     return timer_->StartTimer(timerId_, triggerTime);
@@ -55,6 +61,7 @@ bool TimerImpl::StartTimer(int64_t triggerTime)
 
 void TimerImpl::StopTimer()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (timer_ == nullptr) {
         ANS_LOGE("timer is null");
         return;
@@ -66,6 +73,7 @@ void TimerImpl::StopTimer()
 
 void TimerImpl::DestroyTimer()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     if (timer_ == nullptr) {
         ANS_LOGE("timer is null");
         return;

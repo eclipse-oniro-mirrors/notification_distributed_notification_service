@@ -109,6 +109,8 @@ void AllScenariosExtensionWrapper::CloseExtensionWrapper()
         getLiveViewConfigVersion_ = nullptr;
         notifyLiveViewEvent_ = nullptr;
         checkLiveViewRights_ = nullptr;
+        onNotifyDelayedNotification_ = nullptr;
+        onNotifyClearNotification_ = nullptr;
     }
     ANS_LOGI("liveview all scenarios extension wrapper close success");
 }

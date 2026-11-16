@@ -250,6 +250,7 @@ int32_t BundleResourceHelper::GetAppIndexByUid(const int32_t uid)
 
 bool BundleResourceHelper::IsAncoApp(const std::string &bundleName, int32_t uid, bool& isAnco)
 {
+    isAnco = false;
     int32_t userId = ZERO_USERID;
     if (AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
@@ -259,14 +260,14 @@ bool BundleResourceHelper::IsAncoApp(const std::string &bundleName, int32_t uid,
         isAnco = false;
         return true;
     }
- 
+
     userId = ZERO_USERID;
     AppExecFwk::BundleInfo bundleInfo;
     if (GetBundleInfoV9(bundleName, userId, bundleInfo) != ERR_OK) {
         ANS_LOGW("Get Bundle bundleName %{public}s, %{public}d", bundleName.c_str(), userId);
         return false;
     }
- 
+
     return bundleInfo.applicationInfo.codePath == std::to_string(APP_TYPE_ONE);
 }
 }

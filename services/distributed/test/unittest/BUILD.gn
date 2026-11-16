@@ -702,6 +702,7 @@ ohos_unittest("distributed_service_test") {
     "/${services_path}/distributed/include/tlv_box",
     "/${services_path}/distributed/include/helper",
     "/${services_path}/ans/include",
+    "/${services_path}/infrastructure/interfaces",
     "mock",
   ]
 
@@ -735,6 +736,7 @@ ohos_unittest("distributed_service_test") {
     "/${services_path}/distributed/src/tlv_box/bundle_icon_box.cpp",
     "/${services_path}/distributed/src/tlv_box/match_box.cpp",
     "/${services_path}/distributed/src/tlv_box/notification_sync_box.cpp",
+    "/${services_path}/distributed/src/tlv_box/remove_all_distributed_box.cpp",
     "/${services_path}/distributed/src/tlv_box/remove_box.cpp",
     "/${services_path}/distributed/src/tlv_box/request_box.cpp",
     "/${services_path}/distributed/src/tlv_box/response_box.cpp",
@@ -752,6 +754,7 @@ ohos_unittest("distributed_service_test") {
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
     "${services_path}/distributed:libans_distributed",
+    "${services_path}/infrastructure:ans_base",
   ]
 
   external_deps = [
@@ -1076,6 +1079,7 @@ ohos_unittest("distributed_helper_test") {
     "/${services_path}/distributed/include/helper",
     "/${services_path}/distributed/include/soft_bus",
     "/${services_path}/distributed/include/tlv_box",
+    "/${services_path}/infrastructure/interfaces",
   ]
 
   sources = [

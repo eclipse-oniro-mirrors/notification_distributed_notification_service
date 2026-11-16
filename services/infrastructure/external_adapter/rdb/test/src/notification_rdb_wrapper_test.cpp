@@ -13,7 +13,18 @@
  * limitations under the License.
  */
 
+#include <atomic>
+#include <memory>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include "gtest/gtest.h"
+
+#define private public
+#define protected public
+
 #include "rdb_store_wrapper.h"
 #include "mock_rdb_helper.h"
 #include "mock_rdb_store.h"
@@ -2006,5 +2017,578 @@ HWTEST_F(NtfRdbStoreWrapperTest, Init_UpgradeFailure_100, Function | SmallTest |
     SetMockRdbStoreResults({nullptr});
     int32_t ret = rdbWrapper.Init();
     EXPECT_NE(ret, NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name: Init_700
+ * @tc.desc: Verify Init rebuilds the rdb store successfully when the first GetRdbStore call reports
+ *           SQLITE_CORRUPT and the second attempt succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, Init_700, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    // First open is corrupt, the rebuilt second open succeeds.
+    SetMockGetRdbHelperErrCodes({NativeRdb::E_SQLITE_CORRUPT, NativeRdb::E_OK});
+    SetMockRdbStoreResults({nullptr, mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+
+    int32_t ret = rdbWrapper.Init();
+
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_NE(rdbWrapper.rdbStore_, nullptr);
+}
+
+/**
+ * @tc.name: Init_800
+ * @tc.desc: Verify Init drops legacy per-user statistics tables (userId between 0 and 100) and keeps
+ *           current-scope table names in the created table cache.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, Init_800, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes(
+        {"notification_statistics_50", "notification_statistics_100", "normal_table"},
+        {NativeRdb::E_OK, NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_OK, NativeRdb::E_OK, NativeRdb::E_ERROR});
+
+    int32_t ret = rdbWrapper.Init();
+
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(rdbWrapper.createdTables_.count("notification_statistics_50"), 0);
+    EXPECT_EQ(rdbWrapper.createdTables_.count("notification_statistics_100"), 1);
+    EXPECT_EQ(rdbWrapper.createdTables_.count("normal_table"), 1);
+}
+
+/**
+ * @tc.name: Init_900
+ * @tc.desc: Verify Init keeps the legacy statistics table name in the created table cache when the
+ *           DROP TABLE statement fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, Init_900, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"notification_statistics_50"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    // The drop statement fails, so the legacy table name is kept.
+    SetMockExecuteSqlErrCodes({NativeRdb::E_ERROR});
+
+    int32_t ret = rdbWrapper.Init();
+
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(rdbWrapper.createdTables_.count("notification_statistics_50"), 1);
+}
+
+/**
+ * @tc.name: GenerateOperatedTables_100
+ * @tc.desc: Verify GenerateOperatedTables returns only the base table for a non-system account.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GenerateOperatedTables_100, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+
+    auto tables = rdbWrapper.GenerateOperatedTables(0);
+
+    ASSERT_EQ(tables.size(), 1);
+    EXPECT_EQ(tables[0], "notification_table");
+}
+
+/**
+ * @tc.name: GenerateOperatedTables_200
+ * @tc.desc: Verify GenerateOperatedTables returns only the base table for a system account whose
+ *           per-user table is absent from the created table cache.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GenerateOperatedTables_200, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.createdTables_.clear();
+
+    auto tables = rdbWrapper.GenerateOperatedTables(100);
+
+    ASSERT_EQ(tables.size(), 1);
+    EXPECT_EQ(tables[0], "notification_table");
+}
+
+/**
+ * @tc.name: GenerateOperatedTables_300
+ * @tc.desc: Verify GenerateOperatedTables returns the per-user table followed by the base table for
+ *           a system account whose per-user table exists in the created table cache.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GenerateOperatedTables_300, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.createdTables_.insert("notification_table_100");
+
+    auto tables = rdbWrapper.GenerateOperatedTables(100);
+
+    ASSERT_EQ(tables.size(), 2);
+    EXPECT_EQ(tables[0], "notification_table_100");
+    EXPECT_EQ(tables[1], "notification_table");
+}
+
+/**
+ * @tc.name: GetUserTableName_100
+ * @tc.desc: Verify GetUserTableName returns the base table name for a non-system account without
+ *           touching the rdb store.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GetUserTableName_100, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    std::string tableName;
+
+    int32_t ret = rdbWrapper.GetUserTableName(0, tableName);
+
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(tableName, "notification_table");
+}
+
+/**
+ * @tc.name: GetUserTableName_200
+ * @tc.desc: Verify GetUserTableName returns the cached per-user table name without executing
+ *           CREATE TABLE when the table already exists.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GetUserTableName_200, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.createdTables_.insert("notification_table_100");
+    std::string tableName;
+    // Any create attempt would consume this failing code and return an error.
+    SetMockExecuteSqlErrCodes({NativeRdb::E_ERROR});
+
+    int32_t ret = rdbWrapper.GetUserTableName(100, tableName);
+
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(tableName, "notification_table_100");
+}
+
+/**
+ * @tc.name: GetUserTableName_300
+ * @tc.desc: Verify GetUserTableName returns E_ERROR for a system account when the rdb store is null.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GetUserTableName_300, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    std::string tableName;
+
+    int32_t ret = rdbWrapper.GetUserTableName(100, tableName);
+
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name: GetUserTableName_400
+ * @tc.desc: Verify GetUserTableName returns the ExecuteSql error code when CREATE TABLE fails for
+ *           a system account.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GetUserTableName_400, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+    std::string tableName;
+    SetMockExecuteSqlErrCodes({NativeRdb::E_ERROR});
+
+    int32_t ret = rdbWrapper.GetUserTableName(100, tableName);
+
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+    EXPECT_EQ(rdbWrapper.createdTables_.count("notification_table_100"), 0);
+}
+
+/**
+ * @tc.name: GetUserTableName_500
+ * @tc.desc: Verify GetUserTableName creates the per-user table and caches its name when CREATE TABLE
+ *           succeeds for a system account.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GetUserTableName_500, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+    std::string tableName;
+    SetMockExecuteSqlErrCodes({NativeRdb::E_OK});
+
+    int32_t ret = rdbWrapper.GetUserTableName(100, tableName);
+
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(tableName, "notification_table_100");
+    EXPECT_EQ(rdbWrapper.createdTables_.count("notification_table_100"), 1);
+}
+
+/**
+ * @tc.name: GetUserStatisticTableName_100
+ * @tc.desc: Verify GetUserStatisticTableName returns the cached statistics table name without
+ *           executing CREATE TABLE when the table already exists.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GetUserStatisticTableName_100, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    rdbWrapper.createdTables_.insert("notification_statistics_100");
+    std::string tableName;
+    // Any create attempt would consume this failing code and return an error.
+    SetMockExecuteSqlErrCodes({NativeRdb::E_ERROR});
+
+    int32_t ret = rdbWrapper.GetUserStatisticTableName(100, tableName);
+
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(tableName, "notification_statistics_100");
+}
+
+/**
+ * @tc.name: GetUserStatisticTableName_200
+ * @tc.desc: Verify GetUserStatisticTableName returns E_ERROR when the rdb store is null.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GetUserStatisticTableName_200, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    std::string tableName;
+
+    int32_t ret = rdbWrapper.GetUserStatisticTableName(100, tableName);
+
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name: GetUserStatisticTableName_300
+ * @tc.desc: Verify GetUserStatisticTableName returns the ExecuteSql error code when creating the
+ *           statistics table fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GetUserStatisticTableName_300, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+    std::string tableName;
+    SetMockExecuteSqlErrCodes({NativeRdb::E_ERROR});
+
+    int32_t ret = rdbWrapper.GetUserStatisticTableName(100, tableName);
+
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name: GetUserStatisticTableName_400
+ * @tc.desc: Verify GetUserStatisticTableName creates the statistics table and caches its name when
+ *           CREATE TABLE succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, GetUserStatisticTableName_400, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+    std::string tableName;
+    SetMockExecuteSqlErrCodes({NativeRdb::E_OK});
+
+    int32_t ret = rdbWrapper.GetUserStatisticTableName(100, tableName);
+
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+    EXPECT_EQ(tableName, "notification_statistics_100");
+    EXPECT_EQ(rdbWrapper.createdTables_.count("notification_statistics_100"), 1);
+}
+
+/**
+ * @tc.name: RestoreForMasterSlaver_100
+ * @tc.desc: Verify RestoreForMasterSlaver returns E_ERROR when the rdb store is null.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, RestoreForMasterSlaver_100, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+
+    int32_t ret = rdbWrapper.RestoreForMasterSlaver();
+
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name: RestoreForMasterSlaver_200
+ * @tc.desc: Verify RestoreForMasterSlaver returns E_OK when the rdb store restore succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, RestoreForMasterSlaver_200, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+    SetMockReStoreErrCodes({NativeRdb::E_OK});
+
+    int32_t ret = rdbWrapper.RestoreForMasterSlaver();
+
+    EXPECT_EQ(ret, NativeRdb::E_OK);
+}
+
+/**
+ * @tc.name: RestoreForMasterSlaver_300
+ * @tc.desc: Verify RestoreForMasterSlaver propagates the restore error code when the rdb store
+ *           restore fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, RestoreForMasterSlaver_300, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+    SetMockReStoreErrCodes({NativeRdb::E_ERROR});
+
+    int32_t ret = rdbWrapper.RestoreForMasterSlaver();
+
+    EXPECT_EQ(ret, NativeRdb::E_ERROR);
+}
+
+/**
+ * @tc.name: RecoverDatabase_100
+ * @tc.desc: Verify RecoverDatabase skips the recovery flow while another recovery is already in
+ *           progress and leaves the store untouched.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, RecoverDatabase_100, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+    // If the guard failed and Destroy ran, rdbStore_ would be reset to null.
+    SetMockDeleteRdbStoreErrCodes({NativeRdb::E_ERROR});
+    rdbWrapper.isRecovering_.store(true);
+
+    rdbWrapper.RecoverDatabase();
+
+    EXPECT_NE(rdbWrapper.rdbStore_, nullptr);
+    EXPECT_TRUE(rdbWrapper.isRecovering_.load());
+    rdbWrapper.isRecovering_.store(false);
+}
+
+/**
+ * @tc.name: RecoverDatabase_200
+ * @tc.desc: Verify RecoverDatabase stops after a failed Destroy and leaves the store null without
+ *           reinitializing it.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, RecoverDatabase_200, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+    SetMockDeleteRdbStoreErrCodes({NativeRdb::E_ERROR});
+
+    rdbWrapper.RecoverDatabase();
+
+    EXPECT_EQ(rdbWrapper.rdbStore_, nullptr);
+    EXPECT_FALSE(rdbWrapper.isRecovering_.load());
+}
+
+/**
+ * @tc.name: RecoverDatabase_300
+ * @tc.desc: Verify RecoverDatabase ends with a null store when Destroy succeeds but the
+ *           reinitialization fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, RecoverDatabase_300, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    // First open succeeds for Init, the rebuilt second open fails.
+    SetMockGetRdbHelperErrCodes({NativeRdb::E_OK, NativeRdb::E_ERROR});
+    SetMockRdbStoreResults({mockRdbStore, nullptr});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+
+    rdbWrapper.RecoverDatabase();
+
+    EXPECT_EQ(rdbWrapper.rdbStore_, nullptr);
+    EXPECT_FALSE(rdbWrapper.isRecovering_.load());
+}
+
+/**
+ * @tc.name: RecoverDatabase_400
+ * @tc.desc: Verify RecoverDatabase destroys and reinitializes the store successfully, restoring a
+ *           usable rdb store with repopulated created table cache.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, RecoverDatabase_400, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockGetRdbHelperErrCodes({NativeRdb::E_OK, NativeRdb::E_OK});
+    SetMockRdbStoreResults({mockRdbStore, mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+
+    rdbWrapper.RecoverDatabase();
+
+    EXPECT_NE(rdbWrapper.rdbStore_, nullptr);
+    EXPECT_EQ(rdbWrapper.createdTables_.count("normal_table"), 1);
+    EXPECT_FALSE(rdbWrapper.isRecovering_.load());
 }
 } // OHOS::Notification::Infra

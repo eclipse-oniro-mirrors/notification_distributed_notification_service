@@ -33,6 +33,8 @@
 #include "want_agent_helper.h"
 #include "want_params.h"
 #include "int_wrapper.h"
+#include "bool_wrapper.h"
+#include "mock_time_service_client.h"
 #include "accesstoken_kit.h"
 #include "notification_preferences.h"
 #include "notification_record.h"
@@ -1719,6 +1721,636 @@ HWTEST_F(AnsUtilsTest, GetCommonTargetRecordList_0001, Function | SmallTest | Le
     advancedNotificationService_->GetCommonTargetRecordList(1, NotificationConstant::SlotType::LIVE_VIEW,
         NotificationContent::Type::LIVE_VIEW, recordList);
     EXPECT_EQ(recordList.size(), 1);
+}
+
+/**
+ * @tc.name: GetCommonTargetRecordList_0002
+ * @tc.desc: Test GetCommonTargetRecordList skips null records and records with null request.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetCommonTargetRecordList_0002, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->notificationList_.push_back(nullptr);
+    auto nullRequestRecord = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->notificationList_.push_back(nullRequestRecord);
+
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    auto ret = advancedNotificationService_->GetCommonTargetRecordList(1,
+        NotificationConstant::SlotType::LIVE_VIEW, NotificationContent::Type::LIVE_VIEW, recordList);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_TRUE(recordList.empty());
+}
+
+/**
+ * @tc.name: GetCommonTargetRecordList_0003
+ * @tc.desc: Test GetCommonTargetRecordList skips common live view request whose content is
+ *           not live view content (dynamic cast fails), no null pointer dereference.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetCommonTargetRecordList_0003, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetContentType(static_cast<int32_t>(NotificationContent::Type::BASIC_TEXT));
+    content->content_ = normalContent;
+    request->SetContent(content);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    auto ret = advancedNotificationService_->GetCommonTargetRecordList(1,
+        NotificationConstant::SlotType::LIVE_VIEW, NotificationContent::Type::LIVE_VIEW, recordList);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_TRUE(recordList.empty());
+}
+
+/**
+ * @tc.name: GetCommonTargetRecordList_0004
+ * @tc.desc: Test GetCommonTargetRecordList skips common live view request whose content is null,
+ *           no null pointer dereference.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetCommonTargetRecordList_0004, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->notificationContentType_ = NotificationContent::Type::LIVE_VIEW;
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    auto ret = advancedNotificationService_->GetCommonTargetRecordList(1,
+        NotificationConstant::SlotType::LIVE_VIEW, NotificationContent::Type::LIVE_VIEW, recordList);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_TRUE(recordList.empty());
+}
+
+/**
+ * @tc.name: GetCommonTargetRecordList_0005
+ * @tc.desc: Test GetCommonTargetRecordList skips common live view request whose content object
+ *           holds a null inner content, no null pointer dereference.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetCommonTargetRecordList_0005, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    content->content_ = nullptr;
+    request->SetContent(content);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    auto ret = advancedNotificationService_->GetCommonTargetRecordList(1,
+        NotificationConstant::SlotType::LIVE_VIEW, NotificationContent::Type::LIVE_VIEW, recordList);
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_TRUE(recordList.empty());
+}
+
+/**
+ * @tc.name: GenerateBundleOption_00001
+ * @tc.desc: Test GenerateBundleOption with a native token returns a bundle option with
+ *           the calling uid and an empty bundle name.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GenerateBundleOption_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+
+    auto bundleOption = advancedNotificationService_->GenerateBundleOption();
+
+    ASSERT_NE(bundleOption, nullptr);
+    EXPECT_EQ(bundleOption->GetBundleName(), "");
+    EXPECT_EQ(bundleOption->GetUid(), IPCSkeleton::GetCallingUid());
+    EXPECT_EQ(bundleOption->GetAppIndex(), 0);
+}
+
+/**
+ * @tc.name: GenerateBundleOption_00002
+ * @tc.desc: Test GenerateBundleOption with a non-native token and an empty client
+ *           bundle name returns nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GenerateBundleOption_00002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsNonBundleName(true);
+
+    auto bundleOption = advancedNotificationService_->GenerateBundleOption();
+
+    EXPECT_EQ(bundleOption, nullptr);
+    MockIsNonBundleName(false);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+}
+
+/**
+ * @tc.name: GenerateBundleOption_00003
+ * @tc.desc: Test GenerateBundleOption with a non-native token and a valid client
+ *           bundle name returns a bundle option with the mocked bundle name.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GenerateBundleOption_00003, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsNonBundleName(false);
+
+    auto bundleOption = advancedNotificationService_->GenerateBundleOption();
+
+    ASSERT_NE(bundleOption, nullptr);
+    EXPECT_EQ(bundleOption->GetBundleName(), "bundleName");
+    EXPECT_EQ(bundleOption->GetUid(), 1);
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+}
+
+/**
+ * @tc.name: GetAppTargetBundle_00001
+ * @tc.desc: Test GetAppTargetBundle with a null bundle option assigns the client
+ *           bundle to targetBundle.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetAppTargetBundle_00001, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    auto ret = advancedNotificationService_->GetAppTargetBundle(nullptr, targetBundle);
+
+    EXPECT_EQ(ret, (int)ERR_OK);
+    ASSERT_NE(targetBundle, nullptr);
+    EXPECT_EQ(targetBundle->GetUid(), 1);
+}
+
+/**
+ * @tc.name: GetAppTargetBundle_00002
+ * @tc.desc: Test GetAppTargetBundle with a bundle option matching the client bundle
+ *           keeps the passed option as target.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetAppTargetBundle_00002, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("", 1);
+
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    auto ret = advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle);
+
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(targetBundle.GetRefPtr(), bundleOption.GetRefPtr());
+}
+
+/**
+ * @tc.name: GetAppTargetBundle_00003
+ * @tc.desc: Test GetAppTargetBundle with a mismatched bundle option and a non-system
+ *           caller returns ERR_ANS_INNER_NON_SYSTEM_APP.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetAppTargetBundle_00003, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsNonBundleName(false);
+    MockIsSystemApp(false);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("other", 999);
+
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    auto ret = advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle);
+
+    EXPECT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
+
+    MockIsSystemApp(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+}
+
+/**
+ * @tc.name: GetAppTargetBundle_00004
+ * @tc.desc: Test GetAppTargetBundle with a mismatched bundle option and a system app
+ *           resolves the option as target.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetAppTargetBundle_00004, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsNonBundleName(false);
+    MockIsSystemApp(true);
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("other", 999);
+
+    sptr<NotificationBundleOption> targetBundle = nullptr;
+    auto ret = advancedNotificationService_->GetAppTargetBundle(bundleOption, targetBundle);
+
+    EXPECT_EQ(ret, (int)ERR_OK);
+    EXPECT_EQ(targetBundle.GetRefPtr(), bundleOption.GetRefPtr());
+
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+}
+
+/**
+ * @tc.name: ResolveBundleOptionUids_00001
+ * @tc.desc: Test ResolveBundleOptionUids skips null and unresolvable options and
+ *           keeps the already valid one.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, ResolveBundleOptionUids_00001, Function | SmallTest | Level1)
+{
+    MockQueryForgroundOsAccountId(true, 0);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.emplace_back(nullptr);
+    bundleOptions.emplace_back(new (std::nothrow) NotificationBundleOption("bundleName", 20031005));
+    bundleOptions.emplace_back(new (std::nothrow) NotificationBundleOption("testBundleName", 0));
+
+    auto resolvedBundles = advancedNotificationService_->ResolveBundleOptionUids(bundleOptions);
+
+    ASSERT_EQ(resolvedBundles.size(), 1);
+    EXPECT_EQ(resolvedBundles[0]->GetBundleName(), "bundleName");
+    EXPECT_EQ(resolvedBundles[0]->GetUid(), 20031005);
+}
+
+/**
+ * @tc.name: GenerateSortingMap_00001
+ * @tc.desc: Test GenerateSortingMap returns a map containing the key of the record
+ *           in the notification list.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GenerateSortingMap_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    notification->SetKey("sorting_key_1");
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    record->slot = new (std::nothrow) NotificationSlot(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    auto sortingMap = advancedNotificationService_->GenerateSortingMap();
+
+    ASSERT_NE(sortingMap, nullptr);
+    auto keys = sortingMap->GetKey();
+    ASSERT_EQ(keys.size(), 1);
+    EXPECT_EQ(keys[0], "sorting_key_1");
+}
+
+/**
+ * @tc.name: AdjustDateForDndTypeOnce_00001
+ * @tc.desc: Test AdjustDateForDndTypeOnce keeps the window duration for a window
+ *           around the current time.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, AdjustDateForDndTypeOnce_00001, Function | SmallTest | Level1)
+{
+    constexpr int64_t oneHourMs = 3600 * 1000;
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    int64_t beginDate = now - oneHourMs;
+    int64_t endDate = now + oneHourMs;
+
+    advancedNotificationService_->AdjustDateForDndTypeOnce(beginDate, endDate);
+
+    EXPECT_LT(beginDate, endDate);
+    EXPECT_EQ(endDate - beginDate, 2 * oneHourMs);
+}
+
+/**
+ * @tc.name: AdjustDateForDndTypeOnce_00002
+ * @tc.desc: Test AdjustDateForDndTypeOnce shifts a fully past window to the next day.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, AdjustDateForDndTypeOnce_00002, Function | SmallTest | Level1)
+{
+    constexpr int64_t oneHourMs = 3600 * 1000;
+    auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    int64_t beginDate = now - 2 * oneHourMs;
+    int64_t endDate = now - oneHourMs;
+
+    advancedNotificationService_->AdjustDateForDndTypeOnce(beginDate, endDate);
+
+    EXPECT_LT(beginDate, endDate);
+    EXPECT_EQ(endDate - beginDate, oneHourMs);
+    EXPECT_GT(endDate, now);
+}
+
+/**
+ * @tc.name: IsFromAccountNotification_00001
+ * @tc.desc: Test IsFromAccountNotification with a null request returns false.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, IsFromAccountNotification_00001, Function | SmallTest | Level1)
+{
+    EXPECT_FALSE(advancedNotificationService_->IsFromAccountNotification(nullptr));
+}
+
+/**
+ * @tc.name: IsFromAccountNotification_00002
+ * @tc.desc: Test IsFromAccountNotification with a request without extendInfo returns false.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, IsFromAccountNotification_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+
+    EXPECT_FALSE(advancedNotificationService_->IsFromAccountNotification(request));
+}
+
+/**
+ * @tc.name: IsFromAccountNotification_00003
+ * @tc.desc: Test IsFromAccountNotification with extendInfo carrying
+ *           EXTENDINFO_IS_FROM_ACCOUNT true returns true.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, IsFromAccountNotification_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto extendInfo = std::make_shared<AAFwk::WantParams>();
+    extendInfo->SetParam(EXTENDINFO_IS_FROM_ACCOUNT, AAFwk::Boolean::Box(true));
+    request->SetExtendInfo(extendInfo);
+
+    EXPECT_TRUE(advancedNotificationService_->IsFromAccountNotification(request));
+}
+
+#ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
+/**
+ * @tc.name: CheckDistributedNotificationType_00001
+ * @tc.desc: Test CheckDistributedNotificationType with an empty device support list
+ *           returns true without touching the distributed manager.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, CheckDistributedNotificationType_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+
+    EXPECT_TRUE(advancedNotificationService_->CheckDistributedNotificationType(request));
+}
+#endif
+
+/**
+ * @tc.name: CheckApiCompatibility_00002
+ * @tc.desc: Test CheckApiCompatibility returns false when the bundle manager mock
+ *           reports api incompatibility.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, CheckApiCompatibility_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption("bundleName", 1);
+    MockBundleManager::MockCheckApiCompatibility(false);
+
+    EXPECT_FALSE(advancedNotificationService_->CheckApiCompatibility(bundleOption));
+}
+
+/**
+ * @tc.name: SetAgentNotification_00001
+ * @tc.desc: Test SetAgentNotification leaves the request unchanged when resolving
+ *           the active user id fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, SetAgentNotification_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::string bundleName = "agentOwnerBundle";
+    MockQueryForgroundOsAccountId(false, 0);
+
+    advancedNotificationService_->SetAgentNotification(request, bundleName);
+
+    EXPECT_FALSE(request->IsAgentNotification());
+
+    MockQueryForgroundOsAccountId(true, 0);
+}
+
+/**
+ * @tc.name: SetAgentNotification_00002
+ * @tc.desc: Test SetAgentNotification marks the request as agent notification with
+ *           the active user id and owner bundle name.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, SetAgentNotification_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    std::string bundleName = "agentOwnerBundle";
+    MockQueryForgroundOsAccountId(true, 1);
+
+    advancedNotificationService_->SetAgentNotification(request, bundleName);
+
+    EXPECT_TRUE(request->IsAgentNotification());
+    EXPECT_EQ(request->GetOwnerUserId(), 101);
+    EXPECT_EQ(request->GetOwnerBundleName(), "agentOwnerBundle");
+
+    MockQueryForgroundOsAccountId(true, 0);
+}
+
+/**
+ * @tc.name: PrepareContinuousTaskNotificationRequest_00001
+ * @tc.desc: Test PrepareContinuousTaskNotificationRequest fills creator uid/pid and
+ *           the delivery time when it is unset.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, PrepareContinuousTaskNotificationRequest_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    constexpr int32_t testUid = 20031009;
+
+    auto status = advancedNotificationService_->PrepareContinuousTaskNotificationRequest(request, testUid);
+
+    EXPECT_TRUE(status.Ok());
+    EXPECT_EQ(request->GetCreatorUid(), testUid);
+    EXPECT_EQ(request->GetCreatorPid(), IPCSkeleton::GetCallingPid());
+    EXPECT_GT(request->GetDeliveryTime(), 0);
+}
+
+/**
+ * @tc.name: StartAutoDelete_00001
+ * @tc.desc: Test StartAutoDelete returns the timer id created by the time service.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, StartAutoDelete_00001, Function | SmallTest | Level1)
+{
+    MockCreateTimerFailed(false);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto record = std::make_shared<NotificationRecord>();
+    record->notification = new (std::nothrow) Notification(request);
+
+    auto timerId = advancedNotificationService_->StartAutoDelete(record, 2000000000, 1);
+
+    EXPECT_EQ(timerId, static_cast<uint64_t>(1));
+    ResetTimeServiceMock();
+}
+
+/**
+ * @tc.name: StartAutoDelete_00002
+ * @tc.desc: Test StartAutoDelete returns zero when timer creation fails.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, StartAutoDelete_00002, Function | SmallTest | Level1)
+{
+    MockCreateTimerFailed(true);
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    auto record = std::make_shared<NotificationRecord>();
+    record->notification = new (std::nothrow) Notification(request);
+
+    auto timerId = advancedNotificationService_->StartAutoDelete(record, 2000000000, 1);
+
+    EXPECT_EQ(timerId, static_cast<uint64_t>(0));
+    ResetTimeServiceMock();
+}
+
+/**
+ * @tc.name: CancelTimer_00001
+ * @tc.desc: Test CancelTimer with an invalid timer id does not destroy any timer.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, CancelTimer_00001, Function | SmallTest | Level1)
+{
+    ResetTimeServiceMock();
+
+    advancedNotificationService_->CancelTimer(NotificationConstant::INVALID_TIMER_ID);
+
+    EXPECT_FALSE(IsDestroyTimerCalled());
+    ResetTimeServiceMock();
+}
+
+/**
+ * @tc.name: CancelTimer_00002
+ * @tc.desc: Test CancelTimer with a valid timer id destroys the timer.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, CancelTimer_00002, Function | SmallTest | Level1)
+{
+    ResetTimeServiceMock();
+
+    advancedNotificationService_->CancelTimer(7);
+
+    EXPECT_TRUE(IsDestroyTimerCalled());
+    ResetTimeServiceMock();
+}
+
+/**
+ * @tc.name: BatchCancelTimer_00001
+ * @tc.desc: Test BatchCancelTimer skips invalid ids and cancels the valid ones.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, BatchCancelTimer_00001, Function | SmallTest | Level1)
+{
+    ResetTimeServiceMock();
+    std::vector<uint64_t> emptyIds;
+    advancedNotificationService_->BatchCancelTimer(emptyIds);
+    EXPECT_FALSE(IsDestroyTimerCalled());
+
+    std::vector<uint64_t> timerIds = {NotificationConstant::INVALID_TIMER_ID, 5};
+    advancedNotificationService_->BatchCancelTimer(timerIds);
+
+    EXPECT_TRUE(IsDestroyTimerCalled());
+    ResetTimeServiceMock();
+}
+
+/**
+ * @tc.name: GetCommonLiveViewRecordList_00001
+ * @tc.desc: Test GetCommonLiveViewRecordList collects only the common live view record
+ *           whose create pid matches and removal state is LIVE_VIEW_REMOVE.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetCommonLiveViewRecordList_00001, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    constexpr int32_t testPid = 20031007;
+    auto matchedRecord = std::make_shared<NotificationRecord>();
+    {
+        sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+        request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+        auto liveContent = std::make_shared<NotificationLiveViewContent>();
+        liveContent->SetCreatePid(testPid);
+        liveContent->SetRemoveOnProcessExitState(NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_REMOVE);
+        request->SetContent(std::make_shared<NotificationContent>(liveContent));
+        matchedRecord->request = request;
+        matchedRecord->notification = new (std::nothrow) Notification(request);
+    }
+    auto keptRecord = std::make_shared<NotificationRecord>();
+    {
+        sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+        request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+        auto liveContent = std::make_shared<NotificationLiveViewContent>();
+        liveContent->SetCreatePid(testPid);
+        request->SetContent(std::make_shared<NotificationContent>(liveContent));
+        keptRecord->request = request;
+        keptRecord->notification = new (std::nothrow) Notification(request);
+    }
+    auto normalRecord = std::make_shared<NotificationRecord>();
+    {
+        sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+        normalRecord->request = request;
+        normalRecord->notification = new (std::nothrow) Notification(request);
+    }
+    advancedNotificationService_->notificationList_.push_back(matchedRecord);
+    advancedNotificationService_->notificationList_.push_back(keptRecord);
+    advancedNotificationService_->notificationList_.push_back(normalRecord);
+
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    advancedNotificationService_->GetCommonLiveViewRecordList(testPid, recordList);
+
+    ASSERT_EQ(recordList.size(), 1);
+    EXPECT_EQ(recordList.front(), matchedRecord);
+}
+
+/**
+ * @tc.name: IsExistsPidInObservers_00001
+ * @tc.desc: Test IsExistsPidInObservers reflects the observer map and RemoveAppObserver
+ *           erases a stored null observer without unregistering.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, IsExistsPidInObservers_00001, Function | SmallTest | Level1)
+{
+    constexpr int32_t testPid = 20031008;
+    advancedNotificationService_->appObserverMap_.clear();
+    EXPECT_FALSE(advancedNotificationService_->IsExistsPidInObservers(testPid));
+
+    advancedNotificationService_->appObserverMap_[testPid] = nullptr;
+    EXPECT_TRUE(advancedNotificationService_->IsExistsPidInObservers(testPid));
+
+    advancedNotificationService_->RemoveAppObserver(testPid);
+
+    EXPECT_FALSE(advancedNotificationService_->IsExistsPidInObservers(testPid));
 }
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
 HWTEST_F(AnsUtilsTest, TestGenerateCloneValidBundleOption_NullBundleOption, Level1) {

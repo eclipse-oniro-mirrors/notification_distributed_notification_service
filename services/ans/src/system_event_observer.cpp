@@ -43,6 +43,12 @@ int64_t g_saStartBootTime = 0;
 }
 SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callbacks_(callbacks)
 {
+    SubscribeSystemCommonEvents();
+    SubscribeCloneStartEvent();
+}
+
+void SystemEventObserver::SubscribeSystemCommonEvents()
+{
     EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
 #ifdef ANS_FEATURE_NOTIFICATION_STATISTICS
@@ -76,24 +82,40 @@ SystemEventObserver::SystemEventObserver(const ISystemEvent &callbacks) : callba
     subscriber_ = std::make_shared<SystemEventSubscriber>(
         commonEventSubscribeInfo, std::bind(&SystemEventObserver::OnReceiveEvent, this, std::placeholders::_1));
 
-    EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+    bool subscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(subscriber_);
+    if (!subscribeResult) {
+        ANS_LOGE("Subscribe common event failed, package/user lifecycle events will be missed");
+    }
+}
 
+void SystemEventObserver::SubscribeCloneStartEvent()
+{
     std::string dataCloneBundleName;
     if (!NotificationConfigParse::GetInstance()->GetDataCloneBundleName(dataCloneBundleName)) {
         ANS_LOGW("Failed to get dataClone bundle name from CCM, use empty string as default.");
+    }
+    if (dataCloneBundleName.empty()) {
+        ANS_LOGW("dataClone bundle name is empty, skip clone event subscription");
     }
     EventFwk::MatchingSkills cloneMatchingSkills;
     cloneMatchingSkills.AddEvent(CloneStartEventSubscriber::CLONE_EVENT_START);
     EventFwk::CommonEventSubscribeInfo cloneSubscribeInfo(cloneMatchingSkills);
     cloneSubscribeInfo.SetPublisherBundleName(dataCloneBundleName);
     cloneStartSubscriber_ = std::make_shared<CloneStartEventSubscriber>(cloneSubscribeInfo);
-    EventFwk::CommonEventManager::SubscribeCommonEvent(cloneStartSubscriber_);
+    bool cloneSubscribeResult = EventFwk::CommonEventManager::SubscribeCommonEvent(cloneStartSubscriber_);
+    if (!cloneSubscribeResult) {
+        ANS_LOGW("Subscribe clone common event failed");
+    }
 }
 
 SystemEventObserver::~SystemEventObserver()
 {
-    EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber_);
-    EventFwk::CommonEventManager::UnSubscribeCommonEvent(cloneStartSubscriber_);
+    if (subscriber_ != nullptr) {
+        EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber_);
+    }
+    if (cloneStartSubscriber_ != nullptr) {
+        EventFwk::CommonEventManager::UnSubscribeCommonEvent(cloneStartSubscriber_);
+    }
 }
 
 void SystemEventObserver::InitSaStartTime()

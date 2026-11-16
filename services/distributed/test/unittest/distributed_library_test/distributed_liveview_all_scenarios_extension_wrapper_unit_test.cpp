@@ -14,13 +14,16 @@
  */
  
 #include <gtest/gtest.h>
- 
+
 #define private public
 #define protected public
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #undef private
 #undef protected
- 
+
+#include "ans_inner_errors.h"
+#include "want_params.h"
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
@@ -191,5 +194,19 @@ HWTEST_F(DistributedLiveviewAllScenariosExtensionWrapperTest,
     EXPECT_EQ(res, -1);
     EXPECT_EQ(0, buffer.size());
 }
+/**
+ * @tc.name: TriggerPushWantAgent_0100
+ * @tc.desc: Test TriggerPushWantAgent with null request returns ERR_ANS_INVALID_PARAM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedLiveviewAllScenariosExtensionWrapperTest,
+    TriggerPushWantAgent_0100, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = nullptr;
+    AAFwk::WantParams extraInfo;
+    ErrCode res = DISTRIBUTED_LIVEVIEW_ALL_SCENARIOS_EXTENTION_WRAPPER->TriggerPushWantAgent(
+        request, 0, extraInfo);
+    EXPECT_EQ(res, ERR_ANS_INVALID_PARAM);
 }
-}
+} // namespace Notification
+} // namespace OHOS

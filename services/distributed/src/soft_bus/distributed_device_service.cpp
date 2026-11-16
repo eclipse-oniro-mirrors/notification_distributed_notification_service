@@ -75,6 +75,7 @@ static std::string DeviceTypeConversion(const std::string& deviceType)
 
 void DistributedDeviceService::InitLocalDevice(const std::string &deviceId, uint16_t deviceType)
 {
+    std::lock_guard<ffrt::mutex> lock(localDeviceMutex_);
     localDevice_.deviceId_ = deviceId;
     localDevice_.deviceType_ = deviceType;
     localDevice_.abilityId_ = DistributedAbilityType::APPLICATION_SWITCH;
@@ -82,16 +83,19 @@ void DistributedDeviceService::InitLocalDevice(const std::string &deviceId, uint
 
 DistributedDeviceInfo DistributedDeviceService::GetLocalDevice()
 {
+    std::lock_guard<ffrt::mutex> lock(localDeviceMutex_);
     return localDevice_;
 }
 
 bool DistributedDeviceService::IsLocalPadOrPC()
 {
+    std::lock_guard<ffrt::mutex> lock(localDeviceMutex_);
     return localDevice_.IsPadOrPc();
 }
 
 bool DistributedDeviceService::IsReportDataByHa()
 {
+    std::lock_guard<ffrt::mutex> lock(localDeviceMutex_);
     return localDevice_.deviceType_ != DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH;
 }
 
@@ -342,12 +346,13 @@ void DistributedDeviceService::GetDeviceList(std::map<std::string, DistributedDe
 
 void DistributedDeviceService::SyncDeviceMatch(const DistributedDeviceInfo peerDevice, MatchType type)
 {
+    DistributedDeviceInfo localDevice = GetLocalDevice();
     std::shared_ptr<NotifticationMatchBox> matchBox = std::make_shared<NotifticationMatchBox>();
     matchBox->SetVersion(CURRENT_VERSION);
     matchBox->SetMatchType(type);
-    matchBox->SetLocalDeviceId(localDevice_.deviceId_);
-    matchBox->SetLocalDeviceType(localDevice_.deviceType_);
-    matchBox->SetLocalAbility(localDevice_.abilityId_);
+    matchBox->SetLocalDeviceId(localDevice.deviceId_);
+    matchBox->SetLocalDeviceType(localDevice.deviceType_);
+    matchBox->SetLocalAbility(localDevice.abilityId_);
     if (type == MatchType::MATCH_ACK) {
         matchBox->SetPeerDeviceId(peerDevice.deviceId_);
         matchBox->SetPeerDeviceType(peerDevice.deviceType_);
@@ -416,7 +421,7 @@ void DistributedDeviceService::InitCurrentDeviceStatus()
 {
     bool notificationEnable = false;
     bool liveViewEnable = false;
-    std::string localType = DeviceTypeToTypeString(localDevice_.deviceType_);
+    std::string localType = DeviceTypeToTypeString(GetLocalDevice().deviceType_);
     int32_t status = OberverService::GetInstance().IsScreenLocked();
     auto result = NotificationHelper::IsDistributedEnabledBySlot(NotificationConstant::SlotType::LIVE_VIEW,
         localType, liveViewEnable);
@@ -434,10 +439,11 @@ void DistributedDeviceService::SyncDeviceStatus(int32_t type, int32_t status,
     bool notificationEnable, bool liveViewEnable)
 {
     std::shared_ptr<NotifticationStateBox> stateBox = std::make_shared<NotifticationStateBox>();
-    std::string deviceType = DeviceTypeToTypeString(localDevice_.deviceType_);
+    DistributedDeviceInfo localDevice = GetLocalDevice();
+    std::string deviceType = DeviceTypeToTypeString(localDevice.deviceType_);
     deviceType = DeviceTypeConversion(deviceType);
     stateBox->SetDeviceType(deviceType);
-    stateBox->SetDeviceId(localDevice_.deviceId_);
+    stateBox->SetDeviceId(localDevice.deviceId_);
     if (type == STATE_TYPE_LOCKSCREEN || type == STATE_TYPE_BOTH) {
         stateBox->SetState(status);
     }
@@ -450,7 +456,7 @@ void DistributedDeviceService::SyncDeviceStatus(int32_t type, int32_t status,
         ANS_LOGW("Dans SyncDeviceState serialize failed.");
         return;
     }
-    bool isPad = IsLocalPadOrPC();
+    bool isPad = localDevice.IsPadOrPc();
     std::lock_guard<ffrt::mutex> lock(mapLock_);
     for (const auto& peer : peerDevice_) {
         if (isPad && peer.second.peerState_ != DeviceState::STATE_ONLINE) {

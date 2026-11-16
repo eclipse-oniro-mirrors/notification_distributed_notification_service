@@ -3799,6 +3799,68 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00019,
     GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00019 test end";
 }
 /**
+ * @tc.number    : AdvancedNotificationServiceTest_00020
+ * @tc.name      : GetTargetRecordList
+ * @tc.desc      : Test GetTargetRecordList function skips null records and records with null request.
+ * @tc.require   : #I8B8PI
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00020, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00020 test start";
+    const int32_t uid = 0;
+    const int32_t pid = 0;
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    auto contentType = NotificationContent::Type::LOCAL_LIVE_VIEW;
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->notificationList_.push_back(nullptr);
+    auto nullRequestRecord = std::make_shared<NotificationRecord>();
+    advancedNotificationService_->notificationList_.push_back(nullRequestRecord);
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    ASSERT_EQ(advancedNotificationService_->GetTargetRecordList(uid, pid, slotType, contentType, recordList),
+        ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
+    EXPECT_TRUE(recordList.empty());
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00020 test end";
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_00021
+ * @tc.name      : RemoveNotificationFromRecordList
+ * @tc.desc      : Test RemoveNotificationFromRecordList function skips null records and
+ *                 records with null notification.
+ * @tc.require   : #I8B8PI
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_00021, Function | SmallTest | Level1)
+{
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00021 test start";
+    std::string bundleName = "testBundle";
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    EXPECT_NE(request, nullptr);
+    request->SetSlotType(slotType);
+    auto liveContent = std::make_shared<NotificationLocalLiveViewContent>();
+    auto content = std::make_shared<NotificationContent>(liveContent);
+    request->SetContent(content);
+    request->SetOwnerBundleName(bundleName);
+    sptr<Notification> notification = new (std::nothrow) Notification(request);
+    EXPECT_NE(notification, nullptr);
+    auto record = std::make_shared<NotificationRecord>();
+    record->request = request;
+    record->notification = notification;
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->notificationList_.push_back(record);
+
+    auto nullNotificationRecord = std::make_shared<NotificationRecord>();
+    nullNotificationRecord->request = request;
+    nullNotificationRecord->notification = nullptr;
+    std::vector<std::shared_ptr<NotificationRecord>> recordList;
+    recordList.push_back(nullptr);
+    recordList.push_back(nullNotificationRecord);
+    recordList.push_back(record);
+    ASSERT_EQ(advancedNotificationService_->RemoveNotificationFromRecordList(recordList), ERR_OK);
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    GTEST_LOG_(INFO) << "AdvancedNotificationServiceTest_00021 test end";
+}
+/**
  * @tc.number    : IsLiveViewCanRecoverTest_0001
  * @tc.name      : IsLiveViewCanRecover
  * @tc.desc      : Test IsLiveViewCanRecover and liveview is nullptr.

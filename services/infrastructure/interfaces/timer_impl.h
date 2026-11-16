@@ -16,6 +16,8 @@
 #ifndef ANS_TIMER_IMPL_H
 #define ANS_TIMER_IMPL_H
 
+#include <mutex>
+
 #include "time_service_client.h"
 
 namespace OHOS {
@@ -38,6 +40,7 @@ public:
 private:
     sptr<MiscServices::TimeServiceClient> timer_ {nullptr};
     uint64_t timerId_ {0};
+    std::mutex mutex_;
 };
 } // namespace Infra
 } // namespace Notification

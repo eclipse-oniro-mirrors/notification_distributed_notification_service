@@ -29,6 +29,7 @@
 #include "mock_bundle_mgr.h"
 #include "mock_accesstoken_kit.h"
 #include "mock_time_service_client.h"
+#include "mock_common_event_manager.h"
 #include "mock_datashare.h"
 #include "mock_notification_request.h"
 #include "mock_notification_rdb_data_mgr.h"
@@ -3393,6 +3394,48 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_OnReceiveEvent
     EXPECT_TRUE(spyFired);
 }
 #endif
+
+/**
+ * @tc.name: SystemEventObserver_Constructor_001
+ * @tc.desc: Test SystemEventObserver constructor completes and initializes both subscribers
+ *           when common event subscription succeeds.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_Constructor_001,
+    Function | SmallTest | Level1)
+{
+    MockSubscribeCommonEventResult(true);
+    ISystemEvent callbacks = {};
+
+    SystemEventObserver observer(callbacks);
+
+    EXPECT_NE(observer.subscriber_, nullptr);
+    EXPECT_NE(observer.cloneStartSubscriber_, nullptr);
+
+    MockSubscribeCommonEventResult(true);
+}
+
+/**
+ * @tc.name: SystemEventObserver_Constructor_002
+ * @tc.desc: Test SystemEventObserver constructor still completes and initializes both
+ *           subscribers when both common event subscriptions fail.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, SystemEventObserver_Constructor_002,
+    Function | SmallTest | Level1)
+{
+    MockSubscribeCommonEventResult(false);
+    ISystemEvent callbacks = {};
+
+    SystemEventObserver observer(callbacks);
+
+    EXPECT_NE(observer.subscriber_, nullptr);
+    EXPECT_NE(observer.cloneStartSubscriber_, nullptr);
+
+    MockSubscribeCommonEventResult(true);
+}
 
 /**
  * @tc.name: RemoveFromNotificationList_2000
