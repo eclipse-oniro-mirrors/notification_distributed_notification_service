@@ -1262,6 +1262,10 @@ void AdvancedNotificationService::OnResourceRemove(int32_t userId)
         ANS_LOGD("ffrt enter!");
         NotificationPreferences::GetInstance()->RemoveSettings(userId);
     }));
+    notificationSvrQueue_.Submit([this, userId]() {
+        recoveredLiveViewUserIds_.erase(userId);
+        recoverReplayUserIds_.erase(userId);
+    });
     notificationSvrQueue_.Submit(std::bind([=]() {
         ANS_LOGI("Resource remove %{public}d", userId);
         std::vector<sptr<NotificationBundleOption>> bundles;
@@ -1352,6 +1356,10 @@ void AdvancedNotificationService::OnUserStopped(int32_t userId)
     notificationSvrQueue_.Submit(std::bind([=]() {
         DeleteAllByUserStopped(userId);
     }));
+    notificationSvrQueue_.Submit([this, userId]() {
+        recoveredLiveViewUserIds_.erase(userId);
+        recoverReplayUserIds_.erase(userId);
+    });
 }
 
 void AdvancedNotificationService::DeleteAllByUserStopped(int32_t userId)

@@ -85,6 +85,14 @@ void AdvancedNotificationServiceAbility::OnStart()
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     service_->TryStartExtensionSubscribeService();
 #endif
+    RecoverLiveViewOnStart();
+}
+
+void AdvancedNotificationServiceAbility::RecoverLiveViewOnStart()
+{
+    if (service_ != nullptr) {
+        service_->RecoverLiveViewFromDb();
+    }
 }
 
 void AdvancedNotificationServiceAbility::OnStop()

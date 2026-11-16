@@ -270,7 +270,8 @@ bool PrepareLiveViewRequestFromDb(const std::string &storageKey, int32_t dbUserI
     return true;
 }
 
-void PrepareUsersForRecovery(int32_t userId, std::vector<int32_t> &usersToRecover)
+void PrepareUsersForRecovery(int32_t userId, const std::set<int32_t> &recoveredUserIds,
+    std::vector<int32_t> &usersToRecover)
 {
     std::vector<int32_t> userIds;
     if (userId == -1) {
@@ -279,6 +280,12 @@ void PrepareUsersForRecovery(int32_t userId, std::vector<int32_t> &usersToRecove
         userIds.push_back(userId);
     }
     for (const auto &uid : userIds) {
+        // Skip users already recovered in this process: no duplicate work and no
+        // repeated fail count accumulation that would trigger a data cleanup.
+        if (recoveredUserIds.count(uid) > 0) {
+            ANS_LOGI("Skip user %{public}d recovery: already recovered.", uid);
+            continue;
+        }
         int32_t failCount = GetRecoverFailCount(uid);
         if (failCount >= MAX_RESTART_ATTEMPTS) {
             ANS_LOGE("Skip user %{public}d recovery: fail count %{public}d >= %{public}d, cleaning data.",
@@ -300,19 +307,21 @@ void AdvancedNotificationService::RecoverLiveViewFromDb(int32_t userId)
         ANS_LOGI("Start recover live view. userId:%{public}d", userId);
 
         std::vector<int32_t> usersToRecover;
-        PrepareUsersForRecovery(userId, usersToRecover);
+        PrepareUsersForRecovery(userId, recoveredLiveViewUserIds_, usersToRecover);
         if (usersToRecover.empty()) {
             ANS_LOGI("No users to recover, all skipped.");
             return;
         }
         for (const auto &uid : usersToRecover) {
-            RecoverLiveViewForUser(uid);
+            if (RecoverLiveViewForUser(uid)) {
+                recoveredLiveViewUserIds_.insert(uid);
+            }
         }
         ANS_LOGI("End recover live view from db.");
     }));
 }
 
-void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
+bool AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
 {
     if (RecoverGeofenceLiveViewFromDb(userId) != ERR_OK) {
         ANS_LOGE("Recover geofence live view from db failed for user %{public}d.", userId);
@@ -322,11 +331,11 @@ void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
     if (GetBatchNotificationRequestsFromDb(requestsdb, userId, &removedBaseKeys) != ERR_OK) {
         ANS_LOGE("Get liveView from db failed for user %{public}d.", userId);
         SetRecoverFailCount(userId, 0);
-        return;
+        return false;
     }
     if (requestsdb.empty() && removedBaseKeys.empty()) {
         SetRecoverFailCount(userId, 0);
-        return;
+        return true;
     }
     ANS_LOGI("User %{public}d: recover %{public}zu live views.", userId, requestsdb.size());
     std::vector<std::string> keys;
@@ -340,6 +349,7 @@ void AdvancedNotificationService::RecoverLiveViewForUser(int32_t userId)
     StartSnoozeTimer();
     ReplayRecoveredNotifications(userId);
     SetRecoverFailCount(userId, 0);
+    return true;
 }
 
 void AdvancedNotificationService::ReplayRecoveredNotifications(const int32_t userId)

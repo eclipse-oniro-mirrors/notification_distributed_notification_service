@@ -14,6 +14,7 @@
  */
 
 #include <thread>
+#include <unordered_map>
 #include "gtest/gtest.h"
 
 #define private public
@@ -23,17 +24,81 @@
 #include "advanced_datashare_helper.h"
 #include "iremote_broker.h"
 #include "notification_check_request.h"
+#include "notification_constant.h"
+#include "notification_content.h"
+#include "nlohmann/json.hpp"
+#include "os_account_manager.h"
 
 #include "ans_ut_constant.h"
 #include "mock_ipc_skeleton.h"
 #include "mock_bundle_mgr.h"
 #include "mock_accesstoken_kit.h"
+#include "mock_notification_rdb_data_mgr.h"
 
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
+namespace AccountSA {
+// The real QueryActiveOsAccountIds depends on the device os_account service, which
+// is not healthy on the x86 emulator. Mock it locally so the default user recovery
+// deterministically enumerates one active user.
+ErrCode OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t> &ids)
+{
+    ids = {100};
+    return ERR_OK;
+}
+}  // namespace AccountSA
+}  // namespace OHOS
+
+namespace OHOS {
 namespace Notification {
+namespace {
+constexpr int32_t RECOVER_TEST_USER_ID = 100;
+constexpr int32_t RECOVER_TEST_SECOND_USER_ID = 101;
+
+// An expired live view row still counts as a processed recovery entry: the record is
+// cleaned from DB and the batch is reported as success.
+std::string BuildExpiredLiveViewRow()
+{
+    nlohmann::json row = {
+        { "slotType", static_cast<int32_t>(NotificationConstant::SlotType::LIVE_VIEW) },
+        { "notificationContentType", static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW) },
+        { "updateDeadLine", 1 },
+        { "finishDeadLine", 1 },
+        { "triggerDeadLine", 1 },
+    };
+    return row.dump();
+}
+
+void SetRecoverDbRows(const std::vector<std::string> &labels)
+{
+    std::unordered_map<std::string, std::string> rows;
+    for (const auto &label : labels) {
+        rows[REQUEST_STORAGE_KEY_PREFIX + "_" + label] = BuildExpiredLiveViewRow();
+    }
+    MockSetDataValues(rows);
+}
+
+void ResetRecoverDbMock()
+{
+    std::unordered_map<std::string, std::string> emptyRows;
+    MockSetDataValues(emptyRows);
+    MockSetDataValue("");
+    MockInit(true);
+    MockQueryData(0);
+    MockQueryDataBeginWithKey(true);
+    MockInsertData(true);
+    MockDeleteData(true);
+    MockDeleteBatchData(true);
+}
+
+void WaitForRecoverQueue(const sptr<AdvancedNotificationService> &service)
+{
+    service->notificationSvrQueue_.SyncSubmit(std::function<void()>([] {}));
+}
+}  // namespace
+
 class AdvancedNotificationSysLiveviewServiceTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -221,6 +286,149 @@ HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, RemoveSystemLiveViewNotific
     ASSERT_EQ(false, advancedNotificationService_->IsNotificationExistsInDelayList(key));
     auto key2 = record2->notification->GetKey();
     ASSERT_TRUE(advancedNotificationService_->IsNotificationExists(key2));
+}
+
+/**
+ * @tc.name: RecoverLiveViewIdempotent_100
+ * @tc.desc: Test the same user recovers only once per process lifetime. The second round must be skipped,
+ *           proved by the replay marker not being written again.
+ * @tc.type: FUNC
+ * @tc.require: issue#4502
+ */
+HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, RecoverLiveViewIdempotent_100, Function | SmallTest | Level1)
+{
+    ResetRecoverDbMock();
+    SetRecoverDbRows({"recover_once"});
+    advancedNotificationService_->recoveredLiveViewUserIds_.clear();
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+
+    advancedNotificationService_->RecoverLiveViewFromDb(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+    EXPECT_EQ(advancedNotificationService_->recoverReplayUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+    advancedNotificationService_->RecoverLiveViewFromDb(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.size(), 1U);
+    EXPECT_TRUE(advancedNotificationService_->recoverReplayUserIds_.empty());
+    ResetRecoverDbMock();
+}
+
+/**
+ * @tc.name: RecoverLiveViewIdempotent_200
+ * @tc.desc: Test the default all-user recovery and a later single-user recovery are deduplicated.
+ * @tc.type: FUNC
+ * @tc.require: issue#4502
+ */
+HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, RecoverLiveViewIdempotent_200, Function | SmallTest | Level1)
+{
+    ResetRecoverDbMock();
+    SetRecoverDbRows({"recover_all_user"});
+    advancedNotificationService_->recoveredLiveViewUserIds_.clear();
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+
+    advancedNotificationService_->RecoverLiveViewFromDb();
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+    advancedNotificationService_->RecoverLiveViewFromDb(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+    EXPECT_TRUE(advancedNotificationService_->recoverReplayUserIds_.empty());
+    ResetRecoverDbMock();
+}
+
+/**
+ * @tc.name: RecoverLiveViewIdempotent_300
+ * @tc.desc: Test users recover independently: skipping one recovered user must not affect another user.
+ * @tc.type: FUNC
+ * @tc.require: issue#4502
+ */
+HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, RecoverLiveViewIdempotent_300, Function | SmallTest | Level1)
+{
+    ResetRecoverDbMock();
+    SetRecoverDbRows({"recover_multi_user"});
+    advancedNotificationService_->recoveredLiveViewUserIds_.clear();
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+
+    advancedNotificationService_->RecoverLiveViewFromDb(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    advancedNotificationService_->RecoverLiveViewFromDb(RECOVER_TEST_SECOND_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_SECOND_USER_ID), 1U);
+
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+    advancedNotificationService_->RecoverLiveViewFromDb(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_TRUE(advancedNotificationService_->recoverReplayUserIds_.empty());
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.size(), 2U);
+    ResetRecoverDbMock();
+}
+
+/**
+ * @tc.name: RecoverLiveViewIdempotent_400
+ * @tc.desc: Test a failed batch DB query does not record the user as recovered, so a retry still recovers.
+ * @tc.type: FUNC
+ * @tc.require: issue#4502
+ */
+HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, RecoverLiveViewIdempotent_400, Function | SmallTest | Level1)
+{
+    ResetRecoverDbMock();
+    SetRecoverDbRows({"recover_retry"});
+    advancedNotificationService_->recoveredLiveViewUserIds_.clear();
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+
+    MockQueryDataBeginWithKey(false);
+    advancedNotificationService_->RecoverLiveViewFromDb(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 0U);
+
+    MockQueryDataBeginWithKey(true);
+    advancedNotificationService_->RecoverLiveViewFromDb(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+    ResetRecoverDbMock();
+}
+
+/**
+ * @tc.name: RecoverLiveViewIdempotent_500
+ * @tc.desc: Test user stopped or removed releases the recovery state so the same user can recover again.
+ * @tc.type: FUNC
+ * @tc.require: issue#4502
+ */
+HWTEST_F(AdvancedNotificationSysLiveviewServiceTest, RecoverLiveViewIdempotent_500, Function | SmallTest | Level1)
+{
+    ResetRecoverDbMock();
+    SetRecoverDbRows({"recover_user_lifecycle"});
+    advancedNotificationService_->recoveredLiveViewUserIds_.clear();
+    advancedNotificationService_->recoverReplayUserIds_.clear();
+
+    advancedNotificationService_->RecoverLiveViewFromDb(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    ASSERT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+    ASSERT_EQ(advancedNotificationService_->recoverReplayUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+
+    ResetRecoverDbMock();
+    advancedNotificationService_->OnUserStopped(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 0U);
+    EXPECT_EQ(advancedNotificationService_->recoverReplayUserIds_.count(RECOVER_TEST_USER_ID), 0U);
+
+    SetRecoverDbRows({"recover_user_lifecycle"});
+    advancedNotificationService_->RecoverLiveViewFromDb(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+
+    ResetRecoverDbMock();
+    advancedNotificationService_->OnResourceRemove(RECOVER_TEST_USER_ID);
+    WaitForRecoverQueue(advancedNotificationService_);
+    EXPECT_EQ(advancedNotificationService_->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 0U);
+    EXPECT_EQ(advancedNotificationService_->recoverReplayUserIds_.count(RECOVER_TEST_USER_ID), 0U);
+    ResetRecoverDbMock();
 }
 }  // namespace Notification
 }  // namespace OHOS
