@@ -97,6 +97,53 @@ int32_t QueryIntScalar(NativeRdb::RdbStore& store, const std::string& sql)
     return value;
 }
 
+// RdbStore mock which makes the deprecated QuerySql(sql, args) overload return nullptr
+// from a configured call on, so the QuerySql null checks in
+// ReminderStore::QueryActiveReminderCount are reached. Calls before that are
+// delegated to a real store so the first count keeps its real value.
+class MockNullQuerySqlStore : public NativeRdb::RdbStore {
+public:
+    explicit MockNullQuerySqlStore(std::shared_ptr<NativeRdb::RdbStore> delegate) : delegate_(std::move(delegate)) {}
+
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> QuerySql(const std::string &sql,
+        const std::vector<std::string> &args) override
+    {
+        querySqlCount_++;
+        if (querySqlCount_ >= nullFromCall_) {
+            return nullptr;
+        }
+        return delegate_ == nullptr ? nullptr : delegate_->QuerySql(sql, args);
+    }
+
+    std::shared_ptr<NativeRdb::AbsSharedResultSet> QuerySql(const std::string &sql,
+        const NativeRdb::RdbStore::Values &args) override
+    {
+        return nullptr;
+    }
+
+    std::shared_ptr<NativeRdb::ResultSet> QueryByStep(const std::string &sql,
+        const NativeRdb::RdbStore::Values &args, bool preCount) override
+    {
+        return nullptr;
+    }
+
+    int GetVersion(int &version) override
+    {
+        return NativeRdb::E_OK;
+    }
+
+    int SetVersion(int version) override
+    {
+        return NativeRdb::E_OK;
+    }
+
+    int querySqlCount_ = 0;  // number of QuerySql calls seen so far
+    int nullFromCall_ = 1;   // QuerySql returns nullptr from this call on
+
+private:
+    std::shared_ptr<NativeRdb::RdbStore> delegate_;
+};
+
 /**
  * @tc.name: OnCreate_00002_AllFailBranches
  * @tc.desc: Test OnCreate returns error when each of its three table creations fails.
@@ -1025,6 +1072,65 @@ HWTEST_F(ReminderStoreTest, ReminderStrategyTest_00001_RoundTripBoolFlags, Funct
     EXPECT_TRUE(reminders[0]->IsTapDismissed());
     EXPECT_TRUE(reminders[0]->IsForceDistributed());
     EXPECT_TRUE(reminders[0]->IsNotDistributed());
+    ClearStore();
+}
+
+/**
+ * @tc.name: QueryActiveReminderCount_00005_FirstQuerySqlNull
+ * @tc.desc: Test QueryActiveReminderCount returns 0 without running the second query
+ *           when the first QuerySql returns nullptr.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, QueryActiveReminderCount_00005_FirstQuerySqlNull, Function | SmallTest | Level1)
+{
+    ReminderStore store;
+    InitStore(store);
+    ASSERT_NE(store.rdbStore_, nullptr);
+
+    // The mock keeps rdbStore_ non-null so EnsureOpen succeeds, but makes the first
+    // QuerySql return nullptr. Before the fix GetRowCount dereferenced the null result
+    // set and crashed; after the fix the function returns 0 before the second query.
+    auto mock = std::make_shared<MockNullQuerySqlStore>(store.rdbStore_);
+    mock->nullFromCall_ = 1;
+    store.rdbStore_ = mock;
+
+    EXPECT_EQ(store.QueryActiveReminderCount(), 0);
+    EXPECT_EQ(mock->querySqlCount_, 1);
+    ClearStore();
+}
+
+/**
+ * @tc.name: QueryActiveReminderCount_00006_SecondQuerySqlNull
+ * @tc.desc: Test QueryActiveReminderCount returns 0 when the second QuerySql returns nullptr,
+ *           discarding the non-zero base table count.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, QueryActiveReminderCount_00006_SecondQuerySqlNull, Function | SmallTest | Level1)
+{
+    ReminderStore store;
+    InitStore(store);
+    ASSERT_NE(store.rdbStore_, nullptr);
+    auto realStore = store.rdbStore_;
+
+    // One active timer makes the first (real) query count exactly 1 row.
+    sptr<ReminderRequest> timer = new ReminderRequestTimer();
+    timer->SetReminderId(240);
+    timer->reminderType_ = ReminderRequest::ReminderType::TIMER;
+    timer->SetExpired(false);
+    EXPECT_EQ(store.UpdateOrInsert(timer), ReminderStore::STATE_OK);
+    EXPECT_EQ(store.QueryActiveReminderCount(), 1);
+
+    // The mock delegates the first QuerySql (baseTableNum stays 1) but returns nullptr
+    // for the second one. Before the fix GetRowCount dereferenced the null result set
+    // and crashed; after the fix the function returns 0 instead of the counted 1.
+    auto mock = std::make_shared<MockNullQuerySqlStore>(realStore);
+    mock->nullFromCall_ = 2;
+    store.rdbStore_ = mock;
+
+    EXPECT_EQ(store.QueryActiveReminderCount(), 0);
+    EXPECT_EQ(mock->querySqlCount_, 2);
     ClearStore();
 }
 }

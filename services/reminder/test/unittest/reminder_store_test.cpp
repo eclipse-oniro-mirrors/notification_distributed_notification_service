@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+#include <chrono>
 #include <fstream>
-
 #include <gtest/gtest.h>
 
 #include "abs_shared_result_set.h"
@@ -1621,6 +1621,85 @@ HWTEST_F(ReminderStoreTest, QueryActiveReminderCount_00020, Function | SmallTest
     int32_t activeCount = reminderStore.QueryActiveReminderCount();
 
     EXPECT_EQ(activeCount, 0);
+    ClearStore();
+}
+
+/**
+ * @tc.name: QueryActiveReminderCount_00003
+ * @tc.desc: Test QueryActiveReminderCount when rdbStore is not initialized, should return 0 without crash.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, QueryActiveReminderCount_00003, Function | SmallTest | Level1)
+{
+    // rdbStore_ is nullptr by default, the entry guard should return 0.
+    ReminderStore reminderStore;
+    int32_t activeCount = reminderStore.QueryActiveReminderCount();
+    EXPECT_EQ(activeCount, 0);
+}
+
+/**
+ * @tc.name: QueryActiveReminderCount_00004
+ * @tc.desc: Test QueryActiveReminderCount with mixed active/expired reminders and calendar time
+ *           conditions, verify the count of base table query and calendar table query is summed correctly.
+ * @tc.type: FUNC
+ * @tc.require: issueI92BU9
+ */
+HWTEST_F(ReminderStoreTest, QueryActiveReminderCount_00004, Function | SmallTest | Level1)
+{
+    ReminderStore reminderStore;
+    InitStore(reminderStore);
+    int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    constexpr int64_t minuteMs = 60 * 1000;
+
+    // 1. Active timer: should be counted by the base table query.
+    sptr<ReminderRequest> activeTimer = new ReminderRequestTimer();
+    activeTimer->SetReminderId(1);
+    activeTimer->SetExpired(false);
+    reminderStore.UpdateOrInsert(activeTimer);
+
+    // 2. Expired timer: should not be counted (is_expired = 'true').
+    sptr<ReminderRequest> expiredTimer = new ReminderRequestTimer();
+    expiredTimer->SetReminderId(2);
+    expiredTimer->SetExpired(true);
+    reminderStore.UpdateOrInsert(expiredTimer);
+
+    // 3. Upcoming calendar (date_time > now): should be counted.
+    sptr<ReminderRequest> upcoming = new ReminderRequestCalendar();
+    upcoming->SetReminderId(3);
+    ReminderRequestCalendar* upcomingCalendar = static_cast<ReminderRequestCalendar*>(upcoming.GetRefPtr());
+    upcomingCalendar->SetDateTime(static_cast<uint64_t>(now + 10 * minuteMs));
+    EXPECT_TRUE(upcomingCalendar->SetEndDateTime(static_cast<uint64_t>(now + 20 * minuteMs)));
+    reminderStore.UpdateOrInsert(upcoming);
+
+    // 4. In-window calendar (date_time < now < end_date_time): should be counted.
+    sptr<ReminderRequest> inWindow = new ReminderRequestCalendar();
+    inWindow->SetReminderId(4);
+    ReminderRequestCalendar* inWindowCalendar = static_cast<ReminderRequestCalendar*>(inWindow.GetRefPtr());
+    inWindowCalendar->SetDateTime(static_cast<uint64_t>(now - 5 * minuteMs));
+    EXPECT_TRUE(inWindowCalendar->SetEndDateTime(static_cast<uint64_t>(now + 5 * minuteMs)));
+    reminderStore.UpdateOrInsert(inWindow);
+
+    // 5. One-shot calendar which has passed (date_time = end_date_time < now): should be counted.
+    sptr<ReminderRequest> oneShotPast = new ReminderRequestCalendar();
+    oneShotPast->SetReminderId(5);
+    ReminderRequestCalendar* oneShotPastCalendar = static_cast<ReminderRequestCalendar*>(oneShotPast.GetRefPtr());
+    oneShotPastCalendar->SetDateTime(static_cast<uint64_t>(now - 10 * minuteMs));
+    EXPECT_TRUE(oneShotPastCalendar->SetEndDateTime(static_cast<uint64_t>(now - 10 * minuteMs)));
+    reminderStore.UpdateOrInsert(oneShotPast);
+
+    // 6. Fully expired calendar (date_time < end_date_time < now): should not be counted.
+    sptr<ReminderRequest> expired = new ReminderRequestCalendar();
+    expired->SetReminderId(6);
+    ReminderRequestCalendar* expiredCalendar = static_cast<ReminderRequestCalendar*>(expired.GetRefPtr());
+    expiredCalendar->SetDateTime(static_cast<uint64_t>(now - 20 * minuteMs));
+    EXPECT_TRUE(expiredCalendar->SetEndDateTime(static_cast<uint64_t>(now - 15 * minuteMs)));
+    reminderStore.UpdateOrInsert(expired);
+
+    // base table: 1 (active timer), calendar table: 3 (upcoming, in-window, one-shot past).
+    int32_t activeCount = reminderStore.QueryActiveReminderCount();
+    EXPECT_EQ(activeCount, 4);
     ClearStore();
 }
 
