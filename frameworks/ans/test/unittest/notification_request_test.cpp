@@ -1356,6 +1356,191 @@ HWTEST_F(NotificationRequestTest, FillMissingParameters_0007, Level1)
 }
 
 /**
+ * @tc.name: FillMissingParameters_EventControlForgedFullUpdate_0001
+ * @tc.desc: A full update must drop the client provided eventControl when the stored record has none,
+ *           otherwise a forged value would amplify the rights of the update.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_EventControlForgedFullUpdate_0001, Level1)
+{
+    NotificationRequest notificationRequest(10);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    auto newExtraInfo = std::make_shared<AAFwk::WantParams>();
+    newExtraInfo->SetParam("eventControl", AAFwk::String::Box("forged"));
+    liveContent->SetExtraInfo(newExtraInfo);
+    notificationRequest.SetContent(std::make_shared<NotificationContent>(liveContent));
+
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    oldRequest->SetNotificationId(10);
+    oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    oldLiveContent->SetExtraInfo(std::make_shared<AAFwk::WantParams>());
+    oldRequest->SetContent(std::make_shared<NotificationContent>(oldLiveContent));
+
+    notificationRequest.FillMissingParameters(oldRequest);
+    auto extraInfo = liveContent->GetExtraInfo();
+    ASSERT_NE(extraInfo, nullptr);
+    EXPECT_FALSE(extraInfo->HasParam("eventControl"));
+}
+
+/**
+ * @tc.name: FillMissingParameters_EventControlTrustedFullUpdate_0001
+ * @tc.desc: A full update must replace the client provided eventControl with the trusted value stored
+ *           with the existing record.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_EventControlTrustedFullUpdate_0001, Level1)
+{
+    NotificationRequest notificationRequest(10);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    auto newExtraInfo = std::make_shared<AAFwk::WantParams>();
+    newExtraInfo->SetParam("eventControl", AAFwk::String::Box("forged"));
+    liveContent->SetExtraInfo(newExtraInfo);
+    notificationRequest.SetContent(std::make_shared<NotificationContent>(liveContent));
+
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    oldRequest->SetNotificationId(10);
+    oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    auto oldExtraInfo = std::make_shared<AAFwk::WantParams>();
+    oldExtraInfo->SetParam("eventControl", AAFwk::String::Box("trusted"));
+    oldLiveContent->SetExtraInfo(oldExtraInfo);
+    oldRequest->SetContent(std::make_shared<NotificationContent>(oldLiveContent));
+
+    notificationRequest.FillMissingParameters(oldRequest);
+    auto extraInfo = liveContent->GetExtraInfo();
+    ASSERT_NE(extraInfo, nullptr);
+    EXPECT_EQ(extraInfo->GetStringParam("eventControl"), "trusted");
+}
+
+/**
+ * @tc.name: FillMissingParameters_EventControlTrustedFullUpdate_0002
+ * @tc.desc: A full update without extraInfo still inherits the trusted eventControl of the stored record.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_EventControlTrustedFullUpdate_0002, Level1)
+{
+    NotificationRequest notificationRequest(10);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_FULL_UPDATE);
+    notificationRequest.SetContent(std::make_shared<NotificationContent>(liveContent));
+
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    oldRequest->SetNotificationId(10);
+    oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    auto oldExtraInfo = std::make_shared<AAFwk::WantParams>();
+    oldExtraInfo->SetParam("eventControl", AAFwk::String::Box("trusted"));
+    oldLiveContent->SetExtraInfo(oldExtraInfo);
+    oldRequest->SetContent(std::make_shared<NotificationContent>(oldLiveContent));
+
+    notificationRequest.FillMissingParameters(oldRequest);
+    auto extraInfo = liveContent->GetExtraInfo();
+    ASSERT_NE(extraInfo, nullptr);
+    EXPECT_EQ(extraInfo->GetStringParam("eventControl"), "trusted");
+}
+
+/**
+ * @tc.name: FillMissingParameters_EventControlForgedIncrementalUpdate_0001
+ * @tc.desc: An incremental update must drop the client provided eventControl when the stored record has none.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_EventControlForgedIncrementalUpdate_0001, Level1)
+{
+    NotificationRequest notificationRequest(10);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
+    auto newExtraInfo = std::make_shared<AAFwk::WantParams>();
+    newExtraInfo->SetParam("eventControl", AAFwk::String::Box("forged"));
+    newExtraInfo->SetParam("clientKey", AAFwk::String::Box("clientValue"));
+    liveContent->SetExtraInfo(newExtraInfo);
+    notificationRequest.SetContent(std::make_shared<NotificationContent>(liveContent));
+
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    oldRequest->SetNotificationId(10);
+    oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    oldLiveContent->SetExtraInfo(std::make_shared<AAFwk::WantParams>());
+    oldRequest->SetContent(std::make_shared<NotificationContent>(oldLiveContent));
+
+    notificationRequest.FillMissingParameters(oldRequest);
+    auto extraInfo = liveContent->GetExtraInfo();
+    ASSERT_NE(extraInfo, nullptr);
+    EXPECT_FALSE(extraInfo->HasParam("eventControl"));
+    EXPECT_TRUE(extraInfo->HasParam("clientKey"));
+}
+
+/**
+ * @tc.name: FillMissingParameters_EventControlTrustedIncrementalUpdate_0001
+ * @tc.desc: An incremental update must inherit the trusted eventControl instead of the client provided one.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_EventControlTrustedIncrementalUpdate_0001, Level1)
+{
+    NotificationRequest notificationRequest(10);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
+    auto newExtraInfo = std::make_shared<AAFwk::WantParams>();
+    newExtraInfo->SetParam("eventControl", AAFwk::String::Box("forged"));
+    liveContent->SetExtraInfo(newExtraInfo);
+    notificationRequest.SetContent(std::make_shared<NotificationContent>(liveContent));
+
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    oldRequest->SetNotificationId(10);
+    oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    auto oldExtraInfo = std::make_shared<AAFwk::WantParams>();
+    oldExtraInfo->SetParam("eventControl", AAFwk::String::Box("trusted"));
+    oldLiveContent->SetExtraInfo(oldExtraInfo);
+    oldRequest->SetContent(std::make_shared<NotificationContent>(oldLiveContent));
+
+    notificationRequest.FillMissingParameters(oldRequest);
+    auto extraInfo = liveContent->GetExtraInfo();
+    ASSERT_NE(extraInfo, nullptr);
+    EXPECT_EQ(extraInfo->GetStringParam("eventControl"), "trusted");
+}
+
+/**
+ * @tc.name: FillMissingParameters_EventControlTrustedIncrementalUpdate_0002
+ * @tc.desc: An incremental update without extraInfo copies the stored parameters instead of sharing the
+ *           WantParams object of the stored record.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationRequestTest, FillMissingParameters_EventControlTrustedIncrementalUpdate_0002, Level1)
+{
+    NotificationRequest notificationRequest(10);
+    notificationRequest.SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto liveContent = std::make_shared<NotificationLiveViewContent>();
+    liveContent->SetLiveViewStatus(NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_INCREMENTAL_UPDATE);
+    notificationRequest.SetContent(std::make_shared<NotificationContent>(liveContent));
+
+    sptr<NotificationRequest> oldRequest = new (std::nothrow) NotificationRequest();
+    oldRequest->SetNotificationId(10);
+    oldRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto oldLiveContent = std::make_shared<NotificationLiveViewContent>();
+    auto oldExtraInfo = std::make_shared<AAFwk::WantParams>();
+    oldExtraInfo->SetParam("eventControl", AAFwk::String::Box("trusted"));
+    oldLiveContent->SetExtraInfo(oldExtraInfo);
+    oldRequest->SetContent(std::make_shared<NotificationContent>(oldLiveContent));
+
+    notificationRequest.FillMissingParameters(oldRequest);
+    auto extraInfo = liveContent->GetExtraInfo();
+    ASSERT_NE(extraInfo, nullptr);
+    EXPECT_NE(extraInfo.get(), oldExtraInfo.get());
+    EXPECT_EQ(extraInfo->GetStringParam("eventControl"), "trusted");
+
+    extraInfo->SetParam("eventControl", AAFwk::String::Box("mutated"));
+    EXPECT_EQ(oldExtraInfo->GetStringParam("eventControl"), "trusted");
+}
+
+/**
  * @tc.name: FillMissingParameters_NullContent_001
  * @tc.desc: Test FillMissingParameters when new request has LIVE_VIEW type but
  *           notificationContent_ is nullptr (IPC/JSON inconsistent state, no crash).
