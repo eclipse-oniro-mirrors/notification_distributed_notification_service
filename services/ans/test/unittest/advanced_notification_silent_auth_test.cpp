@@ -334,7 +334,7 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, Lock_EntryDimensions_001, Function 
 HWTEST_F(AdvancedNotificationSilentAuthTest, Lock_AncoActiveUserEntry_001, Function | SmallTest | Level1)
 {
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_anco_lock"}, TEST_USER_ID)), ERR_OK);
-    MockGetOsAccountLocalIdFromUid(true, 3); // uid -> userId 0 (Anco user-0 domain)
+    MockGetOsAccountLocalIdFromUid(true, 4); // uid -> userId 0 (Anco user-0 domain)
     MockBundleManager::MockIsAncoApp(true);
     EXPECT_TRUE(service_->IsBundleSilentAuthLocked(BuildOption("sa_anco_lock", ANCO_UID)));
     MockBundleManager::MockIsAncoApp(false);
@@ -824,7 +824,7 @@ HWTEST_F(AdvancedNotificationSilentAuthTest, Lock_FallbackChainExhaustedUnlocked
 {
     EXPECT_EQ(service_->SetSilentAuthNotificationInfo(BuildSilentAuth({"sa_nouser"}, TEST_USER_ID)), ERR_OK);
     // Anco uid resolves to the user-0 domain, but the active user resolve fails: not locked.
-    MockGetOsAccountLocalIdFromUid(true, 3);
+    MockGetOsAccountLocalIdFromUid(true, 4);
     MockBundleManager::MockIsAncoApp(true);
     MockQueryForgroundOsAccountId(false);
     EXPECT_FALSE(service_->IsBundleSilentAuthLocked(BuildOption("sa_nouser", ANCO_UID)));
