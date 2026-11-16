@@ -1285,6 +1285,10 @@ bool AdvancedNotificationService::IsDisableNotification(const std::string &bundl
 bool AdvancedNotificationService::IsDisableNotificationByRestrictedMode(
     const std::string &bundleName, const int32_t &userId)
 {
+    if (NotificationPreferences::GetInstance()->IsSafeMode()) {
+        ANS_LOGE("Safe Mode is on.");
+        return true;
+    }
     bool isKioskMode = NotificationPreferences::GetInstance()->IsKioskMode();
     bool isExamMode = NotificationPreferences::GetInstance()->IsExamMode();
     if (isKioskMode && !isExamMode && !IsExistRestrictedModeTrustList(bundleName, userId)) {
@@ -1305,6 +1309,10 @@ bool AdvancedNotificationService::IsDisableNotificationForSaByRestrictedMode(
     bool isAppAgent = false;
     if (!directAgency && !bundleName.empty()) {
         isAppAgent = true;
+    }
+    if (isAppAgent && NotificationPreferences::GetInstance()->IsSafeMode()) {
+        ANS_LOGE("Safe Mode is on.");
+        return true;
     }
     bool isKioskMode = NotificationPreferences::GetInstance()->IsKioskMode();
     bool isExamMode = NotificationPreferences::GetInstance()->IsExamMode();

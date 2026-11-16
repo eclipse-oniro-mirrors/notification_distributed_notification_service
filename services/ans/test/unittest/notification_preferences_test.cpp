@@ -3022,6 +3022,40 @@ HWTEST_F(NotificationPreferencesTest, IsKioskMode_001, Function | SmallTest | Le
 }
 
 /**
+ * @tc.name: SetSafeModeStatus_001
+ * @tc.desc: Test SetSafeModeStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, SetSafeModeStatus_001, Function | SmallTest | Level1)
+{
+    bool isSafeMode = true;
+    NotificationPreferences notificationPreferences;
+    notificationPreferences.SetSafeModeStatus(isSafeMode);
+    EXPECT_EQ(notificationPreferences.isSafeMode_, true);
+}
+
+/**
+ * @tc.name: IsSafeMode_001
+ * @tc.desc: Test IsSafeMode
+ * 1. default isSafeMode_ is false
+ * 2. SetSafeModeStatus(true), expects IsSafeMode returns true
+ * 3. SetSafeModeStatus(false), expects IsSafeMode returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationPreferencesTest, IsSafeMode_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+
+    EXPECT_EQ(notificationPreferences.IsSafeMode(), false);
+
+    notificationPreferences.SetSafeModeStatus(true);
+    EXPECT_EQ(notificationPreferences.IsSafeMode(), true);
+
+    notificationPreferences.SetSafeModeStatus(false);
+    EXPECT_EQ(notificationPreferences.IsSafeMode(), false);
+}
+
+/**
  * @tc.name: SetExamStatus_001
  * @tc.desc: Test SetExamStatus
  * @tc.type: FUNC

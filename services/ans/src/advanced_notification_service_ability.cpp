@@ -23,6 +23,7 @@
 #include "distributed_extension_service.h"
 #endif
 #include "advanced_notification_service.h"
+#include "notification_preferences.h"
 #ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
 #include "telephony_extension_wrapper.h"
 #endif
@@ -65,6 +66,7 @@ void AdvancedNotificationServiceAbility::OnStart()
         ANS_LOGE("Failed to create AdvancedNotificationService instance.");
         return;
     }
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(IsSafeBootMode());
     service_->CreateDialogManager();
     
     if (!Publish(service_)) {
@@ -232,6 +234,11 @@ bool AdvancedNotificationServiceAbility::IsBopdOrRescueMode()
 {
     bool isBopdOrRescue = (IsBopdMode() || OHOS::system::GetParameter("soc.boot.mode", "") == "rescue");
     return isBopdOrRescue;
+}
+
+bool AdvancedNotificationServiceAbility::IsSafeBootMode()
+{
+    return OHOS::system::GetParameter("ohos.boot.mode", "") == "safemode";
 }
 }  // namespace Notification
 }  // namespace OHOS

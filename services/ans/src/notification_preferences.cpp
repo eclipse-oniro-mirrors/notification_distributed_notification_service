@@ -3402,6 +3402,16 @@ bool NotificationPreferences::IsKioskMode()
     return isKioskMode_;
 }
 
+void NotificationPreferences::SetSafeModeStatus(bool isSafeMode)
+{
+    isSafeMode_ = isSafeMode;
+}
+
+bool NotificationPreferences::IsSafeMode()
+{
+    return isSafeMode_;
+}
+
 void NotificationPreferences::SetExamStatus(bool isExamStatus)
 {
     isExamMode_ = isExamStatus;

@@ -3301,6 +3301,34 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByRestrictedMode_003, Funct
 }
 
 /**
+ * @tc.name: IsDisableNotificationByRestrictedMode_004
+ * @tc.desc: Test IsDisableNotificationByRestrictedMode with safe mode blocking notifications
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByRestrictedMode_004, Function | SmallTest | Level1)
+{
+    std::string bundleName = "com.test.example";
+    int32_t userId = 0;
+    NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.clear();
+    NotificationPreferences::GetInstance()->preferencesInfo_.restrictedModeTrustList_.clear();
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(true);
+    bool result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId);
+    EXPECT_TRUE(result);
+
+    NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.emplace_back(bundleName);
+    result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId);
+    EXPECT_TRUE(result);
+
+    NotificationPreferences::GetInstance()->SetExamStatus(true);
+    result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId);
+    EXPECT_TRUE(result);
+
+    NotificationPreferences::GetInstance()->SetExamStatus(false);
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(false);
+    NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.clear();
+}
+
+/**
  * @tc.name: IsDisableNotificationForSaByRestrictedMode_001
  * @tc.desc: Test IsDisableNotificationForSaByRestrictedMode
  * @tc.type: FUNC
@@ -3367,6 +3395,29 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_004, 
     EXPECT_TRUE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, false));
 
     NotificationPreferences::GetInstance()->SetKioskModeStatus(false);
+}
+
+/**
+ * @tc.name: IsDisableNotificationForSaByRestrictedMode_005
+ * @tc.desc: Test IsDisableNotificationForSaByRestrictedMode with safe mode.
+ * 1. Safe mode on, SA publishing on behalf of an app, expects blocked
+ * 2. Safe mode on, directAgency SA notification, expects not blocked
+ * 3. Safe mode on, SA notification without bundle, expects not blocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_005, Function | SmallTest | Level1)
+{
+    int32_t userId = 0;
+    std::string bundleName = "com.test.example";
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(true);
+
+    EXPECT_TRUE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, false));
+
+    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, true));
+
+    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode("", userId, false));
+
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(false);
 }
 
 /*
