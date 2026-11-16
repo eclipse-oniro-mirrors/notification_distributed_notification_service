@@ -907,6 +907,375 @@ HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000040
 }
 
 /**
+ * @tc.number    : AdvancedNotificationServiceTest_000050
+ * @tc.name      : ANS_Subscribe_0500
+ * @tc.desc      : Test Subscribe with userId 0 passes through without account existence check
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000050, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t systemUserId = 0;
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(systemUserId);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000060
+ * @tc.name      : ANS_SubscribeNotification_0600
+ * @tc.desc      : Test SubscribeNotification with userId 0 passes through without account check
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000060, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t systemUserId = 0;
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(systemUserId);
+    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000070
+ * @tc.name      : ANS_Subscribe_0700
+ * @tc.desc      : Test Subscribe with appUserId SUBSCRIBE_USER_ALL skips account existence check
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000070, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(SUBSCRIBE_USER_ALL);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000080
+ * @tc.name      : ANS_SubscribeNotification_0800
+ * @tc.desc      : Test SubscribeNotification with appUserId SUBSCRIBE_USER_ALL skips account check
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000080, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(SUBSCRIBE_USER_ALL);
+    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000090
+ * @tc.name      : ANS_Subscribe_0900
+ * @tc.desc      : Test Subscribe with appUserId SUBSCRIBE_USER_INIT skips account existence check
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000090, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(SUBSCRIBE_USER_INIT);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000100
+ * @tc.name      : ANS_SubscribeNotification_1000
+ * @tc.desc      : Test SubscribeNotification with appUserId SUBSCRIBE_USER_INIT skips account check
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000100, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(SUBSCRIBE_USER_INIT);
+    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000110
+ * @tc.name      : ANS_Subscribe_1100
+ * @tc.desc      : Test Subscribe with a nonexistent user still checks account existence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000110, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t nonexistentUserId = 102;
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(nonexistentUserId);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_USER_NOT_EXIST);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000120
+ * @tc.name      : ANS_SubscribeNotification_1200
+ * @tc.desc      : Test SubscribeNotification with a nonexistent user still checks account existence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000120, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t nonexistentUserId = 102;
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(nonexistentUserId);
+    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_USER_NOT_EXIST);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000130
+ * @tc.name      : ANS_Subscribe_1300
+ * @tc.desc      : Test Subscribe with an existing user passes account existence check
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000130, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t existingUserId = 100;
+    MockIsOsAccountExists(true);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(existingUserId);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000140
+ * @tc.name      : ANS_SubscribeNotification_1400
+ * @tc.desc      : Test SubscribeNotification with an existing user passes account existence check
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000140, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t existingUserId = 100;
+    MockIsOsAccountExists(true);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(existingUserId);
+    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000150
+ * @tc.name      : ANS_Subscribe_1500
+ * @tc.desc      : Test Subscribe with non-keyword system-range user 5 still checks account existence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000150, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t systemRangeUserId = 5;
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(systemRangeUserId);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_USER_NOT_EXIST);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000160
+ * @tc.name      : ANS_SubscribeNotification_1600
+ * @tc.desc      : Test SubscribeNotification with non-keyword system-range user 5 checks account
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000160, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t systemRangeUserId = 5;
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(systemRangeUserId);
+    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_USER_NOT_EXIST);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000170
+ * @tc.name      : ANS_Subscribe_1700
+ * @tc.desc      : Test Subscribe with system-range user 5 passes when the account exists
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000170, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t systemRangeUserId = 5;
+    MockIsOsAccountExists(true);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(systemRangeUserId);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000180
+ * @tc.name      : ANS_SubscribeNotification_1800
+ * @tc.desc      : Test SubscribeNotification with system-range user 5 passes when the account exists
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000180, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t systemRangeUserId = 5;
+    MockIsOsAccountExists(true);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(systemRangeUserId);
+    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), info), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000190
+ * @tc.name      : ANS_Subscribe_1900
+ * @tc.desc      : Test Subscribe with invalid negative appUserId -3 still checks account existence
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000190, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    constexpr int32_t invalidUserId = -3;
+    MockIsOsAccountExists(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(invalidUserId);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_USER_NOT_EXIST);
+    MockIsOsAccountExists(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000200
+ * @tc.name      : ANS_Subscribe_2000
+ * @tc.desc      : Test Subscribe with null info skips appUserId validation
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000200, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    auto subscriber = new TestAnsSubscriber();
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), nullptr,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), nullptr), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000210
+ * @tc.name      : ANS_SubscribeNotification_2100
+ * @tc.desc      : Test SubscribeNotification with null info skips appUserId validation
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000210, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    auto subscriber = new TestAnsSubscriber();
+    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), nullptr,
+        subscriber->subscribedFlags_), (int)ERR_OK);
+    EXPECT_EQ((int)advancedNotificationService_->Unsubscribe(subscriber->GetImpl(), nullptr), (int)ERR_OK);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000220
+ * @tc.name      : ANS_Subscribe_2200
+ * @tc.desc      : Test Subscribe from a non-system app returns non-system app error
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000220, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_NON_SYSTEM_APP);
+    MockIsSystemApp(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000230
+ * @tc.name      : ANS_Subscribe_2300
+ * @tc.desc      : Test Subscribe without notification controller permission returns permission denied
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000230, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_PERMISSION_DENIED);
+    MockIsVerfyPermisson(true);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000240
+ * @tc.name      : ANS_Subscribe_2400
+ * @tc.desc      : Test Subscribe returns invalid param when resolving current user fails in AddSubscriber
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000240, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockGetOsAccountLocalIdFromUid(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(SUBSCRIBE_USER_INIT);
+    EXPECT_EQ((int)advancedNotificationService_->Subscribe(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_INVALID_PARAM);
+    MockGetOsAccountLocalIdFromUid(true);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceTest_000250
+ * @tc.name      : ANS_SubscribeNotification_2500
+ * @tc.desc      : Test SubscribeNotification returns invalid param when resolving current user fails
+ */
+HWTEST_F(AdvancedNotificationServiceTest, AdvancedNotificationServiceTest_000250, Function | SmallTest | Level1)
+{
+    MockIsVerfyPermisson(true);
+    MockGetOsAccountLocalIdFromUid(false);
+    auto subscriber = new TestAnsSubscriber();
+    sptr<NotificationSubscribeInfo> info = new NotificationSubscribeInfo();
+    info->AddAppUserId(SUBSCRIBE_USER_INIT);
+    EXPECT_EQ((int)advancedNotificationService_->SubscribeNotification(subscriber->GetImpl(), info,
+        subscriber->subscribedFlags_), (int)ERR_ANS_INNER_INVALID_PARAM);
+    MockGetOsAccountLocalIdFromUid(true);
+}
+
+/**
  * @tc.number    : AdvancedNotificationServiceTest_086001
  * @tc.name      : ANS_GetShowBadgeEnabledForBundle_0200
  * @tc.desc      : Test GetShowBadgeEnabledForBundle function
