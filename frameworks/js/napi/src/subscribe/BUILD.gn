@@ -48,8 +48,6 @@ ohos_shared_library("notificationsubscribe") {
 
   sources = [
     "../distributed_operation_callback.cpp",
-    "../remove.cpp",
-    "../unsubscribe.cpp",
     "../uv_queue.cpp",
     "init_module.cpp",
     "napi_remove.cpp",

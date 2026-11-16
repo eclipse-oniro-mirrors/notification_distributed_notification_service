@@ -29,11 +29,13 @@ ohos_cli_executable("ohos-notificationManager") {
         "-fPIC",
         "-g",
     ]
+    cflags += notification_size_opt_cflags
     cflags += [ "-Wall" ]
     if (target_cpu == "arm") {
         cflags += [ "-DBINDER_IPC_32BIT" ]
     }
     cflags_cc = cflags
+    ldflags = notification_size_opt_exe_ldflags
 
     sources = [
         "src/main.cpp",

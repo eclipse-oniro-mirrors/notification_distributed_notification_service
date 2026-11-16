@@ -19,11 +19,32 @@
         OHOS::Notification::NotificationSubscriberProxy::delegator_;
         OHOS::Notification::NotificationSubscriberProxy::*;
         OHOS::Notification::NotificationSubscriberStub::OnRemoteRequest*;
+        OHOS::Notification::NotificationSubscriberExtension::*;
+        OHOS::Notification::NotificationSubscriberExtensionContext::*;
+        OHOS::Notification::NotificationExtensionContent::*;
+        OHOS::Notification::NotificationInfo::*;
+        OHOS::Notification::NotificationSubscriberStubImpl::*;
         VTT?for?OHOS::Notification::NotificationSubscriberStub;
         VTT?for?OHOS::Notification::NotificationSubscriberProxy;
+        VTT?for?OHOS::Notification::NotificationSubscriberExtension;
+        VTT?for?OHOS::Notification::NotificationSubscriberExtensionContext;
+        VTT?for?OHOS::Notification::NotificationExtensionContent;
+        VTT?for?OHOS::Notification::NotificationInfo;
+        VTT?for?OHOS::Notification::NotificationSubscriberStubImpl;
         vtable?for?OHOS::Notification::NotificationSubscriberStub;
         vtable?for?OHOS::Notification::NotificationSubscriberProxy;
+        vtable?for?OHOS::Notification::NotificationSubscriberExtension;
+        vtable?for?OHOS::Notification::NotificationSubscriberExtensionContext;
+        vtable?for?OHOS::Notification::NotificationExtensionContent;
+        vtable?for?OHOS::Notification::NotificationInfo;
+        vtable?for?OHOS::Notification::NotificationSubscriberStubImpl;
     };
+    # Explicit mangled patterns required for the extension entry classes.
+    _ZN4OHOS12Notification31NotificationSubscriberExtension*;
+    _ZN4OHOS12Notification38NotificationSubscriberExtensionContext*;
+    _ZTVN4OHOS12Notification31NotificationSubscriberExtension*;
+    _ZTVN4OHOS12Notification38NotificationSubscriberExtensionContext*;
+    __emutls_get_address;
     _fini;
     _init;
   local:

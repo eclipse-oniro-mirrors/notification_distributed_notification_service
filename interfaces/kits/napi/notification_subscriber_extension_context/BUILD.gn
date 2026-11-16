@@ -51,6 +51,7 @@ ohos_shared_library("notificationsubscriberextensioncontext_napi") {
 
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags
+  version_script = "libnotificationsubscriberextensioncontext_napi.map"
 
   sources = [ "notification_subscriber_extension_context_module.cpp" ]
 

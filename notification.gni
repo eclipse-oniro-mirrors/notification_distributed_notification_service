@@ -178,3 +178,9 @@ notification_size_opt_ldflags = [
   "-Wl,-Bsymbolic",
 ]
 
+# ROM size optimization executable 链接 flag（可执行文件不使用 -Bsymbolic）
+notification_size_opt_exe_ldflags = [
+  "-flto",
+  "-Wl,--gc-sections",
+]
+

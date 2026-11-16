@@ -51,6 +51,7 @@ ohos_shared_library("notificationsubscriberextensionability_napi") {
 
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags
+  version_script = "libnotificationsubscriberextensionability_napi.map"
 
   sources = [ "notification_subscriber_extension_ability_module.cpp" ]
 

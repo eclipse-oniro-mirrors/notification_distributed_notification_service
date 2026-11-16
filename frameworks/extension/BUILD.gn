@@ -115,6 +115,7 @@ ohos_shared_library("notification_subscriber_ipc") {
   deps = [
     ":notification_subscriber_proxy",
     ":notification_subscriber_stub",
+    ":notification_subscriber_extension_common",
     "${frameworks_module_ans_path}:ans_innerkits",
   ]
 
@@ -156,7 +157,11 @@ ohos_source_set("notification_subscriber_extension_common") {
   configs = []
   public_configs = [ "${frameworks_path}/ans:ans_innerkits_config" ]
 
-  deps = [ ":notification_subscriber_ipc" ]
+  deps = [
+    ":notification_subscriber_interface",
+    ":notification_subscriber_stub",
+    "${frameworks_module_ans_path}:ans_innerkits",
+  ]
 
   external_deps = [
     "ability_base:want",

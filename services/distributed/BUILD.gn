@@ -31,6 +31,7 @@ ohos_shared_library("libans_distributed") {
 
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags
+  version_script = "libans_distributed.map"
 
   sources = [
     "src/distributed_database.cpp",

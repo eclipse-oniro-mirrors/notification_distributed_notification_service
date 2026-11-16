@@ -35,7 +35,6 @@ ohos_unittest("notification_subscriber_stub_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${frameworks_module_extension_path}:notification_subscriber_extension_common",
     "${frameworks_module_extension_path}:notification_subscriber_ipc",
   ]
 
@@ -83,7 +82,6 @@ ohos_unittest("notification_subscriber_extension_context_test") {
 
   deps = [
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${frameworks_module_extension_path}:notification_subscriber_extension_common",
     "${frameworks_module_extension_path}:notification_subscriber_ipc",
   ]
 

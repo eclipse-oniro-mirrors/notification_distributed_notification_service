@@ -77,6 +77,8 @@ ohos_shared_library("notification_napi_common") {
   # 公共库不加 -fvisibility=hidden [PR#4766 借鉴]
 
   sources = [
+    "src/ans_template.cpp",
+    "src/cancel.cpp",
     "src/common.cpp",
     "src/common2.cpp",
     "src/common_convert_content.cpp",
@@ -87,8 +89,20 @@ ohos_shared_library("notification_napi_common") {
     "src/common_convert_trigger.cpp",
     "src/common_utils.cpp",
     "src/constant.cpp",
+    "src/disable_notification.cpp",
+    "src/display_badge.cpp",
+    "src/distributed.cpp",
+    "src/disturb_mode.cpp",
+    "src/enable_notification.cpp",
+    "src/get_active.cpp",
+    "src/js_ans_dialog_callback.cpp",
+    "src/manager/napi_slot.cpp",
+    "src/priority.cpp",
+    "src/publish.cpp",
+    "src/remove.cpp",
     "src/slot.cpp",
     "src/subscribe.cpp",
+    "src/unsubscribe.cpp",
     "${core_path}/src/image_pixelmap_helper.cpp",
     "${core_path}/src/pixelmap_cache_manager.cpp",
     "${core_path}/src/subscriber_image_util.cpp",
@@ -150,20 +164,7 @@ ohos_shared_library("notification") {
   ldflags = notification_size_opt_ldflags
 
   sources = [
-    "src/ans_template.cpp",
-    "src/cancel.cpp",
-    "src/disable_notification.cpp",
-    "src/display_badge.cpp",
-    "src/distributed.cpp",
-    "src/disturb_mode.cpp",
-    "src/enable_notification.cpp",
-    "src/get_active.cpp",
     "src/init.cpp",
-    "src/js_ans_dialog_callback.cpp",
-    "src/priority.cpp",
-    "src/publish.cpp",
-    "src/remove.cpp",
-    "src/unsubscribe.cpp",
   ]
 
   version_script = "libnotification.map"
