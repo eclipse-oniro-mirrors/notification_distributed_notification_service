@@ -30,12 +30,48 @@ extern void MockVerifyCallerPermission(bool isVerify);
 #include "advanced_notification_service_ability.h"
 #include "notification_preferences.h"
 #include "distributed_device_manager.h"
+#include "notification_constant.h"
+#include "notification_content.h"
+#include "nlohmann/json.hpp"
+#include "os_account_manager.h"
 
 using namespace testing::ext;
 
 namespace OHOS {
+namespace AccountSA {
+// The real QueryActiveOsAccountIds depends on the device os_account service, which
+// is not healthy on the x86 emulator. Mock it locally so the default user recovery
+// deterministically enumerates one active user.
+ErrCode OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t> &ids)
+{
+    ids = {100};
+    return ERR_OK;
+}
+}  // namespace AccountSA
+}  // namespace OHOS
+
+namespace OHOS {
 namespace Notification {
 const int ANS_CLONE_ERROR = -1;
+
+namespace {
+constexpr int32_t RECOVER_TEST_USER_ID = 100;
+
+// An expired live view row still counts as a processed recovery entry: the record is
+// cleaned from DB and the batch is reported as success.
+std::string BuildExpiredLiveViewRow()
+{
+    nlohmann::json row = {
+        { "slotType", static_cast<int32_t>(NotificationConstant::SlotType::LIVE_VIEW) },
+        { "notificationContentType", static_cast<int32_t>(NotificationContent::Type::LIVE_VIEW) },
+        { "updateDeadLine", 1 },
+        { "finishDeadLine", 1 },
+        { "triggerDeadLine", 1 },
+    };
+    return row.dump();
+}
+}  // namespace
+
 class AdvancedNotificationServiceAbilityTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -411,6 +447,36 @@ HWTEST_F(
     EXPECT_FALSE(test.isDatashaReready_);
     test.OnAddSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, deviceId);
     EXPECT_FALSE(test.isDatashaReready_);
+}
+
+/**
+ * @tc.number    : AdvancedNotificationServiceAbilityTest_02500
+ * @tc.name      : ANS_AdvancedNotificationServiceAbility_02500
+ * @tc.desc      : OnStart recovers persisted live view records without waiting for USER_SWITCHED, so a
+ *                 manually killed process restores third-party live views on restart (issue#4502)
+ */
+HWTEST_F(
+    AdvancedNotificationServiceAbilityTest, AdvancedNotificationServiceAbilityTest_02500, Function | SmallTest | Level1)
+{
+    auto service = AdvancedNotificationService::GetInstance();
+    ASSERT_NE(service, nullptr);
+    service->notificationSvrQueue_.SyncSubmit(std::function<void()>([] {}));
+    service->recoveredLiveViewUserIds_.clear();
+    service->recoverReplayUserIds_.clear();
+
+    const std::string plainKey = "ans_live_view_restart_recover_key";
+    ASSERT_EQ(NotificationPreferences::GetInstance()->SetKvToDb(
+        plainKey, BuildExpiredLiveViewRow(), RECOVER_TEST_USER_ID), ERR_OK);
+    (void)NotificationPreferences::GetInstance()->DeleteKvFromDb("ans_recover_fail_count", RECOVER_TEST_USER_ID);
+
+    AdvancedNotificationServiceAbility test(ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, true);
+    test.service_ = service;
+    test.RecoverLiveViewOnStart();
+    service->notificationSvrQueue_.SyncSubmit(std::function<void()>([] {}));
+
+    EXPECT_EQ(service->recoveredLiveViewUserIds_.count(RECOVER_TEST_USER_ID), 1U);
+    std::string value;
+    EXPECT_NE(NotificationPreferences::GetInstance()->GetKvFromDb(plainKey, value, RECOVER_TEST_USER_ID), ERR_OK);
 }
 }  // namespace Notification
 }  // namespace OHOS

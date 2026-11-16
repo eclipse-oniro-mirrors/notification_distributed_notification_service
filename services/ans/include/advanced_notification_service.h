@@ -2292,7 +2292,7 @@ private:
         std::vector<std::string> &keys);
     void StartRecoveryTimers(const NotificationRequestDb &requestObj,
         const std::shared_ptr<NotificationRecord> &record);
-    void RecoverLiveViewForUser(int32_t userId);
+    bool RecoverLiveViewForUser(int32_t userId);
     ErrCode SetGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record);
     void CancelGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record);
     ErrCode StartGeofenceTriggerTimer(const std::shared_ptr<NotificationRecord> &record,
@@ -2843,6 +2843,7 @@ private:
     bool aggregateLocalSwitch_ = false;
     std::atomic<bool> orphanSweepInFlight_ {false};
     std::set<int32_t> recoverReplayUserIds_;
+    std::set<int32_t> recoveredLiveViewUserIds_;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;

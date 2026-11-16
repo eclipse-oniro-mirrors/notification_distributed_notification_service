@@ -47,6 +47,7 @@ public:
 private:
     void OnStart() final;
     void OnStop() final;
+    void RecoverLiveViewOnStart();
     bool SubscribeCommonEvent();
     void UnsubscribeCommonEvent();
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
