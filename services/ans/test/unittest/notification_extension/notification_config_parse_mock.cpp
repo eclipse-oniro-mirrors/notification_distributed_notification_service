@@ -213,6 +213,13 @@ bool NotificationConfigParse::GetNotificationExtensionEnabledBundlesWriteList(
     return true;
 }
 
+bool NotificationConfigParse::IsNotificationExtensionLifecycleDestroyTimeConfigured(
+    uint32_t &outDestroyTime) const
+{
+    (void)outDestroyTime;
+    return false;
+}
+
 bool NotificationConfigParse::GetDataCloneBundleName(std::string& bundleName)
 {
     return false;

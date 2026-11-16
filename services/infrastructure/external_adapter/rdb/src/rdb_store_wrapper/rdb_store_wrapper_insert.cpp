@@ -45,7 +45,7 @@ int32_t NtfRdbStoreWrapper::InsertDataWithErrorHandling(const int32_t userId, Fu
 
     {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }
@@ -97,7 +97,7 @@ int32_t NtfRdbStoreWrapper::InsertStatisticsDataWithErrorHandling(const int32_t 
     bool needRecover = false;
     do {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }

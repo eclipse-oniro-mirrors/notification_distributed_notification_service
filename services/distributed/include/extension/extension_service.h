@@ -29,6 +29,14 @@ public:
     int32_t InitService(std::function<void()> shutdownCallback,
         std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback,
         std::function<bool()> isPCModeCallback);
+    /**
+     * @brief Set the extension lifecycle destroy time resolved by the notification service.
+     *
+     * The CCM config is parsed by the notification service, so this DSO no longer needs its
+     * own copy of the config parser. When not called (e.g. the config key is absent), the
+     * connection keeps its built-in default.
+     */
+    void SetLifecycleDestroyTime(uint32_t destroyTime);
     void DestroyService();
     void SubscribeNotification(const sptr<NotificationBundleOption> bundle,
         const std::vector<sptr<NotificationBundleOption>>& subscribedBundles);
@@ -42,6 +50,10 @@ private:
     std::function<void()> shutdownCallback_;
     std::function<void(uint32_t, uint32_t, int32_t, std::string)> haReportCallback_;
     std::function<bool()> isPCModeCallback_;
+
+    /** Extension lifecycle destroy time pushed by the notification service before Startup. */
+    bool hasLifecycleDestroyTime_ = false;
+    uint32_t lifecycleDestroyTime_ = 0;
 };
 }
 }

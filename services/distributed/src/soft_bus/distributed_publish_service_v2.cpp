@@ -32,7 +32,6 @@
 #include "in_process_call_wrapper.h"
 #include "distributed_device_service.h"
 #include "distributed_data_define.h"
-#include "distributed_preference.h"
 #include "distributed_liveview_all_scenarios_extension_wrapper.h"
 #include "bool_wrapper.h"
 #include "int_wrapper.h"

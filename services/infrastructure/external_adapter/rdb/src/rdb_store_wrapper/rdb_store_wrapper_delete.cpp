@@ -107,7 +107,7 @@ int32_t NtfRdbStoreWrapper::DeleteStatisticsByBundle(const int32_t userId,
     int ret = NativeRdb::E_ERROR;
     {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
             return NativeRdb::E_ERROR;
         }
@@ -126,7 +126,7 @@ int32_t NtfRdbStoreWrapper::CleanExperDataTimer(const std::vector<int32_t> &user
 {
     ANS_LOGD("NtfRdbStoreWrapper::CleanExperDataTimer");
     std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-    if (rdbStore_ == nullptr) {
+    if (!EnsureRdbStoreLocked()) {
         ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
         return NativeRdb::E_ERROR;
     }
@@ -169,7 +169,7 @@ int32_t NtfRdbStoreWrapper::CleanExpertotal(const int32_t totalCount, const std:
         "  LIMIT " + std::to_string(DELETEROWS) + " "
         ");";
     std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-    if (rdbStore_ == nullptr) {
+    if (!EnsureRdbStoreLocked()) {
         ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
         return NativeRdb::E_ERROR;
     }
@@ -188,7 +188,7 @@ int32_t NtfRdbStoreWrapper::CleanExperData(const int32_t userId)
     std::shared_ptr<NativeRdb::ResultSet> rs = nullptr;
     {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
             return NativeRdb::E_ERROR;
         }
@@ -220,7 +220,7 @@ int32_t NtfRdbStoreWrapper::DropStatisticsTable(const int32_t userId)
     int32_t ret = NativeRdb::E_OK;
     {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }
@@ -247,7 +247,7 @@ int32_t NtfRdbStoreWrapper::DeleteData(const std::string &tableName, const std::
     int32_t ret = NativeRdb::E_OK;
     {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }
@@ -346,7 +346,7 @@ int32_t NtfRdbStoreWrapper::DropUserTable(const int32_t userId)
     int32_t ret = NativeRdb::E_OK;
     {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }

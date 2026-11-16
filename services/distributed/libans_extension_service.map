@@ -15,6 +15,7 @@
   global:
     Startup;
     Shutdown;
+    SetLifecycleDestroyTime;
     Subscribe;
     SubscribeWithStrategy;
     Unsubscribe;

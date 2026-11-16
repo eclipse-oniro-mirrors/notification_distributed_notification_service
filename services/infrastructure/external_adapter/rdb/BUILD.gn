@@ -180,6 +180,7 @@ ohos_unittest("ans_base_rdb_unittest") {
     "test/src/notification_rdb_hook_mgr_test.cpp",
     "test/src/notification_rdb_mgr_statistics_test.cpp",
     "test/src/notification_rdb_mgr_test.cpp",
+    "test/src/notification_rdb_wrapper_idle_test.cpp",
     "test/src/notification_rdb_wrapper_query_batch_test.cpp",
     "test/src/notification_rdb_wrapper_statistics_test.cpp",
     "test/src/notification_rdb_wrapper_test.cpp",

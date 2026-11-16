@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -29,11 +29,25 @@
 
 namespace OHOS {
 namespace Notification {
+namespace {
+std::string JsonPoint(const char *key)
+{
+    return std::string("/") + key;
+}
+
+std::string JsonPoint(const char *first, const char *second)
+{
+    return std::string("/") + first + "/" + second;
+}
+
+std::string JsonPoint(const char *first, const char *second, const char *third)
+{
+    return std::string("/") + first + "/" + second + "/" + third;
+}
+} // namespace
+
 NotificationConfigParse::NotificationConfigParse()
 {
-    if (!FileUtils::GetJsonByFilePath(NOTIFICAITON_CONFIG_FILE, notificationConfigJsons_)) {
-        ANS_LOGE("Failed to get notification config file, fileName: %{public}s.", NOTIFICAITON_CONFIG_FILE);
-    }
     defaultCurrentSlotReminder_ = {
         {NotificationConstant::SlotType::SOCIAL_COMMUNICATION, 0b111111},
         {NotificationConstant::SlotType::SERVICE_REMINDER, 0b111111},
@@ -43,30 +57,34 @@ NotificationConfigParse::NotificationConfigParse()
         {NotificationConstant::SlotType::CUSTOMER_SERVICE, 0b110001},
         {NotificationConstant::SlotType::EMERGENCY_INFORMATION, 0b111111}
     };
+
+    std::vector<nlohmann::json> docs;
+    if (!LoadConfigJsons(docs)) {
+        ANS_LOGE("Failed to get notification config file, fileName: %{public}s.", NOTIFICAITON_CONFIG_FILE);
+        return;
+    }
+    ParseConfigs(docs);
 }
 
-std::shared_ptr<NotificationAppPrivileges> __attribute__((weak)) NotificationConfigParse::GetAppPrivileges(
-    const std::string &bundleName) const
+bool NotificationConfigParse::LoadConfigJsons(std::vector<nlohmann::json> &docs) const
 {
-    nlohmann::json root;
-    std::string JsonPoint = "/";
-    JsonPoint.append(APP_PRIVILEGES);
-    if (!GetConfigJson(JsonPoint, root)) {
-        ANS_LOGE("Failed to get JsonPoint CCM config file.");
-        return nullptr;
-    }
-    if (!root.contains(APP_PRIVILEGES)) {
-        ANS_LOGE("not found jsonKey appPrivileges");
-        return nullptr;
-    }
-    nlohmann::json affects = root[APP_PRIVILEGES];
-    if (affects.is_null() || affects.empty() || !affects.is_object()) {
-        ANS_LOGE("GetCcmPrivileges failed as invalid ccmPrivileges json.");
-        return nullptr;
-    }
-    for (auto &affect : affects.items()) {
-        if (affect.key() == bundleName && affect.value().is_string()) {
-            return std::make_shared<NotificationAppPrivileges>(affect.value().get<std::string>());
+    return FileUtils::GetJsonByFilePath(NOTIFICAITON_CONFIG_FILE, docs);
+}
+
+const nlohmann::json *NotificationConfigParse::FindConfigDoc(const std::vector<nlohmann::json> &docs,
+    const std::string &jsonPoint) const
+{
+    // Documents are ordered from the highest to the lowest priority, the first match wins.
+    for (const auto &doc : docs) {
+        if (jsonPoint.find('/') == std::string::npos) {
+            if (doc.contains(jsonPoint)) {
+                return &doc;
+            }
+            continue;
+        }
+        nlohmann::json::json_pointer pointer(jsonPoint);
+        if (doc.contains(pointer)) {
+            return &doc;
         }
     }
     return nullptr;
@@ -75,54 +93,104 @@ std::shared_ptr<NotificationAppPrivileges> __attribute__((weak)) NotificationCon
 bool __attribute__((weak)) NotificationConfigParse::GetConfigJson(
     const std::string &keyCheck, nlohmann::json &configJson) const
 {
-    if (notificationConfigJsons_.size() <= 0) {
+    std::vector<nlohmann::json> docs;
+    if (!LoadConfigJsons(docs) || docs.empty()) {
         ANS_LOGE("Failed to get config json cause empty notificationConfigJsons.");
         return false;
     }
-    bool ret = false;
-    std::for_each(notificationConfigJsons_.rbegin(), notificationConfigJsons_.rend(),
-        [&keyCheck, &configJson, &ret](const nlohmann::json &json) {
-        if (keyCheck.find("/") == std::string::npos && json.contains(keyCheck)) {
-            configJson = json;
-            ret = true;
-        }
-
-        if (keyCheck.find("/") != std::string::npos) {
-            nlohmann::json::json_pointer keyCheckPoint(keyCheck);
-            if (json.contains(keyCheckPoint)) {
-                configJson = json;
-                ret = true;
-            }
-        }
-    });
-    if (!ret) {
+    const nlohmann::json *doc = FindConfigDoc(docs, keyCheck);
+    if (doc == nullptr) {
         ANS_LOGE("Cannot find keyCheck: %{public}s in notificationConfigJsons.", keyCheck.c_str());
+        return false;
     }
-    return ret;
+    configJson = *doc;
+    return true;
 }
 
-bool __attribute__((weak)) NotificationConfigParse::GetCurrentSlotReminder(
-    std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const
+void NotificationConfigParse::ParseConfigs(const std::vector<nlohmann::json> &docs)
 {
-    nlohmann::json root;
-    std::string slotJsonPoint = "/";
-    slotJsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    slotJsonPoint.append("/");
-    slotJsonPoint.append(CFG_KEY_SLOT_TYPE_REMINDER);
-    if (!GetConfigJson(slotJsonPoint, root)) {
-        return false;
+    appPrivileges_.clear();
+    currentSlotReminder_.clear();
+    hasSlotReminder_ = false;
+    flowCtrlConfig_ = FlowCtrlConfig();
+    smartReminderEnableList_.clear();
+    hasSmartReminderEnableList_ = false;
+    mirrorNotificationEnabledStatus_.clear();
+    hasMirrorNotificationEnabledStatus_ = false;
+    appAndDeviceRelationMap_.clear();
+    hasAppAndDeviceRelationMap_ = false;
+    collaborativeDeleteTypes_.clear();
+    collaborativeDeleteTypesByDevice_.clear();
+    hasCollaborativeDeleteTypesByDevice_ = false;
+    hasAppLiveViewCcm_ = false;
+    startAbilityTimeout_ = 0;
+    hasStartAbilityTimeout_ = false;
+    cloneExpiredTimeDays_ = 0;
+    hasCloneExpiredTime_ = false;
+    dataCloneBundleName_.clear();
+    extensionLifecycleDestroyTime_ = 0;
+    hasExtensionLifecycleDestroyTime_ = false;
+    extensionEnabledBundlesWriteList_.clear();
+    hasExtensionEnabledBundlesWriteList_ = false;
+    {
+        std::lock_guard<ffrt::mutex> lock(mutex_);
+        uidList_.clear();
+        bundleNameList_.clear();
     }
+    reporteTrustSet_.clear();
+    keyTrustBundles_.clear();
 
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) || !root[CFG_KEY_NOTIFICATION_SERVICE].is_object()) {
-        ANS_LOGE("GetCurrentSlotReminder failed as can not find notificationService.");
-        return false;
+    ParseAppPrivileges(docs);
+    ParseSlotTypeReminder(docs);
+    ParseFlowCtrlConfig(docs);
+    ParseSmartReminderEnableList(docs);
+    ParseMirrorNotificationEnabledStatus(docs);
+    ParseAppAndDeviceRelationMap(docs);
+    ParseCollaborativeDeleteTypes(docs);
+    ParseCollaborativeDeleteTypesByDevice(docs);
+    ParseCollaborationFilter(docs);
+    ParseStartAbilityTimeout(docs);
+    ParseAppLiveViewCcm(docs);
+    ParseReportTrustList(docs);
+    ParseCloneExpiredTime(docs);
+    ParseDataCloneBundleName(docs);
+    ParseNotificationExtension(docs);
+}
+
+void NotificationConfigParse::ParseAppPrivileges(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(APP_PRIVILEGES));
+    if (root == nullptr) {
+        ANS_LOGE("not found jsonKey appPrivileges");
+        return;
     }
-    nlohmann::json currentDeviceRemindJson = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_SLOT_TYPE_REMINDER];
+    const nlohmann::json &affects = (*root)[APP_PRIVILEGES];
+    if (affects.is_null() || affects.empty() || !affects.is_object()) {
+        ANS_LOGE("GetCcmPrivileges failed as invalid ccmPrivileges json.");
+        return;
+    }
+    for (const auto &affect : affects.items()) {
+        if (affect.value().is_string()) {
+            appPrivileges_[affect.key()] =
+                std::make_shared<NotificationAppPrivileges>(affect.value().get<std::string>());
+        }
+    }
+}
+
+void NotificationConfigParse::ParseSlotTypeReminder(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE,
+        CFG_KEY_SLOT_TYPE_REMINDER));
+    if (root == nullptr) {
+        return;
+    }
+    const nlohmann::json &currentDeviceRemindJson =
+        (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_SLOT_TYPE_REMINDER];
     if (currentDeviceRemindJson.is_null() || !currentDeviceRemindJson.is_array() || currentDeviceRemindJson.empty()) {
         ANS_LOGE("GetCurrentSlotReminder failed as invalid currentDeviceReminder json.");
-        return false;
+        return;
     }
-    for (auto &reminderFilterSlot : currentDeviceRemindJson) {
+    for (const auto &reminderFilterSlot : currentDeviceRemindJson) {
         NotificationConstant::SlotType slotType;
         if (reminderFilterSlot.find(CFG_KEY_NAME) == reminderFilterSlot.end() ||
             reminderFilterSlot[CFG_KEY_NAME].is_null() ||
@@ -139,11 +207,331 @@ bool __attribute__((weak)) NotificationConfigParse::GetCurrentSlotReminder(
                 reminderFilterSlot[CFG_KEY_REMINDER_FLAGS].get<std::string>(), reminderFlags)) {
             continue;
         }
-        currentSlotReminder[slotType] = reminderFlags;
+        currentSlotReminder_[slotType] = reminderFlags;
     }
-    if (currentSlotReminder.size() <= 0) {
+    hasSlotReminder_ = !currentSlotReminder_.empty();
+    if (!hasSlotReminder_) {
         ANS_LOGE("GetCurrentSlotReminder failed as invalid currentSlotReminder size.");
+    }
+}
+
+void NotificationConfigParse::ParseFlowCtrlConfig(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE));
+    if (root == nullptr) {
+        ANS_LOGE("GetFlowCtrlConfigFromCCM not found jsonKey");
+        return;
+    }
+    const nlohmann::json &affects = (*root)[CFG_KEY_NOTIFICATION_SERVICE];
+    if (affects.is_null() || affects.empty()) {
+        ANS_LOGE("GetFlowCtrlConfigFromCCM failed as invalid ccmFlowCtrlConfig json");
+        return;
+    }
+    if (affects.contains(CFG_KEY_MAX_CREATE_NUM_PERSECOND) &&
+        affects[CFG_KEY_MAX_CREATE_NUM_PERSECOND].is_number_integer()) {
+        flowCtrlConfig_.maxCreateNumPerSecond = affects[CFG_KEY_MAX_CREATE_NUM_PERSECOND].get<uint32_t>();
+        flowCtrlConfig_.hasMaxCreateNumPerSecond = true;
+    }
+    if (affects.contains(CFG_KEY_MAX_UPDATE_NUM_PERSECOND) &&
+        affects[CFG_KEY_MAX_UPDATE_NUM_PERSECOND].is_number_integer()) {
+        flowCtrlConfig_.maxUpdateNumPerSecond = affects[CFG_KEY_MAX_UPDATE_NUM_PERSECOND].get<uint32_t>();
+        flowCtrlConfig_.hasMaxUpdateNumPerSecond = true;
+    }
+    if (affects.contains(CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP) &&
+        affects[CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP].is_number_integer()) {
+        flowCtrlConfig_.maxCreateNumPerSecondPerApp =
+            affects[CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP].get<uint32_t>();
+        flowCtrlConfig_.hasMaxCreateNumPerSecondPerApp = true;
+    }
+    if (affects.contains(CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP) &&
+        affects[CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP].is_number_integer()) {
+        flowCtrlConfig_.maxUpdateNumPerSecondPerApp =
+            affects[CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP].get<uint32_t>();
+        flowCtrlConfig_.hasMaxUpdateNumPerSecondPerApp = true;
+    }
+    ANS_LOGI("GetFlowCtrlConfigFromCCM success");
+}
+
+void NotificationConfigParse::ParseSmartReminderEnableList(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE,
+        CFG_KEY_SMART_REMINDER_ENABLE_LIST));
+    if (root == nullptr) {
+        ANS_LOGE("get configJson fail");
+        return;
+    }
+    const nlohmann::json &smartReminderEnableList =
+        (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_SMART_REMINDER_ENABLE_LIST];
+    if (smartReminderEnableList.is_null() || !smartReminderEnableList.is_array() || smartReminderEnableList.empty()) {
+        ANS_LOGE("smartReminderEnableList is invalid");
+        return;
+    }
+    hasSmartReminderEnableList_ = true;
+    for (const auto &deviceType : smartReminderEnableList) {
+        if (deviceType.is_string()) {
+            smartReminderEnableList_.push_back(deviceType.get<std::string>());
+        }
+    }
+}
+
+void NotificationConfigParse::ParseMirrorNotificationEnabledStatus(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE,
+        CFG_KEY_MIRROR_NOTIFICAITON_ENABLED_STATUS));
+    if (root == nullptr) {
+        ANS_LOGE("get configJson fail");
+        return;
+    }
+    const nlohmann::json &mirrorNotificationEnabledStatus =
+        (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_MIRROR_NOTIFICAITON_ENABLED_STATUS];
+    if (mirrorNotificationEnabledStatus.is_null() || !mirrorNotificationEnabledStatus.is_array() ||
+        mirrorNotificationEnabledStatus.empty()) {
+        ANS_LOGE("Invalid mirror Status");
+        return;
+    }
+    hasMirrorNotificationEnabledStatus_ = true;
+    for (const auto &deviceType : mirrorNotificationEnabledStatus) {
+        if (deviceType.is_string()) {
+            mirrorNotificationEnabledStatus_.push_back(deviceType.get<std::string>());
+        }
+    }
+}
+
+void NotificationConfigParse::ParseAppAndDeviceRelationMap(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE,
+        CFG_KEY_APP_AND_DEVICE_RELATION_MAP));
+    if (root == nullptr) {
+        ANS_LOGE("get configJson fail");
+        return;
+    }
+    const nlohmann::json &appAndDeviceRelationMap =
+        (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_APP_AND_DEVICE_RELATION_MAP];
+    if (appAndDeviceRelationMap.is_null() || appAndDeviceRelationMap.empty()) {
+        ANS_LOGE("appAndDeviceRelationMap is invalid");
+        return;
+    }
+    hasAppAndDeviceRelationMap_ = true;
+    for (const auto &relation : appAndDeviceRelationMap.items()) {
+        if (relation.value().is_string()) {
+            appAndDeviceRelationMap_[relation.key()] = relation.value().get<std::string>();
+        }
+    }
+}
+
+void NotificationConfigParse::ParseCollaborativeDeleteTypes(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE,
+        CFG_KEY_COLLABORATIVE_DELETE_TYPES));
+    if (root == nullptr) {
+        ANS_LOGE("GetConfigJson faild");
+        return;
+    }
+    const nlohmann::json &collaborativeDeleteTypes =
+        (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_COLLABORATIVE_DELETE_TYPES];
+    if (collaborativeDeleteTypes.empty() && !collaborativeDeleteTypes.is_array()) {
+        ANS_LOGE("collaborativeDeleteTypes null or no array");
+        return;
+    }
+    for (const auto &item : collaborativeDeleteTypes) {
+        if (item.is_string()) {
+            collaborativeDeleteTypes_.insert(item.get<std::string>());
+        }
+    }
+}
+
+void NotificationConfigParse::ParseCollaborativeDeleteTypesByDevice(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE,
+        CFG_KEY_COLLABORATIVE_DELETE_TYPES_DEVICES));
+    if (root == nullptr) {
+        ANS_LOGE("GetConfigJson faild");
+        return;
+    }
+    const nlohmann::json &collaborativeDeleteTypes =
+        (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_COLLABORATIVE_DELETE_TYPES_DEVICES];
+    if (collaborativeDeleteTypes.is_null() || collaborativeDeleteTypes.empty() ||
+        !collaborativeDeleteTypes.is_array()) {
+        ANS_LOGE("get collaborativeDeleteTypes failed.");
+        return;
+    }
+    std::map<std::string, std::map<std::string, std::unordered_set<std::string>>> tempMap;
+    if (!ParseCollaborativeDeleteTypesDevices(tempMap, collaborativeDeleteTypes)) {
+        return;
+    }
+    collaborativeDeleteTypesByDevice_ = std::move(tempMap);
+    hasCollaborativeDeleteTypesByDevice_ = !collaborativeDeleteTypesByDevice_.empty();
+}
+
+void NotificationConfigParse::ParseCollaborationFilter(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE, COLLABORATION_FILTER));
+    if (root == nullptr) {
+        ANS_LOGE("Failed to get jsonPoint CCM config file.");
+        return;
+    }
+    const nlohmann::json &collaborationFilter =
+        (*root)[CFG_KEY_NOTIFICATION_SERVICE][COLLABORATION_FILTER];
+    if (collaborationFilter.is_null() || collaborationFilter.empty()) {
+        ANS_LOGE("GetCollaborationFilter failed as invalid ccmCollaborationFilter json.");
+        return;
+    }
+    const char *keys[] = {COLLABORATION_FILTER_KEY_UID, COLLABORATION_FILTER_KEY_NAME};
+    for (const char *key : keys) {
+        if (!collaborationFilter.contains(key) || !collaborationFilter[key].is_array()) {
+            continue;
+        }
+        for (const auto &item : collaborationFilter[key]) {
+            if (item.is_number_integer()) {
+                uidList_.push_back(item.get<int32_t>());
+            }
+            if (item.is_string()) {
+                bundleNameList_.push_back(item.get<std::string>());
+            }
+        }
+    }
+}
+
+void NotificationConfigParse::ParseStartAbilityTimeout(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE));
+    if (root == nullptr) {
+        ANS_LOGE("GetStartAbilityTimeout not found jsonKey");
+        return;
+    }
+    const nlohmann::json &affects = (*root)[CFG_KEY_NOTIFICATION_SERVICE];
+    if (affects.is_null() || affects.empty()) {
+        ANS_LOGE("GetStartAbilityTimeout failed as invalid ccmFlowCtrlConfig json");
+        return;
+    }
+    if (affects.contains(CFG_KEY_START_ABILITY_TIMEOUT) &&
+        affects[CFG_KEY_START_ABILITY_TIMEOUT].is_number_integer()) {
+        startAbilityTimeout_ = affects[CFG_KEY_START_ABILITY_TIMEOUT].get<uint32_t>();
+        hasStartAbilityTimeout_ = true;
+    }
+}
+
+void NotificationConfigParse::ParseAppLiveViewCcm(const std::vector<nlohmann::json> &docs)
+{
+    hasAppLiveViewCcm_ = FindConfigDoc(docs, JsonPoint(APP_LIVEVIEW_PERMISSIONS)) != nullptr;
+}
+
+void NotificationConfigParse::ParseReportTrustList(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE,
+        CFG_KEY_DFX_NORMAL_EVENT));
+    if (root == nullptr) {
+        return;
+    }
+    const nlohmann::json &reportTrustList =
+        (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_DFX_NORMAL_EVENT];
+    if (reportTrustList.is_null() || reportTrustList.empty() || !reportTrustList.is_array()) {
+        ANS_LOGE("GetReportTrustListConfig failed as invalid dfx_normal_events json.");
+        return;
+    }
+    for (const auto &reportTrust : reportTrustList) {
+        if (reportTrust.is_string()) {
+            reporteTrustSet_.emplace(reportTrust.get<std::string>());
+        }
+    }
+
+    if (!(*root)[CFG_KEY_NOTIFICATION_SERVICE].contains(CFG_KEY_BUNDLE_NAME)) {
+        ANS_LOGE("Key bundles failed json.");
+        return;
+    }
+    const nlohmann::json &keyBundles = (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_BUNDLE_NAME];
+    if (keyBundles.is_null() || keyBundles.empty() || !keyBundles.is_array()) {
+        ANS_LOGE("Key bundles failed json.");
+        return;
+    }
+    for (const auto &bundle : keyBundles) {
+        if (bundle.is_string()) {
+            keyTrustBundles_.emplace(bundle.get<std::string>());
+        }
+    }
+}
+
+void NotificationConfigParse::ParseCloneExpiredTime(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE,
+        CFG_KEY_CLONE_EXPIRED_TIME));
+    if (root == nullptr) {
+        return;
+    }
+    const nlohmann::json &jsonItem = (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_CLONE_EXPIRED_TIME];
+    if (jsonItem.is_null() || !jsonItem.is_number_integer()) {
+        ANS_LOGE("cloneExpiredTime failed json.");
+        return;
+    }
+    cloneExpiredTimeDays_ = jsonItem.get<int32_t>();
+    hasCloneExpiredTime_ = true;
+}
+
+void NotificationConfigParse::ParseDataCloneBundleName(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE,
+        CFG_KEY_DATACLONE_BUNDLE_NAME));
+    if (root == nullptr) {
+        ANS_LOGE("Failed to get JsonPoint CCM config file.");
+        return;
+    }
+    const nlohmann::json &jsonItem = (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_DATACLONE_BUNDLE_NAME];
+    if (jsonItem.is_null() || !jsonItem.is_string()) {
+        ANS_LOGE("datacloneBundleName is missing or not a string in CCM config.");
+        return;
+    }
+    dataCloneBundleName_ = jsonItem.get<std::string>();
+    if (dataCloneBundleName_.empty()) {
+        ANS_LOGE("datacloneBundleName is empty in CCM config.");
+        return;
+    }
+    ANS_LOGI("Got datacloneBundleName from CCM: %{public}s.", dataCloneBundleName_.c_str());
+}
+
+void NotificationConfigParse::ParseNotificationExtension(const std::vector<nlohmann::json> &docs)
+{
+    const nlohmann::json *root = FindConfigDoc(docs, JsonPoint(CFG_KEY_NOTIFICATION_SERVICE,
+        CFG_KEY_NOTIFICATION_EXTENSION));
+    if (root == nullptr) {
+        ANS_LOGE("Failed to get notification extension config.");
+        return;
+    }
+    const nlohmann::json &extension =
+        (*root)[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_NOTIFICATION_EXTENSION];
+    if (extension.is_null() || extension.empty()) {
+        ANS_LOGE("notification extension config is invalid");
+        return;
+    }
+    if (extension.contains(CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME) &&
+        extension[CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME].is_number_integer()) {
+        extensionLifecycleDestroyTime_ =
+            extension[CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME].get<uint32_t>();
+        hasExtensionLifecycleDestroyTime_ = true;
+    }
+    if (!extension.contains(CFG_KEY_ENABLED_BUNDLES_WRITE_LIST)) {
+        return;
+    }
+    const nlohmann::json &list = extension[CFG_KEY_ENABLED_BUNDLES_WRITE_LIST];
+    if (!list.is_array() || list.empty()) {
+        return;
+    }
+    hasExtensionEnabledBundlesWriteList_ = true;
+    for (const auto &bundle : list) {
+        if (!bundle.is_string()) {
+            continue;
+        }
+        extensionEnabledBundlesWriteList_.push_back(bundle.get<std::string>());
+    }
+}
+
+bool __attribute__((weak)) NotificationConfigParse::GetCurrentSlotReminder(
+    std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const
+{
+    if (!hasSlotReminder_) {
         return false;
+    }
+    for (const auto &slot : currentSlotReminder_) {
+        currentSlotReminder[slot.first] = slot.second;
     }
     return true;
 }
@@ -151,15 +539,8 @@ bool __attribute__((weak)) NotificationConfigParse::GetCurrentSlotReminder(
 uint32_t __attribute__((weak)) NotificationConfigParse::GetConfigSlotReminderModeByType(
     NotificationConstant::SlotType slotType)
 {
-    static std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> configSlotsReminder;
-    {
-        std::lock_guard<ffrt::mutex> lock(slotReminderMutex_);
-        if (configSlotsReminder.empty()) {
-            GetCurrentSlotReminder(configSlotsReminder);
-        }
-    }
-    auto iter = configSlotsReminder.find(slotType);
-    if (iter != configSlotsReminder.end()) {
+    auto iter = currentSlotReminder_.find(slotType);
+    if (iter != currentSlotReminder_.end() && iter->second != nullptr) {
         return iter->second->GetReminderFlags();
     }
 
@@ -167,8 +548,17 @@ uint32_t __attribute__((weak)) NotificationConfigParse::GetConfigSlotReminderMod
     if (defaultIter != defaultCurrentSlotReminder_.end()) {
         return defaultIter->second;
     }
-
     return 0;
+}
+
+std::shared_ptr<NotificationAppPrivileges> __attribute__((weak)) NotificationConfigParse::GetAppPrivileges(
+    const std::string &bundleName) const
+{
+    auto iter = appPrivileges_.find(bundleName);
+    if (iter == appPrivileges_.end()) {
+        return nullptr;
+    }
+    return iter->second;
 }
 
 bool __attribute__((weak)) NotificationConfigParse::IsLiveViewEnabled(const std::string bundleName) const
@@ -212,7 +602,7 @@ bool __attribute__((weak)) NotificationConfigParse::IsBannerEnabled(const std::s
         }
         report = ret == ERR_OK ? true : false;
     }
-    
+
     std::string errMessage = "not in profile,  bundleName :";
     errMessage.append(bundleName);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_34, EventBranchId::BRANCH_0);
@@ -242,210 +632,103 @@ bool __attribute__((weak)) NotificationConfigParse::IsBannerEnabled(const std::s
 
 void __attribute__((weak)) NotificationConfigParse::GetFlowCtrlConfigFromCCM(FlowControlThreshold &threshold)
 {
-    nlohmann::json root;
-    std::string JsonPoint = "/";
-    JsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    if (!GetConfigJson(JsonPoint, root)) {
-        ANS_LOGE("Failed to get JsonPoint CCM config file");
-        return;
+    if (flowCtrlConfig_.hasMaxCreateNumPerSecond) {
+        threshold.maxCreateNumPerSecond = flowCtrlConfig_.maxCreateNumPerSecond;
     }
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE)) {
-        ANS_LOGE("GetFlowCtrlConfigFromCCM not found jsonKey");
-        return;
+    if (flowCtrlConfig_.hasMaxUpdateNumPerSecond) {
+        threshold.maxUpdateNumPerSecond = flowCtrlConfig_.maxUpdateNumPerSecond;
     }
-    nlohmann::json affects = root[CFG_KEY_NOTIFICATION_SERVICE];
-    if (affects.is_null() || affects.empty()) {
-        ANS_LOGE("GetFlowCtrlConfigFromCCM failed as invalid ccmFlowCtrlConfig json");
-        return;
+    if (flowCtrlConfig_.hasMaxCreateNumPerSecondPerApp) {
+        threshold.maxCreateNumPerSecondPerApp = flowCtrlConfig_.maxCreateNumPerSecondPerApp;
     }
-    if (affects.contains(CFG_KEY_MAX_CREATE_NUM_PERSECOND) &&
-        affects[CFG_KEY_MAX_CREATE_NUM_PERSECOND].is_number_integer()) {
-        threshold.maxCreateNumPerSecond = affects[CFG_KEY_MAX_CREATE_NUM_PERSECOND].get<uint32_t>();
+    if (flowCtrlConfig_.hasMaxUpdateNumPerSecondPerApp) {
+        threshold.maxUpdateNumPerSecondPerApp = flowCtrlConfig_.maxUpdateNumPerSecondPerApp;
     }
-
-    if (affects.contains(CFG_KEY_MAX_UPDATE_NUM_PERSECOND) &&
-        affects[CFG_KEY_MAX_UPDATE_NUM_PERSECOND].is_number_integer()) {
-        threshold.maxUpdateNumPerSecond = affects[CFG_KEY_MAX_UPDATE_NUM_PERSECOND].get<uint32_t>();
-    }
-
-    if (affects.contains(CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP) &&
-        affects[CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP].is_number_integer()) {
-        threshold.maxCreateNumPerSecondPerApp = affects[CFG_KEY_MAX_CREATE_NUM_PERSECOND_PERAPP].get<uint32_t>();
-    }
-
-    if (affects.contains(CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP) &&
-        affects[CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP].is_number_integer()) {
-        threshold.maxUpdateNumPerSecondPerApp = affects[CFG_KEY_MAX_UPDATE_NUM_PERSECOND_PERAPP].get<uint32_t>();
-    }
-
-    ANS_LOGI("GetFlowCtrlConfigFromCCM success");
 }
 
 bool __attribute__((weak)) NotificationConfigParse::GetSmartReminderEnableList(std::vector<std::string>& deviceTypes)
 {
-    nlohmann::json root;
-    std::string jsonPoint = "/";
-    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_SMART_REMINDER_ENABLE_LIST);
-    if (!GetConfigJson(jsonPoint, root)) {
-        ANS_LOGE("get configJson fail");
-        return false;
-    }
-
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) || !root[CFG_KEY_NOTIFICATION_SERVICE].is_object()) {
-        ANS_LOGE("find notificationService fail");
-        return false;
-    }
-
-    nlohmann::json smartReminderEnableList = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_SMART_REMINDER_ENABLE_LIST];
-    if (smartReminderEnableList.is_null() || !smartReminderEnableList.is_array() || smartReminderEnableList.empty()) {
+    if (!hasSmartReminderEnableList_) {
         ANS_LOGE("smartReminderEnableList is invalid");
         return false;
     }
-    std::lock_guard<ffrt::mutex> lock(mutex_);
-    for (const auto &deviceType : smartReminderEnableList) {
-        if (deviceType.is_string()) {
-            deviceTypes.push_back(deviceType.get<std::string>());
-        }
-    }
+    deviceTypes.insert(deviceTypes.end(), smartReminderEnableList_.begin(), smartReminderEnableList_.end());
     return true;
 }
 
 bool __attribute__((weak)) NotificationConfigParse::GetMirrorNotificationEnabledStatus(
     std::vector<std::string>& deviceTypes)
 {
-    nlohmann::json root;
-    std::string jsonPoint = "/";
-    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_MIRROR_NOTIFICAITON_ENABLED_STATUS);
-    if (!GetConfigJson(jsonPoint, root)) {
-        ANS_LOGE("get configJson fail");
-        return false;
-    }
-
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) || !root[CFG_KEY_NOTIFICATION_SERVICE].is_object()) {
-        ANS_LOGE("find notificationService fail");
-        return false;
-    }
-
-    nlohmann::json mirrorNotificationEnabledStatus =
-        root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_MIRROR_NOTIFICAITON_ENABLED_STATUS];
-    if (mirrorNotificationEnabledStatus.is_null() || !mirrorNotificationEnabledStatus.is_array() ||
-        mirrorNotificationEnabledStatus.empty()) {
+    if (!hasMirrorNotificationEnabledStatus_) {
         ANS_LOGE("Invalid mirror Status");
         return false;
     }
-    std::lock_guard<ffrt::mutex> lock(mutex_);
-    for (const auto &deviceType : mirrorNotificationEnabledStatus) {
-        if (deviceType.is_string()) {
-            deviceTypes.push_back(deviceType.get<std::string>());
-        }
-    }
+    deviceTypes.insert(deviceTypes.end(), mirrorNotificationEnabledStatus_.begin(),
+        mirrorNotificationEnabledStatus_.end());
     return true;
 }
 
 bool __attribute__((weak)) NotificationConfigParse::GetAppAndDeviceRelationMap(
     std::map<std::string, std::string>& relationMap)
 {
-    nlohmann::json root;
-    std::string jsonPoint = "/";
-    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_APP_AND_DEVICE_RELATION_MAP);
-    if (!GetConfigJson(jsonPoint, root)) {
-        ANS_LOGE("get configJson fail");
-        return false;
-    }
-
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) || !root[CFG_KEY_NOTIFICATION_SERVICE].is_object()) {
-        ANS_LOGE("find notificationService fail");
-        return false;
-    }
-
-    nlohmann::json appAndDeviceRelationMap = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_APP_AND_DEVICE_RELATION_MAP];
-    if (appAndDeviceRelationMap.is_null() || appAndDeviceRelationMap.empty()) {
+    if (!hasAppAndDeviceRelationMap_) {
         ANS_LOGE("appAndDeviceRelationMap is invalid");
         return false;
     }
-    std::lock_guard<ffrt::mutex> lock(mutex_);
-    for (auto& appAndDeviceRelation : appAndDeviceRelationMap.items()) {
-        if (appAndDeviceRelation.value().is_string()) {
-            relationMap[appAndDeviceRelation.key()] = appAndDeviceRelation.value().get<std::string>();
-        }
+    for (const auto &relation : appAndDeviceRelationMap_) {
+        relationMap[relation.first] = relation.second;
     }
     return true;
 }
 
 std::unordered_set<std::string> __attribute__((weak)) NotificationConfigParse::GetCollaborativeDeleteType() const
 {
-    nlohmann::json root;
-    std::string JsonPoint = "/";
-    JsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    JsonPoint.append("/");
-    JsonPoint.append(CFG_KEY_COLLABORATIVE_DELETE_TYPES);
-    if (!GetConfigJson(JsonPoint, root)) {
-        ANS_LOGE("GetConfigJson faild");
-        return std::unordered_set<std::string>();
-    }
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) || !root[CFG_KEY_NOTIFICATION_SERVICE].is_object()) {
-        ANS_LOGE("appPrivileges null");
-        return std::unordered_set<std::string>();
-    }
-
-    nlohmann::json collaborativeDeleteTypes = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_COLLABORATIVE_DELETE_TYPES];
-    if (collaborativeDeleteTypes.empty() && !collaborativeDeleteTypes.is_array()) {
-        ANS_LOGE("collaborativeDeleteTypes null or no array");
-        return std::unordered_set<std::string>();
-    }
-    std::unordered_set<std::string> collaborativeDeleteTypeSet;
-    for (const auto &item : collaborativeDeleteTypes) {
-        if (item.is_string()) {
-            collaborativeDeleteTypeSet.insert(item.get<std::string>());
-        }
-    }
-
-    return collaborativeDeleteTypeSet;
+    return collaborativeDeleteTypes_;
 }
 
 bool __attribute__((weak)) NotificationConfigParse::GetFilterUidAndBundleName(const std::string &key)
 {
-    nlohmann::json root;
-    std::string jsonPoint = "/";
-    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE).append("/").append(COLLABORATION_FILTER).append("/").append(key);
-    if (!GetConfigJson(jsonPoint, root)) {
+    std::vector<nlohmann::json> docs;
+    if (!LoadConfigJsons(docs) || docs.empty()) {
         ANS_LOGE("Failed to get jsonPoint CCM config file.");
         return false;
     }
-
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) ||
-        !root[CFG_KEY_NOTIFICATION_SERVICE].contains(COLLABORATION_FILTER)) {
-        ANS_LOGE("Not found jsonKey collaborationFilter.");
+    const nlohmann::json *root = FindConfigDoc(docs,
+        JsonPoint(CFG_KEY_NOTIFICATION_SERVICE, COLLABORATION_FILTER, key.c_str()));
+    if (root == nullptr) {
+        ANS_LOGE("Failed to get jsonPoint CCM config file.");
         return false;
     }
-
-    nlohmann::json collaborationFilter = root[CFG_KEY_NOTIFICATION_SERVICE][COLLABORATION_FILTER];
+    const nlohmann::json &collaborationFilter =
+        (*root)[CFG_KEY_NOTIFICATION_SERVICE][COLLABORATION_FILTER];
     if (collaborationFilter.is_null() || collaborationFilter.empty()) {
         ANS_LOGE("GetCollaborationFilter failed as invalid ccmCollaborationFilter json.");
         return false;
     }
-    if (collaborationFilter.contains(key) && collaborationFilter[key].is_array()) {
-        for (const auto& item : collaborationFilter[key]) {
-            if (item.is_number_integer()) {
-                uidList_.push_back(item.get<int32_t>());
-            }
-            if (item.is_string()) {
-                bundleNameList_.push_back(item.get<std::string>());
-            }
-        }
-        return true;
+    if (!collaborationFilter.contains(key) || !collaborationFilter[key].is_array()) {
+        return false;
     }
-    return false;
+    std::lock_guard<ffrt::mutex> lock(mutex_);
+    for (const auto &item : collaborationFilter[key]) {
+        if (item.is_number_integer()) {
+            uidList_.push_back(item.get<int32_t>());
+        }
+        if (item.is_string()) {
+            bundleNameList_.push_back(item.get<std::string>());
+        }
+    }
+    return true;
 }
 
 void __attribute__((weak)) NotificationConfigParse::GetCollaborationFilter()
 {
+    std::vector<int32_t> uidList;
+    std::vector<std::string> bundleNameList;
+    {
+        std::lock_guard<ffrt::mutex> lock(mutex_);
+        uidList.swap(uidList_);
+        bundleNameList.swap(bundleNameList_);
+    }
     if (!GetFilterUidAndBundleName(COLLABORATION_FILTER_KEY_UID)) {
         ANS_LOGW("Failed to get filterUid.");
     }
@@ -478,79 +761,27 @@ bool __attribute__((weak)) NotificationConfigParse::IsInCollaborationFilter(
 
 uint32_t __attribute__((weak)) NotificationConfigParse::GetStartAbilityTimeout()
 {
-    nlohmann::json root;
-    std::string JsonPoint = "/";
-    JsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    if (!GetConfigJson(JsonPoint, root)) {
-        ANS_LOGE("Failed to get JsonPoint CCM config file");
-        return 0;
-    }
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE)) {
+    if (!hasStartAbilityTimeout_) {
         ANS_LOGE("GetStartAbilityTimeout not found jsonKey");
         return 0;
     }
-    nlohmann::json affects = root[CFG_KEY_NOTIFICATION_SERVICE];
-    if (affects.is_null() || affects.empty()) {
-        ANS_LOGE("GetStartAbilityTimeout failed as invalid ccmFlowCtrlConfig json");
-        return 0;
-    }
-    if (affects.contains(CFG_KEY_START_ABILITY_TIMEOUT) &&
-        affects[CFG_KEY_START_ABILITY_TIMEOUT].is_number_integer()) {
-        return affects[CFG_KEY_START_ABILITY_TIMEOUT].get<uint32_t>();
-    }
-
-    return 0;
+    return startAbilityTimeout_;
 }
 
 bool __attribute__((weak)) NotificationConfigParse::CheckAppLiveViewCcm()
 {
-    nlohmann::json root;
-    std::string JsonPoint = "/";
-    JsonPoint.append(NotificationConfigParse::APP_LIVEVIEW_PERMISSIONS);
-    if (!NotificationConfigParse::GetInstance()->GetConfigJson(JsonPoint, root)) {
-        ANS_LOGE("Failed to get JsonPoint CCM config file.");
-        return false;
-    }
-    return true;
+    return hasAppLiveViewCcm_;
 }
 
 void __attribute__((weak)) NotificationConfigParse::GetReportTrustListConfig()
 {
-    nlohmann::json root;
-    std::string reportJsonPoint = "/";
-    reportJsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    reportJsonPoint.append("/");
-    reportJsonPoint.append(CFG_KEY_DFX_NORMAL_EVENT);
-    if (!GetConfigJson(reportJsonPoint, root)) {
+    std::vector<nlohmann::json> docs;
+    if (!LoadConfigJsons(docs) || docs.empty()) {
         return;
     }
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) || !root[CFG_KEY_NOTIFICATION_SERVICE].is_object()) {
-        ANS_LOGE("Failed to get JsonPoint CCM config file");
-        return;
-    }
-
-    nlohmann::json reportTrustList = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_DFX_NORMAL_EVENT];
-    if (reportTrustList.is_null() || reportTrustList.empty() || !reportTrustList.is_array()) {
-        ANS_LOGE("GetReportTrustListConfig failed as invalid dfx_normal_events json.");
-        return;
-    }
-    for (auto &reportTrust : reportTrustList) {
-        if (reportTrust.is_string()) {
-            reporteTrustSet_.emplace(reportTrust.get<std::string>());
-        }
-    }
-
-    nlohmann::json keyBundles = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_BUNDLE_NAME];
-    if (keyBundles.is_null() || keyBundles.empty() || !keyBundles.is_array()) {
-        ANS_LOGE("Key bundles failed json.");
-        return;
-    }
-    for (auto &bundle : keyBundles) {
-        if (bundle.is_string()) {
-            keyTrustBundles_.emplace(bundle.get<std::string>());
-        }
-    }
-    return;
+    reporteTrustSet_.clear();
+    keyTrustBundles_.clear();
+    ParseReportTrustList(docs);
 }
 
 bool __attribute__((weak)) NotificationConfigParse::IsReportTrustList(const std::string& bundleName) const
@@ -565,94 +796,38 @@ bool __attribute__((weak)) NotificationConfigParse::IsReportTrustBundles(const s
 
 bool __attribute__((weak)) NotificationConfigParse::GetCloneExpiredTime(int32_t& days)
 {
-    nlohmann::json root;
-    std::string reportJsonPoint = "/";
-    reportJsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    reportJsonPoint.append("/");
-    reportJsonPoint.append(CFG_KEY_CLONE_EXPIRED_TIME);
-    if (!GetConfigJson(reportJsonPoint, root)) {
-        return false;
-    }
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) || !root[CFG_KEY_NOTIFICATION_SERVICE].is_object()) {
-        ANS_LOGE("Failed to get JsonPoint CCM config file");
-        return false;
-    }
-    nlohmann::json jsonItem = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_CLONE_EXPIRED_TIME];
-    if (jsonItem.is_null() || !jsonItem.is_number_integer()) {
+    if (!hasCloneExpiredTime_) {
         ANS_LOGE("cloneExpiredTime failed json.");
         return false;
     }
-
-    days = jsonItem.get<int32_t>();
+    days = cloneExpiredTimeDays_;
     return true;
 }
 
 bool __attribute__((weak)) NotificationConfigParse::GetDataCloneBundleName(std::string &bundleName)
 {
-    nlohmann::json root;
-    std::string jsonPoint = "/";
-    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_DATACLONE_BUNDLE_NAME);
-    if (!GetConfigJson(jsonPoint, root)) {
-        ANS_LOGE("Failed to get JsonPoint CCM config file.");
+    if (dataCloneBundleName_.empty()) {
+        ANS_LOGE("datacloneBundleName is missing or empty in CCM config.");
         return false;
     }
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) || !root[CFG_KEY_NOTIFICATION_SERVICE].is_object()) {
-        ANS_LOGE("Failed to find notificationService in CCM config.");
-        return false;
-    }
-    nlohmann::json jsonItem = root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_DATACLONE_BUNDLE_NAME];
-    if (jsonItem.is_null() || !jsonItem.is_string()) {
-        ANS_LOGE("datacloneBundleName is missing or not a string in CCM config.");
-        return false;
-    }
-    bundleName = jsonItem.get<std::string>();
-    if (bundleName.empty()) {
-        ANS_LOGE("datacloneBundleName is empty in CCM config.");
-        return false;
-    }
-    ANS_LOGI("Got datacloneBundleName from CCM: %{public}s.", bundleName.c_str());
+    bundleName = dataCloneBundleName_;
     return true;
 }
 
 bool __attribute__((weak)) NotificationConfigParse::GetCollaborativeDeleteTypeByDevice(std::map<std::string,
     std::map<std::string, std::unordered_set<std::string>>>& resultMap) const
 {
-    nlohmann::json root;
-    std::string JsonPoint = "/";
-    JsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    JsonPoint.append("/");
-    JsonPoint.append(CFG_KEY_COLLABORATIVE_DELETE_TYPES_DEVICES);
-    if (!GetConfigJson(JsonPoint, root)) {
-        ANS_LOGE("GetConfigJson faild");
-        return false;
-    }
-
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) || !root[CFG_KEY_NOTIFICATION_SERVICE].is_object()) {
-        ANS_LOGE("appPrivileges null");
-        return false;
-    }
-
-    nlohmann::json collaborativeDeleteTypes =
-        root[CFG_KEY_NOTIFICATION_SERVICE][CFG_KEY_COLLABORATIVE_DELETE_TYPES_DEVICES];
-
-    if (collaborativeDeleteTypes.is_null() || collaborativeDeleteTypes.empty() ||
-        !collaborativeDeleteTypes.is_array()) {
+    if (!hasCollaborativeDeleteTypesByDevice_) {
         ANS_LOGE("get collaborativeDeleteTypes failed.");
         return false;
     }
-    std::map<std::string, std::map<std::string, std::unordered_set<std::string>>> tempMap;
-    if (!ParseCollaborativeDeleteTypesDevices(tempMap, collaborativeDeleteTypes)) {
-        return false;
-    }
-    resultMap = tempMap;
+    resultMap = collaborativeDeleteTypesByDevice_;
     return true;
 }
 
 bool __attribute__((weak)) NotificationConfigParse::ParseCollaborativeDeleteTypesDevices(std::map<std::string,
     std::map<std::string, std::unordered_set<std::string>>>& resultMap,
-    nlohmann::json& collaborativeDeleteTypes) const
+    const nlohmann::json& collaborativeDeleteTypes) const
 {
     for (const auto& device : collaborativeDeleteTypes) {
         if (!device.contains(LOCAL_DEVICE_TYPE) || !device[LOCAL_DEVICE_TYPE].is_string()) {
@@ -699,88 +874,24 @@ bool __attribute__((weak)) NotificationConfigParse::ParseDeviceSlotType(const nl
 bool __attribute__((weak)) NotificationConfigParse::IsNotificationExtensionLifecycleDestroyTimeConfigured(
     uint32_t &outDestroyTime) const
 {
-    nlohmann::json root;
-    std::string jsonPoint = "/";
-    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION);
-    jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME);
-    
-    if (!GetConfigJson(jsonPoint, root)) {
-        ANS_LOGE("Failed to get extension lifecycle destroy time config.");
+    if (!hasExtensionLifecycleDestroyTime_) {
+        ANS_LOGI("Notification extension lifecycle destroy time config not found");
         return false;
     }
-    
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) ||
-        !root[CFG_KEY_NOTIFICATION_SERVICE].contains(CFG_KEY_NOTIFICATION_EXTENSION)) {
-        ANS_LOGE("Notification extension lifecycle destroy time config not found jsonKey");
-        return false;
-    }
-    
-    nlohmann::json service = root[CFG_KEY_NOTIFICATION_SERVICE];
-    nlohmann::json extension = service[CFG_KEY_NOTIFICATION_EXTENSION];
-    if (extension.is_null() || extension.empty()) {
-        ANS_LOGE("Notification extension lifecycle destroy time config is invalid");
-        return false;
-    }
-    
-    if (extension.contains(CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME) &&
-        extension[CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME].is_number_integer()) {
-        outDestroyTime = extension[CFG_KEY_NOTIFICATION_EXTENSION_LIFECYCLE_DESTORY_TIME].get<uint32_t>();
-        ANS_LOGI("Notification extension lifecycle destroy time config found and valid");
-        return true;
-    }
-
-    ANS_LOGI("Notification extension lifecycle destroy time config not found");
-    return false;
+    outDestroyTime = extensionLifecycleDestroyTime_;
+    ANS_LOGI("Notification extension lifecycle destroy time config found and valid");
+    return true;
 }
 
 bool __attribute__((weak)) NotificationConfigParse::GetNotificationExtensionEnabledBundlesWriteList(
     std::vector<std::string>& bundles) const
 {
-    nlohmann::json root;
-    std::string jsonPoint = "/";
-    jsonPoint.append(CFG_KEY_NOTIFICATION_SERVICE);
-    jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_NOTIFICATION_EXTENSION);
-    jsonPoint.append("/");
-    jsonPoint.append(CFG_KEY_ENABLED_BUNDLES_WRITE_LIST);
-
-    if (!GetConfigJson(jsonPoint, root)) {
-        ANS_LOGE("Failed to get enabledBundlesWriteList config.");
-        return false;
-    }
-
-    if (!root.contains(CFG_KEY_NOTIFICATION_SERVICE) ||
-        !root[CFG_KEY_NOTIFICATION_SERVICE].contains(CFG_KEY_NOTIFICATION_EXTENSION)) {
-        ANS_LOGE("enabledBundlesWriteList missing notificationExtension jsonKey");
-        return false;
-    }
-
-    nlohmann::json service = root[CFG_KEY_NOTIFICATION_SERVICE];
-    nlohmann::json extension = service[CFG_KEY_NOTIFICATION_EXTENSION];
-    if (extension.is_null() || extension.empty()) {
-        ANS_LOGE("enabledBundlesWriteList invalid notificationExtension json");
-        return false;
-    }
-
-    if (!extension.contains(CFG_KEY_ENABLED_BUNDLES_WRITE_LIST)) {
-        ANS_LOGE("enabledBundlesWriteList key not found in notificationExtension");
-        return false;
-    }
-
-    nlohmann::json list = extension[CFG_KEY_ENABLED_BUNDLES_WRITE_LIST];
-    if (list.is_null() || !list.is_array() || list.empty()) {
+    if (!hasExtensionEnabledBundlesWriteList_) {
         ANS_LOGE("enabledBundlesWriteList is invalid or empty");
         return false;
     }
-
-    for (const auto &bundle : list) {
-        if (bundle.is_string()) {
-            bundles.push_back(bundle.get<std::string>());
-        }
-    }
+    bundles.insert(bundles.end(), extensionEnabledBundlesWriteList_.begin(),
+        extensionEnabledBundlesWriteList_.end());
     return true;
 }
 } // namespace Notification

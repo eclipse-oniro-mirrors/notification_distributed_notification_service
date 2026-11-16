@@ -14,9 +14,11 @@
  */
 
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <set>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -2590,5 +2592,196 @@ HWTEST_F(NtfRdbStoreWrapperTest, RecoverDatabase_400, Function | SmallTest | Lev
     EXPECT_NE(rdbWrapper.rdbStore_, nullptr);
     EXPECT_EQ(rdbWrapper.createdTables_.count("normal_table"), 1);
     EXPECT_FALSE(rdbWrapper.isRecovering_.load());
+}
+
+/**
+ * @tc.name: IdleRelease_900
+ * @tc.desc: Verify the idle check never waits for an in-flight operation.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, IdleRelease_900, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.idleReleaseTimeoutMs = 0;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+
+    std::atomic<bool> acquired { false };
+    std::atomic<bool> release { false };
+    std::thread holder([&rdbWrapper, &acquired, &release]() {
+        rdbWrapper.rdbStorePtrMutex_.lock();
+        acquired.store(true);
+        while (!release.load()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        rdbWrapper.rdbStorePtrMutex_.unlock();
+    });
+    constexpr int32_t maxWaitMs = 2000;
+    bool locked = false;
+    for (int32_t i = 0; i < maxWaitMs && !locked; ++i) {
+        locked = acquired.load();
+        if (!locked) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+    }
+    if (!locked) {
+        release.store(true);
+        holder.join();
+    }
+    ASSERT_TRUE(locked);
+    EXPECT_EQ(rdbWrapper.ReleaseIfIdle(0), NativeRdb::E_ERROR);
+
+    // IsStoreOpen() takes the same mutex in a blocking way, so the holder must be stopped first.
+    release.store(true);
+    holder.join();
+    EXPECT_TRUE(rdbWrapper.IsStoreOpen());
+}
+
+/**
+ * @tc.name: IdleRelease_1000
+ * @tc.desc: Verify the store is not released while a database recovery is running.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, IdleRelease_1000, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.idleReleaseTimeoutMs = 0;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+
+    rdbWrapper.isRecovering_.store(true);
+    EXPECT_EQ(rdbWrapper.ReleaseIfIdle(0), NativeRdb::E_ERROR);
+    EXPECT_TRUE(rdbWrapper.IsStoreOpen());
+    rdbWrapper.isRecovering_.store(false);
+}
+
+/**
+ * @tc.name: IdleRelease_1100
+ * @tc.desc: Verify the idle timer is re-armed when the store is still in use.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, IdleRelease_1100, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.idleReleaseTimeoutMs = 60000;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+
+    rdbWrapper.HandleIdleRelease(60000);
+    EXPECT_TRUE(rdbWrapper.IsStoreOpen());
+    EXPECT_NE(rdbWrapper.idleReleaseHandle_, nullptr);
+    rdbWrapper.CancelIdleRelease();
+}
+
+/**
+ * @tc.name: IdleRelease_1200
+ * @tc.desc: Verify the timer body releases an idle store.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, IdleRelease_1200, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.idleReleaseTimeoutMs = 60000;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+
+    rdbWrapper.HandleIdleRelease(0);
+    EXPECT_FALSE(rdbWrapper.IsStoreOpen());
+    EXPECT_EQ(rdbWrapper.idleReleaseHandle_, nullptr);
+}
+
+/**
+ * @tc.name: IdleRelease_1300
+ * @tc.desc: Verify Destroy cancels the pending idle timer.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, IdleRelease_1300, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.idleReleaseTimeoutMs = 60000;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+    ASSERT_NE(rdbWrapper.idleReleaseHandle_, nullptr);
+    // Init on an opened store only refreshes the timestamp, it must not arm a second timer.
+    EXPECT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+    EXPECT_EQ(rdbWrapper.Destroy(), NativeRdb::E_OK);
+    EXPECT_EQ(rdbWrapper.idleReleaseHandle_, nullptr);
+}
+
+/**
+ * @tc.name: IdleRelease_1400
+ * @tc.desc: Verify a store operation refreshes the last used timestamp.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NtfRdbStoreWrapperTest, IdleRelease_1400, Function | SmallTest | Level1)
+{
+    NotificationRdbConfig config;
+    config.idleReleaseTimeoutMs = 0;
+    const NtfRdbHook hooks;
+    const std::set<RdbEventHandlerType> eventHandlerTypes;
+    NtfRdbStoreWrapper rdbWrapper(config, hooks, eventHandlerTypes);
+    auto mockRdbStore = std::make_shared<MockRdbStore>();
+    SetMockRdbStoreResults({mockRdbStore});
+    auto mockResultSet = std::make_shared<MockAbsSharedResultSet>();
+    SetMockQuerySqlResults({mockResultSet});
+    SetMockGoToFirstRowErrCodes({NativeRdb::E_OK});
+    SetMockGetStringValuesAndErrCodes({"normal_table"}, {NativeRdb::E_OK});
+    SetMockGoToNextRowErrCodes({NativeRdb::E_ERROR});
+    ASSERT_EQ(rdbWrapper.Init(), NativeRdb::E_OK);
+
+    rdbWrapper.lastUsedTimeMs_ = 0;
+    EXPECT_EQ(rdbWrapper.InsertData("key", "value", -1), NativeRdb::E_OK);
+    EXPECT_GT(rdbWrapper.lastUsedTimeMs_, 0);
 }
 } // OHOS::Notification::Infra

@@ -77,7 +77,7 @@ int32_t NtfRdbStoreWrapper::GetStatisticsInfos(const int64_t lastTimeMs,
     const int32_t bundleUid, const std::string &tableName, int32_t &totalCount, int64_t &lastTime)
 {
     std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-    if (rdbStore_ == nullptr) {
+    if (!EnsureRdbStoreLocked()) {
         ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
         return NativeRdb::E_ERROR;
     }
@@ -134,7 +134,7 @@ int32_t NtfRdbStoreWrapper::UpdateStatisticsTimeStamp(const int32_t userId, int6
     int ret = NativeRdb::E_ERROR;
     {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("NtfRdbStoreWrapper rdbStore_ is null");
             return NativeRdb::E_ERROR;
         }
@@ -247,7 +247,7 @@ int32_t NtfRdbStoreWrapper::ExecuteQuery(const std::string& tableName, NativeRdb
 {
     {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }

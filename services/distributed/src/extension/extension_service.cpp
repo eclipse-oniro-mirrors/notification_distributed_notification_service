@@ -18,7 +18,6 @@
 #include "extension_service_connection_service.h"
 #include "extension_service.h"
 #include "extension_service_subscribe_service.h"
-#include "notification_config_parse.h"
 
 namespace OHOS {
 namespace Notification {
@@ -27,6 +26,13 @@ NotificationExtensionService& NotificationExtensionService::GetInstance()
 {
     static NotificationExtensionService notificationExtensionService;
     return notificationExtensionService;
+}
+
+void NotificationExtensionService::SetLifecycleDestroyTime(uint32_t destroyTime)
+{
+    lifecycleDestroyTime_ = destroyTime;
+    hasLifecycleDestroyTime_ = true;
+    ANS_LOGD("set extension lifecycle destroy time: %{public}u", destroyTime);
 }
 
 NotificationExtensionService::NotificationExtensionService()
@@ -62,7 +68,8 @@ int32_t NotificationExtensionService::InitService(std::function<void()> shutdown
         });
     });
     uint32_t destroyTime = 0;
-    if (NotificationConfigParse::GetInstance()->IsNotificationExtensionLifecycleDestroyTimeConfigured(destroyTime)) {
+    if (hasLifecycleDestroyTime_) {
+        destroyTime = lifecycleDestroyTime_;
         ExtensionServiceConnection::SetExtensionLifecycleDestroyTime(destroyTime);
     }
     return 0;

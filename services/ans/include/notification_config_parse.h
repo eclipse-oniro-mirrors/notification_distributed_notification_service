@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+* Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -17,10 +17,12 @@
 #define BASE_NOTIFICATION_DISTRIBUTED_NOTIFICATION_SERVICE_SERVICES_ANS_INCLUDE_NOTIFICATION_CONFIG_FILE_H
 
 #include <map>
+#include <memory>
 #include <string>
 #include <set>
 #include <vector>
 #include <singleton.h>
+#include <unordered_map>
 #include <unordered_set>
 #include <mutex>
 
@@ -41,6 +43,13 @@ public:
     NotificationConfigParse();
     ~NotificationConfigParse() = default;
 
+    /**
+     * @brief Get the effective CCM config document containing the given key.
+     *
+     * The CCM config is parsed into typed caches when this singleton is constructed; this
+     * interface is kept for low frequency callers that need the raw document and reloads
+     * the config file on demand, so no JSON document stays resident.
+     */
     bool GetConfigJson(const std::string &keyCheck, nlohmann::json &configJson) const;
     bool GetCurrentSlotReminder(
         std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> &currentSlotReminder) const;
@@ -72,17 +81,77 @@ public:
 
 private:
     bool ParseCollaborativeDeleteTypesDevices(std::map<std::string, std::map<std::string,
-        std::unordered_set<std::string>>>& map, nlohmann::json& collaborativeDeleteTypes) const;
+        std::unordered_set<std::string>>>& map, const nlohmann::json& collaborativeDeleteTypes) const;
     bool ParseDeviceSlotType(const nlohmann::json& device,
         std::map<std::string, std::unordered_set<std::string>>& peerDeviceTypeMap) const;
+
+    /** @brief Load every notification config document (highest priority first). */
+    bool LoadConfigJsons(std::vector<nlohmann::json> &docs) const;
+
+    /** @brief Find the effective document containing jsonPoint (highest priority wins). */
+    const nlohmann::json *FindConfigDoc(const std::vector<nlohmann::json> &docs, const std::string &jsonPoint) const;
+
+    /** @brief Parse the given documents into the typed caches below. */
+    void ParseConfigs(const std::vector<nlohmann::json> &docs);
+    void ParseAppPrivileges(const std::vector<nlohmann::json> &docs);
+    void ParseSlotTypeReminder(const std::vector<nlohmann::json> &docs);
+    void ParseFlowCtrlConfig(const std::vector<nlohmann::json> &docs);
+    void ParseSmartReminderEnableList(const std::vector<nlohmann::json> &docs);
+    void ParseMirrorNotificationEnabledStatus(const std::vector<nlohmann::json> &docs);
+    void ParseAppAndDeviceRelationMap(const std::vector<nlohmann::json> &docs);
+    void ParseCollaborativeDeleteTypes(const std::vector<nlohmann::json> &docs);
+    void ParseCollaborativeDeleteTypesByDevice(const std::vector<nlohmann::json> &docs);
+    void ParseCollaborationFilter(const std::vector<nlohmann::json> &docs);
+    void ParseStartAbilityTimeout(const std::vector<nlohmann::json> &docs);
+    void ParseAppLiveViewCcm(const std::vector<nlohmann::json> &docs);
+    void ParseReportTrustList(const std::vector<nlohmann::json> &docs);
+    void ParseCloneExpiredTime(const std::vector<nlohmann::json> &docs);
+    void ParseDataCloneBundleName(const std::vector<nlohmann::json> &docs);
+    void ParseNotificationExtension(const std::vector<nlohmann::json> &docs);
+
+    /** Flow control thresholds; the has* flags record which keys were present in the config. */
+    struct FlowCtrlConfig {
+        bool hasMaxCreateNumPerSecond = false;
+        uint32_t maxCreateNumPerSecond = 0;
+        bool hasMaxUpdateNumPerSecond = false;
+        uint32_t maxUpdateNumPerSecond = 0;
+        bool hasMaxCreateNumPerSecondPerApp = false;
+        uint32_t maxCreateNumPerSecondPerApp = 0;
+        bool hasMaxUpdateNumPerSecondPerApp = false;
+        uint32_t maxUpdateNumPerSecondPerApp = 0;
+    };
+
     std::map<NotificationConstant::SlotType, uint32_t> defaultCurrentSlotReminder_;
-    std::vector<nlohmann::json> notificationConfigJsons_;
     ffrt::mutex mutex_;
-    ffrt::mutex slotReminderMutex_;
     std::vector<int32_t> uidList_;
     std::vector<std::string> bundleNameList_;
     std::set<std::string> reporteTrustSet_ {};
     std::set<std::string> keyTrustBundles_ {};
+
+    /** Parsed CCM config, built once during construction and immutable afterwards. */
+    std::unordered_map<std::string, std::shared_ptr<NotificationAppPrivileges>> appPrivileges_;
+    std::map<NotificationConstant::SlotType, std::shared_ptr<NotificationFlags>> currentSlotReminder_;
+    bool hasSlotReminder_ = false;
+    FlowCtrlConfig flowCtrlConfig_;
+    std::vector<std::string> smartReminderEnableList_;
+    bool hasSmartReminderEnableList_ = false;
+    std::vector<std::string> mirrorNotificationEnabledStatus_;
+    bool hasMirrorNotificationEnabledStatus_ = false;
+    std::map<std::string, std::string> appAndDeviceRelationMap_;
+    bool hasAppAndDeviceRelationMap_ = false;
+    std::unordered_set<std::string> collaborativeDeleteTypes_;
+    std::map<std::string, std::map<std::string, std::unordered_set<std::string>>> collaborativeDeleteTypesByDevice_;
+    bool hasCollaborativeDeleteTypesByDevice_ = false;
+    bool hasAppLiveViewCcm_ = false;
+    uint32_t startAbilityTimeout_ = 0;
+    bool hasStartAbilityTimeout_ = false;
+    int32_t cloneExpiredTimeDays_ = 0;
+    bool hasCloneExpiredTime_ = false;
+    std::string dataCloneBundleName_;
+    uint32_t extensionLifecycleDestroyTime_ = 0;
+    bool hasExtensionLifecycleDestroyTime_ = false;
+    std::vector<std::string> extensionEnabledBundlesWriteList_;
+    bool hasExtensionEnabledBundlesWriteList_ = false;
 
 public:
     constexpr static const char* CFG_KEY_NOTIFICATION_SERVICE = "notificationService";
