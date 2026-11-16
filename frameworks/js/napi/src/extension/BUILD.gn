@@ -44,7 +44,6 @@ ohos_shared_library("notification_subscriber_extension") {
   deps = [
     "${frameworks_path}/js/napi:notification_napi_common",
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${frameworks_module_extension_path}:notification_subscriber_extension_common",
     "${frameworks_module_extension_path}:notification_subscriber_ipc",
   ]
 
@@ -101,6 +100,7 @@ ohos_shared_library("notification_subscriber_extension_module") {
   deps = [
     ":notification_subscriber_extension",
     "${frameworks_module_ans_path}:ans_innerkits",
+    "${frameworks_module_extension_path}:notification_subscriber_ipc",
   ]
 
   external_deps = [

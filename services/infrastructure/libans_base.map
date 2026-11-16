@@ -13,50 +13,76 @@
  * limitations under the License.
  */
 
+# Exact export list generated from default + full-feature ARM32/ARM64 consumers,
+# including unit/module test binaries. Hidden symbols are not referenced by any
+# consumer; vtable/typeinfo/VTT stay exported for cross-DSO CFI.
+
 1.0 {
   global:
-      extern "C++" {
-        OHOS::Notification::Infra::FfrtQueueImpl*;
-        OHOS::Notification::Infra::NtfRdbHookMgr*;
-        OHOS::Notification::Infra::NtfRdbConstant::NOTIFICATION_RDB_NAME;
-        OHOS::Notification::Infra::NtfRdbConstant::NOTIFICATION_RDB_PATH;
-        OHOS::Notification::Infra::NtfRdbConstant::NOTIFICATION_SYNC_MODE;
-        OHOS::Notification::Infra::NtfRdbConstant::NOTIFICATION_JOURNAL_MODE;
-        OHOS::Notification::Infra::NtfRdbConstant::NOTIFICATION_RDB_TABLE_NAME;
-        OHOS::Notification::Infra::IRdbEventHandler*;
-        OHOS::Notification::Infra::RdbStoreCallback*;
-        OHOS::Notification::Infra::NotificationRdbMgr*;
-        OHOS::Notification::Infra::NtfRdbStoreWrapper*;
-        OHOS::Notification::Infra::VoiceExtensionWrapper*;
-        OHOS::Notification::Infra::RdbEventHandlerManager*;
-        OHOS::Notification::Infra::InitDefaultTableHandler*;
-        OHOS::Notification::Infra::LiveViewMigrationHandler*;
-        OHOS::Notification::Infra::AllScenariosExtensionWrapper*;
-        OHOS::Notification::Infra::PriorityInfoMigrationHandler*;
-        OHOS::Notification::Infra::BundleManagerRepositoryImpl*;
-        OHOS::Notification::Infra::TimerImpl*;
-        # void ffrt::exec_function_wrapper<std::__h::function<void ()> >(void*);
-        # void ffrt::exec_function_wrapper<std::__h::function<void ()> const&>(void*);
-        # void ffrt::destroy_function_wrapper<std::__h::function<void ()> >(void*);
-        # void ffrt::destroy_function_wrapper<std::__h::function<void ()> const&>(void*);
-        # std::__h::basic_stringbuf<char, std::__h::char_traits<char>, std::__h::allocator<char> >::str() const;
-        # std::__h::basic_stringbuf<char, std::__h::char_traits<char>, std::__h::allocator<char> >::seekoff(long long, std::__h::ios_base::seekdir, unsigned int);
-        # std::__h::basic_stringbuf<char, std::__h::char_traits<char>, std::__h::allocator<char> >::overflow(int);
-        # std::__h::basic_stringbuf<char, std::__h::char_traits<char>, std::__h::allocator<char> >::pbackfail(int);
-        # std::__h::basic_stringbuf<char, std::__h::char_traits<char>, std::__h::allocator<char> >::underflow();
-        # construction vtable for std::__h::basic_istream<char, std::__h::char_traits<char> >-in-std::__h::basic_stringstream<char, std::__h::char_traits<char>, std::__h::allocator<char> >;
-        # construction vtable for std::__h::basic_iostream<char, std::__h::char_traits<char> >-in-std::__h::basic_stringstream<char, std::__h::char_traits<char>, std::__h::allocator<char> >;
-        # construction vtable for std::__h::basic_ostream<char, std::__h::char_traits<char> >-in-std::__h::basic_stringstream<char, std::__h::char_traits<char>, std::__h::allocator<char> >;
-        # VTT for std::__h::basic_stringstream<char, std::__h::char_traits<char>, std::__h::allocator<char> >;
-        vtable?for?OHOS::Notification::Infra::IRdbEventHandler;
-        vtable?for?OHOS::Notification::Infra::RdbStoreCallback;
-        vtable?for?OHOS::Notification::Infra::InitDefaultTableHandler;
-        vtable?for?OHOS::Notification::Infra::LiveViewMigrationHandler;
-        vtable?for?OHOS::Notification::Infra::PriorityInfoMigrationHandler;
-        vtable?for?OHOS::Notification::Infra::BundleManagerRepositoryImpl;
-        # vtable for std::__h::basic_stringbuf<char, std::__h::char_traits<char>, std::__h::allocator<char> >;
-        # vtable for std::__h::basic_stringstream<char, std::__h::char_traits<char>, std::__h::allocator<char> >;
-      };
+    _ZN4OHOS12Notification5Infra13FfrtQueueImpl10SyncSubmitEONSt3__h8functionIFvvEEE;
+    _ZN4OHOS12Notification5Infra13FfrtQueueImpl10SyncSubmitERNSt3__h8functionIFvvEEE;
+    _ZN4OHOS12Notification5Infra13FfrtQueueImpl5ResetEv;
+    _ZN4OHOS12Notification5Infra13FfrtQueueImpl6SubmitEOKNSt3__h8functionIFvvEEE;
+    _ZN4OHOS12Notification5Infra13FfrtQueueImpl6SubmitEOKNSt3__h8functionIFvvEEElNS3_12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEE;
+    _ZN4OHOS12Notification5Infra13FfrtQueueImpl6SubmitEOKNSt3__h8functionIFvvEEExNS3_12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEE;
+    _ZN4OHOS12Notification5Infra13FfrtQueueImpl6SubmitERKNSt3__h8functionIFvvEEE;
+    _ZN4OHOS12Notification5Infra13FfrtQueueImpl7RunOnceERKNSt3__h8functionIFvvEEE;
+    _ZN4OHOS12Notification5Infra13FfrtQueueImplC1ENSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEE;
+    _ZN4OHOS12Notification5Infra13FfrtQueueImplD1Ev;
+    _ZN4OHOS12Notification5Infra14NtfRdbConstant21NOTIFICATION_RDB_NAMEE;
+    _ZN4OHOS12Notification5Infra14NtfRdbConstant21NOTIFICATION_RDB_PATHE;
+    _ZN4OHOS12Notification5Infra14NtfRdbConstant22NOTIFICATION_SYNC_MODEE;
+    _ZN4OHOS12Notification5Infra14NtfRdbConstant25NOTIFICATION_JOURNAL_MODEE;
+    _ZN4OHOS12Notification5Infra14NtfRdbConstant27NOTIFICATION_RDB_TABLE_NAMEE;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr10DeleteDataERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr10InsertDataERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERKNS3_6vectorIhNS7_IhEEEERKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr10InsertDataERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEESB_RKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr12QueryAllDataERNSt3__h13unordered_mapINS3_12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEESA_NS3_4hashISA_EENS3_8equal_toISA_EENS8_INS3_4pairIKSA_SA_EEEEEERKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr13DropUserTableEi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr15DeleteBatchDataERKNSt3__h6vectorINS3_12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEENS8_ISA_EEEEi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr15InsertBatchDataERKNSt3__h13unordered_mapINS3_12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEESA_NS3_4hashISA_EENS3_8equal_toISA_EENS8_INS3_4pairIKSA_SA_EEEEEERKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr15QueryDataInKeysERKNSt3__h6vectorINS3_12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEENS8_ISA_EEEERNS3_13unordered_mapISA_SA_NS3_4hashISA_EENS3_8equal_toISA_EENS8_INS3_4pairIKSA_SA_EEEEEERKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr19DropStatisticsTableEi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr19QueryEnabledBundlesERNSt3__h13unordered_mapINS3_12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEESA_NS3_4hashISA_EENS3_8equal_toISA_EENS8_INS3_4pairIKSA_SA_EEEEEERKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr20InsertStatisticsDataEiRKNS1_21StatisticsWrapperInfoE;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr20UpdateStatisticsTimeEil;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr20UpdateStatisticsTimeEix;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr21QueryDataBeginWithKeyERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERNS3_13unordered_mapIS9_S9_NS3_4hashIS9_EENS3_8equal_toIS9_EENS7_INS3_4pairISA_S9_EEEEEERKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr23QueryStatisticsByBundleEiilRiRl;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr23QueryStatisticsByBundleEiixRiRx;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr24CleanStatisticsExperDataEi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr24DeleteStatisticsByBundleEiRKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr24QueryDataContainsWithKeyERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERNS3_13unordered_mapIS9_S9_NS3_4hashIS9_EENS3_8equal_toIS9_EENS7_INS3_4pairISA_S9_EEEEEERKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr29CleanStatisticsExperDataTimerERKNSt3__h6vectorIiNS3_9allocatorIiEEEE;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr4InitEv;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr7DestroyEv;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr9QueryDataERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERNS3_6vectorIhNS7_IhEEEERKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgr9QueryDataERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERS9_RKi;
+    _ZN4OHOS12Notification5Infra18NotificationRdbMgrC1ERNS1_21NotificationRdbConfigERKNS1_10NtfRdbHookERKNSt3__h3setINS1_19RdbEventHandlerTypeENS8_4lessISA_EENS8_9allocatorISA_EEEE;
+    _ZN4OHOS12Notification5Infra21VoiceExtensionWrapper11GetInstanceEv;
+    _ZN4OHOS12Notification5Infra21VoiceExtensionWrapper16NotifyVoiceEventERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERKNS_4sptrINS0_19NotificationRequestEEE;
+    _ZN4OHOS12Notification5Infra21VoiceExtensionWrapper17UpdateVoiceConfigERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEE;
+    _ZN4OHOS12Notification5Infra21VoiceExtensionWrapper20GenerateVoiceContentERKNS_4sptrINS0_19NotificationRequestEEERNSt3__h12basic_stringIcNS8_11char_traitsIcEENS8_9allocatorIcEEEESF_;
+    _ZN4OHOS12Notification5Infra28AllScenariosExtensionWrapper11GetInstanceEv;
+    _ZN4OHOS12Notification5Infra28AllScenariosExtensionWrapper19CheckLiveViewConfigERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEESB_iRb;
+    _ZN4OHOS12Notification5Infra28AllScenariosExtensionWrapper19CheckLiveViewRightsERKNS_4sptrINS0_19NotificationRequestEEE;
+    _ZN4OHOS12Notification5Infra28AllScenariosExtensionWrapper19NotifyLiveViewEventERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEERKNS_4sptrINS0_24NotificationBundleOptionEEE;
+    _ZN4OHOS12Notification5Infra28AllScenariosExtensionWrapper20UpdateLiveViewConfigERKNSt3__h12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEE;
+    _ZN4OHOS12Notification5Infra28AllScenariosExtensionWrapper24GetLiveViewConfigVersionERi;
+    _ZN4OHOS12Notification5Infra28AllScenariosExtensionWrapper25OnNotifyClearNotificationERKNSt3__h6vectorINS3_12basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEENS8_ISA_EEEE;
+    _ZN4OHOS12Notification5Infra28AllScenariosExtensionWrapper26UpdateLiveviewVoiceContentERKNS_4sptrINS0_19NotificationRequestEEE;
+    _ZN4OHOS12Notification5Infra28AllScenariosExtensionWrapper27OnNotifyDelayedNotificationERKNS_4sptrINS0_19NotificationRequestEEE;
+    _ZN4OHOS12Notification5Infra28AllScenariosExtensionWrapper27UpdateLiveviewReminderFlagsERKNS_4sptrINS0_19NotificationRequestEEE;
+    _ZN4OHOS12Notification5Infra9TimerImpl10StartTimerEl;
+    _ZN4OHOS12Notification5Infra9TimerImpl10StartTimerEx;
+    _ZN4OHOS12Notification5Infra9TimerImpl11CreateTimerENSt3__h10shared_ptrINS_12MiscServices10ITimerInfoEEE;
+    _ZN4OHOS12Notification5Infra9TimerImpl12DestroyTimerEv;
+    _ZN4OHOS12Notification5Infra9TimerImpl9StopTimerEv;
+    _ZN4OHOS12Notification5Infra9TimerImplC1Ev;
+    _ZN4OHOS12Notification5Infra9TimerImplD1Ev;
+    _ZTVN4OHOS12Notification5Infra*;
+    _ZTIN4OHOS12Notification5Infra*;
+    _ZTTN4OHOS12Notification5Infra*;
     _fini;
     _init;
   local:

@@ -48,17 +48,6 @@ ohos_shared_library("notificationmanager") {
   ldflags = notification_size_opt_ldflags
 
   sources = [
-    "../ans_template.cpp",
-    "../cancel.cpp",
-    "../disable_notification.cpp",
-    "../display_badge.cpp",
-    "../distributed.cpp",
-    "../disturb_mode.cpp",
-    "../enable_notification.cpp",
-    "../get_active.cpp",
-    "../js_ans_dialog_callback.cpp",
-    "../priority.cpp",
-    "../publish.cpp",
     "init_module.cpp",
     "local_live_view_subscribe.cpp",
     "napi_badge_query_callback.cpp",
@@ -83,7 +72,6 @@ ohos_shared_library("notificationmanager") {
     "napi_remove_group.cpp",
     "napi_ringtone_info_by_bundle.cpp",
     "napi_silent_reminder_enable.cpp",
-    "napi_slot.cpp",
     "napi_snooze_notification.cpp",
     "napi_statistics.cpp",
     "napi_sync_config.cpp",

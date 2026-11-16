@@ -458,7 +458,6 @@ ohos_shared_library("notification_subscriber_extension_ani") {
   deps = [
     ":notification_ani_common",
     "${frameworks_module_ans_path}:ans_innerkits",
-    "${frameworks_module_extension_path}:notification_subscriber_extension_common",
     "${frameworks_module_extension_path}:notification_subscriber_ipc",
   ]
 
@@ -472,6 +471,7 @@ ohos_shared_library("notification_subscriber_extension_ani") {
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_core",
     "ipc:ipc_napi",
