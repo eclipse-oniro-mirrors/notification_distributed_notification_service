@@ -1283,7 +1283,6 @@ ohos_unittest("notification_subscriber_manager_test") {
     cfi = true
     cfi_cross_dso = true
     debug = false
-    blocklist = "//base/notification/distributed_notification_service/services/ans/test/unittest/ans_test_cfi_blocklist.txt"
   }
   include_dirs = [
     ".",
@@ -3408,7 +3407,6 @@ ohos_unittest("notification_subscriber_manager_branch_test") {
     cfi = true
     cfi_cross_dso = true
     debug = false
-    blocklist = "//base/notification/distributed_notification_service/services/ans/test/unittest/ans_test_cfi_blocklist.txt"
   }
   include_dirs = [
     ".",
@@ -4536,7 +4534,6 @@ group("unittest") {
     ":notification_utils_test",
     ":snooze_delay_manager_test",
     ":notification_subscriber_manager_branch_test",
-    ":notification_subscriber_manager_test",
     ":os_account_manager_helper_test",
     ":push_callback_stub_test",
     "advanced_notification_service_test:unittest",
@@ -4544,4 +4541,10 @@ group("unittest") {
     "badge_manager_test:unittest",
     "dynamic_dependency_test:unittest",
   ]
+
+  if (!is_emulator) {
+    deps += [
+      ":notification_subscriber_manager_test",
+    ]
+  }
 }

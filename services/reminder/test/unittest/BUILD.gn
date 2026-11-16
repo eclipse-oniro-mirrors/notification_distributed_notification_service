@@ -173,7 +173,6 @@ ohos_unittest("reminder_bundle_manager_helper_test") {
     cfi = true
     cfi_cross_dso = true
     debug = false
-    blocklist = "//base/notification/distributed_notification_service/services/ans/test/unittest/ans_test_cfi_blocklist.txt"
   }
 
   module_out_path = module_output_path
@@ -399,7 +398,6 @@ ohos_unittest("reminder_datashare_helper_test") {
     cfi = true
     cfi_cross_dso = true
     debug = false
-    blocklist = "//base/notification/distributed_notification_service/services/ans/test/unittest/ans_test_cfi_blocklist.txt"
   }
   module_out_path = module_output_path
   include_dirs = [
@@ -680,12 +678,17 @@ group("unittest") {
   deps = [
     ":reminder_agent_service_ability_test",
     ":reminder_agent_service_test",
-    ":reminder_bundle_manager_helper_test",
     ":reminder_data_manager_test",
-    ":reminder_datashare_helper_test",
     ":reminder_event_manager_test",
     ":reminder_notify_manager_test",
     ":reminder_service_test",
     ":reminder_unit_test",
   ]
+
+  if (!is_emulator) {
+    deps += [
+      ":reminder_bundle_manager_helper_test",
+      ":reminder_datashare_helper_test",
+    ]
+  }
 }
