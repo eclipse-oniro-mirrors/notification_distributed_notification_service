@@ -96,6 +96,7 @@ public:
     MOCK_METHOD((std::vector<std::tuple<std::string, int64_t, SystemSoundError>>), OpenToneList,
         (const std::vector<std::string> &uriList, SystemSoundError &errCode), ());
     MOCK_METHOD(std::vector<ToneInfo>, GetCurrentToneInfos, (), ());
+    MOCK_METHOD(int32_t, FactoryReset, (), ());
 };
 
 } // Media
