@@ -119,6 +119,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnConsumed(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notification == nullptr) {
+        ANS_LOGE("null notification");
+        return ERR_INVALID_DATA;
+    }
     if (notificationMap == nullptr) {
         ANS_LOGE("null notificationMap");
         return ERR_INVALID_DATA;
@@ -152,6 +156,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnCanceled(
     const sptr<Notification> &notification, const sptr<NotificationSortingMap> &notificationMap, int32_t deleteReason)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (notification == nullptr) {
+        ANS_LOGE("null notification");
+        return ERR_INVALID_DATA;
+    }
     if (notificationMap == nullptr) {
         subscriber_.OnCanceled(std::make_shared<Notification>(*notification),
             std::make_shared<NotificationSortingMap>(), deleteReason);
@@ -173,6 +181,10 @@ void NotificationSubscriber::SubscriberImpl::OnBatchCanceled(const std::vector<s
 {
     std::vector<std::shared_ptr<Notification>> notificationList;
     for (auto notification : notifications) {
+        if (notification == nullptr) {
+            ANS_LOGE("null notification");
+            continue;
+        }
         notificationList.emplace_back(std::make_shared<Notification>(*notification));
     }
     if (notificationMap == nullptr) {
@@ -207,12 +219,20 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnCanceledList(
 
 ErrCode NotificationSubscriber::SubscriberImpl::OnUpdated(const sptr<NotificationSortingMap> &notificationMap)
 {
+    if (notificationMap == nullptr) {
+        ANS_LOGE("null notificationMap");
+        return ERR_INVALID_DATA;
+    }
     subscriber_.OnUpdate(std::make_shared<NotificationSortingMap>(*notificationMap));
     return ERR_OK;
 }
 
 ErrCode NotificationSubscriber::SubscriberImpl::OnDoNotDisturbDateChange(const sptr<NotificationDoNotDisturbDate> &date)
 {
+    if (date == nullptr) {
+        ANS_LOGE("null date");
+        return ERR_INVALID_DATA;
+    }
     subscriber_.OnDoNotDisturbDateChange(std::make_shared<NotificationDoNotDisturbDate>(*date));
     return ERR_OK;
 }
@@ -221,6 +241,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledNotificationChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return ERR_INVALID_DATA;
+    }
     subscriber_.OnEnabledNotificationChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
     return ERR_OK;
 }
@@ -229,6 +253,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledSilentReminderChanged(
     const sptr<EnabledSilentReminderCallbackData> &callbackData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return ERR_INVALID_DATA;
+    }
     subscriber_.OnEnabledSilentReminderChanged(std::make_shared<EnabledSilentReminderCallbackData>(*callbackData));
     return ERR_OK;
 }
@@ -241,6 +269,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledWatchStatusChanged(uint
 ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeChanged(const sptr<BadgeNumberCallbackData> &badgeData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (badgeData == nullptr) {
+        ANS_LOGE("null badgeData");
+        return ERR_INVALID_DATA;
+    }
     subscriber_.OnBadgeChanged(std::make_shared<BadgeNumberCallbackData>(*badgeData));
     return ERR_OK;
 }
@@ -249,6 +281,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledPriorityChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return ERR_INVALID_DATA;
+    }
     subscriber_.OnEnabledPriorityChanged(std::make_shared<EnabledNotificationCallbackData>(*callbackData));
     return ERR_OK;
 }
@@ -257,6 +293,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnEnabledPriorityByBundleChanged
     const sptr<EnabledPriorityNotificationByBundleCallbackData> &callbackData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return ERR_INVALID_DATA;
+    }
     subscriber_.OnEnabledPriorityByBundleChanged(
         std::make_shared<EnabledPriorityNotificationByBundleCallbackData>(*callbackData));
     return ERR_OK;
@@ -289,6 +329,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnBadgeEnabledChanged(
     const sptr<EnabledNotificationCallbackData> &callbackData)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (callbackData == nullptr) {
+        ANS_LOGE("null callbackData");
+        return ERR_INVALID_DATA;
+    }
     subscriber_.OnBadgeEnabledChanged(callbackData);
     return ERR_OK;
 }
@@ -297,6 +341,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnApplicationInfoNeedChanged(
     const sptr<NotificationApplicationChangeInfo>& applicationChangeInfo)
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
+    if (applicationChangeInfo == nullptr) {
+        ANS_LOGE("null applicationChangeInfo");
+        return ERR_INVALID_DATA;
+    }
     subscriber_.OnApplicationInfoNeedChanged(
         std::make_shared<NotificationApplicationChangeInfo>(*applicationChangeInfo));
     return ERR_OK;
@@ -305,6 +353,10 @@ ErrCode NotificationSubscriber::SubscriberImpl::OnApplicationInfoNeedChanged(
 ErrCode NotificationSubscriber::SubscriberImpl::OnOperationResponse(
     const sptr<NotificationOperationInfo> &operationInfo, int32_t& funcResult)
 {
+    if (operationInfo == nullptr) {
+        ANS_LOGE("null operationInfo");
+        return ERR_INVALID_DATA;
+    }
     return subscriber_.OnOperationResponse(std::make_shared<NotificationOperationInfo>(*operationInfo));
 }
 

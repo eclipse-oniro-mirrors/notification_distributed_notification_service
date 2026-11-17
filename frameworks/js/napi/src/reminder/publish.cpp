@@ -636,6 +636,10 @@ void ParseButtonDataShareUpdate(const napi_env &env,
     napi_value buttonDataShareUpdate = nullptr;
     napi_create_object(env, &buttonDataShareUpdate);
     napi_set_named_property(env, result, BUTTON_DATA_SHARE_UPDATE, buttonDataShareUpdate);
+    if (dataShareUpdate == nullptr) {
+        ANSR_LOGW("null dataShareUpdate");
+        return;
+    }
     // uri
     napi_value uriInfo = nullptr;
     napi_create_string_utf8(env, dataShareUpdate->uri.c_str(), NAPI_AUTO_LENGTH, &uriInfo);
@@ -678,7 +682,7 @@ void ParseActionButtons(const napi_env &env, const ReminderRequest &reminder, na
         napi_create_object(env, &wantAgentInfo);
         napi_set_named_property(env, actionButton, WANT_AGENT, wantAgentInfo);
 
-        if (it->second.type == ReminderRequest::ActionButtonType::CUSTOM) {
+        if (it->second.type == ReminderRequest::ActionButtonType::CUSTOM && it->second.wantAgent != nullptr) {
             napi_value info = nullptr;
             napi_create_string_utf8(env, (it->second.wantAgent->pkgName).c_str(), NAPI_AUTO_LENGTH, &info);
             napi_set_named_property(env, wantAgentInfo, WANT_AGENT_PKG, info);
@@ -704,16 +708,21 @@ void ParseWantAgent(const napi_env &env, const ReminderRequest &reminder, napi_v
     napi_create_object(env, &wantAgentInfo);
     napi_set_named_property(env, result, WANT_AGENT, wantAgentInfo);
 
+    auto wantAgent = reminder.GetWantAgentInfo();
+    if (wantAgent == nullptr) {
+        ANSR_LOGW("null wantAgent");
+        return;
+    }
     napi_value info = nullptr;
-    napi_create_string_utf8(env, (reminder.GetWantAgentInfo()->pkgName).c_str(), NAPI_AUTO_LENGTH, &info);
+    napi_create_string_utf8(env, (wantAgent->pkgName).c_str(), NAPI_AUTO_LENGTH, &info);
     napi_set_named_property(env, wantAgentInfo, WANT_AGENT_PKG, info);
-    napi_create_string_utf8(env, (reminder.GetWantAgentInfo()->abilityName).c_str(), NAPI_AUTO_LENGTH, &info);
+    napi_create_string_utf8(env, (wantAgent->abilityName).c_str(), NAPI_AUTO_LENGTH, &info);
     napi_set_named_property(env, wantAgentInfo, WANT_AGENT_ABILITY, info);
 
-    napi_create_string_utf8(env, (reminder.GetWantAgentInfo()->uri).c_str(), NAPI_AUTO_LENGTH, &info);
+    napi_create_string_utf8(env, (wantAgent->uri).c_str(), NAPI_AUTO_LENGTH, &info);
     napi_set_named_property(env, wantAgentInfo, WANT_AGENT_URI, info);
 
-    napi_value params = AppExecFwk::WrapWantParams(env, reminder.GetWantAgentInfo()->parameters);
+    napi_value params = AppExecFwk::WrapWantParams(env, wantAgent->parameters);
     napi_set_named_property(env, wantAgentInfo, WANT_AGENT_PARAMETERS, params);
 }
 
@@ -724,10 +733,15 @@ void ParseMaxScreenWantAgent(const napi_env &env, const ReminderRequest &reminde
     napi_create_object(env, &maxScreenWantAgentInfo);
     napi_set_named_property(env, result, MAX_SCREEN_WANT_AGENT, maxScreenWantAgentInfo);
 
+    auto maxScreenWantAgent = reminder.GetMaxScreenWantAgentInfo();
+    if (maxScreenWantAgent == nullptr) {
+        ANSR_LOGW("null maxScreenWantAgent");
+        return;
+    }
     napi_value info = nullptr;
-    napi_create_string_utf8(env, (reminder.GetMaxScreenWantAgentInfo()->pkgName).c_str(), NAPI_AUTO_LENGTH, &info);
+    napi_create_string_utf8(env, (maxScreenWantAgent->pkgName).c_str(), NAPI_AUTO_LENGTH, &info);
     napi_set_named_property(env, maxScreenWantAgentInfo, MAX_SCREEN_WANT_AGENT_PKG, info);
-    napi_create_string_utf8(env, (reminder.GetMaxScreenWantAgentInfo()->abilityName).c_str(), NAPI_AUTO_LENGTH, &info);
+    napi_create_string_utf8(env, (maxScreenWantAgent->abilityName).c_str(), NAPI_AUTO_LENGTH, &info);
     napi_set_named_property(env, maxScreenWantAgentInfo, MAX_SCREEN_WANT_AGENT_ABILITY, info);
 }
 
@@ -867,6 +881,10 @@ void GetAllValidRemindersInner(napi_env env,
     int32_t count = 0;
     napi_create_array(env, &arr);
     for (auto& reminderRequestAdaptation : validReminders) {
+        if (reminderRequestAdaptation.reminderRequest_ == nullptr) {
+            ANSR_LOGW("null reminder");
+            continue;
+        }
         napi_value result = nullptr;
         napi_create_object(env, &result);
         napi_value reminderReq = nullptr;

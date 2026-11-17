@@ -78,11 +78,12 @@ void DistribuedSubscriber::OnConsumed(const std::shared_ptr<Notification> &reque
             localDevice_.deviceType_, StringAnonymous(localDevice_.deviceId_).c_str());
         return;
     }
-    if (peerDevice_.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
-        DistributedService::GetInstance().OnConsumed(request, peerDevice_);
+    if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("Dans OnConsumed invalid notification request");
         return;
     }
-    if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
+    if (peerDevice_.deviceType_ == DistributedHardware::DmDeviceType::DEVICE_TYPE_WATCH) {
+        DistributedService::GetInstance().OnConsumed(request, peerDevice_);
         return;
     }
     auto requestPoint = request->GetNotificationRequestPoint();

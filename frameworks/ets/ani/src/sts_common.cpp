@@ -1188,10 +1188,11 @@ ani_status GetMapIteratorStringValue(ani_env *env, ani_ref &next, std::string &s
         ANS_LOGE("GetMapIteratorStringValue fail, env or next is nullptr");
         return ANI_INVALID_ARGS;
     }
-    ani_ref val;
+    ani_ref val = nullptr;
     ani_status status = env->Object_GetFieldByName_Ref(reinterpret_cast<ani_object>(next), "value", &val);
-    if (status != ANI_OK) {
-        ANS_LOGD("Failed to get value, status: %{public}d", status);
+    if (status != ANI_OK || val == nullptr) {
+        ANS_LOGE("Failed to get value, status: %{public}d", status);
+        return status == ANI_OK ? ANI_ERROR : status;
     }
     status = GetStringByAniString(env, reinterpret_cast<ani_string>(val), str);
     if (status == ANI_OK && str.size() > STRUCTURED_TEXT_SIZE) {

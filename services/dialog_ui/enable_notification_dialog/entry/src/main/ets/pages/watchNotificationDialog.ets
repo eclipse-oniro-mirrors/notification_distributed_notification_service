@@ -116,7 +116,7 @@ struct PermissionDialog {
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
                   Text() {
-                    Span(getContext(this).resourceManager.getStringSync(permission.label.id).replace('%s', this.appName))
+                    Span(this.getPermissionLabel())
                   }
                   .fontSize(this.drpDevice ? '38px' : '36px')
                   .fontColor('#FFFFFF')
@@ -277,6 +277,15 @@ struct PermissionDialog {
     
   }
 
+  private getPermissionLabel(): string {
+    try {
+      return this.context.resourceManager.getStringSync(permission.label.id).replace('%s', this.appName);
+    } catch (err) {
+      console.error(TAG, `getPermissionLabel error : ${err?.code}`);
+      return this.appName;
+    }
+  }
+
   async updateApplicationName(bundleName: string): Promise<void> {
     console.info(TAG, `updateApplicationName bundleName: ${bundleName}`);
     try {
@@ -292,8 +301,13 @@ struct PermissionDialog {
   }
 
   async updateIsBottomPopover(): Promise<void> {
-    let dis = display.getDefaultDisplaySync();
-    let isVertical = dis.width <= dis.height;
+    let isVertical = true;
+    try {
+      let dis = display.getDefaultDisplaySync();
+      isVertical = dis.width <= dis.height;
+    } catch (err) {
+      console.error(TAG, `getDefaultDisplaySync failed, code: ${err?.code}`);
+    }
     try {
       if (display.isFoldable()) {
         let foldStatus = display.getFoldStatus();
@@ -304,7 +318,7 @@ struct PermissionDialog {
         }
       }
     } catch (err) {
-      console.error(TAG, 'Failed to get the device foldable status. Code: ${err?.code}');
+      console.error(TAG, `Failed to get the device foldable status. Code: ${err?.code}`);
     }
 
     // read ccm configs
@@ -324,8 +338,8 @@ struct PermissionDialog {
           }
         }
       }
-    } catch (error) {
-      console.log(TAG, 'Failed get ccm files, Cause: ${err?.code}');
+    } catch (err) {
+      console.error(TAG, `Failed get ccm files, Cause: ${err?.code}`);
     }
     this.isBottomPopover = isBottomPopoverTemp && isVertical;
   }

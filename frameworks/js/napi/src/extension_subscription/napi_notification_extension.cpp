@@ -1225,16 +1225,10 @@ napi_value NapiNotificationExtensionSubscribe(napi_env env, napi_callback_info i
     return promise;
 }
 
-napi_value NapiNotificationExtensionSubscribeNotification(napi_env env, napi_callback_info info)
+napi_value ParseParametersForSubscribeNotification(
+    const napi_env& env, const napi_callback_info& info, int32_t& priorityStrategy)
 {
-    ANS_LOGD("start subscribe notification");
-
-    AsyncCallbackInfoNotificationExtensionSubscription* asynccallbackinfo = new (std::nothrow)
-        AsyncCallbackInfoNotificationExtensionSubscription { .env = env, .asyncWork = nullptr };
-    if (!asynccallbackinfo) {
-        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
-        return Common::JSParaError(env, nullptr);
-    }
+    ANS_LOGD("called");
 
     size_t argc = SUBSCRIBE_NOTIFICATION_MAX_PARA;
     napi_value argv[SUBSCRIBE_NOTIFICATION_MAX_PARA] = {nullptr};
@@ -1248,11 +1242,29 @@ napi_value NapiNotificationExtensionSubscribeNotification(napi_env env, napi_cal
             ANS_LOGE("Wrong argument type. Number expected.");
             std::string msg = "Incorrect parameter types.The type of priorityStrategy must be number.";
             Common::NapiThrow(env, ERR_ANS_INNER_INVALID_PARAM, msg);
-            delete asynccallbackinfo;
-            asynccallbackinfo = nullptr;
-            return Common::NapiGetUndefined(env);
+            return nullptr;
         }
-        napi_get_value_int32(env, argv[PARAM0], &asynccallbackinfo->priorityStrategy);
+        napi_get_value_int32(env, argv[PARAM0], &priorityStrategy);
+    }
+
+    return Common::NapiGetNull(env);
+}
+
+napi_value NapiNotificationExtensionSubscribeNotification(napi_env env, napi_callback_info info)
+{
+    ANS_LOGD("start subscribe notification");
+
+    AsyncCallbackInfoNotificationExtensionSubscription* asynccallbackinfo = new (std::nothrow)
+        AsyncCallbackInfoNotificationExtensionSubscription { .env = env, .asyncWork = nullptr };
+    if (!asynccallbackinfo) {
+        Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
+        return Common::JSParaError(env, nullptr);
+    }
+
+    if (ParseParametersForSubscribeNotification(env, info, asynccallbackinfo->priorityStrategy) == nullptr) {
+        delete asynccallbackinfo;
+        asynccallbackinfo = nullptr;
+        return Common::NapiGetUndefined(env);
     }
 
     napi_value promise = nullptr;

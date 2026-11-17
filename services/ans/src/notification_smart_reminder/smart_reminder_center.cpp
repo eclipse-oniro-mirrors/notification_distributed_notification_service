@@ -908,9 +908,11 @@ __attribute__((no_sanitize("cfi"))) void SmartReminderCenter::GetReminderAffecte
     }
     string typeCodeCombination = contentTypeCombination;
     typeCodeCombination.append("#");
-    if (request->GetContent() != nullptr && request->GetContent()->GetNotificationContent() != nullptr) {
-        NotificationLocalLiveViewContent *localLiveView =
-            static_cast<NotificationLocalLiveViewContent *>(&(*(request->GetContent()->GetNotificationContent())));
+    if (request->GetContent() != nullptr &&
+        request->GetContent()->GetContentType() == NotificationContent::Type::LOCAL_LIVE_VIEW &&
+        request->GetContent()->GetNotificationContent() != nullptr) {
+        NotificationLocalLiveViewContent *localLiveView = static_cast<NotificationLocalLiveViewContent *>(
+            request->GetContent()->GetNotificationContent().get());
         typeCodeCombination.append(to_string(localLiveView->GetType()));
     }
     auto iter = reminderFilterDevice.find(typeCodeCombination);

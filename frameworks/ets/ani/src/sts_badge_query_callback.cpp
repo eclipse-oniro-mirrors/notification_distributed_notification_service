@@ -188,8 +188,10 @@ ErrCode StsBadgeQueryCallBack::OnBadgeNumberQuery(const sptr<NotificationBundleO
             BadgeNumberPromiseManager::RemovePromise(uid);
             return ERR_INVALID_DATA;
         }
-        ani_object bundleObj;
+        ani_object bundleObj = nullptr;
         if (!WrapBundleOption(etsEnv, bundleOption, bundleObj) || bundleObj == nullptr) {
+            ANS_LOGE("WrapBundleOption failed");
+            vm_->DetachCurrentThread();
             BadgeNumberPromiseManager::RemovePromise(uid);
             return ERR_INVALID_DATA;
         }

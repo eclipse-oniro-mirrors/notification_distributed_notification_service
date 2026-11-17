@@ -52,19 +52,23 @@ enum DialogStatus {
 };
 
 async function handleDialogQuitException(want: Want): Promise<void> {
-  CommonEventManager.publish(
-    COMMON_EVENT_NAME,
-    {
-      code: DialogStatus.DIALOG_CRASHED,
-      data: want.parameters.bundleName.toString(),
-      subscriberPermissions: SUBSCRIBER_PERMISSIONS,
-      parameters: {
-        bundleName: want.parameters.bundleName.toString(),
-        bundleUid: want.parameters.bundleUid.toString()
-      }
-    } as CommonEventManager.CommonEventPublishData,
-    () => { console.info(TAG, 'publish DIALOG_CRASHED succeeded'); }
-  );
+  try {
+    CommonEventManager.publish(
+      COMMON_EVENT_NAME,
+      {
+        code: DialogStatus.DIALOG_CRASHED,
+        data: want.parameters.bundleName.toString(),
+        subscriberPermissions: SUBSCRIBER_PERMISSIONS,
+        parameters: {
+          bundleName: want.parameters.bundleName.toString(),
+          bundleUid: want.parameters.bundleUid.toString()
+        }
+      } as CommonEventManager.CommonEventPublishData,
+      () => { console.info(TAG, 'publish DIALOG_CRASHED succeeded'); }
+    );
+  } catch (err) {
+    console.error(TAG, `publish DIALOG_CRASHED error: ${err?.code}`);
+  }
 }
 
 interface NotificationConfig {
