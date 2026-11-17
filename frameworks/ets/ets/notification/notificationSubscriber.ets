@@ -80,6 +80,8 @@ export class NotificationSubscriberInner implements NotificationSubscriber {
 
     public onEnabledPriorityByBundleChanged?: (callbackData: EnabledPriorityNotificationByBundleCallbackData) => void;
 
+    public onNotificationSwitchChanged?: NotificationSwitchChangedCallback;
+
     public onBadgeChanged?: (data: BadgeNumberCallbackData) => void;
 
     public onBadgeEnabledChanged?: BadgeEnabledChangedCallback;
