@@ -53,7 +53,9 @@ static void TestNotificationCheckRequest(FuzzedDataProvider* fuzzData)
     request2.GetUid();
 
     Parcel parcel;
-    request2.Marshalling(parcel);
+    if (!request2.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledRequest = std::unique_ptr<NotificationCheckRequest>(
         NotificationCheckRequest::Unmarshalling(parcel));
     if (unmarshalledRequest != nullptr) {
@@ -89,7 +91,32 @@ static void TestNotificationCheckInfo(FuzzedDataProvider* fuzzData)
     info.GetExtraInfo();
 
     std::string jsonData = fuzzData->ConsumeRandomLengthString();
-    info.ConvertJsonStringToValue(jsonData);
+    // ConvertJsonStringToValue() calls nlohmann::json::parse() without guarding parse errors, so a
+    // malformed input would abort the fuzzer instead of being reported as a test case. accept()
+    // reports a parse failure as a return value instead of throwing, so it works with any exception
+    // configuration of the build.
+    if (nlohmann::json::accept(jsonData)) {
+        info.ConvertJsonStringToValue(jsonData);
+        info.GetPkgName();
+        info.GetNotifyId();
+        info.GetLabel();
+    }
+
+    // A well-formed object built from fuzz data is needed as well, otherwise the body of
+    // ConvertJsonStringToValue() is never reached and the field branches below stay uncovered.
+    nlohmann::json jsonObject;
+    jsonObject["pkgName"] = fuzzData->ConsumeRandomLengthString();
+    jsonObject["notifyId"] = fuzzData->ConsumeIntegral<int32_t>();
+    jsonObject["contentType"] = fuzzData->ConsumeIntegral<int32_t>();
+    jsonObject["creatorUserId"] = fuzzData->ConsumeIntegral<int32_t>();
+    jsonObject["slotType"] = fuzzData->ConsumeIntegral<int32_t>();
+    jsonObject["label"] = fuzzData->ConsumeRandomLengthString();
+    info.ConvertJsonStringToValue(jsonObject.dump());
+    info.GetPkgName();
+    info.GetNotifyId();
+    info.GetCreatorUserId();
+    info.GetSlotType();
+    info.GetLabel();
 }
 
 bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData)

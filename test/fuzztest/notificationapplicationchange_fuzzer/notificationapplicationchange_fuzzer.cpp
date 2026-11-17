@@ -47,7 +47,9 @@ static void TestNotificationApplicationChangeInfo(FuzzedDataProvider *fuzzData)
     info.Dump();
 
     Parcel parcel;
-    info.Marshalling(parcel);
+    if (!info.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalled = std::unique_ptr<NotificationApplicationChangeInfo>(
         NotificationApplicationChangeInfo::Unmarshalling(parcel));
     if (unmarshalled != nullptr) {

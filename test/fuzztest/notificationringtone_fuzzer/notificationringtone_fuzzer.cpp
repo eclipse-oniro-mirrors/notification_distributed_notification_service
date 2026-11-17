@@ -55,7 +55,9 @@ static void TestNotificationRingtoneInfo(FuzzedDataProvider *fuzzData)
     info2.FromJson(jsonStr);
 
     Parcel parcel;
-    info2.Marshalling(parcel);
+    if (!info2.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledInfo = std::unique_ptr<NotificationRingtoneInfo>(NotificationRingtoneInfo::Unmarshalling(parcel));
     if (unmarshalledInfo != nullptr) {
         unmarshalledInfo->Dump();

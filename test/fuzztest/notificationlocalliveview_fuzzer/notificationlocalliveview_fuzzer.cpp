@@ -81,7 +81,9 @@ static void TestNotificationLocalLiveViewContent(FuzzedDataProvider *fuzzData)
     }
 
     Parcel parcel;
-    content.Marshalling(parcel);
+    if (!content.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledContent = std::unique_ptr<NotificationLocalLiveViewContent>(
         NotificationLocalLiveViewContent::Unmarshalling(parcel));
     if (unmarshalledContent != nullptr) {
@@ -109,7 +111,9 @@ static void TestNotificationLocalLiveViewButton(FuzzedDataProvider *fuzzData)
     }
 
     Parcel parcel;
-    button.Marshalling(parcel);
+    if (!button.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledButton = std::unique_ptr<NotificationLocalLiveViewButton>(
         NotificationLocalLiveViewButton::Unmarshalling(parcel));
     if (unmarshalledButton != nullptr) {
@@ -140,7 +144,9 @@ static void TestNotificationProgress(FuzzedDataProvider *fuzzData)
     }
 
     Parcel parcel;
-    progress.Marshalling(parcel);
+    if (!progress.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledProgress = std::unique_ptr<NotificationProgress>(
         NotificationProgress::Unmarshalling(parcel));
     if (unmarshalledProgress != nullptr) {
@@ -174,7 +180,9 @@ static void TestNotificationTime(FuzzedDataProvider *fuzzData)
     }
 
     Parcel parcel;
-    time.Marshalling(parcel);
+    if (!time.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledTime = std::unique_ptr<NotificationTime>(NotificationTime::Unmarshalling(parcel));
     if (unmarshalledTime != nullptr) {
         unmarshalledTime->Dump();

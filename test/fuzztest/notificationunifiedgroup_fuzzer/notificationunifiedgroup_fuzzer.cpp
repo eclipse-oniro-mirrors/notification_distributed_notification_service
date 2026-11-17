@@ -46,7 +46,9 @@ static void TestNotificationUnifiedGroupInfo(FuzzedDataProvider *fuzzData)
     info.Dump();
 
     Parcel parcel;
-    info.Marshalling(parcel);
+    if (!info.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledInfo = std::unique_ptr<NotificationUnifiedGroupInfo>(
         NotificationUnifiedGroupInfo::Unmarshalling(parcel));
     if (unmarshalledInfo != nullptr) {

@@ -67,7 +67,9 @@ static void TestNotificationCapsule(FuzzedDataProvider* fuzzData)
     }
 
     Parcel parcel;
-    capsule.Marshalling(parcel);
+    if (!capsule.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledCapsule = std::unique_ptr<NotificationCapsule>(NotificationCapsule::Unmarshalling(parcel));
     if (unmarshalledCapsule != nullptr) {
         unmarshalledCapsule->Dump();
@@ -98,7 +100,9 @@ static void TestNotificationIconButton(FuzzedDataProvider* fuzzData)
     }
 
     Parcel parcel;
-    button.Marshalling(parcel);
+    if (!button.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledButton = std::unique_ptr<NotificationIconButton>(NotificationIconButton::Unmarshalling(parcel));
     if (unmarshalledButton != nullptr) {
         unmarshalledButton->Dump();

@@ -62,7 +62,9 @@ static void TestNotificationDistributedBundle(FuzzedDataProvider *fuzzData)
     bundle.GetNotificationEnable();
 
     Parcel parcel;
-    bundle.Marshalling(parcel);
+    if (!bundle.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledBundle = std::unique_ptr<NotificationDistributedBundle>(
         NotificationDistributedBundle::Unmarshalling(parcel));
     if (unmarshalledBundle != nullptr) {

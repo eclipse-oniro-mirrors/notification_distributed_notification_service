@@ -68,7 +68,9 @@ static void TestNotificationGeofence(FuzzedDataProvider *fuzzData)
     }
 
     Parcel parcel;
-    geofence2.Marshalling(parcel);
+    if (!geofence2.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledGeofence = std::unique_ptr<NotificationGeofence>(NotificationGeofence::Unmarshalling(parcel));
     if (unmarshalledGeofence != nullptr) {
         unmarshalledGeofence->Dump();

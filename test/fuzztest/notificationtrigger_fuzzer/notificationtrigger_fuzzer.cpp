@@ -78,7 +78,9 @@ static void TestNotificationTrigger(FuzzedDataProvider *fuzzData)
     }
 
     Parcel parcel;
-    trigger2.Marshalling(parcel);
+    if (!trigger2.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledTrigger = std::unique_ptr<NotificationTrigger>(NotificationTrigger::Unmarshalling(parcel));
     if (unmarshalledTrigger != nullptr) {
         unmarshalledTrigger->Dump();

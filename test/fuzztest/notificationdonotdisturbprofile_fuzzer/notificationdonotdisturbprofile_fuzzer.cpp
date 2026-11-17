@@ -56,7 +56,9 @@ static void TestNotificationDoNotDisturbProfile(FuzzedDataProvider *fuzzData)
     profile2.GetProfileJson(jsonObject);
 
     Parcel parcel;
-    profile2.Marshalling(parcel);
+    if (!profile2.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledProfile = std::unique_ptr<NotificationDoNotDisturbProfile>(
         NotificationDoNotDisturbProfile::Unmarshalling(parcel));
     if (unmarshalledProfile != nullptr) {

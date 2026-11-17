@@ -21,10 +21,40 @@
 #undef private
 #undef protected
 #include "distributednotificationmanager_fuzzer.h"
+#include <memory>
 #include <fuzzer/FuzzedDataProvider.h>
 
 namespace OHOS {
 namespace Notification {
+
+/**
+ * DistributedNotificationManager is a process-wide singleton that stores published notifications in a
+ * persistent distributed database, so an entry that is not deleted survives into the next fuzz iteration.
+ * This guard deletes the entry on every exit path, including the early returns of the test body.
+ */
+class PublishedNotificationGuard {
+public:
+    PublishedNotificationGuard(const std::shared_ptr<DistributedNotificationManager> &manager,
+        const std::string &bundleName, const std::string &label, int32_t id)
+        : manager_(manager), bundleName_(bundleName), label_(label), id_(id)
+    {}
+
+    ~PublishedNotificationGuard()
+    {
+        if (manager_ != nullptr) {
+            manager_->Delete(bundleName_, label_, id_);
+        }
+    }
+
+    PublishedNotificationGuard(const PublishedNotificationGuard &) = delete;
+    PublishedNotificationGuard &operator=(const PublishedNotificationGuard &) = delete;
+
+private:
+    std::shared_ptr<DistributedNotificationManager> manager_;
+    std::string bundleName_;
+    std::string label_;
+    int32_t id_;
+};
 
 static void TestDistributedNotificationManager(FuzzedDataProvider *fuzzData)
 {
@@ -32,6 +62,8 @@ static void TestDistributedNotificationManager(FuzzedDataProvider *fuzzData)
     std::string bundleName = fuzzData->ConsumeRandomLengthString();
     std::string label = fuzzData->ConsumeRandomLengthString();
     int32_t id = fuzzData->ConsumeIntegral<int32_t>();
+
+    PublishedNotificationGuard publishedGuard(manager, bundleName, label, id);
 
     sptr<NotificationRequest> request = sptr<NotificationRequest>::MakeSptr();
     if (request == nullptr) {

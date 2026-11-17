@@ -38,7 +38,9 @@ static void TestNotificationVoiceContent(FuzzedDataProvider *fuzzData)
 
     NotificationVoiceContent content2(content);
     Parcel parcel;
-    content2.Marshalling(parcel);
+    if (!content2.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledContent = std::unique_ptr<NotificationVoiceContent>(
         NotificationVoiceContent::Unmarshalling(parcel));
     if (unmarshalledContent != nullptr) {
@@ -59,7 +61,9 @@ static void TestVoiceContentOption(FuzzedDataProvider *fuzzData)
     option3 = option2;
 
     Parcel parcel;
-    option3.Marshalling(parcel);
+    if (!option3.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledOption = std::unique_ptr<VoiceContentOption>(VoiceContentOption::Unmarshalling(parcel));
     if (unmarshalledOption != nullptr) {
         unmarshalledOption->GetEnabled();

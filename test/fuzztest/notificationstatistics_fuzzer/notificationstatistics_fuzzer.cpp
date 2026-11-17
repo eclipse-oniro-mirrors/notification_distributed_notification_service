@@ -52,7 +52,9 @@ static void TestNotificationStatistics(FuzzedDataProvider *fuzzData)
     }
 
     Parcel parcel;
-    statistics.Marshalling(parcel);
+    if (!statistics.Marshalling(parcel)) {
+        return;
+    }
     auto unmarshalledStatistics = std::unique_ptr<NotificationStatistics>(
         NotificationStatistics::Unmarshalling(parcel));
     if (unmarshalledStatistics != nullptr) {
