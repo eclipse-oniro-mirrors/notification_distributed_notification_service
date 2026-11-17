@@ -637,6 +637,9 @@ ErrCode AdvancedNotificationService::ExcuteRemoveNotificationAsAdmin(const std::
 
             DeleteNotificationFromDb(record, removeReason, false);
             NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+            PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
             notificationList_.remove(record);
             result = ERR_OK;
             break;
@@ -792,6 +795,9 @@ ErrCode AdvancedNotificationService::ExcuteRemoveAllNotificationsAsAdmin(const i
     for (auto record : removeList) {
         ProcForDeleteNotificationFromDb(record);
         NotificationClassificationMgr::GetInstance().Remove(record->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        PriorityNotificationDegradeManager::GetInstance()->Remove(record->notification->GetKey());
+#endif
         notificationList_.remove(record);
         CancelWantAgent(record->notification);
         UpdateRecentNotification(record->notification, true, reason);

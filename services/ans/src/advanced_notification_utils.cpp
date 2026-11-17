@@ -1481,6 +1481,9 @@ void AdvancedNotificationService::DeleteNotificationsByAccountLogout(int32_t use
     }
     for (auto deleteRecord : deleteRecords) {
         NotificationClassificationMgr::GetInstance().Remove(deleteRecord->notification->GetKey());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        PriorityNotificationDegradeManager::GetInstance()->Remove(deleteRecord->notification->GetKey());
+#endif
         notificationList_.remove(deleteRecord);
     }
     RemoveFromTriggerNotificationListByAccountLogout(userId);

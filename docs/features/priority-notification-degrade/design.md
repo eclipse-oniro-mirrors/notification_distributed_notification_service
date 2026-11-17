@@ -61,7 +61,7 @@ flowchart TD
     ARB -->|"缓存 source=AI 且新到规则系"| C3["RULE_OVERRIDE<br/>（落地行为同 APPLY）"]
     ARB -->|"其余（含终态复活）"| C2["APPLY（覆盖，latest-round-wins）"]
 
-    C2 --> L1["LandAcceptedResult<br/>① T 钳制 ≤ now+72h（SEC-08）<br/>② 一致保留：类型一致且缓存T>0 → T 保持最初值<br/>③ OTHER 归一化：type=OTHER → T 归 0<br/>④ 过期归一化：type≠OTHER 且 0&lt;T≤now → type 归 OTHER（T 保留终态标记，载体同降）<br/>⑤ 拷贝落地 ClassificationMgr，effective = 落地值"]
+    C2 --> L1["LandAcceptedResult<br/>① T 钳制 ≤ now+16h（SEC-08）<br/>② 一致保留：类型一致且缓存T>0 → T 保持最初值<br/>③ OTHER 归一化：type=OTHER → T 归 0<br/>④ 过期归一化：type≠OTHER 且 0&lt;T≤now → type 归 OTHER（T 保留终态标记，载体同降）<br/>⑤ 拷贝落地 ClassificationMgr，effective = 落地值"]
     C3 --> L1
     L1 -.->|"new 拷贝失败"| FAIL["缓存不动 · effective=缓存值<br/>request 恢复缓存类型 · 改判丢弃族"]
 
@@ -142,7 +142,7 @@ flowchart TD
 
     APPLY --> LAND["LandAcceptedResult（拷贝落地）"]
     RO --> LAND
-    LAND --> CLAMP["① T 钳制：min(T, now+72h)（SEC-08）"]
+    LAND --> CLAMP["① T 钳制：min(T, now+16h)（SEC-08）"]
     CLAMP --> RETAIN{"② 类型与缓存一致 且 缓存 T>0？<br/>（一致保留，不查状态归一化）"}
     RETAIN -->|"是"| KEEP["T 保留缓存最初值<br/>（分类没变降级时刻不变，防反复顺延/提前）"]
     RETAIN -->|"否"| NORM{"③ type == OTHER？"}
@@ -177,7 +177,7 @@ flowchart TD
 ### 4.4 落地与登记规则
 
 - **维度化落地（2026-10-22 决策；语义下沉 2026-10-22 重构）**：维度合并语义的唯一归属为 `NotificationClassificationMgr::AddOrUpdate`（共享基础设施、唯一写入口，单次持锁完成读-合-写，落地恒为新拷贝）：每个维度（聚合标签 / 优先三元组）本轮设置则落地本轮值、未设置则保留缓存值——① **仅优先有效**（如优先规则刷新的 B 闭环回发：只带三元组、聚合未设置）：三元组落地，**聚合标签保留缓存值**（空串不得覆盖有效标签）；② **仅聚合有效**（聚合重分类回发）：聚合维度照常落地，**三元组零触碰**——不覆盖为默认值、跳过全部变换（终态 `(OTHER,T>0)` 标记不被归一化清零）、登记不重排；③ landed 的两维度标志镜像**有效维度在场性**（本轮或缓存任一设置即为 true，否则 false）；null 轮清除条目（不存 null 条目）；两维度均设置的非 null 轮 = 整对象替换（与原 put 语义逐值等价）。DM 的 `LandAcceptedResult` 仅保留优先策略变换（SEC-08 钳制/一致保留/OTHER 归一化），将变换后的三元组写入轮次私有拷贝后交 `AddOrUpdate` 合并落地；降级落点 `DegradeClassificationCache` 同样以"仅优先维度的降级轮"（OTHER + T/source 保留）经 `AddOrUpdate` 落地（聚合标签由合并保留，合并基为当前缓存条目）。**优先开关关闭时的同步消费路径同样走该唯一写入口（null 轮清除条目而非存 null 条目）——两开关组合下聚合标签的落地语义由构造保证收敛，聚合特性行为不再依赖优先域组件，且"裸 put + 部分轮抹维度"的误用面被结构性消灭**（重构动机：P 开时 DM 中介落地与 P 关时整体替换之间存在契约内不可达但契约违例可观察的语义分歧，且聚合标签正确性曾依赖 DM 正确性；原 `AddOrUpdate` 整对象替换语义无生产调用方残留，仅测试播种使用，全维度对象播种与合并语义逐值等价）。
-- **SEC-08 钳制**：接受族落地前 `expiredTime > now + 72h`（`PRIORITY_EXPIRE_TIME_MAX_HORIZON_MS`）则钳制为该上界——in-process .so 调用可绕过 parcel 校验伪造极值，钳制使恶意极端仍保持有界可降级。
+- **SEC-08 钳制**：接受族落地前 `expiredTime > now + 16h`（`PRIORITY_EXPIRE_TIME_MAX_HORIZON_MS`）则钳制为该上界——in-process .so 调用可绕过 parcel 校验伪造极值，钳制使恶意极端仍保持有界可降级。
 - **OTHER 落地归一化（终态判定可靠性）**：落地 type=OTHER 时 expiredTime 强制归 0（带 WARN）——时间语义是"降级时刻"，对已 OTHER 的类型无意义；`(OTHER, T>0)` 形态**只能由到点降级或过期落地归一化产生**（`DegradeClassificationCache` 不经归一化路径），TERMINAL 判定无歧义，原生 OTHER（模型合法输出"非优先类"）不被误锁为终态。
 - **过期落地归一化（2026-10-23 决策，替代 IMMEDIATE_DEGRADE 专用路径）**：落地 type≠OTHER 且 0 < T ≤ now（带 WARN）→ type 直接归 OTHER（T 保留为终态标记，request 载体同步降级）——**过期轮的优先类型从未拥有未来，落地本身就是降级**，effective 携带终态经正常轮次分发链路带出（订阅者所见与原降级回调殊途同归：均汇入 NotifySystemUpdate）；不登记、无专用分派、无跨队列提交，调度器零感知（对称结构：OTHER 归一化 = 无意义的时间归零；过期归一化 = 过期的类型归终态）。原 IMMEDIATE_DEGRADE 场景（S7 延迟回发 / 时钟前跳 / retention 保住到期 T）三场景全部由该归一化覆盖；登记同步侧仅剩防御分支（落地与登记同步之间时钟前跳的窄窗口，WARN + 不登记，下一轮自愈）。
 - **降级落点 compare-and-land（2026-10-23 补齐，R5/R6/R8 并发收敛）**：`DegradeClassificationCache` 的"重读-比对-落地"整体在 DM mutex 内执行（与仲裁落地同一临界区，锁序 DM→mgr 单向不变）：快照三元组（type+expiredTime）与重读值一致才落地，不一致（并发复活轮已落地/条目已被清）则放弃本次降级（INFO 日志），latest-round-wins——修复到期降级任务"读快照→判定→落地"三步锁外可被并发复活轮覆盖的竞态（陈旧降级不再覆盖复活三元组，不再残留孤儿登记、不再产生 OTHER→OTHER 空转回调）；request 载体的 OTHER 写回移至落地确认之后，放弃路径双载体保持一致。
@@ -369,7 +369,7 @@ private:
 | js/ets 双套 | 无同步点（OnSystemUpdate 已双套暴露，无新增 ArkTS API、不修改 frameworks/js、frameworks/ets） |
 | 时钟语义 | expiredTime 为绝对时间（epoch 毫秒 UTC，CLOCK_REALTIME）；系统时间跳变由"登记与到点判定均为绝对比较 expiredTime ≤ now + 过期落地归一化兜底"覆盖；降级为本机行为（缓存与登记均不跨设备同步），无跨设备时钟同步问题 |
 | DFX | 纯 ANS_LOG 日志（SCENE_30 事件上报 2026-10-20 整体裁剪）：仲裁接受/登记 DEBUG、丢弃/防御 WARN、降级完成 INFO、定时器布防成功 INFO / 布防失败 WARN（2026-10-23 补齐，失败保持 unarmed 可重试）；已知取舍：release 构建下接受路径仅 mutex 内 DEBUG（默认不输出），接受结果在 release 无事件级观测（用户已接受） |
-| 防御纵深 | parcel 反序列化对 expiredTime/source 归一化（type 为内部通道不校验，三方入口由 NotificationRequest::SetPriorityNotificationType 白名单拦截）；SEC-08 72h 钳制（防 in-process 伪造极值永久锁定）；OTHER 落地归一化（防原生 OTHER 带时间被误判终态）；过期落地归一化（防过期轮优先态无界，落地即终态）；IsPriorityDegradeDue 到期防御（防陈旧 dueKey 误杀新生命周期）；SEC-07 回调载荷深拷贝（防跨队列共享对象竞争） |
+| 防御纵深 | parcel 反序列化对 expiredTime/source 归一化（type 为内部通道不校验，三方入口由 NotificationRequest::SetPriorityNotificationType 白名单拦截）；SEC-08 16h 钳制（防 in-process 伪造极值永久锁定）；OTHER 落地归一化（防原生 OTHER 带时间被误判终态）；过期落地归一化（防过期轮优先态无界，落地即终态）；IsPriorityDegradeDue 到期防御（防陈旧 dueKey 误杀新生命周期）；SEC-07 回调载荷深拷贝（防跨队列共享对象竞争） |
 | 客户端 SDK | 不持业务状态（全部逻辑在服务端，符合分层不变量） |
 
 ## 9. 验收标准（AC，按目标语义修订）
