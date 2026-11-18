@@ -236,7 +236,13 @@
         "//base/notification/distributed_notification_service/test:systemtest",
         "//base/notification/distributed_notification_service/tools:unittest",
         "//base/notification/distributed_notification_service/test/bechmarktest:benchmarktest",
-        "//base/notification/distributed_notification_service/test/fuzztest:fuzztest"
+        "//base/notification/distributed_notification_service/test/fuzztest:fuzztest",
+        "//base/notification/distributed_notification_service/test/fuzztest/notificationrequestdeadlinesHXF_fuzzer:fuzztest",
+        "//base/notification/distributed_notification_service/test/fuzztest/notificationrequestcontentHXF_fuzzer:fuzztest",
+        "//base/notification/distributed_notification_service/test/fuzztest/notificationslotparcelHXF_fuzzer:fuzztest",
+        "//base/notification/distributed_notification_service/test/fuzztest/notificationgeofencetriggerHXF_fuzzer:fuzztest",
+        "//base/notification/distributed_notification_service/test/fuzztest/notificationdndprofileHXF_fuzzer:fuzztest",
+        "//base/notification/distributed_notification_service/test/fuzztest/notificationliveviewsubcomponentsHXF_fuzzer:fuzztest"
       ]
     }
   }
