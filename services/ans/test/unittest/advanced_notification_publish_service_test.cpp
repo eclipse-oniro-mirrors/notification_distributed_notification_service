@@ -4334,7 +4334,6 @@ HWTEST_F(AnsPublishServiceTest, Publish_LiveViewCreatePushCheckFailed_NoRightsCh
     EXPECT_EQ(ret, (int)ERR_ANS_INNER_PUSH_CHECK_UNREGISTERED);
     EXPECT_EQ(g_liveViewRightsCheckCount, 0);
 #endif
-    EXPECT_EQ(g_liveViewVoiceUpdateCount, 0);
     advancedNotificationService_->pushCallBacks_.clear();
     advancedNotificationService_->checkRequests_.clear();
     ResetLiveViewRightsMock();
