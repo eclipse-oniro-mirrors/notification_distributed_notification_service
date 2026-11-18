@@ -31,6 +31,7 @@ ohos_unittest("reminder_unit_test") {
   defines = []
 
   sources = [
+    "mock/mock_form_mgr.cpp",
     "mock/mock_ipc_skeleton.cpp",
     "reminder_data_manager_test.cpp",
   ]
@@ -588,6 +589,7 @@ ohos_unittest("reminder_data_manager_test") {
     "resource_management:global_resmgr",
     "time_service:time_client",
     "icu:shared_icuuc",
+    "form_fwk:form_manager",
   ]
   external_deps += component_external_deps
 

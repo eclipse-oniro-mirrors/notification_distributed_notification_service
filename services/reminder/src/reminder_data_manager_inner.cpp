@@ -30,6 +30,10 @@
 #include "data_share_permission.h"
 #include "ability_manager_client.h"
 #include "in_process_call_wrapper.h"
+#include "form_mgr_interface.h"
+#include "if_system_ability_manager.h"
+#include "iservice_registry.h"
+#include "system_ability_definition.h"
 #ifdef HAS_HISYSEVENT_PART
 #include <sys/statfs.h>
 #include "hisysevent.h"
@@ -832,6 +836,58 @@ void ReminderDataManager::NotifyReminderState(const int32_t uid)
     std::vector<ReminderState> states = store_->QueryState(uid);
     notifyManager_->NotifyReminderState(uid, states);
     store_->DeleteState(uid);
+}
+
+void ReminderDataManager::RefreshFormsByReminder(const sptr<ReminderRequest> &reminder,
+    ReminderRequest::ActionButtonType buttonType)
+{
+    if (reminder == nullptr) {
+        ANSR_LOGE("RefreshFormsByReminder: null reminder");
+        return;
+    }
+    const std::string bundleName = reminder->GetBundleName();
+    int32_t userId = reminder->GetUserId();
+    int32_t reminderId = reminder->GetReminderId();
+    ANSR_LOGD("RefreshFormsByReminder: bundle=%{public}s, userId=%{public}d, "
+        "reminderId=%{public}d, buttonType=%{public}d",
+        bundleName.c_str(), userId, reminderId, static_cast<int32_t>(buttonType));
+    if (bundleName.empty()) {
+        ANSR_LOGE("RefreshFormsByReminder: empty bundleName, skip.");
+        return;
+    }
+
+    auto refreshTask = [bundleName, userId, reminderId, buttonType]() {
+        OHOS::AAFwk::Want refreshWant;
+        refreshWant.SetParam("reminderId", reminderId);
+        refreshWant.SetParam("reminderButtonType", static_cast<int32_t>(buttonType));
+        sptr<ISystemAbilityManager> systemAbilityManager =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (systemAbilityManager == nullptr) {
+            ANSR_LOGE("RefreshFormsByReminder: null, systemAbilityManager.");
+            return;
+        }
+        sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(FORM_MGR_SERVICE_ID);
+        if (remoteObject == nullptr) {
+            ANSR_LOGE("RefreshFormsByReminder: null form mgr remote object.");
+            return;
+        }
+        auto formMgrProxy = iface_cast<AppExecFwk::IFormMgr>(remoteObject);
+        if (formMgrProxy == nullptr) {
+            ANSR_LOGE("RefreshFormsByReminder: null form mgr proxy.");
+            return;
+        }
+        auto startTime = std::chrono::steady_clock::now();
+        auto errCode = formMgrProxy->UpdateFormsWithReminderAgent(bundleName, userId, refreshWant);
+        auto costMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now() - startTime).count();
+        ANSR_LOGI("UpdateFormsWithReminderAgent: bundle=%{public}s, cost=%{public}d ms, ret=%{public}d",
+            bundleName.c_str(), static_cast<int32_t>(costMs), errCode);
+        if (errCode != ERR_OK) {
+            ANSR_LOGE("UpdateFormsWithReminderAgent: UpdateFormsWithReminderAgent failed, ret=%{public}d, "
+                "bundle=%{public}s", errCode, bundleName.c_str());
+        }
+    };
+    queue_->submit(refreshTask);
 }
 }
 }
