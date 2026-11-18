@@ -78,75 +78,34 @@ ErrCode AdvancedNotificationPriorityHelper::RefreshPriorityType(const std::strin
     uint32_t aiStatus = static_cast<uint32_t>(enableStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
         enableStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
 
-    std::vector<sptr<NotificationRequest>> requests;
-    std::vector<nlohmann::json> commands;
-    std::vector<sptr<NotificationClassification>> notificationClassifications;
-    FilterRequestsByStrategy(cmdType, aiStatus, originRequests, requests, commands,
-        notificationClassifications, results);
-    if (requests.empty()) {
+    PriorityFilterOutputs outputs;
+    FilterRequestsByStrategy(cmdType, aiStatus, originRequests, outputs, results);
+    if (outputs.requests.empty()) {
         ANS_LOGI("RefreshPriorityType requests empty, originRequests size: %{public}zu", originRequests.size());
         return ERR_OK;
     }
-    NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(requests, commands, notificationClassifications, results);
+    NOTIFICATION_AI_EXTENSION_WRAPPER->UpdateNotification(outputs.requests, outputs.commands,
+        outputs.notificationClassifications, results);
     return ERR_OK;
 }
 
-void AdvancedNotificationPriorityHelper::FilterRequestsByStrategy(const std::string &cmdType,
-    uint32_t aiStatus, const std::vector<sptr<NotificationRequest>> &originRequests,
-    std::vector<sptr<NotificationRequest>> &requests, std::vector<nlohmann::json> &commands,
-    std::vector<sptr<NotificationClassification>> &notificationClassifications,
-    std::vector<int32_t> &results)
+bool AdvancedNotificationPriorityHelper::ShouldSkipPriorityTagging(
+    const sptr<NotificationRequest> &request, int64_t &strategy)
 {
-    for (auto &request : originRequests) {
-        sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
-        if (bundleOption == nullptr) {
-            ANS_LOGW("RefreshPriorityType bundleOption null");
-            continue;
-        }
-        if (request->GetOwnerBundleName().empty()) {
-            bundleOption->SetBundleName(request->GetCreatorBundleName());
-            bundleOption->SetUid(request->GetCreatorUid());
-        } else {
-            bundleOption->SetBundleName(request->GetOwnerBundleName());
-            bundleOption->SetUid(request->GetOwnerUid());
-        }
-        NotificationConstant::SWITCH_STATE priorityStatus = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
-        ErrCode dbResult =
-            NotificationPreferences::GetInstance()->GetPriorityEnabledByBundleV2(bundleOption, priorityStatus);
-        if (dbResult != ERR_OK || priorityStatus == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF ||
-            priorityStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) {
-            ANS_LOGI("PriorityEnabledV2 close %{public}s_%{public}d or db fail",
-                bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
-            continue;
-        }
-        int64_t strategy = PRIORITY_STRATEGY_DEFAULT;
-        dbResult = NotificationPreferences::GetInstance()->GetPriorityStrategyByBundle(bundleOption, strategy);
-        if (dbResult != ERR_OK ||
-            strategy & static_cast<int64_t>(NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY)) {
-            ANS_LOGI("StatusAllPriority %{public}s_%{public}d or db fail",
-                bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
-            continue;
-        }
-        nlohmann::json singleCommand = nlohmann::json::object();
-        nlohmann::json priorityParams = nlohmann::json::object();
-        priorityParams["strategy"] = strategy;
-        singleCommand[cmdType] = priorityParams;
-        singleCommand["aiStatus"] = aiStatus;
-
-        commands.emplace_back(singleCommand);
-        requests.emplace_back(request);
-        results.emplace_back(NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
-        notificationClassifications.emplace_back(nullptr);
+    strategy = PRIORITY_STRATEGY_DEFAULT;
+    if (request == nullptr) {
+        ANS_LOGW("ShouldSkipPriorityTagging request null");
+        return true;
     }
-}
-
-void AdvancedNotificationPriorityHelper::BuildPriorityCommand(std::string& cmdType,
-    const sptr<NotificationRequest> &request, nlohmann::json &command)
-{
+    request->SetAllPriorityByBundle(false);
+    if (request->GetSlotType() == NotificationConstant::SlotType::LIVE_VIEW ||
+        AnsCommonUtils::IsCollaborationNotification(request)) {
+        return true;
+    }
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     if (bundleOption == nullptr) {
-        ANS_LOGW("RefreshPriorityType bundleOption null");
-        return;
+        ANS_LOGW("ShouldSkipPriorityTagging bundleOption null");
+        return true;
     }
     if (request->GetOwnerBundleName().empty()) {
         bundleOption->SetBundleName(request->GetCreatorBundleName());
@@ -162,14 +121,50 @@ void AdvancedNotificationPriorityHelper::BuildPriorityCommand(std::string& cmdTy
         priorityStatus == NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) {
         ANS_LOGI("PriorityEnabledV2 close %{public}s_%{public}d or db fail",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
-        return;
+        return true;
     }
-    int64_t strategy = PRIORITY_STRATEGY_DEFAULT;
     dbResult = NotificationPreferences::GetInstance()->GetPriorityStrategyByBundle(bundleOption, strategy);
-    if (dbResult != ERR_OK ||
-        strategy & static_cast<int64_t>(NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY)) {
-        ANS_LOGI("StatusAllPriority %{public}s_%{public}d or db fail",
+    if (dbResult != ERR_OK) {
+        ANS_LOGI("GetPriorityStrategyByBundle fail %{public}s_%{public}d",
             bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+        return true;
+    }
+    if (strategy & static_cast<int64_t>(NotificationConstant::PriorityStrategyStatus::STATUS_ALL_PRIORITY)) {
+        ANS_LOGI("StatusAllPriority %{public}s_%{public}d",
+            bundleOption->GetBundleName().c_str(), bundleOption->GetUid());
+        request->SetAllPriorityByBundle(true);
+        return true;
+    }
+    return false;
+}
+
+void AdvancedNotificationPriorityHelper::FilterRequestsByStrategy(const std::string &cmdType,
+    uint32_t aiStatus, const std::vector<sptr<NotificationRequest>> &originRequests,
+    PriorityFilterOutputs &outputs, std::vector<int32_t> &results)
+{
+    for (auto &request : originRequests) {
+        int64_t strategy = PRIORITY_STRATEGY_DEFAULT;
+        if (ShouldSkipPriorityTagging(request, strategy)) {
+            continue;
+        }
+        nlohmann::json singleCommand = nlohmann::json::object();
+        nlohmann::json priorityParams = nlohmann::json::object();
+        priorityParams["strategy"] = strategy;
+        singleCommand[cmdType] = priorityParams;
+        singleCommand["aiStatus"] = aiStatus;
+
+        outputs.commands.emplace_back(singleCommand);
+        outputs.requests.emplace_back(request);
+        results.emplace_back(NotificationAiExtensionWrapper::ErrorCode::ERR_OK);
+        outputs.notificationClassifications.emplace_back(nullptr);
+    }
+}
+
+void AdvancedNotificationPriorityHelper::BuildPriorityCommand(std::string& cmdType,
+    const sptr<NotificationRequest> &request, nlohmann::json &command)
+{
+    int64_t strategy = PRIORITY_STRATEGY_DEFAULT;
+    if (ShouldSkipPriorityTagging(request, strategy)) {
         return;
     }
 

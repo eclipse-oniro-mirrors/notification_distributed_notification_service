@@ -370,6 +370,35 @@ HWTEST_F(NotificationCloneBundleInfoTest, ToJson_00003, Function | SmallTest | L
     EXPECT_EQ(rrc->GetEnableNotification(), enabledNotification);
 }
 
+static std::string BuildExpectedDumpInfo(const std::shared_ptr<NotificationCloneBundleInfo> &info,
+    const std::string &bundleName, int32_t appIndex, int32_t uid, int32_t slotFlags, bool isShowBadge,
+    bool hasPoppedDialog, NotificationConstant::SWITCH_STATE enabledNotification,
+    const sptr<NotificationRingtoneInfo> &ringtoneInfo)
+{
+    std::string slotDump = "{";
+    for (auto& slot : info->GetSlotInfo()) {
+        slotDump += slot.Dump();
+        slotDump += ",";
+    }
+    NotificationCloneBundleInfo::CollaborationSwitch collaborationSwitch;
+    slotDump += "}";
+    std::string ringtoneDump = ringtoneInfo->Dump();
+    std::string dumpInfo = "CloneBundle{ name = " + bundleName +
+            ", index = " + std::to_string(appIndex) +
+            ", uid = " + std::to_string(uid) +
+            ", slotFlags = " + std::to_string(slotFlags) +
+            ", prioritySlotFlags = 63" +
+            ", ShowBadge = " + std::to_string(isShowBadge) +
+            ", popDialog = " + std::to_string(hasPoppedDialog) +
+            ", isEnabled = " + std::to_string(static_cast<int32_t>(enabledNotification)) +
+            ", slotsInfo = " + slotDump +
+            ", ringtone = " + ringtoneDump +
+            ", collaboration = " + collaborationSwitch.Dump() +
+            ", silentReminderEnabled = 2" +
+            " }";
+    return dumpInfo;
+}
+
 /**
  * @tc.name: Dump_00001
  * @tc.desc: Test Dump parameters.
@@ -403,26 +432,8 @@ HWTEST_F(NotificationCloneBundleInfoTest, Dump_00001, Function | SmallTest | Lev
     rrc->AddRingtoneInfo(ringtoneInfo);
     std::string dumpInfo;
     EXPECT_EQ(dumpInfo.size(), 0);
-    std::string slotDump = "{";
-    for (auto& slot : rrc->GetSlotInfo()) {
-        slotDump += slot.Dump();
-        slotDump += ",";
-    }
-    NotificationCloneBundleInfo::CollaborationSwitch collaborationSwitch;
-    slotDump += "}";
-    std::string ringtoneDump = ringtoneInfo->Dump();
-    dumpInfo += "CloneBundle{ name = " + bundleName +
-            ", index = " + std::to_string(appIndex) +
-            ", uid = " + std::to_string(uid) +
-            ", slotFlags = " + std::to_string(slotFlags) +
-            ", ShowBadge = " + std::to_string(isShowBadge) +
-            ", popDialog = " + std::to_string(hasPoppedDialog) +
-            ", isEnabled = " + std::to_string(static_cast<int32_t>(enabledNotification)) +
-            ", slotsInfo = " + slotDump +
-            ", ringtone = " + ringtoneDump +
-            ", collaboration = " + collaborationSwitch.Dump() +
-            ", silentReminderEnabled = 2" +
-            " }";
+    dumpInfo = BuildExpectedDumpInfo(rrc, bundleName, appIndex, uid, slotFlags, isShowBadge, hasPoppedDialog,
+        enabledNotification, ringtoneInfo);
     EXPECT_EQ(rrc->Dump(), dumpInfo);
 }
 

@@ -47,6 +47,9 @@
 #include "notification_analytics_util.h"
 #include "all_scenarios_extension_wrapper.h"
 #include "ans_const_define.h"
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+#include "advanced_notification_priority_helper.h"
+#endif
 
 namespace OHOS {
 namespace Notification {
@@ -88,6 +91,28 @@ namespace {
         }
         return (localTime.tm_year + YEAR_BASE) * YEAR_MULTIPLIER +
             (localTime.tm_mon + 1) * MONTH_MULTIPLIER + localTime.tm_mday;
+    }
+
+    void ApplySlotReminderModeForBundle(const sptr<NotificationSlot> &slot,
+        const sptr<NotificationBundleOption> &bundle, bool isSpecifiedSlot, uint32_t defaultSlotFlags,
+        int32_t notificationType)
+    {
+        uint32_t slotFlags = defaultSlotFlags;
+        const char *tag = (notificationType == static_cast<int32_t>(
+            NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION))
+            ? "priority slotflags" : "slotflags";
+        auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
+            bundle, slotFlags, notificationType);
+        if (ret != ERR_OK) {
+            ANS_LOGD("Failed to get %{public}s for bundle, use default slotflags", tag);
+        }
+        auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
+            GetConfigSlotReminderModeByType(slot->GetType());
+        uint32_t reminderMode = configSlotReminderMode & slotFlags;
+        if (isSpecifiedSlot) {
+            reminderMode &= slot->GetReminderModeByType(notificationType);
+        }
+        slot->SetReminderModeByType(reminderMode, notificationType);
     }
 
     static const std::vector<std::string> VALID_ADDITION_CONFIG = {
@@ -448,11 +473,30 @@ ErrCode AdvancedNotificationService::GetEnabledForBundleSlotSelf(int32_t slotTyp
     return result;
 }
 
+static bool IsNotificationTypeValid(int32_t notificationType)
+{
+    int32_t minType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION);
+    int32_t maxType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION);
+    if (notificationType < minType || notificationType > maxType) {
+        ANS_LOGE("Invalid notificationType.");
+        return false;
+    }
+#ifndef ANS_FEATURE_PRIORITY_NOTIFICATION
+    if (notificationType == maxType) {
+        return false;
+    }
+#endif
+    return true;
+}
+
 ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,
-    uint32_t &slotFlags)
+    uint32_t &slotFlags, int32_t notificationType)
 {
     ANS_LOGD("called");
     slotFlags = 0;
+    if (!IsNotificationTypeValid(notificationType)) {
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {
         return ERR_ANS_INNER_NON_SYSTEM_APP;
@@ -471,10 +515,16 @@ ErrCode AdvancedNotificationService::GetSlotFlagsAsBundle(const sptr<Notificatio
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("ffrt enter!");
-        result = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
+        result = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
+            bundle, slotFlags, notificationType);
         if (result == ERR_ANS_INNER_PREFERENCES_NOTIFICATION_BUNDLE_NOT_EXIST) {
             result = ERR_OK;
-            slotFlags = DEFAULT_SLOT_FLAGS;
+            if (notificationType ==
+                static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION)) {
+                slotFlags = PRIORITY_DEFAULT_SLOT_FLAGS;
+            } else {
+                slotFlags = DEFAULT_SLOT_FLAGS;
+            }
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get slot flags as bundle.");
@@ -524,18 +574,8 @@ ErrCode AdvancedNotificationService::GetNotificationSettings(uint32_t &slotFlags
     return result;
 }
 
-ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,
-    uint32_t slotFlags)
+static ErrCode CheckSlotFlagsModifyPermission(HaMetaMessage &message)
 {
-    ANS_LOGD("called");
-    if (bundleOption == nullptr) {
-        ANS_LOGE("BundleOption is null.");
-        return ERR_ANS_INNER_INVALID_BUNDLE;
-    }
-
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_2);
-    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
-            " slotFlags:" + std::to_string(slotFlags));
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()
         && !AccessTokenHelper::VerifyShellToken(IPCSkeleton::GetCallingTokenID())) {
@@ -551,6 +591,27 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
         NotificationAnalyticsUtil::ReportModifyEvent(message);
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
+    return ERR_OK;
+}
+
+ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<NotificationBundleOption> &bundleOption,
+    uint32_t slotFlags, int32_t notificationType)
+{
+    ANS_LOGD("called");
+    if (bundleOption == nullptr) {
+        ANS_LOGE("BundleOption is null.");
+        return ERR_ANS_INNER_INVALID_BUNDLE;
+    }
+    if (!IsNotificationTypeValid(notificationType)) {
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_8, EventBranchId::BRANCH_2);
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
+            " slotFlags:" + std::to_string(slotFlags) + " notificationType:" + std::to_string(notificationType));
+    ErrCode permResult = CheckSlotFlagsModifyPermission(message);
+    if (permResult != ERR_OK) {
+        return permResult;
+    }
 
     sptr<NotificationBundleOption> bundle = GenerateValidBundleOption(bundleOption);
     if (bundle == nullptr) {
@@ -563,21 +624,24 @@ ErrCode AdvancedNotificationService::SetSlotFlagsAsBundle(const sptr<Notificatio
     auto submitResult = notificationSvrQueue_.SyncSubmit(
         std::bind([&]() {
             uint32_t savedFlags = 0;
-            NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, savedFlags);
+            NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(
+                bundle, savedFlags, notificationType);
             slotFlags |= NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG;
             slotFlags |= NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG;
-            result = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(bundle, slotFlags);
+            result = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(
+                bundle, slotFlags, notificationType);
             if (result != ERR_OK) {
                 return;
             }
             message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid()) +
                 " set:" + std::to_string(setFlags) + " save:" + std::to_string(savedFlags) + " slot:" +
-                std::to_string(slotFlags), true);
-            result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags);
+                std::to_string(slotFlags) + " notificationType:" + std::to_string(notificationType), true);
+            result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags, notificationType);
         }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Set slot flags as bundle.");
-    ANS_LOGI("%{public}s_%{public}d, slotFlags: %{public}d %{public}d, SetSlotFlagsAsBundle result: %{public}d",
-        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), slotFlags, setFlags, result);
+    ANS_LOGI("%{public}s_%{public}d, slotFlags: %{public}d %{public}d, notificationType: %{public}d, "
+        "SetSlotFlagsAsBundle result: %{public}d",
+        bundleOption->GetBundleName().c_str(), bundleOption->GetUid(), slotFlags, setFlags, notificationType, result);
     message.ErrorCode(result);
     NotificationAnalyticsUtil::ReportModifyEvent(message);
     return result;
@@ -634,7 +698,7 @@ AnsStatus AdvancedNotificationService::AssignValidNotificationSlot(const std::sh
 }
 
 ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
-    const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags)
+    const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags, int32_t notificationType)
 {
     std::vector<sptr<NotificationSlot>> slots;
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_3, EventBranchId::BRANCH_1);
@@ -655,10 +719,10 @@ ErrCode AdvancedNotificationService::UpdateSlotReminderModeBySlotFlags(
     for (auto slot : slots) {
         auto configSlotReminderMode =
             DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
-        slot->SetReminderMode(slotFlags & configSlotReminderMode);
+        slot->SetReminderModeByType(slotFlags & configSlotReminderMode, notificationType);
         std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
         ANS_LOGD("Update reminderMode of %{public}d in %{public}s, value is %{public}d.",
-            slot->GetType(), bundleName.c_str(), slot->GetReminderMode());
+            slot->GetType(), bundleName.c_str(), slot->GetReminderModeByType(notificationType));
     }
 
     ret = NotificationPreferences::GetInstance()->UpdateNotificationSlots(bundle, slots);
@@ -675,23 +739,16 @@ void AdvancedNotificationService::GenerateSlotReminderMode(const sptr<Notificati
         ANS_LOGE("Invalid slot.");
         return;
     }
-    uint32_t slotFlags = defaultSlotFlags;
-    auto ret = NotificationPreferences::GetInstance()->GetNotificationSlotFlagsForBundle(bundle, slotFlags);
-    if (ret != ERR_OK) {
-        ANS_LOGD("Failed to get slotflags for bundle, use default slotflags");
-    }
-
-    auto configSlotReminderMode =
-        DelayedSingleton<NotificationConfigParse>::GetInstance()->GetConfigSlotReminderModeByType(slot->GetType());
-    if (isSpecifiedSlot) {
-        slot->SetReminderMode(configSlotReminderMode & slotFlags & slot->GetReminderMode());
-    } else {
-        slot->SetReminderMode(configSlotReminderMode & slotFlags);
-    }
-
+    ApplySlotReminderModeForBundle(slot, bundle, isSpecifiedSlot, defaultSlotFlags,
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION));
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    ApplySlotReminderModeForBundle(slot, bundle, isSpecifiedSlot, defaultSlotFlags,
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION));
+#endif
     std::string bundleName = (bundle == nullptr) ? "" : bundle->GetBundleName();
-    ANS_LOGI("slotMode type=%{public}d mode=%{public}d bundle=%{public}s,%{public}d,%{public}u",
-        slot->GetType(), slot->GetReminderMode(), bundleName.c_str(), isSpecifiedSlot, defaultSlotFlags);
+    ANS_LOGI("slotMode type=%{public}d mode=%{public}d priorityMode=%{public}d bundle=%{public}s,%{public}d,%{public}u",
+        slot->GetType(), slot->GetReminderMode(), slot->GetPriorityReminderMode(), bundleName.c_str(),
+        isSpecifiedSlot, defaultSlotFlags);
 }
 
 uint32_t AdvancedNotificationService::GetDefaultSlotFlags(const sptr<NotificationRequest> &request)
@@ -721,6 +778,37 @@ void UpdateScreenReminderFlag(uint32_t& slotReminderMode, NotificationConstant::
     slotReminderMode |=  lightBit;
     ANS_LOGI("UpdateScreen:%{public}d,%{public}d,%{public}d,%{public}d,%{public}d.",
         type, config, before, lightBit, slotReminderMode);
+}
+
+static void SetReminderFlagBit(const sptr<NotificationRequest> &request, uint32_t reminderMode,
+    const NotificationConstant::ReminderFlag &bit, bool isPriority, const std::set<std::string> &unaffected)
+{
+    bool status = (reminderMode & bit) != 0;
+    if (isPriority) {
+        request->SetPriorityDistributedFlagBit(bit, status, unaffected);
+    } else {
+        request->SetDistributedFlagBit(bit, status, unaffected);
+    }
+}
+
+static void ApplyReminderFlagsToRequest(const sptr<NotificationRequest> &request, uint32_t reminderMode,
+    int32_t userId, bool isPriority)
+{
+    uint32_t notificationControlFlags = request->GetNotificationControlFlags();
+    if (((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) &&
+        !request->GetCreatorBundleName().empty() && request->IsAgentNotification() &&
+        BundleManagerHelper::GetInstance()->IsAtomicServiceByBundle(request->GetOwnerBundleName(), userId)) {
+        reminderMode |= NotificationConstant::ReminderFlag::BANNER_FLAG;
+    }
+    UpdateScreenReminderFlag(reminderMode, request->GetSlotType());
+    SetReminderFlagBit(request, reminderMode, NotificationConstant::ReminderFlag::SOUND_FLAG, isPriority,
+        unAffectDevices);
+    SetReminderFlagBit(request, reminderMode, NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, isPriority, {});
+    SetReminderFlagBit(request, reminderMode, NotificationConstant::ReminderFlag::BANNER_FLAG, isPriority, {});
+    SetReminderFlagBit(request, reminderMode, NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, isPriority, {});
+    SetReminderFlagBit(request, reminderMode, NotificationConstant::ReminderFlag::VIBRATION_FLAG, isPriority,
+        unAffectDevices);
+    SetReminderFlagBit(request, reminderMode, NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, isPriority, {});
 }
 
 void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRequest> &request,
@@ -755,50 +843,13 @@ void AdvancedNotificationService::SetRequestBySlotType(const sptr<NotificationRe
             __FUNCTION__, request->GetOwnerUid());
         return;
     }
-    uint32_t notificationControlFlags = request->GetNotificationControlFlags();
-    if (((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) &&
-        !request->GetCreatorBundleName().empty() && request->IsAgentNotification() &&
-        BundleManagerHelper::GetInstance()->IsAtomicServiceByBundle(request->GetOwnerBundleName(), userId)) {
-        slotReminderMode = slotReminderMode |= NotificationConstant::ReminderFlag::BANNER_FLAG;
-    }
-    UpdateScreenReminderFlag(slotReminderMode, slotType);
-    if ((slotReminderMode & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
-        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, true);
-    } else {
-        request->SetDistributedFlagBit(
-            NotificationConstant::ReminderFlag::SOUND_FLAG, false, unAffectDevices);
-    }
-
-    if ((slotReminderMode & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
-        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, true);
-    } else {
-        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
-    }
-
-    if ((slotReminderMode & NotificationConstant::ReminderFlag::BANNER_FLAG) != 0) {
-        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, true);
-    } else {
-        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
-    }
-
-    if ((slotReminderMode & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
-        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, true);
-    } else {
-        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
-    }
-
-    if ((slotReminderMode & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
-        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, true);
-    } else {
-        request->SetDistributedFlagBit(
-            NotificationConstant::ReminderFlag::VIBRATION_FLAG, false, unAffectDevices);
-    }
-
-    if ((slotReminderMode & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
-        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, true);
-    } else {
-        request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, false);
-    }
+    ApplyReminderFlagsToRequest(request, slotReminderMode, userId, false);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    // Refresh the isAllPriorityByBundle flag on the original request
+    int64_t strategy = PRIORITY_STRATEGY_DEFAULT;
+    AdvancedNotificationPriorityHelper::GetInstance()->ShouldSkipPriorityTagging(request, strategy);
+    ApplyReminderFlagsToRequest(request, slot->GetPriorityReminderMode(), userId, true);
+#endif
     HandleFlagsWithRequest(request, bundleOption);
 }
 
@@ -819,8 +870,9 @@ void AdvancedNotificationService::HandleFlagsWithRequest(const sptr<Notification
             request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false, unAffectDevices);
         }
     }
-    ANS_LOGI("SetFlags key=%{public}s flags=%{public}d cls=%{public}s silent=%{public}d",
+    ANS_LOGI("SetFlags key=%{public}s flags=%{public}d priorityFlags=%{public}d cls=%{public}s silent=%{public}d",
         request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags(),
+        request->GetPriorityCurrentReminderFlags(),
         request->GetClassification().c_str(), enableStatus);
     if (request->GetClassification() == NotificationConstant::ANS_VOIP &&
         request->GetSlotType() == NotificationConstant::LIVE_VIEW) {

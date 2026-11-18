@@ -68,6 +68,7 @@ namespace Notification {
 class HaMetaMessage;
 
 static const uint32_t DEFAULT_SLOT_FLAGS = 59; // 0b111011
+static const uint32_t PRIORITY_DEFAULT_SLOT_FLAGS = 63; // 0b111111
 static const uint32_t SILENT_REMINDER__SLOT_FLAGS = 32; // 0b100000
 constexpr char REMINDER_CAPABILITY[] = "reminder_capability";
 constexpr char SOUND_CAPABILITY[] = "sound_capability";
@@ -1045,8 +1046,16 @@ public:
      * @param slotFlags Indicates the slogFlags of slot.
      * @return Returns ERR_OK on success, others on failure.
      */
+    /**
+     * @brief Obtains the slotFlags of slot for a specified notification type.
+     *
+     * @param bundleOption Indicates the bundle name and uid of the application.
+     * @param slotFlags Indicates the slogFlags of slot obtained.
+     * @param notificationType Indicates the notification type the slotFlags apply to.
+     * @return Returns ERR_OK on success, others on failure.
+     */
     virtual ErrCode GetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption,
-        uint32_t &slotFlags) override;
+        uint32_t &slotFlags, int32_t notificationType) override;
 
     /**
      * @brief Obtains the number of slotFlags.
@@ -1057,15 +1066,16 @@ public:
     virtual ErrCode GetNotificationSettings(uint32_t &slotFlags) override;
 
     /**
-     * @brief Set the slotFlags of slot.
+     * @brief Set the slotFlags of slot for a specified notification type.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
      * @param slot      Indicates the specified slot object
      * @param slotFlags Indicates the slogFlags of slot to set.
+     * @param notificationType Indicates the notification type the slotFlags apply to.
      * @return Returns ERR_OK on success, others on failure.
      */
     virtual ErrCode SetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption,
-        uint32_t slotFlags) override;
+        uint32_t slotFlags, int32_t notificationType) override;
 
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     /**
@@ -1837,6 +1847,9 @@ public:
     void UpdateCloneBundleInfoFoSlot(
         const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
 
+    ErrCode SetSlotFlagsAndUpdateReminderMode(
+        const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags, int32_t notificationType);
+
     void UpdateCloneBundleInfoFoSilentReminder(
         const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle);
 
@@ -2035,8 +2048,6 @@ public:
      */
     void RemoveCommonLiveViewNotification(const int32_t pid);
     void SnoozeNotificationConsumed(const std::shared_ptr<NotificationRecord> &record);
-    void PrepareSnoozeDeviceFlags(const sptr<NotificationRequest> &request,
-        const std::shared_ptr<NotificationFlags> &currentFlags);
     bool IsCanRecoverSnooze(const std::shared_ptr<NotificationRecord> &record);
     void DeleteSnoozeNotificationFromDB(const std::shared_ptr<NotificationRecord> &record);
     bool SetEncryptToDB(const NotificationRequestDb &requestDb);
@@ -2232,6 +2243,8 @@ private:
     AnsStatus Filter(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
     void ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record,
         const bool isAgentController);
+    void DisableReminderFlagsByControl(const std::shared_ptr<NotificationRecord> &record,
+        const std::shared_ptr<NotificationFlags> &flags, uint32_t notificationControlFlags);
     ErrCode CheckPublishPreparedNotification(const std::shared_ptr<NotificationRecord> &record, bool isSystemApp);
     void AddToNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void AddToDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
@@ -2514,7 +2527,8 @@ private:
     void RemoveDoNotDisturbProfileTrustList(const sptr<NotificationBundleOption> &bundleOption, const int32_t userId);
     AnsStatus AssignValidNotificationSlot(const std::shared_ptr<NotificationRecord> &record,
         const sptr<NotificationBundleOption> &bundleOption);
-    ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags);
+    ErrCode UpdateSlotReminderModeBySlotFlags(const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags,
+        int32_t notificationType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION));
         bool VerifyCloudCapability(const int32_t &uid, const std::string &capability);
     ErrCode CheckSoundPermission(const sptr<NotificationRequest> &request,
         sptr<NotificationBundleOption> &bundleOption);

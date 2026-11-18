@@ -230,6 +230,7 @@ const static std::string KEY_SLOT_ENABLED = "enabled";
  * Indicates whether the type of bundle is flags.
  */
 const static std::string KEY_BUNDLE_SLOTFLGS_TYPE = "bundleReminderFlagsType";
+const static std::string KEY_BUNDLE_PRIORITY_SLOTFLGS_TYPE = "bundlePriorityReminderFlagsType";
 
 /**
  * Indicates the ringtone of bundle.
@@ -255,6 +256,7 @@ const static std::string KEY_SLOT_AUTH_HINT_CNT = "authHintCnt";
  * Indicates that reminder mode of slot.
  */
 const static std::string KEY_REMINDER_MODE = "reminderMode";
+const static std::string KEY_PRIORITY_REMINDER_MODE = "priorityReminderMode";
 
 const static std::string KEY_EXTENSION_SUBSCRIPTION_INFO = "extensionSubscriptionInfo";
 const static std::string KEY_EXTENSION_SUBSCRIPTION_ENABLED = "enableExtensionSubscription";
@@ -727,6 +729,26 @@ bool NotificationPreferencesDatabase::PutSlotFlags(NotificationPreferencesInfo::
         bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), slotFlags);
     std::string bundleKey = GenerateBundleLablel(bundleInfo);
     int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags,
+        bundleInfo.GetBundleUid());
+    return (result == NativeRdb::E_OK);
+}
+
+bool NotificationPreferencesDatabase::PutPrioritySlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo,
+    const int32_t &slotFlags)
+{
+    if (bundleInfo.GetBundleName().empty()) {
+        ANS_LOGE("Bundle name is null.");
+        return false;
+    }
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+
+    ANS_LOGI("bundelName:%{public}s, uid:%{public}d, prioritySlotFlags[%{public}d]",
+        bundleInfo.GetBundleName().c_str(), bundleInfo.GetBundleUid(), slotFlags);
+    std::string bundleKey = GenerateBundleLablel(bundleInfo);
+    int32_t result = PutBundlePropertyToDisturbeDB(bundleKey, BundleType::BUNDLE_PRIORITY_SLOTFLGS_TYPE, slotFlags,
         bundleInfo.GetBundleUid());
     return (result == NativeRdb::E_OK);
 }
@@ -1405,6 +1427,10 @@ int32_t NotificationPreferencesDatabase::PutBundlePropertyToDisturbeDB(
             ANS_LOGD("Into BUNDLE_SLOTFLGS_TYPE:GenerateBundleKey.");
             keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_SLOTFLGS_TYPE);
             break;
+        case BundleType::BUNDLE_PRIORITY_SLOTFLGS_TYPE:
+            ANS_LOGD("Into BUNDLE_PRIORITY_SLOTFLGS_TYPE:GenerateBundleKey.");
+            keyStr = GenerateBundleKey(bundleKey, KEY_BUNDLE_PRIORITY_SLOTFLGS_TYPE);
+            break;
         case BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE:
             keyStr = GenerateBundleKey(bundleKey, KEY_EXTENSION_SUBSCRIPTION_ENABLED);
             break;
@@ -1509,6 +1535,8 @@ void NotificationPreferencesDatabase::GenerateSlotEntry(const std::string &bundl
         std::to_string(slot->GetAuthHintCnt()), values);
     GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_REMINDER_MODE),
         std::to_string(slot->GetReminderMode()), values);
+    GenerateEntry(GenerateSlotKey(bundleKey, slotType, KEY_PRIORITY_REMINDER_MODE),
+        std::to_string(slot->GetPriorityReminderMode()), values);
 }
 
 void NotificationPreferencesDatabase::GetDistributedEnabledForClone(const int32_t &userId,
@@ -1798,6 +1826,9 @@ void NotificationPreferencesDatabase::ParseBundlePropertyFromDisturbeDB(
     if (typeStr.compare(KEY_BUNDLE_SLOTFLGS_TYPE) == 0) {
         return ParseBundleSlotFlags(bundleInfo, valueStr);
     }
+    if (typeStr.compare(KEY_BUNDLE_PRIORITY_SLOTFLGS_TYPE) == 0) {
+        return ParseBundlePrioritySlotFlags(bundleInfo, valueStr);
+    }
     if (typeStr.compare(KEY_EXTENSION_SUBSCRIPTION_INFO) == 0) {
         return ParseBundleExtensionSubscriptionInfos(bundleInfo, valueStr);
     }
@@ -1874,6 +1905,9 @@ void NotificationPreferencesDatabase::ExecuteDisturbeDB(sptr<NotificationSlot> &
 {
     if (typeStr.compare(KEY_REMINDER_MODE) == 0) {
         return ParseSlotReminderMode(slot, valueStr);
+    }
+    if (typeStr.compare(KEY_PRIORITY_REMINDER_MODE) == 0) {
+        return ParseSlotPriorityReminderMode(slot, valueStr);
     }
     if (!typeStr.compare(KEY_SLOT_VIBRATION_STYLE)) {
         GetValueFromDisturbeDB(findString + KEY_SLOT_ENABLE_VRBRATION, userId,
@@ -2153,6 +2187,13 @@ void NotificationPreferencesDatabase::ParseBundleSlotFlags(NotificationPreferenc
     bundleInfo.SetSlotFlags(AnsCommonUtils::StringToInt(value));
 }
 
+void NotificationPreferencesDatabase::ParseBundlePrioritySlotFlags(
+    NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const
+{
+    ANS_LOGD("ParseBundlePrioritySlotFlags slot show flags is %{public}s.", value.c_str());
+    bundleInfo.SetPrioritySlotFlags(AnsCommonUtils::StringToInt(value));
+}
+
 void NotificationPreferencesDatabase::ParseSlotEnableLight(sptr<NotificationSlot> &slot, const std::string &value) const
 {
     ANS_LOGD("ParseSlotEnableLight slot enable light is %{public}s.", value.c_str());
@@ -2240,6 +2281,14 @@ void NotificationPreferencesDatabase::ParseSlotReminderMode(
     ANS_LOGD("ParseSlotReminderMode slot reminder mode is %{public}s.", value.c_str());
     int32_t reminderMode = static_cast<int32_t>(AnsCommonUtils::StringToInt(value));
     slot->SetReminderMode(reminderMode);
+}
+
+void NotificationPreferencesDatabase::ParseSlotPriorityReminderMode(
+    sptr<NotificationSlot> &slot, const std::string &value) const
+{
+    ANS_LOGD("ParseSlotPriorityReminderMode slot priority reminder mode is %{public}s.", value.c_str());
+    int32_t priorityReminderMode = static_cast<int32_t>(AnsCommonUtils::StringToInt(value));
+    slot->SetPriorityReminderMode(priorityReminderMode);
 }
 
 void NotificationPreferencesDatabase::ParseBundleExtensionSubscriptionInfos(

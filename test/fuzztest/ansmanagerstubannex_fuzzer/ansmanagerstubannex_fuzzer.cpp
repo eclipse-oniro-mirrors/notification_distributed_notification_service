@@ -166,8 +166,8 @@ namespace OHOS {
         service->GetSlots(slots);
         service->GetSlotByType(slotType, slot);
         service->GetSlotNumAsBundle(bundleOption, num);
-        service->SetSlotFlagsAsBundle(bundleOption, slotFlags);
-        service->GetSlotFlagsAsBundle(bundleOption, slotFlags);
+        service->SetSlotFlagsAsBundle(bundleOption, slotFlags, fuzzData->ConsumeIntegral<int32_t>());
+        service->GetSlotFlagsAsBundle(bundleOption, slotFlags, fuzzData->ConsumeIntegral<int32_t>());
         service->GetActiveNotifications(notificationRequests, key1);
         service->GetActiveNotificationNums(num);
         service->GetAllActiveNotifications(notificationsVector);

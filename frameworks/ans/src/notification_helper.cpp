@@ -78,10 +78,10 @@ ErrCode NotificationHelper::GetNotificationSlotNumAsBundle(const NotificationBun
 }
 
 ErrCode NotificationHelper::GetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
-    uint32_t &slotFlags)
+    uint32_t &slotFlags, int32_t notificationType)
 {
     InnerErrorCode result =
-        AnsNotification::GetInstance()->GetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
+        AnsNotification::GetInstance()->GetNotificationSlotFlagsAsBundle(bundleOption, slotFlags, notificationType);
     return InnerErrorToNative(result);
 }
 
@@ -93,10 +93,10 @@ ErrCode NotificationHelper::GetNotificationSettings(uint32_t &slotFlags)
 }
 
 ErrCode NotificationHelper::SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
-    uint32_t slotFlags)
+    uint32_t slotFlags, int32_t notificationType)
 {
     InnerErrorCode result =
-        AnsNotification::GetInstance()->SetNotificationSlotFlagsAsBundle(bundleOption, slotFlags);
+        AnsNotification::GetInstance()->SetNotificationSlotFlagsAsBundle(bundleOption, slotFlags, notificationType);
     return InnerErrorToNative(result);
 }
 

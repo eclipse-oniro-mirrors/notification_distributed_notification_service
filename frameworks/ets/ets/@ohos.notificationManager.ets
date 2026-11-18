@@ -192,6 +192,11 @@ export default namespace notificationManager {
         ENABLE = 2
     }
 
+    export enum SlotFlagsNotificationType {
+        NOTIFICATION = 0,
+        PRIORITY_NOTIFICATION = 1
+    }
+
     export interface DistributedBundleEnableInfo {
         bundleName: string;
         uid: int;
@@ -265,9 +270,13 @@ export default namespace notificationManager {
 
     export native function nativeGetSlotFlagsByBundle(bundle: BundleOption,
         callback?: AsyncCallback<long>): Promise<long>;
+    export native function nativeGetSlotFlagsByBundleWithType(bundle: BundleOption,
+        notificationType: SlotFlagsNotificationType, callback?: AsyncCallback<long>): Promise<long>;
 
     export native function nativeSetSlotFlagsByBundle(bundle: BundleOption, slotFlags: long,
         callback?: AsyncCallback<void>): Promise<void>;
+    export native function nativeSetSlotFlagsByBundleWithType(bundle: BundleOption, slotFlags: long,
+        notificationType: SlotFlagsNotificationType, callback?: AsyncCallback<void>): Promise<void>;
     export native function nativeGetSlotsByBundle(bundle: BundleOption,
         callback?: AsyncCallback<Array<NotificationSlot>>): Promise<Array<NotificationSlot>>;
     export native function nativeGetSlotByBundle(bundle: BundleOption, type: SlotType,
@@ -1287,6 +1296,22 @@ export default namespace notificationManager {
         return result;
     }
 
+    export function setSlotFlagsByBundle(bundle: BundleOption, slotFlags: long,
+        notificationType: SlotFlagsNotificationType): Promise<void> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let result: Promise<void>;
+        try {
+            result = nativeSetSlotFlagsByBundleWithType(bundle, slotFlags, notificationType, undefined);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
+    }
+
     export function getSlotFlagsByBundle(bundle: BundleOption): Promise<long> {
         let error: BusinessError = isInvalidParameter(bundle);
         if (error.code !== ERROR_OK) {
@@ -1295,6 +1320,22 @@ export default namespace notificationManager {
         let result: Promise<long>;
         try {
             result = nativeGetSlotFlagsByBundle(bundle, undefined);
+        } catch (err) {
+            let error: BusinessError = err as BusinessError;
+            throw error;
+        }
+        return result;
+    }
+
+    export function getSlotFlagsByBundle(bundle: BundleOption,
+        notificationType: SlotFlagsNotificationType): Promise<long> {
+        let error: BusinessError = isInvalidParameter(bundle);
+        if (error.code !== ERROR_OK) {
+            throw error;
+        }
+        let result: Promise<long>;
+        try {
+            result = nativeGetSlotFlagsByBundleWithType(bundle, notificationType, undefined);
         } catch (err) {
             let error: BusinessError = err as BusinessError;
             throw error;

@@ -2765,6 +2765,83 @@ HWTEST_F(NotificationPreferencesTest, SetNotificationSlotFlagsForBundle_00100, F
     EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
 }
 
+/**
+ * @tc.number    : SetNotificationSlotFlagsForBundle_00101
+ * @tc.name      :
+ * @tc.desc      : Test SetNotificationSlotFlagsForBundle with invalid notificationType
+ */
+HWTEST_F(NotificationPreferencesTest, SetNotificationSlotFlagsForBundle_00101, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    const int32_t invalidType =
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION) + 1;
+    auto res = notificationPreferences.SetNotificationSlotFlagsForBundle(bundleOption_, 63, invalidType);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
+    res = notificationPreferences.SetNotificationSlotFlagsForBundle(bundleOption_, 63, -1);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : GetNotificationSlotFlagsForBundle_00100
+ * @tc.name      :
+ * @tc.desc      : Test GetNotificationSlotFlagsForBundle with null bundle and invalid notificationType
+ */
+HWTEST_F(NotificationPreferencesTest, GetNotificationSlotFlagsForBundle_00100, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    const int32_t priorityType =
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION);
+    uint32_t slotFlags = 0;
+    auto res = notificationPreferences.GetNotificationSlotFlagsForBundle(bundleOption_, slotFlags, -1);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
+    res = notificationPreferences.GetNotificationSlotFlagsForBundle(nullptr, slotFlags, priorityType);
+    EXPECT_EQ(res, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.number    : SetAndGetNotificationSlotFlagsForBundle_00100
+ * @tc.name      :
+ * @tc.desc      : Test Set/GetNotificationSlotFlagsForBundle with normal type and db failure branch
+ */
+HWTEST_F(NotificationPreferencesTest, SetAndGetNotificationSlotFlagsForBundle_00100, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    const int32_t normalType =
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION);
+    uint32_t slotFlags = 8;
+    auto res = notificationPreferences.SetNotificationSlotFlagsForBundle(bundleOption_, slotFlags, normalType);
+    EXPECT_EQ(res, ERR_OK);
+    uint32_t savedFlags = 0;
+    res = notificationPreferences.GetNotificationSlotFlagsForBundle(bundleOption_, savedFlags, normalType);
+    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(savedFlags, slotFlags);
+}
+
+/**
+ * @tc.number    : SetAndGetNotificationSlotFlagsForBundle_00101
+ * @tc.name      :
+ * @tc.desc      : Test normal and priority slot flags are stored and queried independently
+ */
+HWTEST_F(NotificationPreferencesTest, SetAndGetNotificationSlotFlagsForBundle_00101, Function | SmallTest | Level1)
+{
+    NotificationPreferences notificationPreferences;
+    const int32_t normalType =
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION);
+    const int32_t priorityType =
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION);
+    EXPECT_EQ(notificationPreferences.SetNotificationSlotFlagsForBundle(bundleOption_, 1, normalType), ERR_OK);
+    EXPECT_EQ(notificationPreferences.SetNotificationSlotFlagsForBundle(bundleOption_, 40, priorityType), ERR_OK);
+
+    uint32_t normalFlags = 0;
+    uint32_t priorityFlags = 0;
+    EXPECT_EQ(notificationPreferences.GetNotificationSlotFlagsForBundle(bundleOption_, normalFlags, normalType),
+        ERR_OK);
+    EXPECT_EQ(notificationPreferences.GetNotificationSlotFlagsForBundle(bundleOption_, priorityFlags, priorityType),
+        ERR_OK);
+    EXPECT_EQ(normalFlags, 1);
+    EXPECT_EQ(priorityFlags, 40);
+}
+
 
 /**
  * @tc.number    : AddNotificationSlots_00700

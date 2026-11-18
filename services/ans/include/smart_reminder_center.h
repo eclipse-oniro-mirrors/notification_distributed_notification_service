@@ -48,6 +48,8 @@ public:
     bool CompareStatus(const string &status, const bitset<DistributedDeviceStatus::STATUS_SIZE> &bitStatus) const;
 
 private:
+    void InitPriorityDeviceFlags(const sptr<NotificationRequest> &request,
+        const shared_ptr<map<string, shared_ptr<NotificationFlags>>> &notificationFlagsOfDevices) const;
     void GetMultiDeviceReminder();
     void ParseReminderFilterDevice(const nlohmann::json &root, const string &deviceType);
     void ParseReminderFilterSlot(

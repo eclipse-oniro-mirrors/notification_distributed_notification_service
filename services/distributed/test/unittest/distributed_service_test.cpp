@@ -312,43 +312,21 @@ HWTEST_F(DistributedServiceTest, DistributedServiceTest_StatusChange_0100, Funct
     DistributedService::GetInstance().HandleStatusChange(changeInfo);
     EXPECT_NE(0, MockInvokeCounting::GetInstance().MockGetCount());
 }
-
-/**
- * @tc.name      : DistributedServiceTest_OnConsumedSetFlags_0100
- * @tc.desc      : test OnConsumedSetFlags with null notification.
- */
-HWTEST_F(DistributedServiceTest, DistributedServiceTest_OnConsumedSetFlags_0100, Function | SmallTest | Level1)
-{
-    DistributedDeviceInfo device;
-    std::shared_ptr<Notification> request = nullptr;
-    EXPECT_FALSE(DistributedService::GetInstance().OnConsumedSetFlags(request, device));
-}
-
-/**
- * @tc.name      : DistributedServiceTest_OnConsumedSetFlags_0200
- * @tc.desc      : test OnConsumedSetFlags with null notification request point.
- */
-HWTEST_F(DistributedServiceTest, DistributedServiceTest_OnConsumedSetFlags_0200, Function | SmallTest | Level1)
-{
-    DistributedDeviceInfo device;
-    auto request = std::make_shared<Notification>("001", nullptr);
-    EXPECT_FALSE(DistributedService::GetInstance().OnConsumedSetFlags(request, device));
-}
 #endif
 /**
  * @tc.name      : DistributedServiceTest_01200
  * @tc.number    : DistributedServiceTest_01200
- * @tc.desc      : Test OnConsumedSetFlags with a null notification and a notification
+ * @tc.desc      : Test CheckDeviceReminderFlagsExist with a null notification and a notification
  *                 whose request point is null.
  */
 HWTEST_F(DistributedServiceTest, DistributedServiceTest_01200, Function | SmallTest | Level1)
 {
     DistributedDeviceInfo peerDevice;
-    EXPECT_FALSE(DistributedService::GetInstance().OnConsumedSetFlags(nullptr, peerDevice));
+    EXPECT_FALSE(DistributedService::GetInstance().CheckDeviceReminderFlagsExist(nullptr, peerDevice));
 
     sptr<NotificationRequest> nullRequest = nullptr;
     std::shared_ptr<Notification> notification = std::make_shared<Notification>(nullRequest);
-    EXPECT_FALSE(DistributedService::GetInstance().OnConsumedSetFlags(notification, peerDevice));
+    EXPECT_FALSE(DistributedService::GetInstance().CheckDeviceReminderFlagsExist(notification, peerDevice));
 }
 
 /**

@@ -367,6 +367,37 @@ public:
     uint32_t GetReminderMode() const;
 
     /**
+     * @brief Set priority notification reminder mode of a NotificationSlot object.
+     * @param priorityReminderMode Specifies the reminder mode for priority notifications,
+     * @note which determines the priority notification reminder mode.
+     */
+    void SetPriorityReminderMode(uint32_t priorityReminderMode);
+
+    /**
+     * @brief Obtains the reminder mode for priority notifications of a NotificationSlot object
+     * @return Returns the reminder mode for priority notifications of the NotificationSlot object.
+     */
+    uint32_t GetPriorityReminderMode() const;
+
+    /**
+     * @brief Set the reminder mode of a NotificationSlot object for the specified notification type.
+     * @param reminderMode Specifies the reminder mode to set.
+     * @param notificationType Indicates the notification type the reminder mode applies to,
+     * see NotificationConstant::SlotFlagsNotificationType.
+     * @note This is the unified dispatch entry for reminder modes of all notification types.
+     */
+    void SetReminderModeByType(uint32_t reminderMode, int32_t notificationType);
+
+    /**
+     * @brief Obtains the reminder mode of a NotificationSlot object for the specified notification type.
+     * @param notificationType Indicates the notification type of the reminder mode,
+     * see NotificationConstant::SlotFlagsNotificationType.
+     * @return Returns the reminder mode of the NotificationSlot object for the specified type.
+     * @note This is the unified dispatch entry for reminder modes of all notification types.
+     */
+    uint32_t GetReminderModeByType(int32_t notificationType) const;
+
+    /**
      * @brief Obtains the authHintCnt of a NotificationSlot object, which is set by SetAuthHintCnt(int32_t count).
      *
      * @return Returns the authHintCnt of the NotificationSlot object.
@@ -482,6 +513,7 @@ private:
     int32_t authorizedStatus_ {AuthorizedStatus::NOT_AUTHORIZED};
     int32_t authHintCnt_ = {0};
     uint32_t reminderMode_ = {INVALID_REMINDER_MODE};
+    uint32_t priorityReminderMode_ = {INVALID_REMINDER_MODE};
 
     // no object in parcel
     static constexpr int32_t VALUE_NULL = -1;

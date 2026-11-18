@@ -164,10 +164,16 @@ InnerErrorCode AnsNotification::GetNotificationSlotNumAsBundle(
 }
 
 InnerErrorCode AnsNotification::GetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
-    uint32_t &slotFlags)
+    uint32_t &slotFlags, int32_t notificationType)
 {
+    int32_t minType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION);
+    int32_t maxType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION);
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    if (notificationType < minType || notificationType > maxType) {
+        ANS_LOGE("Invalid notificationType");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
 
@@ -182,7 +188,7 @@ InnerErrorCode AnsNotification::GetNotificationSlotFlagsAsBundle(const Notificat
         ANS_LOGE("null bundleOption");
         return ERR_ANS_INNER_NO_MEMORY;
     }
-    return static_cast<InnerErrorCode>(proxy->GetSlotFlagsAsBundle(bo, slotFlags));
+    return static_cast<InnerErrorCode>(proxy->GetSlotFlagsAsBundle(bo, slotFlags, notificationType));
 }
 
 InnerErrorCode AnsNotification::GetNotificationSettings(uint32_t &slotFlags)
@@ -197,13 +203,20 @@ InnerErrorCode AnsNotification::GetNotificationSettings(uint32_t &slotFlags)
 }
 
 InnerErrorCode AnsNotification::SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
-    uint32_t slotFlags)
+    uint32_t slotFlags, int32_t notificationType)
 {
+    int32_t minType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION);
+    int32_t maxType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION);
     if (bundleOption.GetBundleName().empty()) {
         ANS_LOGE("Invalid bundle name.");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
-    ANS_LOGI("set slotFlags bundleName:%{public}s, %{public}d", bundleOption.GetBundleName().c_str(), (int)slotFlags);
+    if (notificationType < minType || notificationType > maxType) {
+        ANS_LOGE("Invalid notificationType");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
+    ANS_LOGI("set slotFlags bundleName:%{public}s, %{public}d, notificationType:%{public}d",
+        bundleOption.GetBundleName().c_str(), (int)slotFlags, notificationType);
 
     sptr<IAnsManager> proxy = GetAnsManagerProxy();
     if (!proxy) {
@@ -225,7 +238,7 @@ InnerErrorCode AnsNotification::SetNotificationSlotFlagsAsBundle(const Notificat
     // got the LSB 6 bits as slotflags;
     uint32_t validSlotFlag = MAX_SLOT_FLAGS & slotFlags;
 
-    return static_cast<InnerErrorCode>(proxy->SetSlotFlagsAsBundle(bo, validSlotFlag));
+    return static_cast<InnerErrorCode>(proxy->SetSlotFlagsAsBundle(bo, validSlotFlag, notificationType));
 }
 
 InnerErrorCode AnsNotification::PublishNotification(

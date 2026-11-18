@@ -1261,6 +1261,29 @@ public:
     std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> GetDeviceFlags() const;
 
     /**
+     * @brief Sets the priority notification flags of this notification and device.
+     *
+     * @param mapFlags Indicates the priority notification flags of this notification and device.
+     */
+    void SetPriorityDeviceFlags(
+        const std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> &mapFlags);
+
+    /**
+     * @brief Obtains the priority notification flags of the notification and device.
+     *
+     * @return Returns the priority notification flags of the notification and device.
+     */
+    std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> GetPriorityDeviceFlags() const;
+
+    /**
+     * @brief Obtains the reminder flags of the current device for priority notifications.
+     *
+     * @return Returns the reminder flags of the current device for priority notifications,
+     * 0 when the priority device flags are not initialized.
+     */
+    uint32_t GetPriorityCurrentReminderFlags() const;
+
+    /**
      * @brief Sets the userId of the notification receiver.
      *
      * @param userId Indicates the userId of the notification receiver.
@@ -1594,6 +1617,10 @@ public:
         const NotificationConstant::ReminderFlag &bit,
         const bool status,
         const std::set<std::string> &unaffectDevice = {});
+    void SetPriorityDistributedFlagBit(
+        const NotificationConstant::ReminderFlag &bit,
+        const bool status,
+        const std::set<std::string> &unaffectDevice = {});
     void SetAppIndex(const int32_t &appIndex);
     int32_t GetAppIndex() const;
 
@@ -1606,6 +1633,12 @@ public:
     void SetInnerPriorityNotificationType(const std::string &priorityNotificationType);
 
     std::string GetPriorityNotificationType() const;
+
+    bool IsPriorityNotification() const;
+
+    void SetAllPriorityByBundle(bool isAllPriorityByBundle);
+
+    bool IsAllPriorityByBundle() const;
 
     void SetPriorityNotificationSign(uint32_t priorityNotificationSign);
 
@@ -1687,6 +1720,14 @@ private:
         const NotificationConstant::ReminderFlag &bit,
         const bool status,
         std::shared_ptr<NotificationFlags> &flag);
+    void SetFlagBitOnDevices(
+        const NotificationConstant::ReminderFlag &bit,
+        const bool status,
+        const std::set<std::string> &unaffectDevice,
+        const std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> &flagsOfDevices,
+        bool skipCurrentDevice);
+    bool MarshallingPriorityNotificationFields(Parcel &parcel) const;
+    bool ReadPriorityNotificationFieldsFromParcel(Parcel &parcel);
     std::string GetLiveViewStatusKey();
     void AddConsumedDevices(const std::string &deviceType);
     bool IsConsumedDevices(const std::string &deviceType);
@@ -1795,6 +1836,8 @@ private:
     std::shared_ptr<NotificationTrigger> notificationTrigger_ {};
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
     std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
+    std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> priorityNotificationFlagsOfDevices_ {};
+    bool isAllPriorityByBundle_ {false};
     std::shared_ptr<NotificationGroupInfo> groupInfo_ {};
 
     uint32_t publishDelayTime_ {0};

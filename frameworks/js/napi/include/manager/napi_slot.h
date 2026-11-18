@@ -174,11 +174,15 @@ struct ParametersInfoSetSlotFlagsByBundle {
     NotificationBundleOption option;
     uint32_t slotFlags;
     napi_ref callback = nullptr;
+    bool hasNotificationType = false;
+    int32_t notificationType = 0;
 };
 
 struct ParametersInfoGetSlotFlagsByBundle {
     NotificationBundleOption option;
     napi_ref callback = nullptr;
+    bool hasNotificationType = false;
+    int32_t notificationType = 0;
 };
 
 struct AsyncCallbackInfoSetSlotFlagsByBundle {

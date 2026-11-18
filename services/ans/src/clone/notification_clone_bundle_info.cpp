@@ -25,6 +25,7 @@ namespace {
 constexpr const char *BUNDLE_INFO_NAME = "name";
 constexpr const char *BUNDLE_INFO_APP_INDEX = "index";
 constexpr const char *BUNDLE_INFO_SLOT_FLAGS = "slotFlags";
+constexpr const char *BUNDLE_INFO_PRIORITY_SLOT_FLAGS = "prioritySlotFlags";
 constexpr const char *BUNDLE_INFO_SHOW_BADGE = "badge";
 constexpr const char *BUNDLE_INFO_POP_DIALOG = "popDialog";
 constexpr const char *BUNDLE_INFO_ENABLE_NOTIFICATION = "enable";
@@ -80,6 +81,16 @@ void NotificationCloneBundleInfo::SetSlotFlags(const uint32_t &slotFlags)
 uint32_t NotificationCloneBundleInfo::GetSlotFlags() const
 {
     return slotFlags_;
+}
+
+void NotificationCloneBundleInfo::SetPrioritySlotFlags(const uint32_t &slotFlags)
+{
+    prioritySlotFlags_ = slotFlags;
+}
+
+uint32_t NotificationCloneBundleInfo::GetPrioritySlotFlags() const
+{
+    return prioritySlotFlags_;
 }
 
 void NotificationCloneBundleInfo::SetIsShowBadge(const bool &isShowBadge)
@@ -286,6 +297,7 @@ void NotificationCloneBundleInfo::ToJson(nlohmann::json &jsonObject) const
     jsonObject[BUNDLE_INFO_NAME] = bundleName_;
     jsonObject[BUNDLE_INFO_APP_INDEX] = appIndex_;
     jsonObject[BUNDLE_INFO_SLOT_FLAGS] = slotFlags_;
+    jsonObject[BUNDLE_INFO_PRIORITY_SLOT_FLAGS] = prioritySlotFlags_;
     jsonObject[BUNDLE_INFO_SHOW_BADGE] = isShowBadge_ ? 1 : 0;
     jsonObject[BUNDLE_INFO_POP_DIALOG] = hasPoppedDialog_ ? 1 : 0;
     int32_t state = static_cast<int32_t>(isEnabledNotification_);
@@ -388,6 +400,10 @@ void NotificationCloneBundleInfo::FromJson(const nlohmann::json &jsonObject)
     if (jsonObject.contains(BUNDLE_INFO_SLOT_FLAGS) && jsonObject[BUNDLE_INFO_SLOT_FLAGS].is_number()) {
         slotFlags_ = jsonObject.at(BUNDLE_INFO_SLOT_FLAGS).get<uint32_t>();
     }
+    if (jsonObject.contains(BUNDLE_INFO_PRIORITY_SLOT_FLAGS) &&
+        jsonObject[BUNDLE_INFO_PRIORITY_SLOT_FLAGS].is_number()) {
+        prioritySlotFlags_ = jsonObject.at(BUNDLE_INFO_PRIORITY_SLOT_FLAGS).get<uint32_t>();
+    }
     if (jsonObject.contains(BUNDLE_INFO_SHOW_BADGE) && jsonObject[BUNDLE_INFO_SHOW_BADGE].is_number()) {
         int32_t showBadge = jsonObject.at(BUNDLE_INFO_SHOW_BADGE).get<int32_t>();
         isShowBadge_ = (showBadge == CONST_ENABLE_INT);
@@ -478,6 +494,7 @@ std::string NotificationCloneBundleInfo::Dump() const
             ", index = " + std::to_string(appIndex_) +
             ", uid = " + std::to_string(uid_) +
             ", slotFlags = " + std::to_string(slotFlags_) +
+            ", prioritySlotFlags = " + std::to_string(prioritySlotFlags_) +
             ", ShowBadge = " + std::to_string(isShowBadge_) +
             ", popDialog = " + std::to_string(hasPoppedDialog_) +
             ", isEnabled = " + std::to_string(static_cast<int32_t>(isEnabledNotification_)) +

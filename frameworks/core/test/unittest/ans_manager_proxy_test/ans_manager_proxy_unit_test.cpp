@@ -1546,7 +1546,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotFlagsAsBundleTest_0100, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
-    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -1567,7 +1567,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotFlagsAsBundleTest_0200, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = nullptr;
     uint32_t soltFlags = 0;
-    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_NE(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -1588,7 +1588,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotFlagsAsBundleTest_0300, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = nullptr;
     uint32_t soltFlags = 0;
-    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_NE(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -1611,7 +1611,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotFlagsAsBundleTest_0400, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
-    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_EQ(ERR_OK, result);
     EXPECT_NE(ERR_OK, soltFlags);
 }
@@ -1634,7 +1634,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotFlagsAsBundleTest_0500, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
-    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -1658,7 +1658,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotFlagsAsBundleTest_0600, Function | Medi
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
     uint32_t res = 1;
-    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_EQ(res, result);
 }
 
@@ -1681,7 +1681,7 @@ HWTEST_F(AnsManagerProxyUnitTest, GetSlotFlagsAsBundleTest_0700, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
-    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->GetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_EQ(IPC_READ_ERROR, result);
 }
 
@@ -1702,7 +1702,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSlotFlagsAsBundleTest_0100, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
-    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -1723,7 +1723,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSlotFlagsAsBundleTest_0200, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = nullptr;
     uint32_t soltFlags = 0;
-    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_NE(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -1744,7 +1744,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSlotFlagsAsBundleTest_0300, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = nullptr;
     uint32_t soltFlags = 0;
-    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_NE(ERR_ANS_PARCELABLE_FAILED, result);
 }
 
@@ -1767,7 +1767,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSlotFlagsAsBundleTest_0400, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
-    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_EQ(ERR_OK, result);
     EXPECT_EQ(ERR_OK, soltFlags);
 }
@@ -1790,7 +1790,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSlotFlagsAsBundleTest_0500, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
-    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_EQ(DEAD_OBJECT, result);
 }
 
@@ -1814,7 +1814,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSlotFlagsAsBundleTest_0600, Function | Medi
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
     uint32_t res = 1;
-    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_EQ(res, result);
 }
 
@@ -1837,7 +1837,7 @@ HWTEST_F(AnsManagerProxyUnitTest, SetSlotFlagsAsBundleTest_0700, Function | Medi
     ASSERT_NE(nullptr, proxy);
     sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption();
     uint32_t soltFlags = 0;
-    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags);
+    int32_t result = proxy->SetSlotFlagsAsBundle(bundleOption, soltFlags, 0);
     EXPECT_EQ(ERR_OK, result);
 }
 

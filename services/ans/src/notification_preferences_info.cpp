@@ -210,6 +210,16 @@ void NotificationPreferencesInfo::BundleInfo::SetSlotFlags(uint32_t slotFlags)
     slotFlags_ = slotFlags;
 }
 
+uint32_t NotificationPreferencesInfo::BundleInfo::GetPrioritySlotFlags()
+{
+    return prioritySlotFlags_;
+}
+
+void NotificationPreferencesInfo::BundleInfo::SetPrioritySlotFlags(uint32_t slotFlags)
+{
+    prioritySlotFlags_ = slotFlags;
+}
+
 void NotificationPreferencesInfo::BundleInfo::RemoveAllSlots()
 {
     slots_.clear();
@@ -565,6 +575,9 @@ void SetCloneBundleBasicInfo(NotificationPreferencesInfo::BundleInfo& bundle,
     cloneBundleInfo.SetUid(bundle.GetBundleUid());
     cloneBundleInfo.SetBundleName(bundle.GetBundleName());
     cloneBundleInfo.SetSlotFlags(bundle.GetSlotFlags());
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    cloneBundleInfo.SetPrioritySlotFlags(bundle.GetPrioritySlotFlags());
+#endif
     cloneBundleInfo.SetIsShowBadge(bundle.GetIsShowBadge());
     cloneBundleInfo.SetHasPoppedDialog(bundle.GetHasPoppedDialog());
     cloneBundleInfo.SetEnableNotification(bundle.GetEnableNotification());

@@ -24,6 +24,8 @@ namespace NotificationNapi {
 const int32_t ADD_SLOT_MAX_PARA = 2;
 const int32_t ADD_SLOTS_MAX_PARA = 2;
 const int32_t SET_SLOT_AS_BUNDLE_MAX_PARA = 3;
+const int32_t SET_SLOT_FLAGS_BY_BUNDLE_MAX_PARA = 4;
+const int32_t GET_SLOT_FLAGS_BY_BUNDLE_MAX_PARA = 3;
 const int32_t GET_SLOT_MAX_PARA = 2;
 const int32_t GET_SLOT_NUM_AS_BUNDLE_MAX_PARA = 2;
 const int32_t GET_SLOTS_AS_BUNDLE_MAX_PARA = 2;
@@ -185,11 +187,15 @@ struct ParametersInfoSetSlotFlagsByBundle {
     NotificationBundleOption option;
     uint32_t slotFlags;
     napi_ref callback = nullptr;
+    bool hasNotificationType = false;
+    int32_t notificationType = 0;
 };
 
 struct ParametersInfoGetSlotFlagsByBundle {
     NotificationBundleOption option;
     napi_ref callback = nullptr;
+    bool hasNotificationType = false;
+    int32_t notificationType = 0;
 };
 
 struct AsyncCallbackInfoSetSlotFlagsByBundle {
@@ -473,13 +479,70 @@ napi_value ParseParametersGetSlotNumByBundle(
 }
 
 
+static bool ParseSetSlotFlagsNotificationTypeOrCallback(const napi_env &env, napi_value *argv, size_t argc,
+    ParametersInfoSetSlotFlagsByBundle &params, napi_value &result)
+    {
+        napi_valuetype valuetype = napi_undefined;
+        napi_status status = napi_typeof(env, argv[PARAM2], &valuetype);
+        if (status != napi_ok) {
+            result = nullptr;
+            return false;
+        }
+        if (valuetype == napi_number) {
+            // setSlotFlagsByBundle(bundle: BundleOption, slotFlags: long,
+            //     notificationType: SlotFlagsNotificationType)
+            int32_t notificationType = 0;
+            status = napi_get_value_int32(env, argv[PARAM2], &notificationType);
+            if (status != napi_ok) {
+                result = nullptr;
+                return false;
+            }
+            if (notificationType <
+                static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION) ||
+                notificationType >
+                static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION)) {
+                ANS_LOGE("NotificationType is invalid.");
+                std::string msg = "Incorrect parameter types."
+                    "The type of param must be enum SlotFlagsNotificationType.";
+                Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
+                result = nullptr;
+                return false;
+            }
+            params.hasNotificationType = true;
+            params.notificationType = notificationType;
+
+            // argv[3]: callback
+            if (argc >= SET_SLOT_FLAGS_BY_BUNDLE_MAX_PARA) {
+                status = napi_typeof(env, argv[PARAM3], &valuetype);
+                if (status != napi_ok) {
+                    result = nullptr;
+                    return false;
+                }
+                if (valuetype != napi_function) {
+                    ANS_LOGE("Callback is not function excute promise.");
+                    result = Common::NapiGetNull(env);
+                    return false;
+                }
+                napi_create_reference(env, argv[PARAM3], 1, &params.callback);
+            }
+        } else if (valuetype == napi_function) {
+            // setSlotFlagsByBundle(bundle: BundleOption, slotFlags: long, callback: AsyncCallback<void>)
+            napi_create_reference(env, argv[PARAM2], 1, &params.callback);
+        } else {
+            ANS_LOGE("Callback is not function excute promise.");
+            result = Common::NapiGetNull(env);
+            return false;
+        }
+        return true;
+    }
+
 napi_value ParseParametersSetSlotFlagsByBundle(
     const napi_env &env, const napi_callback_info &info, ParametersInfoSetSlotFlagsByBundle &params)
     {
         ANS_LOGD("ParseParametersSetSlotByBundle enter");
 
-        size_t argc = SET_SLOT_AS_BUNDLE_MAX_PARA;
-        napi_value argv[SET_SLOT_AS_BUNDLE_MAX_PARA] = {nullptr};
+        size_t argc = SET_SLOT_FLAGS_BY_BUNDLE_MAX_PARA;
+        napi_value argv[SET_SLOT_FLAGS_BY_BUNDLE_MAX_PARA] = {nullptr};
         napi_value thisVar = nullptr;
         napi_valuetype valuetype = napi_undefined;
         NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
@@ -511,19 +574,73 @@ napi_value ParseParametersSetSlotFlagsByBundle(
         params.slotFlags = slotFlags;
         ANS_LOGD("enter2");
 
-        // argv[2]:callback
+        // argv[2]: notificationType or callback
         if (argc >= SET_SLOT_AS_BUNDLE_MAX_PARA) {
-            NAPI_CALL(env, napi_typeof(env, argv[PARAM2], &valuetype));
-            if (valuetype != napi_function) {
-                ANS_LOGE("Callback is not function excute promise.");
-                return Common::NapiGetNull(env);
+            napi_value result = nullptr;
+            if (!ParseSetSlotFlagsNotificationTypeOrCallback(env, argv, argc, params, result)) {
+                return result;
             }
-        ANS_LOGD("ParseParametersSetSlotByBundle enter3");
-            napi_create_reference(env, argv[PARAM2], 1, &params.callback);
         }
+        ANS_LOGD("ParseParametersSetSlotByBundle enter3");
 
         ANS_LOGD("ParseParametersSetSlotByBundle out!");
         return Common::NapiGetNull(env);
+    }
+
+static bool ParseGetSlotFlagsNotificationTypeOrCallback(const napi_env &env, napi_value *argv, size_t argc,
+    ParametersInfoGetSlotFlagsByBundle &params, napi_value &result)
+    {
+        napi_valuetype valuetype = napi_undefined;
+        napi_status status = napi_typeof(env, argv[PARAM1], &valuetype);
+        if (status != napi_ok) {
+            result = nullptr;
+            return false;
+        }
+        if (valuetype == napi_number) {
+            // getSlotFlagsByBundle(bundle: BundleOption, notificationType: SlotFlagsNotificationType)
+            int32_t notificationType = 0;
+            status = napi_get_value_int32(env, argv[PARAM1], &notificationType);
+            if (status != napi_ok) {
+                result = nullptr;
+                return false;
+            }
+            if (notificationType <
+                static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION) ||
+                notificationType >
+                static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION)) {
+                ANS_LOGE("NotificationType is invalid.");
+                std::string msg = "Incorrect parameter types."
+                    "The type of param must be enum SlotFlagsNotificationType.";
+                Common::NapiThrowLegacy(env, ERROR_PARAM_INVALID, msg);
+                result = nullptr;
+                return false;
+            }
+            params.hasNotificationType = true;
+            params.notificationType = notificationType;
+
+            // argv[2]: callback
+            if (argc >= GET_SLOT_FLAGS_BY_BUNDLE_MAX_PARA) {
+                status = napi_typeof(env, argv[PARAM2], &valuetype);
+                if (status != napi_ok) {
+                    result = nullptr;
+                    return false;
+                }
+                if (valuetype != napi_function) {
+                    ANS_LOGE("Callback is not function excute promise.");
+                    result = Common::NapiGetNull(env);
+                    return false;
+                }
+                napi_create_reference(env, argv[PARAM2], 1, &params.callback);
+            }
+        } else if (valuetype == napi_function) {
+            // getSlotFlagsByBundle(bundle: BundleOption, callback: AsyncCallback<long>)
+            napi_create_reference(env, argv[PARAM1], 1, &params.callback);
+        } else {
+            ANS_LOGE("Callback is not function excute promise.");
+            result = Common::NapiGetNull(env);
+            return false;
+        }
+        return true;
     }
 
 napi_value ParseParametersGetSlotFlagsByBundle(
@@ -531,8 +648,8 @@ napi_value ParseParametersGetSlotFlagsByBundle(
     {
         ANS_LOGD("enter");
 
-        size_t argc = GET_SLOTS_AS_BUNDLE_MAX_PARA;
-        napi_value argv[GET_SLOTS_AS_BUNDLE_MAX_PARA] = {nullptr};
+        size_t argc = GET_SLOT_FLAGS_BY_BUNDLE_MAX_PARA;
+        napi_value argv[GET_SLOT_FLAGS_BY_BUNDLE_MAX_PARA] = {nullptr};
         napi_value thisVar = nullptr;
         napi_valuetype valuetype = napi_undefined;
         NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
@@ -557,14 +674,12 @@ napi_value ParseParametersGetSlotFlagsByBundle(
             return nullptr;
         }
 
-        // argv[1]:callback
+        // argv[1]: notificationType or callback
         if (argc >= GET_SLOTS_AS_BUNDLE_MAX_PARA) {
-            NAPI_CALL(env, napi_typeof(env, argv[PARAM1], &valuetype));
-            if (valuetype != napi_function) {
-                ANS_LOGE("Callback is not function excute promise.");
-                return Common::NapiGetNull(env);
+            napi_value result = nullptr;
+            if (!ParseGetSlotFlagsNotificationTypeOrCallback(env, argv, argc, params, result)) {
+                return result;
             }
-            napi_create_reference(env, argv[PARAM1], 1, &params.callback);
         }
 
         return Common::NapiGetNull(env);

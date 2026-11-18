@@ -59,6 +59,7 @@ struct AsyncCallbackSlotInfo {
     sptr<Notification::NotificationSlot> slot;
     uint64_t slotNum = 0;
     uint32_t slotFlags = 0;
+    int32_t notificationType = 0;
 };
 
 struct AsyncCallbackSlotBundleInfo {
@@ -76,7 +77,11 @@ void HandleSlotFunctionCallbackComplete1(ani_env* env, arkts::concurrency_helper
 void HandleSlotBundleCallbackComplete(ani_env* env, arkts::concurrency_helpers::WorkStatus status, void* data);
 
 ani_object AniGetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_object callback);
+ani_object AniGetSlotFlagsByBundleWithType(
+    ani_env *env, ani_object obj, ani_enum_item notificationType, ani_object callback);
 ani_object AniSetSlotFlagsByBundle(ani_env *env, ani_object obj, ani_long slotFlags, ani_object callback);
+ani_object AniSetSlotFlagsByBundleWithType(ani_env *env, ani_object obj, ani_long slotFlags,
+    ani_enum_item notificationType, ani_object callback);
 ani_object AniGetSlotsByBundle(ani_env *env, ani_object bundleOption, ani_object callback);
 ani_object AniIsNotificationSlotEnabled(ani_env *env, ani_object bundleOption, ani_enum_item type,
     ani_object callback);

@@ -167,8 +167,8 @@ public:
     MOCK_METHOD2(SetBadgeNumber, ErrCode(int32_t, const std::string&));
     MOCK_METHOD2(SetBadgeNumberByBundle, ErrCode(const sptr<NotificationBundleOption>&, int32_t));
     MOCK_METHOD2(SetBadgeNumberForDhByBundle, ErrCode(const sptr<NotificationBundleOption>&, int32_t));
-    MOCK_METHOD2(GetSlotFlagsAsBundle, ErrCode(const sptr<NotificationBundleOption>&, uint32_t&));
-    MOCK_METHOD2(SetSlotFlagsAsBundle, ErrCode(const sptr<NotificationBundleOption>&, uint32_t));
+    MOCK_METHOD3(GetSlotFlagsAsBundle, ErrCode(const sptr<NotificationBundleOption>&, uint32_t&, int32_t));
+    MOCK_METHOD3(SetSlotFlagsAsBundle, ErrCode(const sptr<NotificationBundleOption>&, uint32_t, int32_t));
     MOCK_METHOD1(GetNotificationSettings, ErrCode(uint32_t&));
     MOCK_METHOD1(GetAllNotificationEnabledBundles, ErrCode(std::vector<NotificationBundleOption>&));
     MOCK_METHOD2(GetAllNotificationEnabledBundles,

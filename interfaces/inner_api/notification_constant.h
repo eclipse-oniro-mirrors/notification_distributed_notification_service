@@ -319,6 +319,11 @@ public:
         PUSH_RULE = 3,
     };
 
+    enum class SlotFlagsNotificationType {
+        NOTIFICATION = 0,
+        PRIORITY_NOTIFICATION = 1,
+    };
+
     static const int32_t DEFAULT_REASON_DELETE = 0;
 
     /**

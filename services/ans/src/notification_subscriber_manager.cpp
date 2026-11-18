@@ -1176,6 +1176,57 @@ bool NotificationSubscriberManager::IsSubscribedBysubscriber(
     return false;
 }
 
+static bool AdjustSubscribedFlags(const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record,
+    const sptr<Notification> &notificationStub)
+{
+#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
+    if (notificationStub == nullptr) {
+        ANS_LOGE("null notificationStub");
+        return false;
+    }
+    sptr<NotificationRequest> request = notificationStub->GetNotificationRequestPoint();
+    if (request == nullptr) {
+        ANS_LOGE("null request");
+        return false;
+    }
+    std::string deviceType = record->deviceType;
+    bool isPriorityNotification = request->IsPriorityNotification();
+    auto flagsMap = isPriorityNotification ? request->GetPriorityDeviceFlags() : request->GetDeviceFlags();
+    if (flagsMap != nullptr) {
+        auto flagIter = flagsMap->find(deviceType);
+        if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
+            request->SetFlags(flagIter->second);
+            ANS_LOGI("flagsFinal key=%{public}s flags=%{public}d isPriorityNotification=%{public}d dev=%{public}s",
+                request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags(),
+                isPriorityNotification, deviceType.c_str());
+        } else if (isPriorityNotification) {
+            auto currentIter = flagsMap->find(NotificationConstant::CURRENT_DEVICE_TYPE);
+            if (currentIter != flagsMap->end() && currentIter->second != nullptr) {
+                request->SetFlags(currentIter->second);
+            }
+        }
+    }
+#else
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    if (notificationStub == nullptr || notificationStub->GetNotificationRequestPoint() == nullptr) {
+        ANS_LOGE("null notificationStub");
+        return false;
+    }
+    sptr<NotificationRequest> request = notificationStub->GetNotificationRequestPoint();
+    if (request->IsPriorityNotification()) {
+        auto flagsMap = request->GetPriorityDeviceFlags();
+        if (flagsMap != nullptr) {
+            auto currentIter = flagsMap->find(NotificationConstant::CURRENT_DEVICE_TYPE);
+            if (currentIter != flagsMap->end() && currentIter->second != nullptr) {
+                request->SetFlags(currentIter->second);
+            }
+        }
+    }
+#endif
+#endif
+    return true;
+}
+
 sptr<Notification> NotificationSubscriberManager::GenerateSubscribedNotification(
     const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification,
     const std::string& voiceContent)
@@ -1192,27 +1243,9 @@ sptr<Notification> NotificationSubscriberManager::GenerateSubscribedNotification
     } else {
         notificationStub = new (std::nothrow) Notification(*notification);
     }
-#ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED
-    if (notificationStub == nullptr) {
-        ANS_LOGE("null notificationStub");
+    if (!AdjustSubscribedFlags(record, notificationStub)) {
         return nullptr;
     }
-    sptr<NotificationRequest> request = notificationStub->GetNotificationRequestPoint();
-    if (request == nullptr) {
-        ANS_LOGE("null request");
-        return nullptr;
-    }
-    std::string deviceType = record->deviceType;
-    auto flagsMap = request->GetDeviceFlags();
-    if (flagsMap != nullptr) {
-        auto flagIter = flagsMap->find(deviceType);
-        if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
-            request->SetFlags(flagIter->second);
-            ANS_LOGI("flagsFinal key=%{public}s flags=%{public}d dev=%{public}s",
-                request->GetBaseKey("").c_str(), request->GetFlags()->GetReminderFlags(), deviceType.c_str());
-        }
-    }
-#endif
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
     if (notificationStub == nullptr || notificationStub->GetNotificationRequestPoint() == nullptr) {
         ANS_LOGE("null notificationStub");

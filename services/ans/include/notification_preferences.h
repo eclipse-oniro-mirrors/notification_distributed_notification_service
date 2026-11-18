@@ -215,22 +215,28 @@ public:
     ErrCode SetTotalBadgeNums(const sptr<NotificationBundleOption> &bundleOption, const int32_t num);
 
     /**
-     * @brief Get slotFlags in the of bunlde from DB.
+     * @brief Get slotFlags of the specified notification type in the of bunlde from DB.
      *
      * @param bundleOption Indicates bunlde info label.
      * @param slotFlags Indicates to set soltFlags.
+     * @param notificationType Indicates the notification type the slotFlags apply to.
      * @return Return ERR_OK on success, others on failure.
      */
-    ErrCode GetNotificationSlotFlagsForBundle(const sptr<NotificationBundleOption> &bundleOption, uint32_t &slotFlags);
+    ErrCode GetNotificationSlotFlagsForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        uint32_t &slotFlags,
+        int32_t notificationType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION));
 
     /**
-     * @brief Get slotFlags in the of bunlde from DB.
+     * @brief Set slotFlags of the specified notification type in the of bunlde to DB.
      *
      * @param bundleOption Indicates bunlde info label.
      * @param slotFlags Indicates to get slotFlags.
+     * @param notificationType Indicates the notification type the slotFlags apply to.
      * @return Return ERR_OK on success, others on failure.
      */
-    ErrCode SetNotificationSlotFlagsForBundle(const sptr<NotificationBundleOption> &bundleOption, uint32_t slotFlags);
+    ErrCode SetNotificationSlotFlagsForBundle(const sptr<NotificationBundleOption> &bundleOption,
+        uint32_t slotFlags,
+        int32_t notificationType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION));
 
     /**
      * @brief Get private notification enable in the of bunlde from DB.
@@ -868,6 +874,8 @@ public:
     template <typename T>
     ErrCode SaveBundleProperty(NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, const T &value);
+    template <typename T>
+    bool SaveEnableNotificationState(NotificationPreferencesInfo::BundleInfo &bundleInfo, const T &value);
     template <typename T>
     ErrCode GetBundleProperty(
         const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, T &value);

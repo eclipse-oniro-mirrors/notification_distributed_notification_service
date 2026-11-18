@@ -62,6 +62,7 @@ enum class BundleType {
     BUNDLE_POPPED_DIALOG_TYPE,
     BUNDLE_SLOTFLGS_TYPE,
     BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE,
+    BUNDLE_PRIORITY_SLOTFLGS_TYPE,
 };
 }  // namespace Notification
 }  // namespace OHOS
