@@ -16,7 +16,6 @@
 #include "advanced_notification_service.h"
 
 #include <cinttypes>
-#include <vector>
 
 #include "advanced_notification_priority_helper.h"
 #include "accesstoken_kit.h"
@@ -275,7 +274,6 @@ bool AdvancedNotificationService::SetEncryptToDB(const NotificationRequestDb &re
 void AdvancedNotificationService::TriggerSnoozeDelay()
 {
     int64_t current = NotificationAnalyticsUtil::GetCurrentTime();
-    std::vector<std::shared_ptr<NotificationRecord>> dueRecords;
     {
         std::lock_guard<ffrt::mutex> locker(snoozeNotificationMutex_);
         for (const auto &iter : snoozeDelayTimerList_) {
@@ -286,16 +284,13 @@ void AdvancedNotificationService::TriggerSnoozeDelay()
             if (request->GetSnoozeDelayTime() >= current) {
                 continue;
             }
+            SnoozeNotificationConsumed(iter);
             request->SetIsSnoozeTrigger(true);
             NotificationRequestDb requestDb = { .request = request, .bundleOption = iter->bundleOption};
             if (!SetEncryptToDB(requestDb)) {
                 ANS_LOGE("Persist snooze triggered state to DB failed");
             }
-            dueRecords.push_back(iter);
         }
-    }
-    for (const auto &record : dueRecords) {
-        notificationSvrQueue_.SyncSubmit([this, record]() { SnoozeNotificationConsumed(record); });
     }
 
     SetNextSnoozeTimer(current);
