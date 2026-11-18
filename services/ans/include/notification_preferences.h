@@ -243,6 +243,19 @@ public:
         NotificationConstant::SWITCH_STATE &state);
 
     /**
+     * @brief Batch query the recorded enable notification states of the given bundles from DB
+     *        with an IN-keys query, without a whole-bundle load or cache fill per bundle. For
+     *        boot time bundle scans to avoid a per-bundle DB query.
+     *
+     * @param bundleOptions Indicates the bundles to query.
+     * @param bundleStates Indicates the loaded map from bundle option to switch state; bundles
+     *        without an enable record are absent from the map.
+     * @return Return ERR_OK on success, others on failure.
+     */
+    ErrCode GetBatchBundleEnableStates(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> &bundleStates);
+
+    /**
      * @brief Set private notification enable in the of bunlde from DB.
      *
      * @param bundleOption Indicates bunlde info label.

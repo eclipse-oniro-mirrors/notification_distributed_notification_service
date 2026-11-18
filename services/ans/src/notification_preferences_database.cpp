@@ -1055,6 +1055,56 @@ bool NotificationPreferencesDatabase::GetBundleInfo(const sptr<NotificationBundl
     return true;
 }
 
+bool NotificationPreferencesDatabase::GetBundleEnableStatesFromDisturbeDB(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> &bundleStates)
+{
+    if (!CheckRdbStore()) {
+        ANS_LOGE("null RdbStore");
+        return false;
+    }
+    // Bundle records are stored in per-user DB tables, so group the enable keys by user.
+    std::unordered_map<std::string, sptr<NotificationBundleOption>> keyToOption;
+    std::map<int32_t, std::vector<std::string>> userKeys;
+    for (const auto &bundleOption : bundleOptions) {
+        if (bundleOption == nullptr) {
+            continue;
+        }
+        int32_t userId = -1;
+        if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId)
+            != ERR_OK || userId < 0) {
+            ANS_LOGE("Failed to get valid userId from uid, uid: %{public}d", bundleOption->GetUid());
+            return false;
+        }
+        std::string enableKey = GenerateBundleKey(bundleOption->GetBundleName() +
+            std::to_string(bundleOption->GetUid()), KEY_BUNDLE_ENABLE_NOTIFICATION);
+        keyToOption[enableKey] = bundleOption;
+        userKeys[userId].push_back(enableKey);
+    }
+    for (const auto &userKey : userKeys) {
+        std::unordered_map<std::string, std::string> results;
+        int32_t queryResult = rdbDataManager_->QueryDataInKeys(userKey.second, results, userKey.first);
+        if (queryResult != NativeRdb::E_OK && queryResult != NativeRdb::E_EMPTY_VALUES_BUCKET) {
+            ANS_LOGE("Query enable states failed, userId: %{public}d", userKey.first);
+            return false;
+        }
+        for (const auto &result : results) {
+            auto option = keyToOption.find(result.first);
+            if (option == keyToOption.end()) {
+                continue;
+            }
+            int32_t switchValue = AnsCommonUtils::StringToInt(result.second);
+            if (switchValue < static_cast<int32_t>(NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF) ||
+                switchValue > static_cast<int32_t>(NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON)) {
+                ANS_LOGE("Invalid switch state: %{public}d", switchValue);
+                continue;
+            }
+            bundleStates[option->second] = static_cast<NotificationConstant::SWITCH_STATE>(switchValue);
+        }
+    }
+    return true;
+}
+
 bool NotificationPreferencesDatabase::RemoveAllDataFromDisturbeDB()
 {
     ANS_LOGD("called");

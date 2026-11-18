@@ -1934,84 +1934,120 @@ ErrCode AdvancedNotificationService::UpdateNotificationSwitchState(
     const sptr<NotificationBundleOption> &bundleOption, const AppExecFwk::BundleInfo &bundleInfo)
 {
     ANS_LOGD("called");
-    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_9);
-    NotificationConstant::SWITCH_STATE targetState = bundleInfo.applicationInfo.allowEnableNotification ?
-        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
-        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     // Silent auth locked bundles are always kept on during install/scan initialization, so that
     // apps installed after the enterprise config also get the locked-on switch.
-    if (AdvancedNotificationService::GetInstance()->IsBundleSilentAuthLocked(bundleOption)) {
-        return AdvancedNotificationService::GetInstance()->ForceEnableSilentAuthBundle(bundleOption);
+    if (IsBundleSilentAuthLocked(bundleOption)) {
+        return ForceEnableSilentAuthBundle(bundleOption);
     }
-    bool enable = false;
     NotificationConstant::SWITCH_STATE currentState = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
-    ErrCode result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
-        bundleOption, currentState);
-    if (result != ERR_OK) {
+    const bool hasRecord = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
+        bundleOption, currentState) == ERR_OK;
+    return UpdateBundleSwitchStateInner(bundleOption, bundleInfo.applicationInfo.allowEnableNotification,
+        hasRecord, currentState);
+}
+
+ErrCode AdvancedNotificationService::UpdateBundleSwitchStateInner(const sptr<NotificationBundleOption> &bundleOption,
+    bool systemDefaultEnable, bool hasRecord, NotificationConstant::SWITCH_STATE currentState)
+{
+    const NotificationConstant::SWITCH_STATE targetState = systemDefaultEnable ?
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON :
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    // The recorded state (user modified, or already matching the declared default) needs no change.
+    const bool needUpgrade = hasRecord && currentState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF &&
+        targetState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON;
+    if (hasRecord && !needUpgrade) {
+        return ERR_OK;
+    }
+    HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_7, EventBranchId::BRANCH_9);
+    message.Message(bundleOption->GetBundleName() + "_" + std::to_string(bundleOption->GetUid())
+        + "_st" + std::to_string(static_cast<int32_t>(targetState)));
+    if (needUpgrade) {
+        ANS_LOGI("Updating system default state for %{public}s : %{public}d -> %{public}d",
+            bundleOption->GetBundleName().c_str(), static_cast<int32_t>(currentState),
+            static_cast<int32_t>(targetState));
+        message.BranchId(BRANCH_10);
+    } else {
         ANS_LOGI("Initialize %{public}s to %{public}s",
             bundleOption->GetBundleName().c_str(),
             (targetState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ?
                 "SYSTEM_DEFAULT_ON" : "SYSTEM_DEFAULT_OFF");
-        message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid())
-            + "_st" + std::to_string(static_cast<int32_t>(targetState)));
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
-        enable = (targetState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) ? true : false;
-        if (enable) {
-            return AdvancedNotificationService::GetInstance()->SetDefaultNotificationEnabled(
-                bundleOption, enable);
-        } else {
-            return NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(
-                bundleOption, targetState);
+    }
+    NotificationAnalyticsUtil::ReportModifyEvent(message);
+    if (targetState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) {
+        return SetDefaultNotificationEnabled(bundleOption, true);
+    }
+    return NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleOption, targetState);
+}
+
+std::vector<sptr<NotificationBundleOption>> AdvancedNotificationService::CollectDefaultEnableBundles(
+    const std::vector<AppExecFwk::BundleInfo> &bundleInfos)
+{
+    std::vector<sptr<NotificationBundleOption>> defaultEnableOptions;
+    for (const auto &bundleInfo : bundleInfos) {
+        sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
+            bundleInfo.applicationInfo.bundleName, bundleInfo.uid);
+        if (bundleOption == nullptr) {
+            ANS_LOGE("New bundle option obj error! bundlename:%{public}s",
+                bundleInfo.applicationInfo.bundleName.c_str());
+            continue;
         }
+        // Silent auth locked bundles are always kept on during install/scan initialization, so
+        // that apps installed after the enterprise config also get the locked-on switch.
+        if (IsBundleSilentAuthLocked(bundleOption)) {
+            ErrCode forceResult = ForceEnableSilentAuthBundle(bundleOption);
+            if (forceResult != ERR_OK) {
+                ANS_LOGE("Force enable silent auth bundle error. code: %{public}d", forceResult);
+            }
+            continue;
+        }
+        if (!bundleInfo.applicationInfo.allowEnableNotification) {
+            continue;
+        }
+        defaultEnableOptions.push_back(bundleOption);
+    }
+    return defaultEnableOptions;
+}
+
+void AdvancedNotificationService::InitDefaultEnableBundle(const sptr<NotificationBundleOption> &bundleOption,
+    const std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> &recordedStates)
+{
+    bool hasRecord = false;
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    auto iter = recordedStates.find(bundleOption);
+    if (iter != recordedStates.end()) {
+        hasRecord = true;
+        state = iter->second;
+    }
+    ErrCode result = UpdateBundleSwitchStateInner(bundleOption, true, hasRecord, state);
+    if (result != ERR_OK) {
+        ANS_LOGE("Update switch state error. code: %{public}d", result);
     }
 
-    if (currentState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF &&
-        targetState == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON) {
-        ANS_LOGI("Updating system default state for %{public}s : %{public}d -> %{public}d",
-            bundleOption->GetBundleName().c_str(),
-            static_cast<int32_t>(currentState),
-            static_cast<int32_t>(targetState));
-        message.Message(bundleOption->GetBundleName() + "_" +std::to_string(bundleOption->GetUid())
-            + "_st" + std::to_string(static_cast<int32_t>(targetState))).BranchId(BRANCH_10);
-        NotificationAnalyticsUtil::ReportModifyEvent(message);
-        enable = true;
-        return AdvancedNotificationService::GetInstance()->SetDefaultNotificationEnabled(
-            bundleOption, enable);
+    if (!hasRecord) {
+        result = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
+        if (result != ERR_OK) {
+            ANS_LOGE("Set badge enable error! code: %{public}d", result);
+        }
+        SetSlotFlagsTrustlistsAsBundle(bundleOption);
     }
-    return ERR_OK;
 }
 
 void AdvancedNotificationService::InitNotificationEnableList()
 {
     auto task = [&]() {
-        std::vector<AppExecFwk::BundleInfo> bundleInfos = GetBundlesOfActiveUser();
-        for (const auto &bundleInfo : bundleInfos) {
-            sptr<NotificationBundleOption> bundleOption = new (std::nothrow) NotificationBundleOption(
-                bundleInfo.applicationInfo.bundleName, bundleInfo.uid);
-            if (bundleOption == nullptr) {
-                ANS_LOGE("New bundle option obj error! bundlename:%{public}s",
-                    bundleInfo.applicationInfo.bundleName.c_str());
-                continue;
-            }
-            bool isExist = false;
-            NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
-            ErrCode result = NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(
-                bundleOption, state);
-            if (result == ERR_OK) {
-                isExist = true;
-            }
-            result = UpdateNotificationSwitchState(bundleOption, bundleInfo);
-            if (result != ERR_OK) {
-                ANS_LOGE("Update switch state error. code: %{public}d", result);
-            }
-
-            if (bundleInfo.applicationInfo.allowEnableNotification && !isExist) {
-                result = NotificationPreferences::GetInstance()->SetShowBadge(bundleOption, true);
-                if (result != ERR_OK) {
-                    ANS_LOGE("Set badge enable error! code: %{public}d", result);
-                }
-                SetSlotFlagsTrustlistsAsBundle(bundleOption);
-            }
+        // Restart stage: the preference cache is empty, and bundles not enabled by default need
+        // no switch record work, so only the default-enabled bundles are collected and batch
+        // queried below, instead of a DB query per bundle.
+        std::vector<sptr<NotificationBundleOption>> defaultEnableOptions =
+            CollectDefaultEnableBundles(GetBundlesOfActiveUser());
+        std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> recordedStates;
+        if (NotificationPreferences::GetInstance()->GetBatchBundleEnableStates(
+            defaultEnableOptions, recordedStates) != ERR_OK) {
+            ANS_LOGE("Batch query bundle enable states failed, skip switch state init this boot.");
+            return;
+        }
+        for (const auto &bundleOption : defaultEnableOptions) {
+            InitDefaultEnableBundle(bundleOption, recordedStates);
         }
     };
     notificationSvrQueue_.RunOnce(task);

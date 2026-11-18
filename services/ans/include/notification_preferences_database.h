@@ -475,6 +475,19 @@ public:
         NotificationPreferencesInfo::BundleInfo &bundleInfo);
 
     /**
+     * @brief Batch query the enable notification states of the given bundles from DB with an
+     *        IN-keys query, without a whole-bundle load per bundle. Keys are routed to the
+     *        per-user DB tables internally.
+     *
+     * @param bundleOptions Indicates the bundles to query.
+     * @param bundleStates Indicates the loaded map from bundle option to switch state; bundles
+     *        without an enable record are absent from the map.
+     * @return Return true on success, false on failure.
+     */
+    bool GetBundleEnableStatesFromDisturbeDB(const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+        std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> &bundleStates);
+
+    /**
      * @brief Query whether there is a agent relationship between the two apps.
      *
      * @param agentBundleName The bundleName of the agent app.
