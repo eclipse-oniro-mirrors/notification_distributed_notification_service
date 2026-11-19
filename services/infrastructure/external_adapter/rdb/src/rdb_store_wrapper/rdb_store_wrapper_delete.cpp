@@ -143,15 +143,7 @@ int32_t NtfRdbStoreWrapper::CleanExperDataTimer(const std::vector<int32_t> &user
         absRdbPredicates.SetWhereArgs({std::to_string(minTimestamp)});
 
         int affectedRows = -1;
-        int ret = NativeRdb::E_OK;
-        {
-            std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-            if (rdbStore_ == nullptr) {
-                ANS_LOGE("notification rdb is null");
-                return NativeRdb::E_ERROR;
-            }
-            ret = rdbStore_->Delete(affectedRows, absRdbPredicates);
-        }
+        int ret = rdbStore_->Delete(affectedRows, absRdbPredicates);
         if (ret != NativeRdb::E_OK) {
             ANS_LOGE("NtfRdbStoreWrapper::CleanExperDataTimer fail: %{public}d", ret);
             continue;
