@@ -29,6 +29,7 @@
 #undef private
 #undef protected
 #include "notification_live_view_content.h"
+#include "notification_long_text_content.h"
 #include "notification_content.h"
 #include "bool_wrapper.h"
 #include "int_wrapper.h"
@@ -1195,6 +1196,33 @@ HWTEST_F(SmartReminderCenterTest, GetCollaborationBundleInfo_100, Function | Sma
         appInfo, bundleResourceInfo);
     ASSERT_FALSE(result);
     MockBundleManager::MockBundleInterfaceResult(0);
+}
+
+/**
+ * @tc.name: GetReminderAffecteds_900
+ * @tc.desc: Test GetReminderAffecteds with non local live view content
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartReminderCenterTest, GetReminderAffecteds_900, Function | SmallTest | Level1)
+{
+    map<string, vector<shared_ptr<ReminderAffected>>> reminderFilterDevice{};
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    auto longTextContent = std::make_shared<NotificationLongTextContent>("longText");
+    auto content = std::make_shared<NotificationContent>(longTextContent);
+    request->SetContent(content);
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    auto affected = std::make_shared<ReminderAffected>();
+    affected->status_ = "0111";
+    std::string slotType = to_string(static_cast<int32_t>(NotificationConstant::SlotType::SOCIAL_COMMUNICATION));
+    std::string contentKey = slotType + "#" +
+        to_string(static_cast<int32_t>(NotificationContent::Type::LONG_TEXT));
+    reminderFilterDevice[contentKey] = { affected };
+    vector<shared_ptr<ReminderAffected>> reminderAffecteds;
+
+    smartReminderCenter_->GetReminderAffecteds(reminderFilterDevice, request, reminderAffecteds);
+
+    ASSERT_EQ(reminderAffecteds.size(), 1);
+    ASSERT_EQ(reminderAffecteds[0]->status_, "0111");
 }
 }   //namespace Notification
 }   //namespace OHOS

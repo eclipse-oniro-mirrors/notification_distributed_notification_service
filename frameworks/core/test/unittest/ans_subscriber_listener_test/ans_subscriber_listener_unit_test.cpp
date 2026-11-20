@@ -578,6 +578,18 @@ HWTEST_F(SubscriberListenerTest, OnBadgeEnabledChanged_0200, Function | MediumTe
 }
 
 /**
+ * @tc.name      : OnBadgeEnabledChanged_0300
+ * @tc.desc      : Test OnBadgeEnabledChanged null callbackData
+ */
+HWTEST_F(SubscriberListenerTest, OnBadgeEnabledChanged_0300, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnBadgeEnabledChanged(nullptr);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
  * @tc.name      : OnEnabledPriorityChanged_0100
  * @tc.desc      : Test OnEnabledPriorityChanged invalid data
  */
@@ -787,6 +799,104 @@ HWTEST_F(SubscriberListenerTest, OnNotificationSwitchChanged_0300, Function | Me
     std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
     sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
     ErrCode result = listener->OnNotificationSwitchChanged(nullptr);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnConsumed_0600
+ * @tc.desc      : Test OnConsumed null notification
+ */
+HWTEST_F(SubscriberListenerTest, OnConsumed_0600, Function | MediumTest | Level1)
+{
+    sptr<NotificationSortingMap> notificationMap = new (std::nothrow) NotificationSortingMap();
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnConsumed(nullptr, notificationMap);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnCanceled_0500
+ * @tc.desc      : Test OnCanceled null notification
+ */
+HWTEST_F(SubscriberListenerTest, OnCanceled_0500, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnCanceled(nullptr, nullptr, 0);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnUpdated_0300
+ * @tc.desc      : Test OnUpdated null notification map
+ */
+HWTEST_F(SubscriberListenerTest, OnUpdated_0300, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnUpdated(nullptr);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnDoNotDisturbDateChange_0300
+ * @tc.desc      : Test OnDoNotDisturbDateChange null date
+ */
+HWTEST_F(SubscriberListenerTest, OnDoNotDisturbDateChange_0300, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnDoNotDisturbDateChange(nullptr);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnEnabledNotificationChanged_0300
+ * @tc.desc      : Test OnEnabledNotificationChanged null callbackData
+ */
+HWTEST_F(SubscriberListenerTest, OnEnabledNotificationChanged_0300, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnEnabledNotificationChanged(nullptr);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnBadgeChanged_0300
+ * @tc.desc      : Test OnBadgeChanged null badgeData
+ */
+HWTEST_F(SubscriberListenerTest, OnBadgeChanged_0300, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnBadgeChanged(nullptr);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnApplicationInfoNeedChanged_0300
+ * @tc.desc      : Test OnApplicationInfoNeedChanged null info
+ */
+HWTEST_F(SubscriberListenerTest, OnApplicationInfoNeedChanged_0300, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    ErrCode result = listener->OnApplicationInfoNeedChanged(nullptr);
+    EXPECT_EQ(result, ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name      : OnOperationResponse_0300
+ * @tc.desc      : Test OnOperationResponse null operationInfo
+ */
+HWTEST_F(SubscriberListenerTest, OnOperationResponse_0300, Function | MediumTest | Level1)
+{
+    std::shared_ptr<NotificationSubscriber> subscriber = std::make_shared<TestSubscriber>();
+    sptr<IAnsSubscriber> listener = new (std::nothrow) SubscriberListener(subscriber);
+    int32_t funcResult = 0;
+    ErrCode result = listener->OnOperationResponse(nullptr, funcResult);
     EXPECT_EQ(result, ERR_INVALID_DATA);
 }
 }  // namespace Notification

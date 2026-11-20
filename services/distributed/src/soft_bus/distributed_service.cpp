@@ -396,6 +396,10 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
     const DistributedDeviceInfo& peerDevice)
 {
     std::function<void()> task = std::bind([request, peerDevice, this]() {
+        if (request == nullptr) {
+            ANS_LOGE("DistributedService::OnConsumed: null request");
+            return;
+        }
         if (!OnConsumedSetFlags(request, peerDevice)) {
             return;
         }

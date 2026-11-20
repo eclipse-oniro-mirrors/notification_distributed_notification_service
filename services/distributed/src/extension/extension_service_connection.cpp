@@ -237,6 +237,15 @@ void ExtensionServiceConnection::OnAbilityConnectDone(
     if (deathRecipient_ == nullptr) {
         ANS_LOGE("Failed to create RemoteDeathRecipient instance");
     }
+    if (remoteObject == nullptr || deathRecipient_ == nullptr) {
+        ANS_LOGE("Invalid connection, remoteObject or deathRecipient is null, disconnect it");
+        // AMS has established the connection before this callback, so it must be disconnected explicitly.
+        // Otherwise Close() would take the HandleDisconnectedState path and the connection record, the
+        // IAbilityConnection reference and the bound extension process would be left behind.
+        state_ = ExtensionServiceConnectionState::CONNECTED;
+        AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(this);
+        return;
+    }
     state_ = ExtensionServiceConnectionState::CONNECTED;
     remoteObject_ = remoteObject;
     remoteObject->AddDeathRecipient(deathRecipient_);

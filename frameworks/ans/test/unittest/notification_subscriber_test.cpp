@@ -253,5 +253,84 @@ HWTEST_F(NotificationSubscriberTest, OnNotificationSwitchChanged_00005, Function
     EXPECT_EQ(result->GetEnableStatus(), NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
 }
 
+/**
+ * @tc.name: SubscriberImplOnConsumed_00001
+ * @tc.desc: Test OnConsumed with null notification.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberTest, SubscriberImplOnConsumed_00001, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    sptr<NotificationSubscriber::SubscriberImpl> impl = subscriber.GetImpl();
+    ASSERT_NE(impl, nullptr);
+    EXPECT_EQ(impl->OnConsumed(nullptr, nullptr), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: SubscriberImplOnCanceled_00001
+ * @tc.desc: Test OnCanceled with null notification.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberTest, SubscriberImplOnCanceled_00001, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    sptr<NotificationSubscriber::SubscriberImpl> impl = subscriber.GetImpl();
+    ASSERT_NE(impl, nullptr);
+    EXPECT_EQ(impl->OnCanceled(nullptr, nullptr, 0), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: SubscriberImplOnUpdated_00001
+ * @tc.desc: Test OnUpdated with null notification map.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberTest, SubscriberImplOnUpdated_00001, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    sptr<NotificationSubscriber::SubscriberImpl> impl = subscriber.GetImpl();
+    ASSERT_NE(impl, nullptr);
+    EXPECT_EQ(impl->OnUpdated(nullptr), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: SubscriberImplOnDoNotDisturbDateChange_00001
+ * @tc.desc: Test OnDoNotDisturbDateChange with null date.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberTest, SubscriberImplOnDoNotDisturbDateChange_00001, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    sptr<NotificationSubscriber::SubscriberImpl> impl = subscriber.GetImpl();
+    ASSERT_NE(impl, nullptr);
+    EXPECT_EQ(impl->OnDoNotDisturbDateChange(nullptr), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: SubscriberImplOnOperationResponse_00001
+ * @tc.desc: Test OnOperationResponse with null operation info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberTest, SubscriberImplOnOperationResponse_00001, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    sptr<NotificationSubscriber::SubscriberImpl> impl = subscriber.GetImpl();
+    ASSERT_NE(impl, nullptr);
+    int32_t funcResult = 0;
+    EXPECT_EQ(impl->OnOperationResponse(nullptr, funcResult), ERR_INVALID_DATA);
+}
+
+/**
+ * @tc.name: SubscriberImplOnBadgeEnabledChanged_00001
+ * @tc.desc: Test OnBadgeEnabledChanged with null callback data.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NotificationSubscriberTest, SubscriberImplOnBadgeEnabledChanged_00001, Function | SmallTest | Level1)
+{
+    MockNotificationSubscriber subscriber;
+    sptr<NotificationSubscriber::SubscriberImpl> impl = subscriber.GetImpl();
+    ASSERT_NE(impl, nullptr);
+    EXPECT_EQ(impl->OnBadgeEnabledChanged(nullptr), ERR_INVALID_DATA);
+}
+
 }  // namespace Notification
 }  // namespace OHOS

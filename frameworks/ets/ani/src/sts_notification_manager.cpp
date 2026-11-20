@@ -547,7 +547,7 @@ void StsNotificationLocalLiveViewSubscriber::OnResponse(int32_t notificationId, 
     ANS_LOGD("OnResponse call");
     std::shared_ptr<StsNotificationLocalLiveViewSubscriber> self = AcquireSelfFromRegistry();
     if (self == nullptr) {
-        ANS_LOGW("OnResponse dropped, subscriber %{public}p not in registry", this);
+        ANS_LOGW("OnResponse dropped, subscriber not in registry");
         return;
     }
     // The strong reference must cover the whole callback: it keeps the subscriber

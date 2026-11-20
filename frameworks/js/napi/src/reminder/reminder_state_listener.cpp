@@ -66,6 +66,15 @@ JsReminderStateCallback::JsReminderStateCallback(napi_env env, napi_ref jsCallba
         ThreadSafeCallBack, &threadSafeFunction_);
 }
 
+JsReminderStateCallback::~JsReminderStateCallback()
+{
+    if (threadSafeFunction_ != nullptr) {
+        napi_release_threadsafe_function(threadSafeFunction_, napi_tsfn_release);
+        threadSafeFunction_ = nullptr;
+    }
+    callbackRef_ = nullptr;
+}
+
 void JsReminderStateCallback::OnReminderState(const std::vector<ReminderState>& states)
 {
     if (napiEnv_ == nullptr || callbackRef_ == nullptr || reminderStateCb_ == nullptr) {
@@ -130,6 +139,10 @@ napi_value JsReminderStateListener::RegisterReminderStateCallback(napi_env env, 
     asyncCallbackInfo->info.deferred = deferred;
     napi_create_reference(env, jsCallback, 1, &asyncCallbackInfo->jsCallbackRef);
     if (!RegisterReminderStateCallbackInner(env, asyncCallbackInfo)) {
+        if (asyncCallbackInfo->jsCallbackRef != nullptr) {
+            napi_delete_reference(env, asyncCallbackInfo->jsCallbackRef);
+            asyncCallbackInfo->jsCallbackRef = nullptr;
+        }
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_PARAM_ERROR);
         return nullptr;
     }
@@ -190,6 +203,11 @@ napi_value JsReminderStateListener::UnRegisterReminderStateCallback(napi_env env
         napi_create_reference(env, jsCallback, 1, &asyncCallbackInfo->jsCallbackRef);
     }
     if (!UnRegisterReminderStateCallbackInner(env, asyncCallbackInfo)) {
+        if (asyncCallbackInfo->hasRef && asyncCallbackInfo->jsCallbackRef != nullptr) {
+            napi_delete_reference(env, asyncCallbackInfo->jsCallbackRef);
+            asyncCallbackInfo->jsCallbackRef = nullptr;
+            asyncCallbackInfo->hasRef = false;
+        }
         ReminderCommon::HandleErrCode(env, ERR_REMINDER_PARAM_ERROR);
         return nullptr;
     }
@@ -213,6 +231,10 @@ napi_value JsReminderStateListener::UnRegisterReminderStateCallback(napi_env env
             ANSR_LOGI("UnRegisterReminderStateCallback napi_create_async_work complete start");
             auto asyncCallbackinfo = reinterpret_cast<AsyncRegisterCallbackInfo*>(data);
             std::unique_ptr<AsyncRegisterCallbackInfo> callbackPtr { asyncCallbackinfo };
+            if (asyncCallbackinfo->hasRef && asyncCallbackinfo->jsCallbackRef != nullptr) {
+                napi_delete_reference(env, asyncCallbackinfo->jsCallbackRef);
+                asyncCallbackinfo->jsCallbackRef = nullptr;
+            }
             ReminderCommon::SetPromise(env, asyncCallbackinfo->info, NotificationNapi::Common::NapiGetNull(env));
             ANSR_LOGI("UnRegisterReminderStateCallback napi_create_async_work complete end");
         },

@@ -28,7 +28,12 @@ AdvancedAggregationDataRoamingObserver::~AdvancedAggregationDataRoamingObserver(
 void AdvancedAggregationDataRoamingObserver::OnChange()
 {
     std::string enable = "";
-    AdvancedNotificationService::GetInstance()->GetUnifiedGroupInfoFromDb(enable);
+    auto instance = AdvancedNotificationService::GetInstance();
+    if (instance == nullptr) {
+        ANS_LOGE("AdvancedNotificationService instance is null");
+        return;
+    }
+    instance->GetUnifiedGroupInfoFromDb(enable);
     ANS_LOGI("GetUnifiedGroupInfoFromDb enter, enable:%{public}s", enable.c_str());
 }
 } // namespace Telephony

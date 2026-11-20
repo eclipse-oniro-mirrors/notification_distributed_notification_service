@@ -348,8 +348,7 @@ void SubscriberInstance::ClearEnvCallback(void *data)
 void SubscriberInstance::UnsubscribeOnEnvCleanup()
 {
     auto subscriber = std::static_pointer_cast<SubscriberInstance>(shared_from_this());
-    ANS_LOGW("Env destroyed before unsubscribe, try to Remove subscriber asynchronously, subscriber: %{public}p",
-        subscriber.get());
+    ANS_LOGW("Env destroyed before unsubscribe, try to Remove subscriber asynchronously");
     ffrt::submit([subscriber]() {
         if (!AddDeletingSubscriber(subscriber)) {
             ANS_LOGW("Subscriber is deleting, skip Remove subscriber on env cleanup");
@@ -371,8 +370,7 @@ void SubscriberInstance::CallThreadSafeFunc(void* data)
         int32_t eventType = (dataWorker != nullptr) ? static_cast<int32_t>(dataWorker->type) : -1;
         delete dataWorker;
         dataWorker = nullptr;
-        ANS_LOGW("In-flight event dropped for null tsfn_, subscriber: %{public}p, eventType: %{public}d",
-            this, eventType);
+        ANS_LOGW("In-flight event dropped for null tsfn_, eventType: %{public}d", eventType);
         return;
     }
     napi_acquire_threadsafe_function(tsfn_);
@@ -426,7 +424,7 @@ void SubscriberInstance::OnCanceled(const std::shared_ptr<OHOS::Notification::No
         callbackInfo = canceCallbackInfo_;
     }
     if (callbackInfo.ref == nullptr || callbackInfo.env == nullptr) {
-        ANS_LOGW("OnCanceled dropped for invalid callback, subscriber: %{public}p", this);
+        ANS_LOGW("OnCanceled dropped for invalid callback");
         return;
     }
 

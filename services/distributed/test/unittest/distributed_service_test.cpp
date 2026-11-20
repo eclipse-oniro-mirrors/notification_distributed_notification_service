@@ -312,6 +312,28 @@ HWTEST_F(DistributedServiceTest, DistributedServiceTest_StatusChange_0100, Funct
     DistributedService::GetInstance().HandleStatusChange(changeInfo);
     EXPECT_NE(0, MockInvokeCounting::GetInstance().MockGetCount());
 }
+
+/**
+ * @tc.name      : DistributedServiceTest_OnConsumedSetFlags_0100
+ * @tc.desc      : test OnConsumedSetFlags with null notification.
+ */
+HWTEST_F(DistributedServiceTest, DistributedServiceTest_OnConsumedSetFlags_0100, Function | SmallTest | Level1)
+{
+    DistributedDeviceInfo device;
+    std::shared_ptr<Notification> request = nullptr;
+    EXPECT_FALSE(DistributedService::GetInstance().OnConsumedSetFlags(request, device));
+}
+
+/**
+ * @tc.name      : DistributedServiceTest_OnConsumedSetFlags_0200
+ * @tc.desc      : test OnConsumedSetFlags with null notification request point.
+ */
+HWTEST_F(DistributedServiceTest, DistributedServiceTest_OnConsumedSetFlags_0200, Function | SmallTest | Level1)
+{
+    DistributedDeviceInfo device;
+    auto request = std::make_shared<Notification>("001", nullptr);
+    EXPECT_FALSE(DistributedService::GetInstance().OnConsumedSetFlags(request, device));
+}
 #endif
 /**
  * @tc.name      : DistributedServiceTest_01200

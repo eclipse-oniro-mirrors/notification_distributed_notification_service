@@ -26,7 +26,7 @@ using OnReminderStateCb = std::function<void(napi_env, napi_value, std::vector<N
 class JsReminderStateCallback : public Notification::ReminderStateCallback {
 public:
     JsReminderStateCallback(napi_env env, napi_ref jsCallbackRef, OnReminderStateCb callback);
-    ~JsReminderStateCallback() = default;
+    ~JsReminderStateCallback();
 
     void OnReminderState(const std::vector<Notification::ReminderState>& states) override;
 
