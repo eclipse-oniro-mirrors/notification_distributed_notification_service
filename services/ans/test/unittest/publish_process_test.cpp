@@ -238,6 +238,40 @@ HWTEST_F(PublishProcessTest, LivePublishNotificationByApp_00003, Function | Smal
 
 
 /**
+ * @tc.name: Test PublishNotificationByApp_00004
+ * @tc.desc: Test systemApp publish notification with isInProgress true, isInProgress should keep true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PublishProcessTest, PublishNotificationByApp_00004, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetInProgress(true);
+
+    CommonNotificationPublishProcess progress;
+    auto res = progress.PublishNotificationByApp(request);
+    ASSERT_EQ(request->IsInProgress(), true);
+}
+
+/**
+ * @tc.name: Test LivePublishNotificationByApp_00004
+ * @tc.desc: Test systemApp publish live view with isInProgress true, isInProgress should keep true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PublishProcessTest, LivePublishNotificationByApp_00004, Function | SmallTest | Level1)
+{
+    MockGetTokenTypeFlag(ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    sptr<NotificationRequest> request(new NotificationRequest(1));
+    request->SetInProgress(true);
+
+    LivePublishProcess progress;
+    auto res = progress.PublishNotificationByApp(request);
+    ASSERT_EQ(request->IsInProgress(), true);
+}
+
+/**
  * @tc.name: Test LiveCheckLocalLiveViewSubscribed_00001
  * @tc.desc: Test LiveCheckLocalLiveViewSubscribed_00001
  * @tc.type: FUNC

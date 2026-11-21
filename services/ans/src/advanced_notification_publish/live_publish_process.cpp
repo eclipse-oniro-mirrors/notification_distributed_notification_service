@@ -85,6 +85,18 @@ AnsStatus LivePublishProcess::PublishNotificationByApp(const sptr<NotificationRe
         request->SetInProgress(false);
     }
 
+    if (request->IsInProgress() && AccessTokenHelper::IsSystemApp()) {
+        std::string bundleName = GetClientBundleName();
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_37, EventBranchId::BRANCH_0)
+            .SlotType(static_cast<int32_t>(request->GetSlotType()))
+            .NotificationId(request->GetNotificationId())
+            .Message("systemApp publish liveView isInProgress, bundleName:" + bundleName +
+                ", slotType:" + std::to_string(static_cast<int32_t>(request->GetSlotType())) +
+                ", contentType:" + std::to_string(static_cast<int32_t>(request->GetNotificationType())) +
+                ", notificationId:" + std::to_string(request->GetNotificationId()));
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
+
     ansStatus = CommonPublishProcess(request);
     if (!ansStatus.Ok()) {
         return ansStatus;

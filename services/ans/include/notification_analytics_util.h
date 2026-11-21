@@ -62,6 +62,8 @@ enum EventSceneId {
     SCENE_33 = 33,
     SCENE_34 = 34,
     SCENE_35 = 35,
+    SCENE_36 = 36,
+    SCENE_37 = 37,
 };
 
 enum EventBranchId {

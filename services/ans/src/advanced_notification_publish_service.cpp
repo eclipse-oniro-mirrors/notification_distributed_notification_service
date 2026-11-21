@@ -803,6 +803,22 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
         return ansStatus;
     }
 
+    if (request->IsInProgress()) {
+        HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_16)
+            .SlotType(static_cast<int32_t>(request->GetSlotType()))
+            .NotificationId(request->GetNotificationId())
+            .Message("SA publish notification isInProgress, callerUid:" +
+                std::to_string(IPCSkeleton::GetCallingUid()) +
+                ", slotType:" + std::to_string(static_cast<int32_t>(request->GetSlotType())) +
+                ", contentType:" + std::to_string(static_cast<int32_t>(request->GetNotificationType())) +
+                ", notificationId:" + std::to_string(request->GetNotificationId()) +
+                ", creatorUid:" + std::to_string(request->GetCreatorUid()) +
+                ", creatorBundleName:" + request->GetCreatorBundleName() +
+                ", ownerUid:" + std::to_string(request->GetOwnerUid()) +
+                ", ownerBundleName:" + request->GetOwnerBundleName());
+        NotificationAnalyticsUtil::ReportModifyEvent(message);
+    }
+
     // SA not support sound
     if (!request->GetSound().empty()) {
         request->SetSound("");
