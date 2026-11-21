@@ -80,7 +80,7 @@ ErrCode AdvancedNotificationService::Subscribe(
             break;
         }
     } while (0);
-    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
+    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingAppUid(), info, errCode);
     return errCode;
 }
 
@@ -126,7 +126,7 @@ ErrCode AdvancedNotificationService::SubscribeNotification(
             break;
         }
     } while (0);
-    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
+    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingAppUid(), info, errCode);
     return errCode;
 }
 
@@ -134,7 +134,7 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &s
 {
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
-    int32_t callingUid = IPCSkeleton().GetCallingUid();
+    int32_t callingUid = IPCSkeleton().GetCallingAppUid();
     sptr<NotificationSubscribeInfo> sptrInfo = new (std::nothrow) NotificationSubscribeInfo();
     if (sptrInfo == nullptr) {
         ANS_LOGE("Failed to create sptrInfo");
@@ -170,7 +170,7 @@ ErrCode AdvancedNotificationService::SubscribeSelf(const sptr<IAnsSubscriber> &s
         }));
         ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Subscribe self.");
     }
-    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), sptrInfo, errCode);
+    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingAppUid(), sptrInfo, errCode);
     return errCode;
 }
 
@@ -185,7 +185,7 @@ ErrCode AdvancedNotificationService::Unsubscribe(
     NOTIFICATION_HITRACE(HITRACE_TAG_NOTIFICATION);
     ANS_LOGD("%{public}s", __FUNCTION__);
 
-    SendUnSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info);
+    SendUnSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingAppUid(), info);
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3);
     bool isSubsystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
     if (!isSubsystem && !AccessTokenHelper::IsSystemApp()) {

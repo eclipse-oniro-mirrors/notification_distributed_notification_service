@@ -1840,7 +1840,7 @@ HWTEST_F(AnsUtilsTest, GenerateBundleOption_00001, Function | SmallTest | Level1
 
     ASSERT_NE(bundleOption, nullptr);
     EXPECT_EQ(bundleOption->GetBundleName(), "");
-    EXPECT_EQ(bundleOption->GetUid(), IPCSkeleton::GetCallingUid());
+    EXPECT_EQ(bundleOption->GetUid(), IPCSkeleton::GetCallingAppUid());
     EXPECT_EQ(bundleOption->GetAppIndex(), 0);
 }
 

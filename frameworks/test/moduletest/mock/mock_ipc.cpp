@@ -27,6 +27,11 @@ int IPCSkeleton::GetCallingUid()
     return uid_;
 }
 
+int IPCSkeleton::GetCallingAppUid()
+{
+    return uid_;
+}
+
 int IPCSkeleton::GetCallingPid()
 {
     uid_ = 1;

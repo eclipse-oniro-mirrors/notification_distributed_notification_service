@@ -90,7 +90,7 @@ ErrCode NotificationLocalLiveViewSubscriberManager::AddLocalLiveViewSubscriber(
 
     sptr<NotificationBundleOption> bundleOption;
     std::string bundle;
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     int32_t callingPid = IPCSkeleton::GetCallingPid();
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager != nullptr) {

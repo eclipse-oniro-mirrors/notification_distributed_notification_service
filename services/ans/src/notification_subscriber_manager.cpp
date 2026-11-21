@@ -111,7 +111,7 @@ ErrCode NotificationSubscriberManager::AddSubscriber(const sptr<IAnsSubscriber> 
             return ERR_ANS_INNER_NO_MEMORY;
         }
     }
-    int32_t callingUid = IPCSkeleton().GetCallingUid();
+    int32_t callingUid = IPCSkeleton().GetCallingAppUid();
     std::string callingBuneldName = GetClientBundleName();
     subInfo->SetSubscriberBundleName(callingBuneldName);
     subInfo->SetSubscriberUid(callingUid);

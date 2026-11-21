@@ -74,7 +74,7 @@ ErrCode ReminderAgentService::PublishReminder(const ReminderRequest& reminder, i
         ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     std::string bundleName = ReminderBundleManagerHelper::GetInstance().GetBundleNameByUid(callingUid);
     bool isAllowUseReminder = false;
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
@@ -124,7 +124,7 @@ ErrCode ReminderAgentService::UpdateReminder(const int32_t reminderId, const Rem
         ANSR_LOGE("Failed to check permission: ohos.permission.PUBLISH_AGENT_REMINDER.");
         return ERR_REMINDER_PERMISSION_DENIED;
     }
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     std::string bundleName = ReminderBundleManagerHelper::GetInstance().GetBundleNameByUid(callingUid);
     ErrCode ret = InitReminderRequest(tarReminder, bundleName, callingUid);
     if (ret != ERR_OK) {
@@ -151,7 +151,7 @@ ErrCode ReminderAgentService::CancelReminder(const int32_t reminderId)
     if (nullptr == rdm) {
         return ERR_NO_INIT;
     }
-    ErrCode ret = rdm->CancelReminder(reminderId, IPCSkeleton::GetCallingUid());
+    ErrCode ret = rdm->CancelReminder(reminderId, IPCSkeleton::GetCallingAppUid());
     return ret;
 }
 
@@ -167,7 +167,7 @@ ErrCode ReminderAgentService::CancelAllReminders()
     if (nullptr == rdm) {
         return ERR_NO_INIT;
     }
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     std::string bundleName = ReminderBundleManagerHelper::GetInstance().GetBundleNameByUid(callingUid);
     int32_t userId = -1;
     AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
@@ -187,7 +187,7 @@ ErrCode ReminderAgentService::CancelReminderOnDisplay(const int32_t reminderId)
     if (nullptr == rdm) {
         return ERR_NO_INIT;
     }
-    ErrCode ret = rdm->CancelReminderOnDisplay(reminderId, IPCSkeleton::GetCallingUid());
+    ErrCode ret = rdm->CancelReminderOnDisplay(reminderId, IPCSkeleton::GetCallingAppUid());
     return ret;
 }
 
@@ -204,7 +204,7 @@ ErrCode ReminderAgentService::GetValidReminders(std::vector<ReminderRequestAdapt
         return ERR_NO_INIT;
     }
     reminders.clear();
-    rdm->GetValidReminders(IPCSkeleton::GetCallingUid(), reminders);
+    rdm->GetValidReminders(IPCSkeleton::GetCallingAppUid(), reminders);
     return ERR_OK;
 }
 
@@ -220,7 +220,7 @@ ErrCode ReminderAgentService::AddExcludeDate(const int32_t reminderId, const int
     if (nullptr == rdm) {
         return ERR_NO_INIT;
     }
-    ErrCode ret = rdm->AddExcludeDate(reminderId, date, IPCSkeleton::GetCallingUid());
+    ErrCode ret = rdm->AddExcludeDate(reminderId, date, IPCSkeleton::GetCallingAppUid());
     return ret;
 }
 
@@ -236,7 +236,7 @@ ErrCode ReminderAgentService::DelExcludeDates(const int32_t reminderId)
     if (nullptr == rdm) {
         return ERR_NO_INIT;
     }
-    ErrCode ret = rdm->DelExcludeDates(reminderId, IPCSkeleton::GetCallingUid());
+    ErrCode ret = rdm->DelExcludeDates(reminderId, IPCSkeleton::GetCallingAppUid());
     return ret;
 }
 
@@ -252,7 +252,7 @@ ErrCode ReminderAgentService::GetExcludeDates(const int32_t reminderId, std::vec
     if (nullptr == rdm) {
         return ERR_NO_INIT;
     }
-    ErrCode ret = rdm->GetExcludeDates(reminderId, IPCSkeleton::GetCallingUid(), dates);
+    ErrCode ret = rdm->GetExcludeDates(reminderId, IPCSkeleton::GetCallingAppUid(), dates);
     return ret;
 }
 
@@ -268,7 +268,7 @@ ErrCode ReminderAgentService::RegisterReminderState(const sptr<IRemoteObject>& o
     if (rdm == nullptr) {
         return ERR_NO_INIT;
     }
-    return rdm->RegisterReminderState(IPCSkeleton::GetCallingUid(), object);
+    return rdm->RegisterReminderState(IPCSkeleton::GetCallingAppUid(), object);
 }
 
 ErrCode ReminderAgentService::UnRegisterReminderState()
@@ -279,7 +279,7 @@ ErrCode ReminderAgentService::UnRegisterReminderState()
     if (rdm == nullptr) {
         return ERR_NO_INIT;
     }
-    return rdm->UnRegisterReminderState(IPCSkeleton::GetCallingUid());
+    return rdm->UnRegisterReminderState(IPCSkeleton::GetCallingAppUid());
 }
 
 void ReminderAgentService::TryPostDelayUnloadTask(const int64_t delayTime)

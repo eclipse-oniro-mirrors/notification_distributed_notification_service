@@ -136,7 +136,7 @@ sptr<NotificationBundleOption> AdvancedNotificationService::GenerateBundleOption
         }
     }
 
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     bundleOption = new (std::nothrow) NotificationBundleOption(bundle, uid);
     if (bundleOption == nullptr) {
         return nullptr;
@@ -840,7 +840,7 @@ void AdvancedNotificationService::OnDistributedPublish(
         return;
     }
 
-    const int32_t callingUid = IPCSkeleton::GetCallingUid();
+    const int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     notificationSvrQueue_.Submit(std::bind([this, deviceId, bundleName, request, activeUserId, callingUid]() {
         ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
@@ -923,7 +923,7 @@ void AdvancedNotificationService::OnDistributedUpdate(
         return;
     }
 
-    const int32_t callingUid = IPCSkeleton::GetCallingUid();
+    const int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     notificationSvrQueue_.Submit(std::bind([this, deviceId, bundleName, request, activeUserId, callingUid]() {
         ANS_LOGD("ffrt enter!");
         if (!CheckDistributedNotificationType(request)) {
@@ -1770,7 +1770,7 @@ AnsStatus AdvancedNotificationService::ResolveCreatorUserId(const sptr<Notificat
         }
     } else {
         if (OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(
-            IPCSkeleton::GetCallingUid(), userId) != ERR_OK || userId < 0) {
+            IPCSkeleton::GetCallingAppUid(), userId) != ERR_OK || userId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s", __FUNCTION__);
             return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
         }
@@ -1803,7 +1803,7 @@ AnsStatus AdvancedNotificationService::PrePublishNotificationBySa(const sptr<Not
         if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(
             request->GetOwnerUid(), ownerUserId) != ERR_OK || ownerUserId < 0) {
             ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d",
-                __FUNCTION__, IPCSkeleton::GetCallingUid());
+                __FUNCTION__, IPCSkeleton::GetCallingAppUid());
             return AnsStatus(ERR_ANS_INNER_GET_ACTIVE_USER_FAILED, "Failed to get valid userId from uid");
         }
         request->SetOwnerUserId(ownerUserId);

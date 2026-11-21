@@ -198,7 +198,7 @@ void DistributedBundleService::HandleSlaveBundleChange(DistributedBundleChangeTy
         AppExecFwk::BundleInfo bundleInfo;
         int32_t flag = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION);
         if (BundleManagerHelper::GetInstance()->GetBundleInfoV9(bundle->GetBundleName(), flag, bundleInfo, userId)) {
-            ANS_LOGI("Slave same bundle %{public}d %{public}s.", bundleInfo.applicationInfo.uid,
+            ANS_LOGI("Slave same bundle %{public}d %{public}s.", bundleInfo.applicationInfo.appUid,
                 bundle->GetBundleName().c_str());
             return;
         }

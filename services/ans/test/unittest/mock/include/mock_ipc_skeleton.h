@@ -59,6 +59,13 @@ public:
     static pid_t GetCallingUid();
 
     /**
+     * @brief Get calling application uid.
+     *
+     * @return Indicates the calling application uid.
+     */
+    static pid_t GetCallingAppUid();
+
+    /**
      * @brief Get the ID of local device.
      *
      * @return Indicates the ID of local device.

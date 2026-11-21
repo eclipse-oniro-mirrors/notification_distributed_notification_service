@@ -183,9 +183,9 @@ bool BundleResourceHelper::GetAllLauncherAbility(int32_t userId, std::set<int32_
         return false;
     }
     for (auto& abilityInfo : launcherAbilityInfos) {
-        launcherBundles.insert(abilityInfo.applicationInfo.uid);
+        launcherBundles.insert(abilityInfo.applicationInfo.appUid);
     }
- 
+
     launcherAbilityInfos.clear();
     ret = launcherService->GetAllLauncherAbility(userId, launcherAbilityInfos);
     if (ret != ERR_OK) {
@@ -193,7 +193,7 @@ bool BundleResourceHelper::GetAllLauncherAbility(int32_t userId, std::set<int32_
         return false;
     }
     for (auto& abilityInfo : launcherAbilityInfos) {
-        launcherBundles.insert(abilityInfo.applicationInfo.uid);
+        launcherBundles.insert(abilityInfo.applicationInfo.appUid);
     }
     ANS_LOGI("Get launcher ability %{public}zu.", launcherBundles.size());
     return true;

@@ -180,7 +180,7 @@ void AdvancedNotificationService::UpdateCollaborateTimerInfo(const std::shared_p
 
 ErrCode AdvancedNotificationService::SetCollaborateRequest(const sptr<NotificationRequest> &request)
 {
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     request->SetCreatorUid(uid);
     if (request->GetCreatorPid() == 0) {
@@ -400,7 +400,7 @@ ErrCode AdvancedNotificationService::IsNeedSilentInDoNotDisturbModeInner(
 {
     ANS_LOGD("called");
 
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (callingUid != NotificationConstant::ANS_UID &&
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGD("IsNeedSilentInDoNotDisturbMode CheckPermission failed.");
@@ -828,7 +828,7 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
         return AnsStatus(ERR_ANS_INNER_NO_MEMORY, "Failed to create bundleOption");
     }
     record->bundleOption->SetAppInstanceKey(request->GetAppInstanceKey());
-    int32_t ipcUid = IPCSkeleton::GetCallingUid();
+    int32_t ipcUid = IPCSkeleton::GetCallingAppUid();
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
     uint32_t hashCodeGeneratetype = NotificationPreferences::GetInstance()->GetHashCodeRule(
         ipcUid, request->GetReceiverUserId());
@@ -1507,7 +1507,7 @@ ErrCode AdvancedNotificationService::SetHashCodeRuleInner(const uint32_t type, c
         return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     if (uid != AVSEESAION_PID) {
         ANS_LOGE("Permission Denied.");
         message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).Append("No permission");

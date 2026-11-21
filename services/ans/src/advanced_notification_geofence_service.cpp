@@ -1030,7 +1030,7 @@ void AdvancedNotificationService::GeneratePublishNotificationParameter(const spt
     parameter.bundleOption = bundleOption;
     parameter.isUpdateByOwner = isUpdateByOwner;
     parameter.tokenCaller = IPCSkeleton::GetCallingTokenID();
-    parameter.uid = IPCSkeleton::GetCallingUid();
+    parameter.uid = IPCSkeleton::GetCallingAppUid();
     parameter.isSystemApp = AccessTokenHelper::IsSystemApp();
 }
 

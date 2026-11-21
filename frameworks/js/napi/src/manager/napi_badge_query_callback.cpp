@@ -375,7 +375,7 @@ void AsyncCompleteCallbackNapiBadgeNumberQuery(napi_env env, napi_status status,
 napi_value NapiOnBadgeNumberQuery(napi_env env, napi_callback_info info)
 {
     std::shared_ptr<JSBadgeQueryCallBack> objectInfo;
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     if (uid < 0) {
         ANS_LOGE("uid(%{public}d) is invalid", uid);
         Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);
@@ -482,7 +482,7 @@ void AsyncCompleteCallbackNapiOffBadgeNumberQuery(napi_env env, napi_status stat
 
 napi_value NapiOffBadgeNumberQuery(napi_env env, napi_callback_info info)
 {
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     if (uid < 0) {
         ANS_LOGE("uid(%{public}d) is invalid", uid);
         Common::NapiThrow(env, ERR_ANS_INNER_TASK_ERR);

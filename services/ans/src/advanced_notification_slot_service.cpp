@@ -705,7 +705,7 @@ uint32_t AdvancedNotificationService::GetDefaultSlotFlags(const sptr<Notificatio
             request->GetOwnerUid(), request->GetNotificationControlFlags());
     }
     if (((notificationControlFlags & NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG) != 0) &&
-        (request->GetCreatorUid() == IPCSkeleton::GetCallingUid() && request->GetCreatorBundleName().empty() &&
+        (request->GetCreatorUid() == IPCSkeleton::GetCallingAppUid() && request->GetCreatorBundleName().empty() &&
         request->GetOwnerBundleName().empty())) {
         return (flags |= NotificationConstant::ReminderFlag::BANNER_FLAG);
     }

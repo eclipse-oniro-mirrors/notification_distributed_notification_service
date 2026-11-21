@@ -207,7 +207,7 @@ ErrCode AdvancedNotificationService::SetDoNotDisturbDateByUser(const int32_t &us
         ANS_LOGE("Failed to create NotificationDoNotDisturbDate instance");
         return ERR_NO_MEMORY;
     }
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
 
     sptr<NotificationBundleOption> bundleOption = GenerateBundleOption();
     if (bundleOption == nullptr) {

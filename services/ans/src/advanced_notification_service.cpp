@@ -297,7 +297,7 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
             }
         }
 
-        int32_t agentUid = IPCSkeleton::GetCallingUid();
+        int32_t agentUid = IPCSkeleton::GetCallingAppUid();
         std::shared_ptr<NotificationBundleOption> agentBundle =
             std::make_shared<NotificationBundleOption>(bundle, agentUid);
         if (agentBundle == nullptr) {
@@ -333,7 +333,7 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
                 return AnsStatus(ERR_ANS_INNER_INVALID_UID, "ERR_ANS_INNER_INVALID_UID");
             }
             request->SetOwnerUid(uid);
-            int32_t agentUid = IPCSkeleton::GetCallingUid();
+            int32_t agentUid = IPCSkeleton::GetCallingAppUid();
             std::shared_ptr<NotificationBundleOption> agentBundle =
                 std::make_shared<NotificationBundleOption>(bundle, agentUid);
             if (agentBundle == nullptr) {
@@ -345,7 +345,7 @@ AnsStatus AdvancedNotificationService::PrepareNotificationRequest(const sptr<Not
         }
     }
 
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     int32_t pid = IPCSkeleton::GetCallingPid();
     request->SetCreatorUid(uid);
     request->SetCreatorPid(pid);
@@ -1129,7 +1129,7 @@ ErrCode AdvancedNotificationService::IsDoNotDisturbEnabled(int32_t userId, bool&
 {
     if (!AccessTokenHelper::CheckPermission("ohos.permission.GET_DONOTDISTURB_STATE")) {
         ANS_LOGE("Permission GET_DONOTDISTURB_STATE denied for uid=%{public}d, pid=%{public}d",
-            IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
+            IPCSkeleton::GetCallingAppUid(), IPCSkeleton::GetCallingPid());
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     std::lock_guard<ffrt::mutex> lock(notDisturbEnableStateMutex_);
@@ -1152,7 +1152,7 @@ ErrCode AdvancedNotificationService::IsNotifyAllowedInDoNotDisturb(int32_t userI
 {
     if (!AccessTokenHelper::CheckPermission("ohos.permission.GET_DONOTDISTURB_STATE")) {
         ANS_LOGE("Permission GET_DONOTDISTURB_STATE denied for uid=%{public}d, pid=%{public}d",
-            IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
+            IPCSkeleton::GetCallingAppUid(), IPCSkeleton::GetCallingPid());
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     std::lock_guard<ffrt::mutex> lock(notDisturbEnableStateMutex_);
@@ -1175,7 +1175,7 @@ ErrCode AdvancedNotificationService::IsNotifyAllowedInDoNotDisturb(int32_t userI
     if (bundleManager == nullptr) {
         return ERR_ANS_INNER_TASK_ERR;
     }
-    if (soundWhiteListString_.find(":" + std::to_string(IPCSkeleton::GetCallingUid()) + ",") != std::string::npos) {
+    if (soundWhiteListString_.find(":" + std::to_string(IPCSkeleton::GetCallingAppUid()) + ",") != std::string::npos) {
         isAllowed = true;
         ANS_LOGI("Currently app is in white list.");
     } else {
@@ -1198,7 +1198,7 @@ ErrCode AdvancedNotificationService::GetStatisticsByBundle(const std::vector<spt
     }
     if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission NOTIFICATION_CONTROLLER denied for uid=%{public}d, pid=%{public}d",
-            IPCSkeleton::GetCallingUid(), IPCSkeleton::GetCallingPid());
+            IPCSkeleton::GetCallingAppUid(), IPCSkeleton::GetCallingPid());
         message.Message("Permission denied.");
         NotificationAnalyticsUtil::ReportModifyEvent(
             message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_1));
@@ -2398,7 +2398,7 @@ ErrCode AdvancedNotificationService::RegisterPushCallback(
         return ERR_ANS_INNER_TASK_ERR;
     }
     NotificationConstant::SlotType slotType = notificationCheckRequest->GetSlotType();
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
 
     std::lock_guard<ffrt::mutex> lock(pushMutex_);
     auto checkIter = checkRequests_.find(slotType);
@@ -3287,7 +3287,7 @@ void AdvancedNotificationService::SetClassificationWithVoip(const sptr<Notificat
 ErrCode AdvancedNotificationService::ProxyForUnaware(const std::vector<int32_t>& uidList, bool isProxy)
 {
     std::unique_lock<std::shared_mutex> lock(proxyForUnawareUidSetMutex_);
-    if (IPCSkeleton::GetCallingUid() != RESOURCE_SCHEDULE_SERVICE_ID) {
+    if (IPCSkeleton::GetCallingAppUid() != RESOURCE_SCHEDULE_SERVICE_ID) {
         ANS_LOGE("notificationDisable is permission denied");
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }

@@ -453,7 +453,7 @@ void HaOperationMessage::ResetData()
 void NotificationAnalyticsUtil::MakeRequestBundle(const sptr<NotificationRequest>& request)
 {
     if (request->GetOwnerBundleName().empty() && request->GetCreatorBundleName().empty()) {
-        request->SetCreatorUid(IPCSkeleton::GetCallingUid());
+        request->SetCreatorUid(IPCSkeleton::GetCallingAppUid());
         request->SetCreatorBundleName(GetClientBundleName());
     }
 }
@@ -862,7 +862,7 @@ void __attribute__((weak)) NotificationAnalyticsUtil::ReportModifyEvent(
     NotificationAnalyticsUtil::SetCommonWant(want, message, extraInfo);
 
     std::string bundle;
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     if (bundleManager != nullptr) {
         bundle = bundleManager->GetBundleNameByUid(callingUid);

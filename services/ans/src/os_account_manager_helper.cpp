@@ -42,7 +42,7 @@ ErrCode OsAccountManagerHelper::GetOsAccountLocalIdFromUid(const int32_t uid, in
 
 ErrCode OsAccountManagerHelper::GetCurrentCallingUserId(int32_t &userId)
 {
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
     if (ret != ERR_OK) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_2)

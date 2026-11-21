@@ -44,7 +44,7 @@ inline std::string GetClientBundleNameByUid(int32_t callingUid)
 
 inline std::string __attribute__((weak)) GetClientBundleName()
 {
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     return GetClientBundleNameByUid(callingUid);
 }
 
@@ -120,7 +120,7 @@ inline OHOS::Notification::HaMetaMessage AddInformationInMessage(
     message += "reason:" + std::to_string(reason) + ".";
 
     std::string bundleName;
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     message += "uid:" + std::to_string(callingUid) + ".";
     bundleName = GetClientBundleNameByUid(callingUid);
 

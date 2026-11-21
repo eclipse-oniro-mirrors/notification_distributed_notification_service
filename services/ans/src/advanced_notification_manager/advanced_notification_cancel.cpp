@@ -217,7 +217,7 @@ ErrCode AdvancedNotificationService::CancelAsBundle(
     if (bundleOption->GetUid() != 0) {
         OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
     } else {
-        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingAppUid(), userId);
     }
     return CancelAsBundle(bundleOption, notificationId, userId);
 }
@@ -242,7 +242,7 @@ ErrCode AdvancedNotificationService::ResolveAgentUid(
     if (bundleOption->GetUid() != 0) {
         OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(bundleOption->GetUid(), userId);
     } else {
-        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingUid(), userId);
+        OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(IPCSkeleton::GetCallingAppUid(), userId);
     }
     int32_t uid = -1;
     if (bundleOption->GetUid() == DEFAULT_UID) {
@@ -318,7 +318,7 @@ ErrCode AdvancedNotificationService::CancelContinuousTaskNotification(const std:
         return ERR_ANS_INNER_NOT_SYSTEM_SERVICE;
     }
 
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     ErrCode result = ERR_OK;
     auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
         ANS_LOGD("called");
@@ -365,7 +365,7 @@ ErrCode AdvancedNotificationService::RemoveNotification(const sptr<NotificationB
         return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (callingUid != NotificationConstant::BROKER_UID &&
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         std::string message = "no acl controller permission.";
@@ -497,7 +497,7 @@ AnsStatus AdvancedNotificationService::RemoveAllNotificationsInner(const sptr<No
         return AnsStatus::NonSystemApp(message, EventSceneId::SCENE_6, EventBranchId::BRANCH_1);
     }
 
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (callingUid != NotificationConstant::ANS_UID &&
         !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         std::string message = "no acl permission.";
