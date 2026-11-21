@@ -1,0 +1,8 @@
+{
+  "boolean": [
+    {
+      "name": "ohos_module_variant_color",
+      "value": true
+    }
+  ]
+}

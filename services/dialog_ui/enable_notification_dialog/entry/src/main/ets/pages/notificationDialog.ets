@@ -34,7 +34,8 @@ const TAG = 'NotificationDialog_Service ';
 const mainWindowId = 'mainWindow';
 const permission: Record<string, Resource> = {
   'label': $r('app.string.group_label_notification'),
-  'icon': $r('app.media.ic_public_ring'),
+  'icon': $r('app.media.ic_public_bell'),
+  'iconBackground': $r('sys.color.font_emphasize'),
   'reason': $r('app.string.reason'),
 };
 const defaultUiMaterial = new uiMaterial.ImmersiveMaterial({style: uiMaterial.ImmersiveStyle.ULTRA_THICK});
@@ -120,9 +121,15 @@ struct PermissionDialog {
   @Builder
   DialogIconArea() {
     Row() {
-      Image(permission.icon)
-      .width(Constants.DIALOG_ICON_WIDTH)
-      .height(Constants.DIALOG_ICON_HEIGHT)
+      Stack() {
+        Circle()
+          .fill(permission.iconBackground)
+          .width(Constants.DIALOG_ICON_WIDTH)
+          .height(Constants.DIALOG_ICON_HEIGHT)
+        Image(permission.icon)
+          .width(Constants.DIALOG_ICON_WIDTH)
+          .height(Constants.DIALOG_ICON_HEIGHT)
+      }
       .margin({
         top: Constants.DIALOG_ICON_MARGIN_TOP
       })
@@ -223,7 +230,7 @@ struct PermissionDialog {
             await this.enableNotification(true);
           })
           .customizeButton()
-          .fontColor($r('app.color.button_text'))
+          .fontColor($r('sys.color.font_emphasize'))
       }
       .margin({
         top: Constants.BUTTON_MARGIN_TOP,
@@ -269,7 +276,7 @@ struct PermissionDialog {
             await this.enableNotification(true);
           })
           .singleRowButton()
-          .fontColor($r('app.color.button_text'))
+          .fontColor($r('sys.color.font_emphasize'))
           .margin({
             left: Constants.MARGIN_ZERO,
             right: Constants.MARGIN_ZERO
