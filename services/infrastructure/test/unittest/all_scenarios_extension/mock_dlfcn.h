@@ -29,6 +29,8 @@ struct MockDlfcnState {
     bool dlopenSuccess = false;
     std::map<std::string, bool> dlsymSuccessMap;
     int32_t checkLiveViewRightsResult = 0;
+    int32_t onCleanupResult = 0;
+    int32_t onCleanupCalled = 0;
     bool dlcloseCalled = false;
 };
 

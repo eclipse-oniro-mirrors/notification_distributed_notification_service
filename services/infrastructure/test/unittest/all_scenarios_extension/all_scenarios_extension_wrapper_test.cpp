@@ -140,6 +140,62 @@ HWTEST_F(AllScenariosExtensionWrapperTest, ErrorToExternal_CustomExtension_001, 
 }
 
 /**
+ * @tc.name: OnCleanup_001
+ * @tc.desc: Symbol available + extension returns ERR_OK. OnCleanup should
+ *           return ERR_OK and the extension entry should be invoked once.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AllScenariosExtensionWrapperTest, OnCleanup_001, Function | SmallTest | Level1)
+{
+    g_mockDlfcn.dlopenSuccess = true;
+    g_mockDlfcn.dlsymSuccessMap["OnCleanup"] = true;
+    g_mockDlfcn.onCleanupResult = ERR_OK;
+
+    auto& wrapper = AllScenariosExtensionWrapper::GetInstance();
+    wrapper.InitExtensionWrapper();
+
+    ErrCode result = wrapper.OnCleanup();
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(g_mockDlfcn.onCleanupCalled, 1);
+}
+
+/**
+ * @tc.name: OnCleanup_002
+ * @tc.desc: Symbol not available (dlsym returns nullptr, simulating old version .so).
+ *           OnCleanup should return ERR_OK (skip notify) without calling the entry.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AllScenariosExtensionWrapperTest, OnCleanup_002, Function | SmallTest | Level1)
+{
+    g_mockDlfcn.dlopenSuccess = true;
+    g_mockDlfcn.dlsymSuccessMap["OnCleanup"] = false;
+
+    auto& wrapper = AllScenariosExtensionWrapper::GetInstance();
+    wrapper.InitExtensionWrapper();
+
+    ErrCode result = wrapper.OnCleanup();
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(g_mockDlfcn.onCleanupCalled, 0);
+}
+
+/**
+ * @tc.name: OnCleanup_003
+ * @tc.desc: dlopen fails (.so not found). OnCleanup should return ERR_OK (skip notify).
+ * @tc.type: FUNC
+ */
+HWTEST_F(AllScenariosExtensionWrapperTest, OnCleanup_003, Function | SmallTest | Level1)
+{
+    g_mockDlfcn.dlopenSuccess = false;
+
+    auto& wrapper = AllScenariosExtensionWrapper::GetInstance();
+    wrapper.InitExtensionWrapper();
+
+    ErrCode result = wrapper.OnCleanup();
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(g_mockDlfcn.onCleanupCalled, 0);
+}
+
+/**
  * @tc.name: CloseExtensionWrapper_001
  * @tc.desc: Test CloseExtensionWrapper resets onNotifyDelayedNotification_ and
  *           onNotifyClearNotification_ together with other cached symbols.

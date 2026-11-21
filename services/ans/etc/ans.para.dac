@@ -12,3 +12,4 @@
 # limitations under the License.
 
 notification.ans.check.sa.permission=subfoundation:system:0711
+bootevent.ans.register.ready=subfoundation:system:0755

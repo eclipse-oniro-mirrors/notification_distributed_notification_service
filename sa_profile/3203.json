@@ -8,7 +8,7 @@
             "depend": [
                 3299
             ],
-            "extension": ["backup", "restore"],
+            "extension": ["backup", "restore", "sa_cleanup"],
             "depend_time_out": 60000,
             "distributed": false,
             "dump_level": 1,

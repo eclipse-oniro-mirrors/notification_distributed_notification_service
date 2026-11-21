@@ -94,6 +94,10 @@ void AllScenariosExtensionWrapper::InitExtensionWrapper()
     // no nullptr check and early return
     checkLiveViewRights_ =
         (CHECK_LIVEVIEW_RIGHTS)dlsym(ExtensionHandle_, "CheckLiveViewRights");
+
+    // Optional symbol: old version libliveview.z.so may not contain this symbol,
+    // no nullptr check and early return
+    onCleanup_ = (ON_CLEANUP)dlsym(ExtensionHandle_, "OnCleanup");
     ANS_LOGI("liveview all scenarios extension wrapper init success");
 }
 
@@ -109,6 +113,7 @@ void AllScenariosExtensionWrapper::CloseExtensionWrapper()
         getLiveViewConfigVersion_ = nullptr;
         notifyLiveViewEvent_ = nullptr;
         checkLiveViewRights_ = nullptr;
+        onCleanup_ = nullptr;
         onNotifyDelayedNotification_ = nullptr;
         onNotifyClearNotification_ = nullptr;
     }
@@ -202,6 +207,19 @@ ErrCode AllScenariosExtensionWrapper::CheckLiveViewRights(const sptr<Notificatio
     ErrCode result = checkLiveViewRights_(request);
     if (result != ERR_OK) {
         ANS_LOGE("CheckLiveViewRights check failed, result: %{public}d", result);
+    }
+    return result;
+}
+
+ErrCode AllScenariosExtensionWrapper::OnCleanup()
+{
+    if (onCleanup_ == nullptr) {
+        ANS_LOGW("OnCleanup symbol not loaded, skip cleanup notify");
+        return ERR_OK;
+    }
+    ErrCode result = onCleanup_();
+    if (result != ERR_OK) {
+        ANS_LOGE("OnCleanup failed, result: %{public}d", result);
     }
     return result;
 }

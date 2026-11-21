@@ -48,6 +48,8 @@ public:
     ErrCode OnNotifyClearNotification(const std::vector<std::string> &triggerKeys);
     typedef ErrCode (*CHECK_LIVEVIEW_RIGHTS)(const sptr<NotificationRequest> &request);
     ErrCode CheckLiveViewRights(const sptr<NotificationRequest> &request);
+    typedef ErrCode (*ON_CLEANUP)();
+    ErrCode OnCleanup();
 
 private:
     AllScenariosExtensionWrapper();
@@ -62,6 +64,7 @@ private:
     ON_NOTIFY_DELAYED_NOTIFICATION onNotifyDelayedNotification_ = nullptr;
     ON_NOTIFY_CLEAR_NOTIFICATION onNotifyClearNotification_ = nullptr;
     CHECK_LIVEVIEW_RIGHTS checkLiveViewRights_ = nullptr;
+    ON_CLEANUP onCleanup_ = nullptr;
 };
 
 #define ALL_SCENARIOS_EXTENTION_WRAPPER AllScenariosExtensionWrapper::GetInstance()

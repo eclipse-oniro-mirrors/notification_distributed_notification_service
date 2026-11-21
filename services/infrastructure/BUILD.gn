@@ -95,6 +95,7 @@ group("unittest") {
   testonly = true
   deps = [
     "external_adapter\rdb:ans_base_rdb_unittest",
+    "test/unittest/all_scenarios_extension:all_scenarios_extension_wrapper_test",
     "test/unittest/voice_extension:unittest",
   ]
 }
