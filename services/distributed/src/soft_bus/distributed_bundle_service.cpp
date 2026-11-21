@@ -24,7 +24,6 @@
 #include "notification_helper.h"
 #include "bundle_resource_helper.h"
 #include "distributed_device_service.h"
-#include "distributed_preference.h"
 #include "distributed_subscribe_service.h"
 #include "distributed_send_adapter.h"
 #include "notification_distributed_bundle.h"

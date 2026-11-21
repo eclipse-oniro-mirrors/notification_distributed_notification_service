@@ -37,6 +37,11 @@ SYMBOL_EXPORT void Shutdown()
     NotificationExtensionService::GetInstance().DestroyService();
 }
 
+SYMBOL_EXPORT void SetLifecycleDestroyTime(uint32_t destroyTime)
+{
+    NotificationExtensionService::GetInstance().SetLifecycleDestroyTime(destroyTime);
+}
+
 SYMBOL_EXPORT void Subscribe(
     const sptr<NotificationBundleOption> bundle, const std::vector<sptr<NotificationBundleOption>>& subscribedBundles)
 {

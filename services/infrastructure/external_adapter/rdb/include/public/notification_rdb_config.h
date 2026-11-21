@@ -46,6 +46,13 @@ struct NotificationRdbConfig {
 
     /** Database schema version number. Used for upgrade/downgrade management. */
     int32_t version { NtfRdbConstant::NOTIFICATION_RDB_VERSION };
+
+    /**
+     * Idle timeout (in milliseconds) after which the resident RdbStore handle is
+     * released. The database file is kept and the store is reopened on demand.
+     * A value <= 0 disables the idle release.
+     */
+    int64_t idleReleaseTimeoutMs { NtfRdbConstant::NOTIFICATION_RDB_IDLE_TIMEOUT_MS };
 };
 } // namespace OHOS::Notification::Infra
 

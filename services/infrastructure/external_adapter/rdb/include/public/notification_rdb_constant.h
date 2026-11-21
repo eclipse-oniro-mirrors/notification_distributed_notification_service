@@ -48,6 +48,14 @@ public:
     constexpr static int32_t NOTIFICATION_RDB_VERSION = 3;
 
     constexpr static int32_t NOTIFICATION_RDB_CRASH_CLEANUP_THRESHOLD = 2;
+
+    /**
+     * Idle timeout before the resident RdbStore handle is released to reduce the
+     * resident memory of the notification service. The database file is NOT deleted;
+     * the store is transparently reopened on the next access. Set a value <= 0 in
+     * NotificationRdbConfig to disable the idle release.
+     */
+    constexpr static int64_t NOTIFICATION_RDB_IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 };
 }  // namespace OHOS::Notification::Infra
 

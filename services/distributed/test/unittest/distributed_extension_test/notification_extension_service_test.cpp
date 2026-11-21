@@ -1067,5 +1067,36 @@ HWTEST_F(NotificationExtensionServiceTest, NotifyOnCancelMessages_CacheLimit_010
     EXPECT_EQ(connection->messages_.size(), maxCachedMessages);
     EXPECT_NE(connection->messages_.front().second.hashCodes, firstHashCodes);
 }
+
+/**
+ * @tc.name   : NotificationExtensionService_InitService_NoDestroyTime_0100
+ * @tc.number : NotificationExtensionService_InitService_NoDestroyTime_0100
+ * @tc.desc   : Verify InitService keeps the default destroy time when nothing was pushed.
+ */
+HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionService_InitService_NoDestroyTime_0100,
+    Function | SmallTest | Level1)
+{
+    auto &service = NotificationExtensionService::GetInstance();
+    service.hasLifecycleDestroyTime_ = false;
+    EXPECT_EQ(service.InitService(nullptr, nullptr, nullptr), 0);
+    service.DestroyService();
+}
+
+/**
+ * @tc.name   : NotificationExtensionService_SetLifecycleDestroyTime_0100
+ * @tc.number : NotificationExtensionService_SetLifecycleDestroyTime_0100
+ * @tc.desc   : Verify the destroy time pushed by ANS is stored and applied during InitService.
+ */
+HWTEST_F(NotificationExtensionServiceTest, NotificationExtensionService_SetLifecycleDestroyTime_0100,
+    Function | SmallTest | Level1)
+{
+    auto &service = NotificationExtensionService::GetInstance();
+    constexpr uint32_t destroyTime = 4000;
+    service.SetLifecycleDestroyTime(destroyTime);
+    EXPECT_TRUE(service.hasLifecycleDestroyTime_);
+    EXPECT_EQ(service.lifecycleDestroyTime_, destroyTime);
+    EXPECT_EQ(service.InitService(nullptr, nullptr, nullptr), 0);
+    service.DestroyService();
+}
 } // namespace Notification
 } // namespace OHOS

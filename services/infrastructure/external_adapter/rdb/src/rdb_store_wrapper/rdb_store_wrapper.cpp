@@ -14,7 +14,9 @@
  */
 #include "rdb_store_wrapper.h"
 
+#include <chrono>
 #include <sstream>
+#include "ffrt_inner.h"
 #include "ans_common_utils.h"
 #include "ans_const_define.h"
 #include "ans_log_wrapper.h"
@@ -28,6 +30,7 @@
 namespace OHOS::Notification::Infra {
 namespace {
 const int32_t NOTIFICATION_RDB_MAX_MEMORY_SIZE = 1;
+constexpr int64_t MICROSECONDS_PER_MILLISECOND = 1000;
 
 bool IsLegacyStatisticsTable(const std::string &name)
 {
@@ -48,11 +51,130 @@ NtfRdbStoreWrapper::NtfRdbStoreWrapper(const NotificationRdbConfig& config, cons
     ANS_LOGD("create notification rdb data manager");
 }
 
+NtfRdbStoreWrapper::~NtfRdbStoreWrapper()
+{
+    CancelIdleRelease();
+}
+
+int64_t NtfRdbStoreWrapper::NowMs()
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count();
+}
+
+void NtfRdbStoreWrapper::TouchStoreLocked()
+{
+    lastUsedTimeMs_ = NowMs();
+}
+
+bool NtfRdbStoreWrapper::EnsureRdbStoreLocked()
+{
+    if (rdbStore_ == nullptr) {
+        int32_t ret = InitRdbStore();
+        if (ret != NativeRdb::E_OK) {
+            ANS_LOGE("Failed to reopen notification rdb, ret=%{public}d", ret);
+            return false;
+        }
+        int32_t tableRet = InitCreatedTables();
+        if (tableRet != NativeRdb::E_OK && tableRet != NativeRdb::E_EMPTY_VALUES_BUCKET) {
+            ANS_LOGE("Failed to reload notification rdb tables, ret=%{public}d", tableRet);
+            rdbStore_ = nullptr;
+            return false;
+        }
+        ANS_LOGI("Notification rdb reopened after idle release");
+        ScheduleIdleRelease();
+    }
+    TouchStoreLocked();
+    return true;
+}
+
+void NtfRdbStoreWrapper::ScheduleIdleRelease()
+{
+    const int64_t timeoutMs = notificationRdbConfig_.idleReleaseTimeoutMs;
+    if (timeoutMs <= 0) {
+        return;
+    }
+    std::lock_guard<ffrt::mutex> lock(idleReleaseMutex_);
+    if (idleReleaseHandle_ != nullptr) {
+        return;
+    }
+    idleReleaseHandle_ = ffrt::submit_h([this, timeoutMs]() {
+        this->HandleIdleRelease(timeoutMs);
+    }, {}, {}, ffrt::task_attr().delay(timeoutMs * MICROSECONDS_PER_MILLISECOND)
+        .name("AnsRdbIdleRelease"));
+    if (idleReleaseHandle_ == nullptr) {
+        ANS_LOGW("Failed to arm notification rdb idle release timer");
+        return;
+    }
+    ANS_LOGI("Notification rdb idle release timer armed, timeout=%{public}lld ms",
+        static_cast<long long>(timeoutMs));
+}
+
+void NtfRdbStoreWrapper::CancelIdleRelease()
+{
+    std::lock_guard<ffrt::mutex> lock(idleReleaseMutex_);
+    if (idleReleaseHandle_ != nullptr) {
+        ffrt::skip(idleReleaseHandle_);
+        idleReleaseHandle_ = nullptr;
+    }
+}
+
+void NtfRdbStoreWrapper::HandleIdleRelease(int64_t idleMs)
+{
+    {
+        std::lock_guard<ffrt::mutex> lock(idleReleaseMutex_);
+        idleReleaseHandle_ = nullptr;
+    }
+    if (ReleaseIfIdle(idleMs) != NativeRdb::E_OK) {
+        // The store is still in use, check again later.
+        ScheduleIdleRelease();
+    }
+}
+
+int32_t NtfRdbStoreWrapper::ReleaseIfIdle(int64_t idleMs)
+{
+    std::unique_lock<ffrt::mutex> storeLock(rdbStorePtrMutex_, std::try_to_lock);
+    if (!storeLock.owns_lock()) {
+        ANS_LOGD("Notification rdb is busy, skip idle release");
+        return NativeRdb::E_ERROR;
+    }
+    if (rdbStore_ == nullptr) {
+        ANS_LOGI("Notification rdb is already released");
+        return NativeRdb::E_OK;
+    }
+    if (isRecovering_.load()) {
+        ANS_LOGD("Notification rdb is recovering, skip idle release");
+        return NativeRdb::E_ERROR;
+    }
+    const int64_t lastUsed = lastUsedTimeMs_;
+    const int64_t now = NowMs();
+    if (lastUsed > 0 && now - lastUsed < idleMs) {
+        return NativeRdb::E_ERROR;
+    }
+    rdbStore_ = nullptr;
+    {
+        std::lock_guard<ffrt::mutex> tableLock(createdTableMutex_);
+        createdTables_.clear();
+    }
+    lastUsedTimeMs_ = 0;
+    ANS_LOGI("Notification rdb released after idle %{public}lld ms, file kept",
+        static_cast<long long>(now - lastUsed));
+    return NativeRdb::E_OK;
+}
+
+bool NtfRdbStoreWrapper::IsStoreOpen() const
+{
+    std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
+    return rdbStore_ != nullptr;
+}
+
 int32_t NtfRdbStoreWrapper::Init()
 {
     std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
     if (rdbStore_ != nullptr) {
         ANS_LOGD("notification rdb has existed");
+        TouchStoreLocked();
+        ScheduleIdleRelease();
         return NativeRdb::E_OK;
     }
     int32_t ret = InitRdbStore();
@@ -61,6 +183,10 @@ int32_t NtfRdbStoreWrapper::Init()
         return ret;
     }
     ret = InitCreatedTables();
+    if (ret == NativeRdb::E_OK || ret == NativeRdb::E_EMPTY_VALUES_BUCKET) {
+        TouchStoreLocked();
+        ScheduleIdleRelease();
+    }
     return ret;
 }
 
@@ -151,6 +277,7 @@ void NtfRdbStoreWrapper::CleanLegacyStatisticsTables(std::set<std::string> &tabl
 int32_t NtfRdbStoreWrapper::Destroy()
 {
     ANS_LOGD("Destory rdbStore");
+    CancelIdleRelease();
     {
         std::lock_guard<ffrt::mutex> lock(createdTableMutex_);
         createdTables_.clear();
@@ -162,6 +289,7 @@ int32_t NtfRdbStoreWrapper::Destroy()
             return NativeRdb::E_ERROR;
         }
         rdbStore_ = nullptr;
+        lastUsedTimeMs_ = 0;
     }
     int32_t ret = NativeRdb::RdbHelper::DeleteRdbStore(notificationRdbConfig_.dbPath + notificationRdbConfig_.dbName);
     if (ret != NativeRdb::E_OK) {
@@ -217,7 +345,7 @@ int32_t NtfRdbStoreWrapper::GetUserTableName(const int32_t &userId, std::string 
     // Create table if it does not exist in the database.
     {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }
@@ -262,7 +390,7 @@ int32_t NtfRdbStoreWrapper::GetUserStatisticTableName(const int32_t &userId, std
     // Create table if it does not exist in the database.
     do {
         std::lock_guard<ffrt::mutex> lock(rdbStorePtrMutex_);
-        if (rdbStore_ == nullptr) {
+        if (!EnsureRdbStoreLocked()) {
             ANS_LOGE("notification rdb is null");
             return NativeRdb::E_ERROR;
         }

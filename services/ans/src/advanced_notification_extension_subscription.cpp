@@ -41,6 +41,7 @@ namespace Notification {
 using STARTUP = int32_t (*)(std::function<void()>, std::function<void(uint32_t, uint32_t, int32_t, std::string)>,
     std::function<bool()>);
 using SHUTDOWN = void (*)();
+using SET_LIFECYCLE_DESTROY_TIME = void (*)(uint32_t);
 using SUBSCRIBE = void (*)(const sptr<NotificationBundleOption>,
     const std::vector<sptr<NotificationBundleOption>> &);
 using SUBSCRIBE_NOTIFICATION = void (*)(const sptr<NotificationBundleOption>, int32_t);
@@ -72,6 +73,17 @@ int32_t AdvancedNotificationService::LoadExtensionService()
     if (startup == nullptr) {
         ANS_LOGW("GetProxyFunc Startup init failed.");
         return -1;
+    }
+
+    // The CCM config is parsed by this process only; push the destroy time to the extension
+    // service so that the extension DSO does not need its own config parser.
+    SET_LIFECYCLE_DESTROY_TIME setDestroyTime =
+        (SET_LIFECYCLE_DESTROY_TIME)notificationExtensionHandler_->GetProxyFunc("SetLifecycleDestroyTime");
+    uint32_t destroyTime = 0;
+    if (setDestroyTime != nullptr &&
+        DelayedSingleton<NotificationConfigParse>::GetInstance()->
+            IsNotificationExtensionLifecycleDestroyTimeConfigured(destroyTime)) {
+        setDestroyTime(destroyTime);
     }
 
     startup(nullptr, [](uint32_t sceneId, uint32_t branchId, int32_t errorCode, std::string message) {

@@ -64,13 +64,28 @@ public:
     NtfRdbStoreWrapper(const NotificationRdbConfig& config, const NtfRdbHook &hooks,
         const std::set<RdbEventHandlerType> &eventHandlerTypes);
 
-    ~NtfRdbStoreWrapper() = default;
+    ~NtfRdbStoreWrapper();
 
     /** @brief Create/open the RDB store and cache existing table names. */
     int32_t Init();
 
     /** @brief Close and delete the underlying database file. */
     int32_t Destroy();
+
+    /**
+     * @brief Release the resident store handle when it has been idle long enough.
+     *
+     * The database file is kept intact; the store is reopened transparently by the
+     * next operation. Safe to call from a timer: it never waits for an in-flight
+     * operation (returns E_ERROR when the store is busy).
+     *
+     * @param idleMs Minimum idle time in milliseconds; <= 0 means release immediately.
+     * @return Returns E_OK when the store is (already) closed, others when it stays open.
+     */
+    int32_t ReleaseIfIdle(int64_t idleMs);
+
+    /** @brief Whether the underlying store handle is currently open. */
+    bool IsStoreOpen() const;
 
     /**
      * @brief Insert statistics data in DB.
@@ -162,6 +177,27 @@ public:
 private:
     /** @brief Create the NativeRdb store instance if not already created. */
     int32_t InitRdbStore();
+
+    /**
+     * @brief Reopen the store on demand and refresh the last-used timestamp.
+     * Caller must hold rdbStorePtrMutex_.
+     */
+    bool EnsureRdbStoreLocked();
+
+    /** @brief Refresh the last-used timestamp. Caller must hold rdbStorePtrMutex_. */
+    void TouchStoreLocked();
+
+    /** @brief Arm the one-shot idle release timer when enabled and not armed yet. */
+    void ScheduleIdleRelease();
+
+    /** @brief Cancel a pending idle release timer. */
+    void CancelIdleRelease();
+
+    /** @brief Timer body: release the store when idle, otherwise keep watching. */
+    void HandleIdleRelease(int64_t idleMs);
+
+    /** @brief Monotonic time in milliseconds. */
+    static int64_t NowMs();
 
     /** @brief Populate createdTables_ from sqlite_master. */
     int32_t InitCreatedTables();
@@ -284,6 +320,15 @@ private:
 
     /** Guard flag indicating that a recovery flow is in progress. */
     std::atomic<bool> isRecovering_{false};
+
+    /** Last time the store was used, in monotonic milliseconds (0 means closed). Guarded by rdbStorePtrMutex_. */
+    int64_t lastUsedTimeMs_ {0};
+
+    /** Protects idleReleaseHandle_. */
+    ffrt::mutex idleReleaseMutex_;
+
+    /** Pending one-shot idle release task, null when not armed. */
+    ffrt::task_handle idleReleaseHandle_ {nullptr};
 };
 } // namespace Notification::Infra
 } // namespace OHOS

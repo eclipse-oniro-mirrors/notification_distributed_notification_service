@@ -109,8 +109,6 @@ ohos_shared_library("libdans") {
     "src/helper/bundle_resource_helper.cpp",
     "src/helper/distributed_operation_connection.cpp",
     "src/helper/distributed_operation_helper.cpp",
-    "src/helper/distributed_preference.cpp",
-    "src/helper/distributed_rdb_helper.cpp",
     "src/soft_bus/distributed_bundle_service.cpp",
     "src/soft_bus/distributed_device_service.cpp",
     "src/soft_bus/distributed_extern_intferface.cpp",
@@ -218,8 +216,6 @@ ohos_shared_library("libans_extension_service") {
 
   sources = [
     "${services_path}/ans/src/bundle_manager_helper.cpp",
-    "${services_path}/ans/src/common/file_utils.cpp",
-    "${services_path}/ans/src/common/notification_config_parse.cpp",
     "src/extension/extension_service.cpp",
     "src/extension/extension_service_connection.cpp",
     "src/extension/extension_service_connection_service.cpp",
