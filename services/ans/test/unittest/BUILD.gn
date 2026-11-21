@@ -2849,6 +2849,7 @@ ohos_unittest("notification_publish_process_test") {
     "mock/mock_bundle_mgr.cpp",
     "mock/mock_event_handler.cpp",
     "mock/mock_ipc.cpp",
+    "mock/mock_notification_analytics_util.cpp",
     "mock/mock_parameters.cpp",
     "mock/mock_push_callback_stub.cpp",
     "mock/mock_single_kv_store.cpp",

@@ -3156,6 +3156,36 @@ HWTEST_F(AdvancedNotificationServiceUnitTest, SetNotificationRequestToDbCommon_6
     MockInsertData(true);
 }
 
+/**
+ * @tc.name: PublishNotificationBySa_InInProgress_100
+ * @tc.desc: Test SA publish notification with isInProgress true, isInProgress should keep true and report event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationServiceUnitTest, PublishNotificationBySa_InInProgress_100, Function | SmallTest | Level1)
+{
+    advancedNotificationService_->notificationList_.clear();
+    sptr<NotificationRequest> request = new NotificationRequest(1);
+    std::shared_ptr<NotificationNormalContent> normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetTitle("title_1");
+    std::shared_ptr<NotificationContent> content = std::make_shared<NotificationContent>(normalContent);
+    std::string bundleName = "BundleName_04";
+    request->SetContent(content);
+    request->SetCreatorUid(100);
+    request->SetCreatorUserId(100);
+    request->SetOwnerBundleName(bundleName);
+    request->SetOwnerUid(100);
+    request->SetLabel("test_4");
+    request->SetSlotType(NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
+    request->SetIsAgentNotification(true);
+    request->SetInProgress(true);
+    MockInsertData(false);
+    auto result = advancedNotificationService_->PublishNotificationBySa(request);
+    ASSERT_EQ(request->IsInProgress(), true);
+    ASSERT_EQ(result.Ok(), false);
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    MockInsertData(true);
+}
+
 
 /**
  * @tc.name: SetEncryptToDB_100

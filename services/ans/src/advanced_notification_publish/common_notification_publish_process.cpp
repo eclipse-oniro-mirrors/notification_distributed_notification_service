@@ -17,6 +17,8 @@
 
 #include "access_token_helper.h"
 #include "ans_log_wrapper.h"
+#include "advanced_notification_inline.h"
+#include "notification_analytics_util.h"
 
 namespace OHOS {
 namespace Notification {
@@ -44,9 +46,20 @@ AnsStatus CommonNotificationPublishProcess::PublishNotificationByApp(const sptr<
         return ansStatus;
     }
 
-    if (request->IsInProgress() &&
-        !AccessTokenHelper::IsSystemApp()) {
-        request->SetInProgress(false);
+    if (request->IsInProgress()) {
+        if (AccessTokenHelper::IsSystemApp()) {
+            std::string bundleName = GetClientBundleName();
+            HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_36, EventBranchId::BRANCH_0)
+                .SlotType(static_cast<int32_t>(request->GetSlotType()))
+                .NotificationId(request->GetNotificationId())
+                .Message("systemApp publish notification isInProgress, bundleName:" + bundleName +
+                    ", slotType:" + std::to_string(static_cast<int32_t>(request->GetSlotType())) +
+                    ", contentType:" + std::to_string(static_cast<int32_t>(request->GetNotificationType())) +
+                    ", notificationId:" + std::to_string(request->GetNotificationId()));
+            NotificationAnalyticsUtil::ReportModifyEvent(message);
+        } else {
+            request->SetInProgress(false);
+        }
     }
 
     ansStatus = CommonPublishProcess(request);
