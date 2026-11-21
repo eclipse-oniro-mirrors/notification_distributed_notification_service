@@ -94,10 +94,10 @@ static void TestDistributedNotificationManager(FuzzedDataProvider *fuzzData)
 
     DistributedDatabase::DeviceInfo deviceInfo;
     manager->GetLocalDeviceInfo(deviceInfo);
-    // These two are the only entry points for the corresponding implementations and are idempotent
-    // re-initialization paths, so they are kept to preserve the coverage of the manager singleton.
-    manager->OnDistributedKvStoreDeathRecipient();
-    manager->ResetFfrtQueue();
+    // ResetFfrtQueue() releases the queue created by the manager constructor and the queue is never
+    // re-created, so all later iterations would skip the submit paths. OnDistributedKvStoreDeathRecipient()
+    // deletes the whole distributed kv store. Both are one-shot recovery paths whose side effect cannot be
+    // restored, so they are not exercised here.
 }
 
 static void TestDistributedPreferences(FuzzedDataProvider *fuzzData)
@@ -106,7 +106,11 @@ static void TestDistributedPreferences(FuzzedDataProvider *fuzzData)
     bool isEnable = fuzzData->ConsumeBool();
     int32_t userId = fuzzData->ConsumeIntegral<int32_t>();
 
-    preferences->SetDistributedEnable(isEnable);
+    // DistributedPreferencesDatabase uses a fixed app id, store id and store path, so the write and delete
+    // interfaces cannot be pointed at a separate store from the fuzz target. Calling them would modify the
+    // real preference store that the other test cases rely on, and ClearDataInRestoreFactorySettings() empties
+    // it completely, so only the read interfaces are exercised here. The write and delete paths are covered by
+    // services/distributed/test/unittest/distributed_preferences_test.cpp.
     preferences->GetDistributedEnable(isEnable);
 
     std::string bundleName = fuzzData->ConsumeRandomLengthString();
@@ -115,11 +119,7 @@ static void TestDistributedPreferences(FuzzedDataProvider *fuzzData)
     if (bundleOption == nullptr) {
         return;
     }
-    preferences->SetDistributedBundleEnable(bundleOption, isEnable);
     preferences->GetDistributedBundleEnable(bundleOption, isEnable);
-    preferences->DeleteDistributedBundleInfo(bundleOption);
-    preferences->ClearDataInRestoreFactorySettings();
-    preferences->SetSyncEnabledWithoutApp(userId, isEnable);
     preferences->GetSyncEnabledWithoutApp(userId, isEnable);
 }
 
