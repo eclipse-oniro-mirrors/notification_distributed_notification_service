@@ -68,7 +68,7 @@ ErrCode AdvancedNotificationService::Subscribe(
             break;
         }
 
-        if (info != nullptr && info->GetAppUserId() != SUBSCRIBE_USER_ALL) {
+        if (info != nullptr && !SubscribeAll(info->GetAppUserId())) {
             errCode = CheckUserIdParams(info->GetAppUserId());
             if (errCode != ERR_OK) {
                 break;
@@ -114,7 +114,7 @@ ErrCode AdvancedNotificationService::SubscribeNotification(
             break;
         }
 
-        if (info != nullptr && info->GetAppUserId() != SUBSCRIBE_USER_ALL) {
+        if (info != nullptr && !SubscribeAll(info->GetAppUserId())) {
             errCode = CheckUserIdParams(info->GetAppUserId());
             if (errCode != ERR_OK) {
                 break;

@@ -56,6 +56,20 @@ inline int32_t CheckUserIdParams(const int userId)
     return ERR_OK;
 }
 
+/*
+ * Returns whether the appUserId parameter of NotificationSubscribeInfo is a
+ * subscribe-all keyword: SUBSCRIBE_USER_ALL means all users and ZERO_USERID means the
+ * system-user broadcast scope, where the dispatch side (NotificationSubscriberManager::
+ * IsNeedNotifySubscribers) broadcasts without checking account existence. Other values
+ * denote concrete users and are validated via CheckUserIdParams. Publish/cancel paths
+ * keep validating 0 via CheckUserIdParams, where 0 (receiverUserId) is a real user
+ * space, not a broadcast scope.
+ */
+inline bool SubscribeAll(const int appUserId)
+{
+    return appUserId == SUBSCRIBE_USER_ALL || appUserId == ZERO_USERID;
+}
+
 inline int64_t ResetSeconds(int64_t date)
 {
     auto milliseconds = std::chrono::milliseconds(date);
