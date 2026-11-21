@@ -44,7 +44,8 @@ const EMPTY_PAGE_PATH = 'emptyPage';
 
 const permission: Record<string, Resource> = {
   'label': $r('app.string.group_label_notification'),
-  'icon': $r('app.media.ic_public_ring'),
+  'icon': $r('app.media.ic_public_bell'),
+  'iconBackground': $r('sys.color.font_emphasize'),
   'reason': $r('app.string.reason_simple'),
 };
 
@@ -136,13 +137,19 @@ struct PermissionDialog {
           Scroll() {
             Column() {
               Row() {
-                Image(permission.icon)
-                .width(Constants.DIALOG_ICON_WIDTH)
-                .height(Constants.DIALOG_ICON_HEIGHT)
+                Stack() {
+                  Circle()
+                    .fill(permission.iconBackground)
+                    .width(Constants.DIALOG_ICON_WIDTH)
+                    .height(Constants.DIALOG_ICON_HEIGHT)
+                  Image(permission.icon)
+                  .width(Constants.DIALOG_ICON_WIDTH)
+                  .height(Constants.DIALOG_ICON_HEIGHT)
+                  .draggable(false)
+                }
                 .margin({
                   top: Constants.PC_ICON_MARGIN_TOP
                 })
-                .draggable(false)
               }
               Row() {
                 Flex({ justifyContent: FlexAlign.Center }) {
