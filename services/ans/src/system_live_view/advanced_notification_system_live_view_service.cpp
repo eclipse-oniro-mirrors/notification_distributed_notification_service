@@ -127,7 +127,7 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
         }
     } while (0);
     if (errCode == ERR_OK) {
-        int32_t callingUid = IPCSkeleton::GetCallingUid();
+        int32_t callingUid = IPCSkeleton::GetCallingAppUid();
         int32_t callingPid = IPCSkeleton::GetCallingPid();
         auto submitResult = notificationSvrQueue_.SyncSubmit(std::bind([&]() {
             auto livePublishProcess = LivePublishProcess::GetInstance();
@@ -137,7 +137,7 @@ ErrCode AdvancedNotificationService::SubscribeLocalLiveView(
         }));
         ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Subscribe live view.");
     }
-    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), info, errCode);
+    SendSubscribeHiSysEvent(IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingAppUid(), info, errCode);
     return errCode;
 }
 

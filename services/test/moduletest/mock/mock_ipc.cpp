@@ -23,4 +23,9 @@ int IPCSkeleton::GetCallingUid()
 {
     return 1;
 }
+
+int IPCSkeleton::GetCallingAppUid()
+{
+    return 1;
+}
 }  // namespace OHOS

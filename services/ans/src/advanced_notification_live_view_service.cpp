@@ -1211,7 +1211,7 @@ bool AdvancedNotificationService::IsUpdateSystemLiveviewByOwner(const sptr<Notif
         return false;
     }
 
-    auto ownerUid = IPCSkeleton::GetCallingUid();
+    auto ownerUid = IPCSkeleton::GetCallingAppUid();
     auto oldRecord = GetFromDelayedNotificationList(ownerUid, request->GetNotificationId());
     if (oldRecord != nullptr) {
         return true;

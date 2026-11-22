@@ -303,7 +303,7 @@ ErrCode AdvancedNotificationService::SetNotificationsEnabledForSpecialBundleImpl
         return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (callingUid != ANS_USERID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("Permission Denied.");
         message.ErrorCode(ERR_ANS_INNER_PERMISSION_DENIED).BranchId(BRANCH_7);
@@ -671,7 +671,7 @@ ErrCode AdvancedNotificationService::CheckSpecialCallerAndResolveTarget(
         return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (callingUid != ANS_USERID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }

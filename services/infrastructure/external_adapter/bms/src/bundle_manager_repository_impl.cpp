@@ -237,15 +237,15 @@ ErrCode BundleManagerRepositoryImpl::GetAllBundleInfo(
             continue;
         }
 
-        ANS_LOGI("Get bundle %{public}d %{public}s.", bundle.applicationInfo.uid,
+        ANS_LOGI("Get bundle %{public}d %{public}s.", bundle.applicationInfo.appUid,
             bundle.applicationInfo.bundleName.c_str());
         sptr<NotificationBundleOption> option = new (std::nothrow) NotificationBundleOption(
-            bundle.applicationInfo.bundleName, bundle.applicationInfo.uid);
+            bundle.applicationInfo.bundleName, bundle.applicationInfo.appUid);
         if (option == nullptr) {
             ANS_LOGE("Get bundle failed.");
             continue;
         }
-        std::string key = bundle.applicationInfo.bundleName + std::to_string(bundle.applicationInfo.uid);
+        std::string key = bundle.applicationInfo.bundleName + std::to_string(bundle.applicationInfo.appUid);
         bundleOptions[key] = option;
     }
 

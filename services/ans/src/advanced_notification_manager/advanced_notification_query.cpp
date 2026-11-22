@@ -111,7 +111,7 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
         return ERR_ANS_INNER_NON_SYSTEM_APP;
     }
 
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (callingUid != RSS_UID && !AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
         ANS_LOGE("AccessTokenHelper::CheckPermission failed.");
         return ERR_ANS_INNER_PERMISSION_DENIED;
@@ -233,9 +233,9 @@ ErrCode AdvancedNotificationService::GetActiveNotificationByFilter(
         return ERR_ANS_INNER_INVALID_BUNDLE;
     }
     // get other bundle notification need controller permission
-    if (bundle->GetUid() != IPCSkeleton::GetCallingUid()) {
+    if (bundle->GetUid() != IPCSkeleton::GetCallingAppUid()) {
         ANS_LOGI_LIMIT("None-self call, uid: %{public}d, curUid: %{public}d.",
-            bundle->GetUid(), IPCSkeleton::GetCallingUid());
+            bundle->GetUid(), IPCSkeleton::GetCallingAppUid());
         if (!AccessTokenHelper::CheckPermission(OHOS_PERMISSION_NOTIFICATION_CONTROLLER)) {
             ANS_LOGE("Get live view by filter failed because check permission is false.");
             return ERR_ANS_INNER_PERMISSION_DENIED;

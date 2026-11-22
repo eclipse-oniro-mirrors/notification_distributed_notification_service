@@ -25,6 +25,11 @@ pid_t IPCSkeleton::GetCallingUid()
     return g_mockUid;
 }
 
+pid_t IPCSkeleton::GetCallingAppUid()
+{
+    return g_mockUid;
+}
+
 pid_t IPCSkeleton::GetCallingPid()
 {
     return g_mockPid;

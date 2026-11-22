@@ -971,7 +971,7 @@ HWTEST_F(AnsSlotServiceTest, GetDefaultSlotFlags_00001, Function | SmallTest | L
     sptr<NotificationRequest> request(new NotificationRequest(1));
     uint32_t notificationControlFlags = NotificationConstant::ReminderFlag::SA_SELF_BANNER_FLAG;
     request->SetNotificationControlFlags(notificationControlFlags);
-    request->SetCreatorUid(IPCSkeleton::GetCallingUid());
+    request->SetCreatorUid(IPCSkeleton::GetCallingAppUid());
     auto ret = advancedNotificationService_->GetDefaultSlotFlags(request);
     ASSERT_EQ(ret, 63);
 }

@@ -276,7 +276,7 @@ ErrCode AdvancedNotificationService::GetShowBadgeEnabled(bool &enabled)
 ErrCode AdvancedNotificationService::SetBadgeNumber(int32_t badgeNumber, const std::string &instanceKey)
 {
     ANS_LOGD("called");
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     std::string bundleName = GetClientBundleName();
     ANS_LOGD("SetBadgeNumber receive instanceKey:%{public}s", instanceKey.c_str());
     sptr<BadgeNumberCallbackData> badgeData = new (std::nothrow) BadgeNumberCallbackData(

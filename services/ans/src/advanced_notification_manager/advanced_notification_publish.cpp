@@ -473,7 +473,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
         return ERR_ANS_INNER_PERMISSION_DENIED;
     }
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (!isSubSystem || callingUid != ANCO_UID) {
         ANS_LOGE("not subsystem or wrong callingUid. callingUid = %{public}d", callingUid);
         return ERR_ANS_INNER_NOT_SYSTEM_SERVICE;
@@ -544,7 +544,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
 
     SetRequestBySlotType(record->request, bundleOption);
     SetVersionCodeToExtendInfo(request);
-    auto ipcUid = IPCSkeleton::GetCallingUid();
+    auto ipcUid = IPCSkeleton::GetCallingAppUid();
     auto submitResult = notificationSvrQueue_.SyncSubmit([&]() {
 #ifdef NOTIFICATION_MULTI_FOREGROUND_USER
         if (IsDisableNotification(bundle, record->notification->GetRecvUserId())) {
@@ -650,7 +650,7 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
     }
     SetIsFromSAToExtendInfo(request);
 
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     int32_t userId = SUBSCRIBE_USER_INIT;
     if (OsAccountManagerHelper::GetInstance().GetOsAccountLocalIdFromUid(uid, userId) != ERR_OK || userId < 0) {
         ANS_LOGE("Failed to get valid userId from uid, function: %{public}s, uid: %{public}d", __FUNCTION__, uid);
@@ -711,7 +711,7 @@ ErrCode AdvancedNotificationService::PublishContinuousTaskNotification(const spt
 ErrCode AdvancedNotificationService::UpdateNotificationTimerByUid(const int32_t uid, const bool isPaused)
 {
     bool isSubSystem = AccessTokenHelper::VerifyNativeToken(IPCSkeleton::GetCallingTokenID());
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     if (!isSubSystem || callingUid != RESSCHED_UID) {
         ANS_LOGE(" callingUid: %{public}d", callingUid);
         return ERR_ANS_INNER_NOT_SYSTEM_SERVICE;

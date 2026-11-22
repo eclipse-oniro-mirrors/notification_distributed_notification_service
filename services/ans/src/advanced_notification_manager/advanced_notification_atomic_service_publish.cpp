@@ -76,7 +76,7 @@ ErrCode AdvancedNotificationService::SetCreatorInfoWithAtomicService(const sptr<
         }
     }
 
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     std::shared_ptr<NotificationBundleOption> agentBundle =
         std::make_shared<NotificationBundleOption>(agentBundleName, uid);
     if (agentBundle == nullptr) {

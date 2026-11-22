@@ -145,10 +145,10 @@ ErrCode __attribute__((weak)) BundleManagerHelper::GetAllBundleOption(
     }
 
     for (auto& bundle : bundleInfos) {
-        ANS_LOGD("Get bundle %{public}d %{public}s %{public}s.", bundle.applicationInfo.uid,
+        ANS_LOGD("Get bundle %{public}d %{public}s %{public}s.", bundle.applicationInfo.appUid,
             bundle.applicationInfo.bundleName.c_str(), bundle.label.c_str());
         NotificationBundleOption option = NotificationBundleOption(bundle.applicationInfo.bundleName,
-            bundle.applicationInfo.uid);
+            bundle.applicationInfo.appUid);
         option.SetAppName(bundle.label);
         option.SetAppIndex(bundle.applicationInfo.appIndex);
         bundleOptions.emplace_back(option);
@@ -187,15 +187,15 @@ ErrCode __attribute__((weak)) BundleManagerHelper::GetAllBundleInfo(
             continue;
         }
 
-        ANS_LOGI("Get bundle %{public}d %{public}s.", bundle.applicationInfo.uid,
+        ANS_LOGI("Get bundle %{public}d %{public}s.", bundle.applicationInfo.appUid,
             bundle.applicationInfo.bundleName.c_str());
         sptr<NotificationBundleOption> option = new (std::nothrow) NotificationBundleOption(
-            bundle.applicationInfo.bundleName, bundle.applicationInfo.uid);
+            bundle.applicationInfo.bundleName, bundle.applicationInfo.appUid);
         if (option == nullptr) {
             ANS_LOGE("Get bundle failed.");
             continue;
         }
-        std::string key = bundle.applicationInfo.bundleName + std::to_string(bundle.applicationInfo.uid);
+        std::string key = bundle.applicationInfo.bundleName + std::to_string(bundle.applicationInfo.appUid);
         bundleOptions[key] = option;
     }
 

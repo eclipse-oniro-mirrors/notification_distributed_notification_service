@@ -269,7 +269,7 @@ void StsBadgeQueryCallBackManager::AniOnBadgeNumberQuery(ani_env *env, ani_fn_ob
         OHOS::NotificationSts::ThrowErrorWithCode(env, ERR_ANS_INNER_INVALID_PARAM, "BadgeQueryCallback is undefine");
         return;
     }
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     if (uid < 0) {
         ANS_LOGE("uid is invalid, %{public}d", uid);
         return;
@@ -309,7 +309,7 @@ void StsBadgeQueryCallBackManager::AniOnBadgeNumberQuery(ani_env *env, ani_fn_ob
 void StsBadgeQueryCallBackManager::AniOffBadgeNumberQuery(ani_env *env)
 {
     ANS_LOGD("AniOffBadgeNumberQuery call");
-    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t uid = IPCSkeleton::GetCallingAppUid();
     if (uid < 0) {
         ANS_LOGE("uid is invalid, %{public}d", uid);
         return;

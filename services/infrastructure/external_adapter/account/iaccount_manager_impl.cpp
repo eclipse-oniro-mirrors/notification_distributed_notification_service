@@ -51,7 +51,7 @@ int32_t IAccountManagerImpl::GetOsAccountLocalIdFromUid(const int32_t uid)
 
 ErrCode IAccountManagerImpl::GetCurrentCallingUserId(int32_t &userId)
 {
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    int32_t callingUid = IPCSkeleton::GetCallingAppUid();
     int32_t ret = AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
     if (ret != ERR_OK) {
         ANS_LOGE("Get userId failed, callingUid = <%{public}d>, code is %{public}d", callingUid, ret);

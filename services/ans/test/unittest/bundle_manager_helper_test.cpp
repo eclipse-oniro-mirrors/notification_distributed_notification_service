@@ -47,7 +47,7 @@ public:
  */
 HWTEST_F(BundleManagerHelperTest, BundleManagerHelperTest_00100, Function | SmallTest | Level1)
 {
-    pid_t callingUid = IPCSkeleton::GetCallingUid();
+    pid_t callingUid = IPCSkeleton::GetCallingAppUid();
     std::shared_ptr<BundleManagerHelper> bundleManager = BundleManagerHelper::GetInstance();
     ASSERT_EQ(bundleManager->GetBundleNameByUid(callingUid), "bundleName");
 }
