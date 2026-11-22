@@ -34,9 +34,33 @@ public:
     ErrCode RefreshPriorityType(const std::string &cmdType,
         const std::vector<sptr<NotificationRequest>> originRequests, std::vector<int32_t> &results);
     void BuildPriorityCommand(std::string& cmdType, const sptr<NotificationRequest> &request, nlohmann::json &command);
+
+    /**
+     * @brief Check whether the request should skip the AI priority tagging.
+     *
+     * As a side effect, the isAllPriorityByBundle flag is reset to false first
+     * and set to true only when the bundle priority switch is on and the
+     * strategy contains the STATUS_ALL_PRIORITY bit.
+     *
+     * Skip cases: null request / live view / collaboration / priority switch off
+     * / db fail / all-priority strategy (flag set).
+     *
+     * @param request Indicates the notification request to check and update.
+     * @param strategy Indicates the bundle priority strategy fetched from DB,
+     * valid only when false is returned.
+     * @return Returns true when the AI priority tagging should be skipped,
+     * false when the request should proceed with AI tagging.
+     */
+    bool ShouldSkipPriorityTagging(const sptr<NotificationRequest> &request, int64_t &strategy);
 #endif
 #ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
 private:
+    struct PriorityFilterOutputs {
+        std::vector<sptr<NotificationRequest>> requests;
+        std::vector<nlohmann::json> commands;
+        std::vector<sptr<NotificationClassification>> notificationClassifications;
+    };
+
     /**
      * @brief Filter the refresh batch by the bundle level priority strategy.
      *
@@ -48,17 +72,13 @@ private:
      * @param cmdType Indicates the command type of the refresh.
      * @param aiStatus Indicates the intelligent switch state, 1 on / 0 off.
      * @param originRequests Indicates the whole refresh batch, the filter source.
-     * @param requests Indicates the requests that survived the filter.
-     * @param commands Indicates the commands built for the surviving requests.
-     * @param notificationClassifications Indicates the classification slots of the
-     * surviving requests (all null on the refresh chain).
+     * @param outputs Indicates the requests, commands and classification slots of the
+     * surviving requests (all null classifications on the refresh chain).
      * @param results Indicates the result slots appended per surviving request.
      */
     void FilterRequestsByStrategy(const std::string &cmdType, uint32_t aiStatus,
         const std::vector<sptr<NotificationRequest>> &originRequests,
-        std::vector<sptr<NotificationRequest>> &requests, std::vector<nlohmann::json> &commands,
-        std::vector<sptr<NotificationClassification>> &notificationClassifications,
-        std::vector<int32_t> &results);
+        PriorityFilterOutputs &outputs, std::vector<int32_t> &results);
 #endif
 };
 }  // namespace Notification

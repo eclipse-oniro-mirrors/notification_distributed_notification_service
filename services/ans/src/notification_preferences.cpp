@@ -586,26 +586,42 @@ ErrCode NotificationPreferences::GetNotificationSlotsNumForBundle(
 }
 
 ErrCode NotificationPreferences::GetNotificationSlotFlagsForBundle(
-    const sptr<NotificationBundleOption> &bundleOption, uint32_t &slotFlags)
+    const sptr<NotificationBundleOption> &bundleOption, uint32_t &slotFlags, int32_t notificationType)
 {
+    int32_t normalType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION);
+    int32_t priorityType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INNER_INVALID_PARAM;
     }
+    if (notificationType != normalType && notificationType != priorityType) {
+        ANS_LOGE("Invalid notificationType.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
 
-    return GetBundleProperty(bundleOption, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
+    BundleType type = (notificationType == priorityType)
+        ? BundleType::BUNDLE_PRIORITY_SLOTFLGS_TYPE : BundleType::BUNDLE_SLOTFLGS_TYPE;
+    return GetBundleProperty(bundleOption, type, slotFlags);
 }
 
 
 ErrCode NotificationPreferences::SetNotificationSlotFlagsForBundle(
-    const sptr<NotificationBundleOption> &bundleOption, uint32_t slotFlags)
+    const sptr<NotificationBundleOption> &bundleOption, uint32_t slotFlags, int32_t notificationType)
 {
+    int32_t normalType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION);
+    int32_t priorityType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION);
     if (bundleOption == nullptr || bundleOption->GetBundleName().empty()) {
         return ERR_ANS_INNER_INVALID_PARAM;
     }
+    if (notificationType != normalType && notificationType != priorityType) {
+        ANS_LOGE("Invalid notificationType.");
+        return ERR_ANS_INNER_INVALID_PARAM;
+    }
 
+    BundleType type = (notificationType == priorityType)
+        ? BundleType::BUNDLE_PRIORITY_SLOTFLGS_TYPE : BundleType::BUNDLE_SLOTFLGS_TYPE;
     std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
     NotificationPreferencesInfo preferencesInfo = preferencesInfo_;
-    ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, BundleType::BUNDLE_SLOTFLGS_TYPE, slotFlags);
+    ErrCode result = SetBundleProperty(preferencesInfo, bundleOption, type, slotFlags);
     if (result == ERR_OK) {
         preferencesInfo_ = preferencesInfo;
         StartCacheCleanupTimer();
@@ -929,7 +945,12 @@ bool NotificationPreferences::BuildCloneSlotInfo(const NotificationCloneBundleIn
         uint32_t slotFlags = bundleInfo.GetSlotFlags();
         auto configSlotReminderMode = DelayedSingleton<NotificationConfigParse>::GetInstance()->
             GetConfigSlotReminderModeByType(slotInfo->GetType());
-        slotInfo->SetReminderMode(configSlotReminderMode & slotFlags);
+        slotInfo->SetReminderModeByType(configSlotReminderMode & slotFlags,
+            static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION));
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+        slotInfo->SetReminderModeByType(configSlotReminderMode & bundleInfo.GetPrioritySlotFlags(),
+            static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION));
+#endif
         slotInfo->SetEnable(cloneSlot.enable_);
         slotInfo->SetForceControl(cloneSlot.isForceControl_);
         slotInfo->SetAuthorizedStatus(cloneSlot.GetAuthStaus());
@@ -971,6 +992,13 @@ void NotificationPreferences::UpdateCloneBundleInfo(int32_t userId,
         ANS_LOGW("Clone bundle slot info %{public}s.", cloneBundleInfo.Dump().c_str());
         return;
     }
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    if (SaveBundleProperty(bundleInfo, bundleOption,
+        BundleType::BUNDLE_PRIORITY_SLOTFLGS_TYPE, cloneBundleInfo.GetPrioritySlotFlags()) != ERR_OK) {
+        ANS_LOGW("Clone bundle priority slot info %{public}s.", cloneBundleInfo.Dump().c_str());
+        return;
+    }
+#endif
     preferencesInfo.SetBundleInfo(bundleInfo);
 
     /* update slot info */
@@ -1438,6 +1466,22 @@ ErrCode NotificationPreferences::SetBundleProperty(NotificationPreferencesInfo &
 }
 
 template <typename T>
+bool NotificationPreferences::SaveEnableNotificationState(
+    NotificationPreferencesInfo::BundleInfo &bundleInfo, const T &value)
+{
+    NotificationConstant::SWITCH_STATE state = static_cast<NotificationConstant::SWITCH_STATE>(value);
+    bundleInfo.SetEnableNotification(state);
+    bool storeDBResult = preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, state);
+    if (storeDBResult) {
+        if (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
+            state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
+            SetDistributedEnabledForBundle(bundleInfo);
+        }
+    }
+    return storeDBResult;
+}
+
+template <typename T>
 ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo::BundleInfo &bundleInfo,
     const sptr<NotificationBundleOption> &bundleOption, const BundleType &type, const T &value)
 {
@@ -1457,15 +1501,7 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
             storeDBResult = preferncesDB_->PutShowBadge(bundleInfo, value);
             break;
         case BundleType::BUNDLE_ENABLE_NOTIFICATION_TYPE:
-            state = static_cast<NotificationConstant::SWITCH_STATE>(value);
-            bundleInfo.SetEnableNotification(state);
-            storeDBResult = preferncesDB_->PutNotificationsEnabledForBundle(bundleInfo, state);
-            if (storeDBResult) {
-                if (state == NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON ||
-                    state == NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON) {
-                    SetDistributedEnabledForBundle(bundleInfo);
-                }
-            }
+            storeDBResult = SaveEnableNotificationState(bundleInfo, value);
             break;
         case BundleType::BUNDLE_POPPED_DIALOG_TYPE:
             ANS_LOGI("Into BUNDLE_POPPED_DIALOG_TYPE:SetHasPoppedDialog.");
@@ -1476,6 +1512,11 @@ ErrCode NotificationPreferences::SaveBundleProperty(NotificationPreferencesInfo:
             ANS_LOGI("Into BUNDLE_SLOTFLGS_TYPE:SetSlotFlags.");
             bundleInfo.SetSlotFlags(value);
             storeDBResult = preferncesDB_->PutSlotFlags(bundleInfo, value);
+            break;
+        case BundleType::BUNDLE_PRIORITY_SLOTFLGS_TYPE:
+            ANS_LOGI("Into BUNDLE_PRIORITY_SLOTFLGS_TYPE:SetPrioritySlotFlags.");
+            bundleInfo.SetPrioritySlotFlags(value);
+            storeDBResult = preferncesDB_->PutPrioritySlotFlags(bundleInfo, value);
             break;
         case BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE:
             state = static_cast<NotificationConstant::SWITCH_STATE>(value);
@@ -1516,6 +1557,10 @@ ErrCode NotificationPreferences::GetBundleProperty(
             case BundleType::BUNDLE_SLOTFLGS_TYPE:
                 value = bundleInfo.GetSlotFlags();
                 ANS_LOGD("Into BUNDLE_SLOTFLGS_TYPE:GetSlotFlags.");
+                break;
+            case BundleType::BUNDLE_PRIORITY_SLOTFLGS_TYPE:
+                value = bundleInfo.GetPrioritySlotFlags();
+                ANS_LOGD("Into BUNDLE_PRIORITY_SLOTFLGS_TYPE:GetPrioritySlotFlags.");
                 break;
             case BundleType::BUNDLE_EXTENSION_SUBSCRIPTION_ENABLED_TYPE:
                 value = static_cast<int32_t>(bundleInfo.GetExtensionSubscriptionEnabled());

@@ -400,7 +400,7 @@ void DistributedService::OnConsumed(const std::shared_ptr<Notification> &request
             ANS_LOGE("DistributedService::OnConsumed: null request");
             return;
         }
-        if (!OnConsumedSetFlags(request, peerDevice)) {
+        if (!CheckDeviceReminderFlagsExist(request, peerDevice)) {
             return;
         }
         DistributedPublishService::GetInstance().SendNotifictionRequest(request, peerDevice);
@@ -426,11 +426,11 @@ void DistributedService::HandleDeviceUsingChange(const DeviceStatueChangeInfo& c
     ConnectPeerDevice(device);
 }
 
-bool DistributedService::OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
+bool DistributedService::CheckDeviceReminderFlagsExist(const std::shared_ptr<Notification> &request,
     const DistributedDeviceInfo& peerDevice)
 {
     if (request == nullptr || request->GetNotificationRequestPoint() == nullptr) {
-        ANS_LOGE("OnConsumedSetFlags request or notification request point is null");
+        ANS_LOGE("CheckDeviceReminderFlagsExist request or notification request point is null");
         return false;
     }
     std::string deviceType = DistributedDeviceService::DeviceTypeToTypeString(peerDevice.deviceType_);
@@ -441,14 +441,9 @@ bool DistributedService::OnConsumedSetFlags(const std::shared_ptr<Notification> 
     }
     auto flagIter = flagsMap->find(deviceType);
     if (flagIter != flagsMap->end() && flagIter->second != nullptr) {
-        requestPoint->SetFlags(flagIter->second);
-        ANS_LOGI("flagsFinal key=%{public}s flags=%{public}d dev=%{public}s",
-            requestPoint->GetBaseKey("").c_str(),
-            requestPoint->GetFlags()->GetReminderFlags(), deviceType.c_str());
-    } else {
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 #else

@@ -282,9 +282,11 @@ interface OHOS.Notification.IAnsManager {
 
     void SetBadgeNumberForDhByBundle([in] sptr<NotificationBundleOption> bundleOption, [in] int badgeNumber);
 
-    void GetSlotFlagsAsBundle([in] sptr<NotificationBundleOption> bundleOption, [out] unsigned int slotFlags);
+    void GetSlotFlagsAsBundle([in] sptr<NotificationBundleOption> bundleOption, [out] unsigned int slotFlags,
+        [in] int notificationType);
 
-    void SetSlotFlagsAsBundle([in] sptr<NotificationBundleOption> bundleOption, [in] unsigned int slotFlags);
+    void SetSlotFlagsAsBundle(
+        [in] sptr<NotificationBundleOption> bundleOption, [in] unsigned int slotFlags, [in] int notificationType);
 
     void GetNotificationSettings([out] unsigned int slotFlags);
 

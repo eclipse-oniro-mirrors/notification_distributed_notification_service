@@ -519,11 +519,11 @@ HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00001, Function | SmallTest | 
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test", 1);
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(false);
-    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1);
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1, 0);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 
     uint32_t flag = 0;
-    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag);
+    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag, 0);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_NON_SYSTEM_APP);
 }
 
@@ -539,11 +539,11 @@ HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00002, Function | SmallTest | 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(false);
-    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1);
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1, 0);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 
     uint32_t flag = 0;
-    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag);
+    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag, 0);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_PERMISSION_DENIED);
 }
 
@@ -559,11 +559,11 @@ HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00003, Function | SmallTest | 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1);
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1, 0);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 
     uint32_t flag = 0;
-    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag);
+    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag, 0);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_BUNDLE);
 }
 
@@ -580,11 +580,11 @@ HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00004, Function | SmallTest | 
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
     advancedNotificationService_->notificationSvrQueue_.Reset();
-    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1);
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1, 0);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 
     uint32_t flag = 0;
-    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag);
+    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag, 0);
     ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
 }
 
@@ -625,11 +625,11 @@ HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00005, Function | SmallTest | 
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 40);
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 40, 0);
     ASSERT_EQ(ret, (int)ERR_OK);
 
     uint32_t flag = 0;
-    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag);
+    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag, 0);
     ASSERT_EQ(ret, (int)ERR_OK);
     ASSERT_EQ(flag, 40);
 }
@@ -646,14 +646,14 @@ HWTEST_F(AnsSlotServiceTest, GetAndGetSlotFlagsAsBundle_00001, Function | SmallT
     MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
     MockIsSystemApp(true);
     MockIsVerfyPermisson(true);
-    ASSERT_EQ(advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 63), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 63, 0), (int)ERR_OK);
 
     uint32_t flag = 0;
-    ASSERT_EQ(advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag, 0), (int)ERR_OK);
     ASSERT_EQ(flag, 63);
 
-    ASSERT_EQ(advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1), (int)ERR_OK);
-    ASSERT_EQ(advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1, 0), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag, 0), (int)ERR_OK);
     // light screen and status bar not support modify.
     ASSERT_EQ(flag, 41);
 }
@@ -672,9 +672,83 @@ HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00006, Function | SmallTest | 
     MockIsVerfyPermisson(true);
 
     uint32_t flag = 0;
-    auto ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag);
+    auto ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag, 0);
     ASSERT_EQ(ret, (int)ERR_OK);
     ASSERT_EQ(flag, DEFAULT_SLOT_FLAGS);
+}
+
+/**
+ * @tc.name: GetSlotFlagsAsBundle_00007
+ * @tc.desc: Test Set/GetSlotFlagsAsBundle with priority notification type
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00007, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testPrio", 700);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    const int32_t priorityType =
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION);
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 40, priorityType);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    uint32_t flag = 0;
+    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag, priorityType);
+    ASSERT_EQ(ret, (int)ERR_OK);
+    ASSERT_EQ(flag, 40);
+}
+
+/**
+ * @tc.name: GetSlotFlagsAsBundle_00008
+ * @tc.desc: Test Set/GetSlotFlagsAsBundle with invalid notification type
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00008, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testPrio", 701);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 40, -1);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+    uint32_t flag = 0;
+    const int32_t invalidType =
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION) + 1;
+    ret = advancedNotificationService_->GetSlotFlagsAsBundle(bundle, flag, invalidType);
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/**
+ * @tc.name: GetSlotFlagsAsBundle_00009
+ * @tc.desc: Test normal and priority slot flags are stored and queried independently
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsSlotServiceTest, GetSlotFlagsAsBundle_00009, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testPrio", 702);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+
+    const int32_t normalType =
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION);
+    const int32_t priorityType =
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION);
+    ASSERT_EQ(advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 1, normalType), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->SetSlotFlagsAsBundle(bundle, 40, priorityType), (int)ERR_OK);
+
+    uint32_t normalFlag = 0;
+    uint32_t priorityFlag = 0;
+    ASSERT_EQ(advancedNotificationService_->GetSlotFlagsAsBundle(bundle, normalFlag, normalType), (int)ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->GetSlotFlagsAsBundle(bundle, priorityFlag, priorityType), (int)ERR_OK);
+    // normal type: 1 with light screen and status bar auto-enabled; priority type keeps 40
+    ASSERT_EQ(normalFlag, 41);
+    ASSERT_EQ(priorityFlag, 40);
 }
 
 /**
@@ -1051,7 +1125,7 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00002, Function | SmallTest
     ASSERT_NE(bundleOption, nullptr);
 
     uint32_t flag = 0xff;
-    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundleOption, flag);
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundleOption, flag, 0);
     ASSERT_EQ(ret, ERR_OK);
     ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, false);
     ASSERT_EQ(ret, ERR_OK);
@@ -1112,7 +1186,7 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00005, Function | SmallTest
 
     std::string deviceId = "";
     uint32_t flag = 0xff;
-    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundleOption, flag);
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundleOption, flag, 0);
     ASSERT_EQ(ret, ERR_OK);
     ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, true);
     ASSERT_EQ(ret, ERR_OK);
@@ -1139,7 +1213,7 @@ HWTEST_F(AnsSlotServiceTest, GetNotificationSettings_00006, Function | SmallTest
 
     std::string deviceId = "";
     uint32_t flag = 0xff;
-    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundleOption, flag);
+    auto ret = advancedNotificationService_->SetSlotFlagsAsBundle(bundleOption, flag, 0);
     ASSERT_EQ(ret, ERR_OK);
     ret = advancedNotificationService_->SetShowBadgeEnabledForBundle(bundleOption, true);
     ASSERT_EQ(ret, ERR_OK);

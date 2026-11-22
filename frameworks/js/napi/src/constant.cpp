@@ -516,8 +516,10 @@ napi_value NotificationTypeInit(napi_env env, napi_value exports)
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
 
-    SetNamedPropertyByInteger(env, obj, (int32_t)NotificationType::NOTIFICATION, "NOTIFICATION");
-    SetNamedPropertyByInteger(env, obj, (int32_t)NotificationType::LIVE_VIEW, "LIVE_VIEW");
+    SetNamedPropertyByInteger(env, obj,
+        (int32_t)NotificationConstant::SlotFlagsNotificationType::NOTIFICATION, "NOTIFICATION");
+    SetNamedPropertyByInteger(env, obj,
+        (int32_t)NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION, "PRIORITY_NOTIFICATION");
 
     napi_property_descriptor exportFuncs[] = {
         DECLARE_NAPI_PROPERTY("NotificationType", obj),

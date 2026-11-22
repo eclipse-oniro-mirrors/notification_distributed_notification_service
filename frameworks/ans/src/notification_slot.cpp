@@ -36,6 +36,10 @@ const uint32_t BANNER_OPNE = 1 << 2;
 const uint32_t LIGHTSCREEN_OPNE = 1 << 3;
 const uint32_t VIBRATION_OPNE = 1 << 4;
 const uint32_t STATUSBAR_ICON_OPNE = 1 << 5;
+const int32_t SLOT_FLAGS_NOTIFICATION =
+    static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION);
+const int32_t SLOT_FLAGS_PRIORITY_NOTIFICATION =
+    static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION);
 // Default sound for notification
 const static std::vector<int64_t> DEFAULT_NOTIFICATION_VIBRATION = {200};
 const static Uri DEFAULT_NOTIFICATION_SOUND("file://system/etc/Light.ogg");
@@ -292,13 +296,39 @@ bool NotificationSlot::GetForceControl() const
 
 void NotificationSlot::SetReminderMode(uint32_t reminderMode)
 {
-    reminderMode_ = reminderMode;
+    SetReminderModeByType(reminderMode, SLOT_FLAGS_NOTIFICATION);
 }
 
 uint32_t NotificationSlot::GetReminderMode() const
 {
-    if (reminderMode_ != INVALID_REMINDER_MODE) {
-        return reminderMode_;
+    return GetReminderModeByType(SLOT_FLAGS_NOTIFICATION);
+}
+
+void NotificationSlot::SetPriorityReminderMode(uint32_t priorityReminderMode)
+{
+    SetReminderModeByType(priorityReminderMode, SLOT_FLAGS_PRIORITY_NOTIFICATION);
+}
+
+uint32_t NotificationSlot::GetPriorityReminderMode() const
+{
+    return GetReminderModeByType(SLOT_FLAGS_PRIORITY_NOTIFICATION);
+}
+
+void NotificationSlot::SetReminderModeByType(uint32_t reminderMode, int32_t notificationType)
+{
+    if (notificationType == SLOT_FLAGS_PRIORITY_NOTIFICATION) {
+        priorityReminderMode_ = reminderMode;
+    } else {
+        reminderMode_ = reminderMode;
+    }
+}
+
+uint32_t NotificationSlot::GetReminderModeByType(int32_t notificationType) const
+{
+    uint32_t reminderMode = (notificationType == SLOT_FLAGS_PRIORITY_NOTIFICATION) ?
+        priorityReminderMode_ : reminderMode_;
+    if (reminderMode != INVALID_REMINDER_MODE) {
+        return reminderMode;
     }
     return GetDefaultReminderMode();
 }
@@ -322,6 +352,7 @@ std::string NotificationSlot::Dump() const
             ", enabled = " + (enabled_ ? "true" : "false") +
             ", slotFlags = " + std::to_string(static_cast<int32_t>(slotFlags_)) +
             ", remindMode = " + std::to_string(static_cast<int32_t>(GetReminderMode())) +
+            ", priorityRemindMode = " + std::to_string(static_cast<int32_t>(GetPriorityReminderMode())) +
             " }";
 }
 
@@ -428,6 +459,11 @@ bool NotificationSlot::Marshalling(Parcel &parcel) const
         return false;
     }
 
+    if (!parcel.WriteInt32(priorityReminderMode_)) {
+        ANS_LOGE("Failed to write priorityReminderMode");
+        return false;
+    }
+
     return true;
 }
 
@@ -461,6 +497,7 @@ bool NotificationSlot::ReadFromParcel(Parcel &parcel)
     authorizedStatus_ = parcel.ReadInt32();
     authHintCnt_ = parcel.ReadInt32();
     reminderMode_ = parcel.ReadInt32();
+    priorityReminderMode_ = parcel.ReadInt32();
     return true;
 }
 

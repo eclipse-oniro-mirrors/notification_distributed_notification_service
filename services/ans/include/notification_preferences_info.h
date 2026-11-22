@@ -169,6 +169,20 @@ public:
         void SetSlotFlags(uint32_t slotFlags);
 
         /**
+         * @brief Get priority notification slotflags from bundle.
+         *
+         * @return Return priority notification slotFlags of bundle.
+         */
+        uint32_t GetPrioritySlotFlags();
+
+        /**
+         * @brief Set priority notification slotflags to bundle.
+         *
+         * @param slotFlags Indicates priority notification slotFlags of bundle.
+         */
+        void SetPrioritySlotFlags(uint32_t slotFlags);
+
+        /**
          * get slot type name string from slottype enum type.
          * @param type  slot type enum value.
          * @return slot type name string.
@@ -255,6 +269,7 @@ public:
         int32_t uid_ = 0;
         int32_t userId_ = -1;
         uint32_t slotFlags_ = 59; // 0b111011
+        uint32_t prioritySlotFlags_ = 63; // 0b111111
         int32_t importance_ = BUNDLE_IMPORTANCE;
         bool isShowBadge_ = BUNDLE_SHOW_BADGE;
         int32_t badgeTotalNum_ = BUNDLE_BADGE_TOTAL_NUM;

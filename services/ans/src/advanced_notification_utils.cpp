@@ -2331,13 +2331,14 @@ void AdvancedNotificationService::CloseAlert(const std::shared_ptr<NotificationR
     record->notification->SetEnableLight(false);
     record->notification->SetEnableSound(false);
     record->notification->SetEnableVibration(false);
-    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
-    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
-    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
-    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
-    ANS_LOGI("closeAlert key=%{public}s flags=%{public}d",
+    SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::SOUND_FLAG, false);
+    SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
+    SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
+    SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::BANNER_FLAG, false);
+    ANS_LOGI("closeAlert key=%{public}s flags=%{public}d priorityFlags=%{public}d",
         record->request->GetBaseKey("").c_str(),
-        record->request->GetFlags()->GetReminderFlags());
+        record->request->GetFlags()->GetReminderFlags(),
+        record->request->GetPriorityCurrentReminderFlags());
 }
 
 bool AdvancedNotificationService::AllowUseReminder(const std::string& bundleName)
@@ -2707,21 +2708,42 @@ void AdvancedNotificationService::UpdateCloneBundleInfoForEnable(
     }
 }
 
+ErrCode AdvancedNotificationService::SetSlotFlagsAndUpdateReminderMode(
+    const sptr<NotificationBundleOption> &bundle, uint32_t slotFlags, int32_t notificationType)
+{
+    std::string tag = (notificationType == static_cast<int32_t>(
+        NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION))
+        ? "priority notification" : "notification";
+    ErrCode result = NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(
+        bundle, slotFlags, notificationType);
+    if (result != ERR_OK) {
+        ANS_LOGW("Set %{public}s slot failed.", tag.c_str());
+        return result;
+    }
+    result = UpdateSlotReminderModeBySlotFlags(bundle, slotFlags, notificationType);
+    if (result != ERR_OK) {
+        ANS_LOGW("Set %{public}s reminder slot failed.", tag.c_str());
+        return result;
+    }
+    return ERR_OK;
+}
+
 void AdvancedNotificationService::UpdateCloneBundleInfoFoSlot(
     const NotificationCloneBundleInfo cloneBundleInfo, const sptr<NotificationBundleOption> bundle)
 {
     if (cloneBundleInfo.GetSlotInfo().empty()) {
         PublishSlotChangeCommonEvent(bundle);
     }
-    if (NotificationPreferences::GetInstance()->SetNotificationSlotFlagsForBundle(bundle,
-        cloneBundleInfo.GetSlotFlags()) != ERR_OK) {
-        ANS_LOGW("Set notification slot failed.");
+    if (SetSlotFlagsAndUpdateReminderMode(bundle, cloneBundleInfo.GetSlotFlags(),
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION)) != ERR_OK) {
         return;
     }
-    if (UpdateSlotReminderModeBySlotFlags(bundle, cloneBundleInfo.GetSlotFlags()) != ERR_OK) {
-        ANS_LOGW("Set notification reminder slot failed.");
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    if (SetSlotFlagsAndUpdateReminderMode(bundle, cloneBundleInfo.GetPrioritySlotFlags(),
+        static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::PRIORITY_NOTIFICATION)) != ERR_OK) {
         return;
     }
+#endif
 
     for (auto& cloneSlot : cloneBundleInfo.GetSlotInfo()) {
         NotificationSlot slotInfo = NotificationSlot(cloneSlot.slotType_);

@@ -249,7 +249,11 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeIsNotificationSlotEnabledByBundles", nullptr,
         reinterpret_cast<void *>(AniIsNotificationSlotEnabledByBundles)},
     ani_native_function {"nativeSetSlotFlagsByBundle", nullptr, reinterpret_cast<void *>(AniSetSlotFlagsByBundle)},
+    ani_native_function {"nativeSetSlotFlagsByBundleWithType", nullptr,
+        reinterpret_cast<void *>(AniSetSlotFlagsByBundleWithType)},
     ani_native_function {"nativeGetSlotFlagsByBundle", nullptr, reinterpret_cast<void *>(AniGetSlotFlagsByBundle)},
+    ani_native_function {"nativeGetSlotFlagsByBundleWithType", nullptr,
+        reinterpret_cast<void *>(AniGetSlotFlagsByBundleWithType)},
     ani_native_function {"nativeGetSlotByBundle", nullptr, reinterpret_cast<void *>(AniGetSlotByBundle)},
     ani_native_function {"nativeGetSlotNumByBundle", nullptr, reinterpret_cast<void *>(AniGetSlotNumByBundle)},
 #else
@@ -262,7 +266,9 @@ static std::array kitManagerFunctions = {
     ani_native_function {"nativeIsNotificationSlotEnabledByBundles", nullptr,
         reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeSetSlotFlagsByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeSetSlotFlagsByBundleWithType", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeGetSlotFlagsByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
+    ani_native_function {"nativeGetSlotFlagsByBundleWithType", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeGetSlotByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
     ani_native_function {"nativeGetSlotNumByBundle", nullptr, reinterpret_cast<void *>(ThrowSystemCapErr)},
 #endif

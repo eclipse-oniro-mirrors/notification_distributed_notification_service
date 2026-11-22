@@ -21,6 +21,7 @@
 #include "notification_bundle_icon_info.h"
 #include "distributed_bundle_option.h"
 #include "notification_button_option.h"
+#include "notification_constant.h"
 #include "notification_do_not_disturb_date.h"
 #include "notification_do_not_disturb_profile.h"
 #include "enabled_notification_callback_data.h"
@@ -183,13 +184,16 @@ public:
     static ErrCode GetEnabledForBundleSlotSelf(const NotificationConstant::SlotType &slotType, bool &enabled);
 
     /**
-     * @brief Obtains slotflags of bundle.
+     * @brief Obtains slotflags of bundle for a specified notification type.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
-     * @param slotFlags Indicates slotFlags of bundle.
+     * @param slotFlags Indicates slotFlags of bundle obtained.
+     * @param notificationType Indicates the notification type the slotFlags apply to.
      * @return Returns get slotFlags by bundle result.
      */
-    static ErrCode GetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption, uint32_t &slotFlags);
+    static ErrCode GetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption,
+        uint32_t &slotFlags,
+        int32_t notificationType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION));
 
     /**
      * @brief Obtains slotFlags of bundle.
@@ -200,13 +204,15 @@ public:
     static ErrCode GetNotificationSettings(uint32_t &slotFlags);
 
     /**
-     * @brief set slotflags of bundle.
+     * @brief set slotflags of bundle for a specified notification type.
      *
      * @param bundleOption Indicates the bundle name and uid of the application.
      * @param slotFlags Indicates slotFlags of bundle.
+     * @param notificationType Indicates the notification type the slotFlags apply to.
      * @return Returns get slotFlags by bundle result.
      */
-    static ErrCode SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption, uint32_t slotFlags);
+    static ErrCode SetNotificationSlotFlagsAsBundle(const NotificationBundleOption &bundleOption, uint32_t slotFlags,
+        int32_t notificationType = static_cast<int32_t>(NotificationConstant::SlotFlagsNotificationType::NOTIFICATION));
 
     /**
      * @brief Publishes a notification.

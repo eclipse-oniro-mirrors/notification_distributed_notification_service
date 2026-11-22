@@ -26,7 +26,8 @@ namespace Notification {
         auto service = AdvancedNotificationService::GetInstance();
         sptr<NotificationBundleOption> bundleOption = ObjectBuilder<NotificationBundleOption>::Build(fuzzData);
         uint32_t slotFlags = fuzzData->ConsumeIntegral<uint32_t>();
-        service->SetSlotFlagsAsBundle(bundleOption, slotFlags);
+        int32_t notificationType = fuzzData->ConsumeIntegral<int32_t>();
+        service->SetSlotFlagsAsBundle(bundleOption, slotFlags, notificationType);
         return true;
     }
 }

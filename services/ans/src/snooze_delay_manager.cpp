@@ -148,20 +148,25 @@ bool AdvancedNotificationService::SetSnoozeDelayTimeToDB(const int64_t delayTime
     return true;
 }
 
-void AdvancedNotificationService::PrepareSnoozeDeviceFlags(const sptr<NotificationRequest> &request,
-    const std::shared_ptr<NotificationFlags> &currentFlags)
+static void PrepareSnoozeDeviceFlag(const sptr<NotificationRequest> &request,
+    const std::shared_ptr<NotificationFlags> &currentFlags, bool isPriority)
 {
     auto deviceFlags = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
-    auto src = request->GetDeviceFlags();
+    auto src = isPriority ? request->GetPriorityDeviceFlags() : request->GetDeviceFlags();
     if (src != nullptr) {
         for (auto it = src->begin(); it != src->end(); ++it) {
             if (it->second != nullptr) {
-                deviceFlags->emplace(it->first, std::make_shared<NotificationFlags>(it->second->GetReminderFlags()));
+                deviceFlags->emplace(it->first,
+                    std::make_shared<NotificationFlags>(it->second->GetReminderFlags()));
             }
         }
     }
-    (*deviceFlags)[NotificationConstant::CURRENT_DEVICE_TYPE] = currentFlags;
-    request->SetDeviceFlags(deviceFlags);
+    if (isPriority) {
+        request->SetPriorityDeviceFlags(deviceFlags);
+    } else {
+        (*deviceFlags)[NotificationConstant::CURRENT_DEVICE_TYPE] = currentFlags;
+        request->SetDeviceFlags(deviceFlags);
+    }
 }
 
 void AdvancedNotificationService::SnoozeNotificationConsumed(const std::shared_ptr<NotificationRecord> &record)
@@ -179,7 +184,10 @@ void AdvancedNotificationService::SnoozeNotificationConsumed(const std::shared_p
     std::shared_ptr<NotificationFlags> flags = record->request->GetFlags() == nullptr ?
         nullptr : std::make_shared<NotificationFlags>(record->request->GetFlags()->GetReminderFlags());
     recordNew->request->SetFlags(flags);
-    PrepareSnoozeDeviceFlags(recordNew->request, flags);
+    PrepareSnoozeDeviceFlag(recordNew->request, flags, false);
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    PrepareSnoozeDeviceFlag(recordNew->request, flags, true);
+#endif
     recordNew->request->SetBadgeNumber(0);
     recordNew->notification = new (std::nothrow) Notification(recordNew->request);
     ANS_COND_DO_ERR(recordNew->notification == nullptr, return, "Notification malloc error.");

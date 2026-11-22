@@ -127,6 +127,13 @@ inline AnsStatus CheckPictureSize(const sptr<NotificationRequest> &request)
     return AnsStatus();
 }
 
+inline void SetBothDistributedFlagBit(const sptr<NotificationRequest> &request,
+    const NotificationConstant::ReminderFlag &bit, const bool status)
+{
+    request->SetDistributedFlagBit(bit, status);
+    request->SetPriorityDistributedFlagBit(bit, status);
+}
+
 inline OHOS::Notification::HaMetaMessage AddInformationInMessage(
     OHOS::Notification::HaMetaMessage haMetaMessage, const int32_t reason,
     std::string message)

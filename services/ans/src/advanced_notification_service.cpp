@@ -1379,16 +1379,17 @@ void AdvancedNotificationService::DoNotDisturbUpdataReminderFlags(const std::sha
         NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request, message.BranchId(BRANCH_11));
         return;
     }
-    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
+    SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::SOUND_FLAG, false);
     record->notification->SetEnableSound(false);
     record->request->SetVisibleness(NotificationConstant::VisiblenessType::SECRET);
-    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
-    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
-    record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
+    SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::BANNER_FLAG, false);
+    SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
+    SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
     record->notification->SetEnableVibration(false);
-    ANS_LOGI("SetFlags-DoNotDisturb, Key = %{public}s flags=%{public}d",
+    ANS_LOGI("SetFlags-DoNotDisturb, Key = %{public}s flags=%{public}d priorityFlags=%{public}d",
         record->request->GetBaseKey("").c_str(),
-        record->request->GetFlags()->GetReminderFlags());
+        record->request->GetFlags()->GetReminderFlags(),
+        record->request->GetPriorityCurrentReminderFlags());
 }
 
 ErrCode AdvancedNotificationService::UpdateSlotAuthInfo(const std::shared_ptr<NotificationRecord> &record)
@@ -1493,6 +1494,43 @@ AnsStatus AdvancedNotificationService::Filter(const std::shared_ptr<Notification
     return AnsStatus();
 }
 
+void AdvancedNotificationService::DisableReminderFlagsByControl(const std::shared_ptr<NotificationRecord> &record,
+    const std::shared_ptr<NotificationFlags> &flags, uint32_t notificationControlFlags)
+{
+    if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
+        SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::SOUND_FLAG, false);
+        record->notification->SetEnableSound(false);
+    }
+
+    if (flags->IsLockScreenEnabled() == NotificationConstant::FlagStatus::OPEN &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
+        SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
+        record->request->SetVisibleness(NotificationConstant::VisiblenessType::SECRET);
+    }
+
+    if (flags->IsBannerEnabled() == NotificationConstant::FlagStatus::OPEN &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::BANNER_FLAG) != 0) {
+        SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::BANNER_FLAG, false);
+    }
+
+    if (flags->IsLightScreenEnabled() &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
+        SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
+    }
+
+    if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
+        SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
+        record->notification->SetEnableVibration(false);
+    }
+
+    if (flags->IsStatusIconEnabled() &&
+        (notificationControlFlags & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
+        SetBothDistributedFlagBit(record->request, NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, false);
+    }
+}
+
 void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::shared_ptr<NotificationRecord> &record,
     const bool isAgentController)
 {
@@ -1521,41 +1559,11 @@ void AdvancedNotificationService::ChangeNotificationByControlFlags(const std::sh
         return;
     }
 
-    if (flags->IsSoundEnabled() == NotificationConstant::FlagStatus::OPEN &&
-        (notificationControlFlags & NotificationConstant::ReminderFlag::SOUND_FLAG) != 0) {
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
-        record->notification->SetEnableSound(false);
-    }
-
-    if (flags->IsLockScreenEnabled() == NotificationConstant::FlagStatus::OPEN &&
-        (notificationControlFlags & NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG) != 0) {
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
-        record->request->SetVisibleness(NotificationConstant::VisiblenessType::SECRET);
-    }
-
-    if (flags->IsBannerEnabled() == NotificationConstant::FlagStatus::OPEN &&
-        (notificationControlFlags & NotificationConstant::ReminderFlag::BANNER_FLAG) != 0) {
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
-    }
-
-    if (flags->IsLightScreenEnabled() &&
-        (notificationControlFlags & NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG) != 0) {
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
-    }
-
-    if (flags->IsVibrationEnabled() == NotificationConstant::FlagStatus::OPEN &&
-        (notificationControlFlags & NotificationConstant::ReminderFlag::VIBRATION_FLAG) != 0) {
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
-        record->notification->SetEnableVibration(false);
-    }
-
-    if (flags->IsStatusIconEnabled() &&
-        (notificationControlFlags & NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG) != 0) {
-        record->request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG, false);
-    }
-    ANS_LOGI("SetFlags-control, Key = %{public}s flags=%{public}d",
+    DisableReminderFlagsByControl(record, flags, notificationControlFlags);
+    ANS_LOGI("SetFlags-control, Key = %{public}s flags=%{public}d priorityFlags=%{public}d",
         record->request->GetBaseKey("").c_str(),
-        record->request->GetFlags()->GetReminderFlags());
+        record->request->GetFlags()->GetReminderFlags(),
+        record->request->GetPriorityCurrentReminderFlags());
 }
 
 ErrCode AdvancedNotificationService::CheckPublishPreparedNotification(

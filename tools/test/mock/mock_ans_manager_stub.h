@@ -565,12 +565,14 @@ public:
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode GetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption, uint32_t& slotFlags) override
+    ErrCode GetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption, uint32_t& slotFlags,
+        int32_t notificationType) override
     {
         return ERR_ANS_INVALID_PARAM;
     }
 
-    ErrCode SetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption, uint32_t slotFlags) override
+    ErrCode SetSlotFlagsAsBundle(const sptr<NotificationBundleOption>& bundleOption, uint32_t slotFlags,
+        int32_t notificationType) override
     {
         return ERR_ANS_INVALID_PARAM;
     }

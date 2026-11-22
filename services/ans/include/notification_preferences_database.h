@@ -375,6 +375,7 @@ public:
      */
     bool PutNotificationsEnabled(const int32_t &userId, const bool &enabled);
     bool PutSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &slotFlags);
+    bool PutPrioritySlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo, const int32_t &slotFlags);
     bool PutHasPoppedDialog(const NotificationPreferencesInfo::BundleInfo &bundleInfo, const bool &hasPopped);
 
     /**
@@ -706,6 +707,8 @@ private:
     void ParseBundleName(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleImportance(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleSlotFlags(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
+    void ParseBundlePrioritySlotFlags(
+        NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
     void ParseBundleShowBadgeEnable(NotificationPreferencesInfo::BundleInfo &bundleInfo,
         const std::string &value) const;
     void ParseBundleBadgeNum(NotificationPreferencesInfo::BundleInfo &bundleInfo, const std::string &value) const;
@@ -731,6 +734,7 @@ private:
     void ParseSlotAuthorizedStatus(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotAuthHitnCnt(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseSlotReminderMode(sptr<NotificationSlot> &slot, const std::string &value) const;
+    void ParseSlotPriorityReminderMode(sptr<NotificationSlot> &slot, const std::string &value) const;
     void ParseBundleExtensionSubscriptionInfos(
         NotificationPreferencesInfo::BundleInfo& bundleInfo, const std::string& value) const;
     void ParseBundleExtensionSubscriptionEnabled(

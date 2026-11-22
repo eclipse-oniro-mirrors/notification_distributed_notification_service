@@ -53,7 +53,7 @@ public:
     void OnReceiveMsg(const void *data, uint32_t dataLen);
 #ifdef DISTRIBUTED_FEATURE_MASTER
     void HandleDeviceUsingChange(const DeviceStatueChangeInfo& changeInfo);
-    bool OnConsumedSetFlags(const std::shared_ptr<Notification> &request,
+    bool CheckDeviceReminderFlagsExist(const std::shared_ptr<Notification> &request,
         const DistributedDeviceInfo& peerDevice);
 #else
     void SyncDeviceStatus(int32_t status);

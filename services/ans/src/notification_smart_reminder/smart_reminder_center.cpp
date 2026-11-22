@@ -297,6 +297,26 @@ void SmartReminderCenter::SetSyncDevice(const sptr<NotificationRequest> &request
     request->SetExtendInfo(extendInfo);
 }
 
+void SmartReminderCenter::InitPriorityDeviceFlags(const sptr<NotificationRequest> &request,
+    const shared_ptr<map<string, shared_ptr<NotificationFlags>>> &notificationFlagsOfDevices) const
+{
+#ifdef ANS_FEATURE_PRIORITY_NOTIFICATION
+    auto priorityNotificationFlagsOfDevices = make_shared<map<string, shared_ptr<NotificationFlags>>>();
+    for (auto &deviceFlag : *notificationFlagsOfDevices) {
+        if (deviceFlag.second != nullptr) {
+            (*priorityNotificationFlagsOfDevices)[deviceFlag.first] =
+                make_shared<NotificationFlags>(deviceFlag.second->GetReminderFlags());
+        }
+    }
+    auto currentIter = priorityNotificationFlagsOfDevices->find(NotificationConstant::CURRENT_DEVICE_TYPE);
+    if (currentIter == priorityNotificationFlagsOfDevices->end() && request->GetFlags() != nullptr) {
+        (*priorityNotificationFlagsOfDevices)[NotificationConstant::CURRENT_DEVICE_TYPE] =
+            make_shared<NotificationFlags>(request->GetFlags()->GetReminderFlags());
+    }
+    request->SetPriorityDeviceFlags(priorityNotificationFlagsOfDevices);
+#endif
+}
+
 void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest> &request) const
 {
     shared_ptr<map<string, shared_ptr<NotificationFlags>>> notificationFlagsOfDevices =
@@ -309,6 +329,7 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
         ANS_LOGD("Privilege message handle ReminderDecisionProcess.");
         (*notificationFlagsOfDevices)[NotificationConstant::CURRENT_DEVICE_TYPE] = request->GetFlags();
         request->SetDeviceFlags(notificationFlagsOfDevices);
+        InitPriorityDeviceFlags(request, notificationFlagsOfDevices);
         return;
     }
 #endif
@@ -323,6 +344,7 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
     if (!IsCollaborationAllowed(request)) {
         ANS_LOGW("collabration not allowed");
         request->SetDeviceFlags(notificationFlagsOfDevices);
+        InitPriorityDeviceFlags(request, notificationFlagsOfDevices);
         return;
     }
 
@@ -333,6 +355,7 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
     SetSyncDevice(request, syncDevices);
     if (syncDevices.size() <= 1) {
         request->SetDeviceFlags(notificationFlagsOfDevices);
+        InitPriorityDeviceFlags(request, notificationFlagsOfDevices);
         return;
     }
 
@@ -344,6 +367,7 @@ void SmartReminderCenter::ReminderDecisionProcess(const sptr<NotificationRequest
     }
 
     request->SetDeviceFlags(notificationFlagsOfDevices);
+    InitPriorityDeviceFlags(request, notificationFlagsOfDevices);
 }
 
 void SmartReminderCenter::CheckScreenOffForCollaboration(const set<string>& syncDevices,

@@ -61,6 +61,8 @@ public:
 
     void SetSlotFlags(const uint32_t &slotFlags);
     uint32_t GetSlotFlags() const;
+    void SetPrioritySlotFlags(const uint32_t &slotFlags);
+    uint32_t GetPrioritySlotFlags() const;
 
     void SetUid(const int32_t &uid);
     int32_t GetUid() const;
@@ -110,6 +112,7 @@ private:
     int32_t appIndex_ = -1;
     int32_t uid_ = -1;
     uint32_t slotFlags_ = 0;
+    uint32_t prioritySlotFlags_ = 63;
     bool isShowBadge_ = false;
     bool hasPoppedDialog_ = false;
     bool ishasPoppedSupportClone_ = false;

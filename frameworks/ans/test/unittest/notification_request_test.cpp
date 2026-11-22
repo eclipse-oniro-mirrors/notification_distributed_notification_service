@@ -3286,5 +3286,202 @@ HWTEST_F(NotificationRequestTest, FromJson_LiveViewWithoutContent_001, Level1)
     EXPECT_EQ(request->CheckNotificationRequest(nullptr), ERR_ANS_INNER_INVALID_PARAM);
     delete request;
 }
+
+/**
+ * @tc.name: SetDistributedFlagBit_0100
+ * @tc.desc: Test SetDistributedFlagBit sets and clears the reminder bit on notification flags.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetDistributedFlagBit_0100, Level1)
+{
+    NotificationRequest notificationRequest(10);
+    notificationRequest.SetFlags(std::make_shared<NotificationFlags>(0));
+    notificationRequest.SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, true);
+    EXPECT_EQ(notificationRequest.GetFlags()->GetReminderFlags(),
+        static_cast<uint32_t>(NotificationConstant::ReminderFlag::SOUND_FLAG));
+    notificationRequest.SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
+    EXPECT_EQ(notificationRequest.GetFlags()->GetReminderFlags(), 0);
+}
+
+/**
+ * @tc.name: SetDistributedFlagBit_0200
+ * @tc.desc: Test SetDistributedFlagBit clear propagates to device flags skipping headset/glasses
+ *           and unaffectDevice members, current device entry is cleared.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetDistributedFlagBit_0200, Level1)
+{
+    const uint32_t soundFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::SOUND_FLAG);
+    const uint32_t lockscreenFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG);
+    const uint32_t bannerFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::BANNER_FLAG);
+    const uint32_t lightScreenFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG);
+    const uint32_t vibrationFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::VIBRATION_FLAG);
+    const uint32_t statusIconFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG);
+    const uint32_t allFlags = soundFlag | lockscreenFlag | bannerFlag | lightScreenFlag | vibrationFlag |
+        statusIconFlag;
+
+    NotificationRequest notificationRequest(10);
+    notificationRequest.SetFlags(std::make_shared<NotificationFlags>(allFlags));
+    auto deviceFlags = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    (*deviceFlags)["wearable"] = std::make_shared<NotificationFlags>(soundFlag);
+    (*deviceFlags)["tablet"] = std::make_shared<NotificationFlags>(bannerFlag);
+    (*deviceFlags)[NotificationConstant::HEADSET_DEVICE_TYPE] =
+        std::make_shared<NotificationFlags>(lightScreenFlag);
+    (*deviceFlags)[NotificationConstant::GLASSES_DEVICE_TYPE] =
+        std::make_shared<NotificationFlags>(vibrationFlag);
+    (*deviceFlags)[NotificationConstant::CURRENT_DEVICE_TYPE] = std::make_shared<NotificationFlags>(soundFlag);
+    notificationRequest.SetDeviceFlags(deviceFlags);
+
+    std::set<std::string> unaffectDevice = {"tablet"};
+    notificationRequest.SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false, unaffectDevice);
+
+    EXPECT_EQ(notificationRequest.GetFlags()->GetReminderFlags(), allFlags & ~soundFlag);
+    auto result = notificationRequest.GetDeviceFlags();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ((*result)["wearable"]->GetReminderFlags(), 0);
+    EXPECT_EQ((*result)["tablet"]->GetReminderFlags(), bannerFlag);
+    EXPECT_EQ((*result)[NotificationConstant::HEADSET_DEVICE_TYPE]->GetReminderFlags(), lightScreenFlag);
+    EXPECT_EQ((*result)[NotificationConstant::GLASSES_DEVICE_TYPE]->GetReminderFlags(), vibrationFlag);
+    EXPECT_EQ((*result)[NotificationConstant::CURRENT_DEVICE_TYPE]->GetReminderFlags(), 0);
+}
+
+/**
+ * @tc.name: SetPriorityDistributedFlagBit_0100
+ * @tc.desc: Test SetPriorityDistributedFlagBit seeds current entry from normal flags
+ *           and sets/clears bit on the current entry.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetPriorityDistributedFlagBit_0100, Level1)
+{
+    const uint32_t soundFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::SOUND_FLAG);
+    const uint32_t lockscreenFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG);
+    const uint32_t bannerFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::BANNER_FLAG);
+    const uint32_t lightScreenFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG);
+    const uint32_t vibrationFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::VIBRATION_FLAG);
+    const uint32_t statusIconFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG);
+    const uint32_t allFlags = soundFlag | lockscreenFlag | bannerFlag | lightScreenFlag | vibrationFlag |
+        statusIconFlag;
+
+    NotificationRequest notificationRequest(10);
+    notificationRequest.SetFlags(std::make_shared<NotificationFlags>(allFlags));
+
+    notificationRequest.SetPriorityDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, true);
+    auto priorityDeviceFlags = notificationRequest.GetPriorityDeviceFlags();
+    ASSERT_NE(priorityDeviceFlags, nullptr);
+    auto currentIter = priorityDeviceFlags->find(NotificationConstant::CURRENT_DEVICE_TYPE);
+    ASSERT_NE(currentIter, priorityDeviceFlags->end());
+    ASSERT_NE(currentIter->second, nullptr);
+    EXPECT_EQ(currentIter->second->GetReminderFlags(), allFlags);
+
+    notificationRequest.SetPriorityDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
+    EXPECT_EQ(currentIter->second->GetReminderFlags(), allFlags & ~soundFlag);
+}
+
+/**
+ * @tc.name: SetPriorityDistributedFlagBit_0200
+ * @tc.desc: Test SetPriorityDistributedFlagBit clear propagation skips headset/glasses/current
+ *           and honors unaffectDevice.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, SetPriorityDistributedFlagBit_0200, Level1)
+{
+    const uint32_t soundFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::SOUND_FLAG);
+    const uint32_t lockscreenFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG);
+    const uint32_t bannerFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::BANNER_FLAG);
+    const uint32_t lightScreenFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG);
+    const uint32_t vibrationFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::VIBRATION_FLAG);
+    const uint32_t statusIconFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::STATUSBAR_ICON_FLAG);
+    const uint32_t allFlags = soundFlag | lockscreenFlag | bannerFlag | lightScreenFlag | vibrationFlag |
+        statusIconFlag;
+
+    NotificationRequest notificationRequest(10);
+    notificationRequest.SetFlags(std::make_shared<NotificationFlags>(allFlags));
+    auto priorityDeviceFlags = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    (*priorityDeviceFlags)["wearable"] = std::make_shared<NotificationFlags>(soundFlag);
+    (*priorityDeviceFlags)["tablet"] = std::make_shared<NotificationFlags>(bannerFlag);
+    (*priorityDeviceFlags)[NotificationConstant::HEADSET_DEVICE_TYPE] =
+        std::make_shared<NotificationFlags>(lightScreenFlag);
+    (*priorityDeviceFlags)[NotificationConstant::GLASSES_DEVICE_TYPE] =
+        std::make_shared<NotificationFlags>(vibrationFlag);
+    notificationRequest.SetPriorityDeviceFlags(priorityDeviceFlags);
+
+    std::set<std::string> unaffectDevice = {"tablet"};
+    notificationRequest.SetPriorityDistributedFlagBit(
+        NotificationConstant::ReminderFlag::SOUND_FLAG, false, unaffectDevice);
+
+    auto result = notificationRequest.GetPriorityDeviceFlags();
+    ASSERT_NE(result, nullptr);
+    auto currentIter = result->find(NotificationConstant::CURRENT_DEVICE_TYPE);
+    ASSERT_NE(currentIter, result->end());
+    ASSERT_NE(currentIter->second, nullptr);
+    EXPECT_EQ(currentIter->second->GetReminderFlags(), allFlags & ~soundFlag);
+    EXPECT_EQ((*result)["wearable"]->GetReminderFlags(), 0);
+    EXPECT_EQ((*result)["tablet"]->GetReminderFlags(), bannerFlag);
+    EXPECT_EQ((*result)[NotificationConstant::HEADSET_DEVICE_TYPE]->GetReminderFlags(), lightScreenFlag);
+    EXPECT_EQ((*result)[NotificationConstant::GLASSES_DEVICE_TYPE]->GetReminderFlags(), vibrationFlag);
+}
+
+/**
+ * @tc.name: NotificationMarshalling_PriorityFields_0100
+ * @tc.desc: Test parcel roundtrip preserves priority device flags and isAllPriorityByBundle.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, NotificationMarshalling_PriorityFields_0100, Level1)
+{
+    const uint32_t soundFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::SOUND_FLAG);
+    const uint32_t bannerFlag = static_cast<uint32_t>(NotificationConstant::ReminderFlag::BANNER_FLAG);
+
+    NotificationRequest notificationRequest(10);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetText("priority fields text");
+    normalContent->SetTitle("priority fields title");
+    notificationRequest.SetContent(std::make_shared<NotificationContent>(normalContent));
+    auto priorityDeviceFlags = std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
+    (*priorityDeviceFlags)["wearable"] = std::make_shared<NotificationFlags>(soundFlag | bannerFlag);
+    notificationRequest.SetPriorityDeviceFlags(priorityDeviceFlags);
+    notificationRequest.SetAllPriorityByBundle(true);
+
+    Parcel parcel;
+    EXPECT_TRUE(notificationRequest.Marshalling(parcel));
+    auto *unmarshalledRequest = NotificationRequest::Unmarshalling(parcel);
+    ASSERT_NE(unmarshalledRequest, nullptr);
+    auto result = unmarshalledRequest->GetPriorityDeviceFlags();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->size(), 1);
+    auto wearableIter = result->find("wearable");
+    ASSERT_NE(wearableIter, result->end());
+    ASSERT_NE(wearableIter->second, nullptr);
+    EXPECT_EQ(wearableIter->second->GetReminderFlags(), soundFlag | bannerFlag);
+    EXPECT_TRUE(unmarshalledRequest->IsAllPriorityByBundle());
+    delete unmarshalledRequest;
+}
+
+/**
+ * @tc.name: NotificationMarshalling_PriorityFields_0200
+ * @tc.desc: Test parcel roundtrip with default request keeps priority fields empty.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(NotificationRequestTest, NotificationMarshalling_PriorityFields_0200, Level1)
+{
+    NotificationRequest notificationRequest(10);
+    auto normalContent = std::make_shared<NotificationNormalContent>();
+    normalContent->SetText("default priority fields text");
+    normalContent->SetTitle("default priority fields title");
+    notificationRequest.SetContent(std::make_shared<NotificationContent>(normalContent));
+
+    Parcel parcel;
+    EXPECT_TRUE(notificationRequest.Marshalling(parcel));
+    auto *unmarshalledRequest = NotificationRequest::Unmarshalling(parcel);
+    ASSERT_NE(unmarshalledRequest, nullptr);
+    EXPECT_EQ(unmarshalledRequest->GetPriorityDeviceFlags(), nullptr);
+    EXPECT_FALSE(unmarshalledRequest->IsAllPriorityByBundle());
+    delete unmarshalledRequest;
+}
 } // namespace Notification
 } // namespace OHOS

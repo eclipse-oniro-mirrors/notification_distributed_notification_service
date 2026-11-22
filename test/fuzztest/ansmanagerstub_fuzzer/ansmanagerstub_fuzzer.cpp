@@ -68,9 +68,10 @@ namespace OHOS {
         service->SetTargetDeviceStatus(deviceType, status, stringData);
         service->SetTargetDeviceStatus(deviceType, status, controlFlag, stringData, userId);
         service->ClearAllNotificationGroupInfo(localSwitch);
-        service->SetSlotFlagsAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>());
+        service->SetSlotFlagsAsBundle(bundleOption, fuzzData->ConsumeIntegral<int32_t>(),
+            fuzzData->ConsumeIntegral<int32_t>());
         uint32_t slotFlags;
-        service->GetSlotFlagsAsBundle(bundleOption, slotFlags);
+        service->GetSlotFlagsAsBundle(bundleOption, slotFlags, fuzzData->ConsumeIntegral<int32_t>());
         service->GetActiveNotificationByFilter(bundleOption, notificationId, stringData, userId, keys, request);
         sptr<NotificationParameters> parameters = nullptr;
         service->GetNotificationParameters(notificationId, stringData, parameters);
