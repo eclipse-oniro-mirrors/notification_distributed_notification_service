@@ -1897,10 +1897,13 @@ public:
 
     bool IsDisableNotification(const std::string &bundleName, const int32_t userId);
 
-    bool IsDisableNotificationByRestrictedMode(const std::string &bundleName, const int32_t &userId);
+    bool IsDisableNotificationByRestrictedMode(const std::string &bundleName, const int32_t &userId,
+        int32_t ownerUid = DEFAULT_UID);
 
     bool IsDisableNotificationForSaByRestrictedMode(const std::string &bundleName,
-        const int32_t &userId, bool directAgency);
+        const int32_t &userId, bool directAgency, int32_t ownerUid = DEFAULT_UID);
+
+    bool IsThirdpartyForSafeMode(int32_t ownerUid);
 
     bool IsNeedToControllerByDisableNotification(const sptr<NotificationRequest> &request);
     

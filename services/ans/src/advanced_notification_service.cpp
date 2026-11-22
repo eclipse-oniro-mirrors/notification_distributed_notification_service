@@ -966,7 +966,8 @@ AnsStatus __attribute__((weak)) AdvancedNotificationService::PublishPreparedNoti
             return;
         }
 #endif
-        if (IsDisableNotificationByRestrictedMode(ownerBundleName, record->notification->GetRecvUserId())) {
+        if (IsDisableNotificationByRestrictedMode(ownerBundleName, record->notification->GetRecvUserId(),
+            bundleOption != nullptr ? bundleOption->GetUid() : DEFAULT_UID)) {
             ANS_LOGE("bundle(%{public}s) not in trust list.", (request->GetOwnerBundleName()).c_str());
             ansStatus = AnsStatus(ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle not in trust list");
             return;
