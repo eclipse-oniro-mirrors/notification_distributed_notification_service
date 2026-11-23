@@ -913,16 +913,20 @@ HWTEST_F(NotificationConfigParseTest, ParseNotificationExtension_Branch_00002, F
 
 /**
  * @tc.name: GetConfigJson_Branch_00001
- * @tc.desc: Test GetConfigJson and GetFilterUidAndBundleName when no config file is available.
+ * @tc.desc: Test GetConfigJson and GetFilterUidAndBundleName stay environment independent.
  */
 HWTEST_F(NotificationConfigParseTest, GetConfigJson_Branch_00001, Function | SmallTest | Level1)
 {
     auto inst = NotificationConfigParse::GetInstance();
+    // A key that never exists must be rejected no matter whether a config file is installed.
     nlohmann::json root;
-    EXPECT_FALSE(inst->GetConfigJson("/appPrivileges", root));
-    EXPECT_FALSE(inst->GetFilterUidAndBundleName(NotificationConfigParse::COLLABORATION_FILTER_KEY_UID));
+    EXPECT_FALSE(inst->GetConfigJson("__ans_ut_missing_key__", root));
+    EXPECT_FALSE(inst->GetFilterUidAndBundleName("__ans_ut_missing_key__"));
+
+    // Loading depends on the image, so only check that the result matches the loaded documents.
     std::vector<nlohmann::json> docs;
-    EXPECT_FALSE(inst->LoadConfigJsons(docs));
+    const bool loaded = inst->LoadConfigJsons(docs);
+    EXPECT_EQ(loaded, !docs.empty());
 }
 
 /**
