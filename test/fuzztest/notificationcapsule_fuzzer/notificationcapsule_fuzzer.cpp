@@ -1,0 +1,156 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#define private public    // NOLINT
+#define protected public  // NOLINT
+#include "notification_capsule.h"
+#include "notification_icon_button.h"
+#undef private
+#undef protected
+#include <memory>
+#include <fuzzer/FuzzedDataProvider.h>
+#include "notificationcapsule_fuzzer.h"
+
+namespace OHOS {
+namespace Notification {
+
+constexpr uint8_t MAX_BUTTON_SIZE = 3;
+
+static void TestNotificationCapsule(FuzzedDataProvider* fuzzData)
+{
+    NotificationCapsule capsule;
+    std::string title = fuzzData->ConsumeRandomLengthString();
+    std::string backgroundColor = fuzzData->ConsumeRandomLengthString();
+    std::string content = fuzzData->ConsumeRandomLengthString();
+    int32_t time = fuzzData->ConsumeIntegral<int32_t>();
+    uint8_t buttonSize = fuzzData->ConsumeIntegral<uint8_t>() % (MAX_BUTTON_SIZE + 1);
+    std::vector<NotificationIconButton> buttons;
+    buttons.reserve(buttonSize);
+    for (uint8_t i = 0; i < buttonSize; ++i) {
+        NotificationIconButton button;
+        button.SetText(fuzzData->ConsumeRandomLengthString());
+        button.SetName(fuzzData->ConsumeRandomLengthString());
+        button.SetHidePanel(fuzzData->ConsumeBool());
+        buttons.emplace_back(button);
+    }
+
+    capsule.SetTitle(title);
+    capsule.GetTitle();
+    capsule.SetBackgroundColor(backgroundColor);
+    capsule.GetBackgroundColor();
+    capsule.SetContent(content);
+    capsule.GetContent();
+    capsule.SetTime(time);
+    capsule.GetTime();
+    capsule.SetCapsuleButton(buttons);
+    capsule.GetCapsuleButton();
+    capsule.Dump();
+    capsule.ResetIcon();
+
+    nlohmann::json jsonObject;
+    capsule.ToJson(jsonObject);
+    std::unique_ptr<NotificationCapsule> fromJsonCapsule(NotificationCapsule::FromJson(jsonObject));
+    if (fromJsonCapsule != nullptr) {
+        fromJsonCapsule->Dump();
+    }
+
+    Parcel parcel;
+    if (!capsule.Marshalling(parcel)) {
+        return;
+    }
+    auto unmarshalledCapsule = std::unique_ptr<NotificationCapsule>(NotificationCapsule::Unmarshalling(parcel));
+    if (unmarshalledCapsule != nullptr) {
+        unmarshalledCapsule->Dump();
+    }
+}
+
+static void TestNotificationIconButton(FuzzedDataProvider* fuzzData)
+{
+    NotificationIconButton button;
+    std::string text = fuzzData->ConsumeRandomLengthString();
+    std::string name = fuzzData->ConsumeRandomLengthString();
+    bool hidePanel = fuzzData->ConsumeBool();
+
+    button.SetText(text);
+    button.GetText();
+    button.SetName(name);
+    button.GetName();
+    button.SetHidePanel(hidePanel);
+    button.GetHidePanel();
+    button.Dump();
+    button.ClearButtonIconsResource();
+
+    nlohmann::json jsonObject;
+    button.ToJson(jsonObject);
+    std::unique_ptr<NotificationIconButton> fromJsonButton(NotificationIconButton::FromJson(jsonObject));
+    if (fromJsonButton != nullptr) {
+        fromJsonButton->Dump();
+    }
+
+    Parcel parcel;
+    if (!button.Marshalling(parcel)) {
+        return;
+    }
+    auto unmarshalledButton = std::unique_ptr<NotificationIconButton>(NotificationIconButton::Unmarshalling(parcel));
+    if (unmarshalledButton != nullptr) {
+        unmarshalledButton->Dump();
+    }
+}
+
+static void TestNotificationIconButtonWithResource(FuzzedDataProvider* fuzzData)
+{
+    NotificationIconButton button;
+    button.SetText(fuzzData->ConsumeRandomLengthString());
+
+    std::shared_ptr<ResourceManager::Resource> iconResource = std::make_shared<ResourceManager::Resource>();
+    iconResource->bundleName = fuzzData->ConsumeRandomLengthString();
+    iconResource->moduleName = fuzzData->ConsumeRandomLengthString();
+    iconResource->id = fuzzData->ConsumeIntegral<int32_t>();
+    button.SetIconResource(iconResource);
+    button.GetIconResource();
+
+    // Round trip through Marshalling/Unmarshalling so this test does not depend on the internal
+    // field order of the parcel layout. ReadFromParcel() parses the icon resource written by
+    // WriteIconToParcel() and calls ReadResourceFromParcel() on that path.
+    Parcel parcel;
+    if (!button.Marshalling(parcel)) {
+        return;
+    }
+    std::unique_ptr<NotificationIconButton> unmarshalledButton(NotificationIconButton::Unmarshalling(parcel));
+    if (unmarshalledButton == nullptr) {
+        return;
+    }
+    unmarshalledButton->GetText();
+    unmarshalledButton->GetIconResource();
+    unmarshalledButton->GetIconImage();
+}
+
+bool DoSomethingInterestingWithMyAPI(FuzzedDataProvider* fuzzData)
+{
+    TestNotificationCapsule(fuzzData);
+    TestNotificationIconButton(fuzzData);
+    TestNotificationIconButtonWithResource(fuzzData);
+    return true;
+}
+}  // namespace Notification
+}  // namespace OHOS
+
+/* Fuzzer entry point */
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
+{
+    FuzzedDataProvider fuzzData(data, size);
+    OHOS::Notification::DoSomethingInterestingWithMyAPI(&fuzzData);
+    return 0;
+}
