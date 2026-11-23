@@ -3427,7 +3427,8 @@ HWTEST_F(NotificationRequestTest, SetPriorityDistributedFlagBit_0200, Level1)
 
 /**
  * @tc.name: NotificationMarshalling_PriorityFields_0100
- * @tc.desc: Test parcel roundtrip preserves priority device flags and isAllPriorityByBundle.
+ * @tc.desc: Test parcel roundtrip no longer serializes the service-only priority device
+ *           flags and isAllPriorityByBundle.
  * @tc.type: FUNC
  * @tc.require: issue
  */
@@ -3450,14 +3451,8 @@ HWTEST_F(NotificationRequestTest, NotificationMarshalling_PriorityFields_0100, L
     EXPECT_TRUE(notificationRequest.Marshalling(parcel));
     auto *unmarshalledRequest = NotificationRequest::Unmarshalling(parcel);
     ASSERT_NE(unmarshalledRequest, nullptr);
-    auto result = unmarshalledRequest->GetPriorityDeviceFlags();
-    ASSERT_NE(result, nullptr);
-    EXPECT_EQ(result->size(), 1);
-    auto wearableIter = result->find("wearable");
-    ASSERT_NE(wearableIter, result->end());
-    ASSERT_NE(wearableIter->second, nullptr);
-    EXPECT_EQ(wearableIter->second->GetReminderFlags(), soundFlag | bannerFlag);
-    EXPECT_TRUE(unmarshalledRequest->IsAllPriorityByBundle());
+    EXPECT_EQ(unmarshalledRequest->GetPriorityDeviceFlags(), nullptr);
+    EXPECT_FALSE(unmarshalledRequest->IsAllPriorityByBundle());
     delete unmarshalledRequest;
 }
 

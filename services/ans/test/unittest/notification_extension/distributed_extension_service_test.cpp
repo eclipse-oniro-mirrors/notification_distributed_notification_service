@@ -149,11 +149,12 @@ HWTEST_F(DistributedExtensionServiceTest, extension_00004, Function | SmallTest 
     DistributedExtensionService::GetInstance().HADotCallback(0, 0, 0, "{\"deviceType\":\"pc\"}");
     DistributedExtensionService::GetInstance().HADotCallback(0, 0, 0, "{\"result\":\"ok\"}");
     DistributedDeviceManager::GetInstance().InitTrustList();
-    // trigger device online
+    // trigger device online with mocked udid translate failure; capture the map state
+    // before clearing the mock so the async online task always observes the failure flag
     DeviceTrigger::MockTransDeviceIdToUdid(true);
     DeviceTrigger::TriggerDeviceOnline();
-    DeviceTrigger::MockTransDeviceIdToUdid(false);
     bool isEmpty = DistributedExtensionService::GetInstance().deviceMap_.empty();
+    DeviceTrigger::MockTransDeviceIdToUdid(false);
     ASSERT_EQ(isEmpty, true);
 
     DeviceTrigger::TriggerDeviceOnline();

@@ -1726,8 +1726,6 @@ private:
         const std::set<std::string> &unaffectDevice,
         const std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> &flagsOfDevices,
         bool skipCurrentDevice);
-    bool MarshallingPriorityNotificationFields(Parcel &parcel) const;
-    bool ReadPriorityNotificationFieldsFromParcel(Parcel &parcel);
     std::string GetLiveViewStatusKey();
     void AddConsumedDevices(const std::string &deviceType);
     bool IsConsumedDevices(const std::string &deviceType);
@@ -1835,13 +1833,16 @@ private:
     std::shared_ptr<NotificationBundleOption> agentBundle_ {};
     std::shared_ptr<NotificationTrigger> notificationTrigger_ {};
     std::shared_ptr<NotificationUnifiedGroupInfo> unifiedGroupInfo_ {};
-    std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
-    std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> priorityNotificationFlagsOfDevices_ {};
-    bool isAllPriorityByBundle_ {false};
     std::shared_ptr<NotificationGroupInfo> groupInfo_ {};
 
     uint32_t publishDelayTime_ {0};
     std::string priorityNotificationType_ {NotificationConstant::PriorityNotificationType::OTHER};
+
+    // The following variables are used only at the services.
+    bool isAllPriorityByBundle_ {false};
+    std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> notificationFlagsOfDevices_ {};
+    std::shared_ptr<std::map<std::string, std::shared_ptr<NotificationFlags>>> priorityNotificationFlagsOfDevices_ {};
+
     friend class NotificationSubscriberManager;
     friend class AdvancedNotificationService;
     friend class SnoozeTimerHelper;

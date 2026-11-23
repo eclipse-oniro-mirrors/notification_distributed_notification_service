@@ -230,6 +230,9 @@ int32_t DeviceManagerImpl::SetUserOperation(const std::string &pkgName, int32_t 
 int32_t DeviceManagerImpl::GetUdidByNetworkId(const std::string &pkgName, const std::string &netWorkId,
                                               std::string &udid)
 {
+    if (Notification::g_mockTransDeviceIdToUdid) {
+        return -1;
+    }
     return 0;
 }
 

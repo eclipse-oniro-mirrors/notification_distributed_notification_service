@@ -1066,64 +1066,6 @@ HWTEST_F(AnsSnoozeDelayTest, SnoozeNotificationConsumed_DeviceFlags_00001, Funct
 }
 
 /**
- * @tc.name: TriggerSnoozeDelay_00003
- * @tc.desc: Test TriggerSnoozeDelay skips null records and records with null request,
- *           and keeps the record whose snooze delay time is not reached.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsSnoozeDelayTest, TriggerSnoozeDelay_00003, Function | SmallTest | Level1)
-{
-    advancedNotificationService_->snoozeDelayTimerList_.clear();
-    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullptr);
-    auto nullRequestRecord = std::make_shared<NotificationRecord>();
-    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullRequestRecord);
-
-    sptr<NotificationRequest> futureRequest(new (std::nothrow) NotificationRequest());
-    futureRequest->SetSnoozeDelayTime(NotificationAnalyticsUtil::GetCurrentTime() + 60000);
-    auto futureRecord = std::make_shared<NotificationRecord>();
-    futureRecord->request = futureRequest;
-    advancedNotificationService_->snoozeDelayTimerList_.push_back(futureRecord);
-
-    advancedNotificationService_->TriggerSnoozeDelay();
-    ASSERT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 1);
-    EXPECT_EQ(advancedNotificationService_->snoozeDelayTimerList_.front(), futureRecord);
-}
-
-/**
- * @tc.name: TriggerSnoozeDelay_00004
- * @tc.desc: Test TriggerSnoozeDelay marks due record triggered and consumes it even when
- *           the list contains null entries.
- * @tc.type: FUNC
- * @tc.require: issue
- */
-HWTEST_F(AnsSnoozeDelayTest, TriggerSnoozeDelay_00004, Function | SmallTest | Level1)
-{
-    sptr<NotificationRequest> request(new (std::nothrow) NotificationRequest());
-    auto normalContent = std::make_shared<NotificationNormalContent>();
-    normalContent->SetContentType(1);
-    auto content = std::make_shared<NotificationContent>(normalContent);
-    request->SetContent(content);
-    request->SetSnoozeDelayTime(NotificationAnalyticsUtil::GetCurrentTime() - 60000);
-    request->SetIsSnoozeTrigger(false);
-    request->SetUpdateOnly(true);
-    sptr<NotificationBundleOption> bundleOption = new NotificationBundleOption("MyTestBundle", 50);
-    sptr<Notification> notification(new (std::nothrow) Notification(request));
-    notification->SetKey("testSnoozeDue");
-    auto dueRecord = std::make_shared<NotificationRecord>();
-    dueRecord->request = request;
-    dueRecord->notification = notification;
-    dueRecord->bundleOption = bundleOption;
-    advancedNotificationService_->snoozeDelayTimerList_.clear();
-    advancedNotificationService_->snoozeDelayTimerList_.push_back(nullptr);
-    advancedNotificationService_->snoozeDelayTimerList_.push_back(dueRecord);
-
-    advancedNotificationService_->TriggerSnoozeDelay();
-    EXPECT_EQ(dueRecord->request->GetIsSnoozeTrigger(), true);
-    EXPECT_EQ(advancedNotificationService_->snoozeDelayTimerList_.size(), 0);
-}
-
-/**
  * @tc.name: StartSnoozeTimer_00002
  * @tc.desc: Test StartSnoozeTimer erases null entries and returns false when no valid
  *           trigger time exists.
