@@ -23,6 +23,7 @@
 #include "distributed_extension_service.h"
 #endif
 #include "advanced_notification_service.h"
+#include "notification_clean_mgr.h"
 #include "notification_preferences.h"
 #ifdef ENABLE_ANS_TELEPHONY_CUST_WRAPPER
 #include "telephony_extension_wrapper.h"
@@ -30,6 +31,7 @@
 #include "advanced_datashare_helper.h"
 #include "notification_ai_extension_wrapper.h"
 #include "advanced_notification_inline.h"
+#include "ans_service_errors.h"
 #include "parameters.h"
 
 namespace OHOS {
@@ -40,6 +42,10 @@ REGISTER_SYSTEM_ABILITY_BY_ID(AdvancedNotificationServiceAbility, ADVANCED_NOTIF
 
 const std::string EXTENSION_BACKUP = "backup";
 const std::string EXTENSION_RESTORE = "restore";
+const std::string EXTENSION_CLEAN = "sa_cleanup";
+const std::string BOOTEVENT_ANS_REGISTER_READY = "bootevent.ans.register.ready";
+const std::string CLEANUP_MODE_PARAM = "ohos.boot.cleanup.mode";
+const std::string PARAM_TRUE = "true";
 const int32_t ALL_CONNECT_SA_ID = 70633;
 
 AdvancedNotificationServiceAbility::AdvancedNotificationServiceAbility(const int32_t systemAbilityId, bool runOnCreate)
@@ -70,6 +76,12 @@ void AdvancedNotificationServiceAbility::OnStart()
     service_->CreateDialogManager();
     
     if (!Publish(service_)) {
+        return;
+    }
+
+    if (IsCleanupModeEnabled()) {
+        ANS_LOGW("Cleanup mode, skip remaining init and send register ready");
+        ProcessRegisterReady();
         return;
     }
 
@@ -210,6 +222,22 @@ int32_t AdvancedNotificationServiceAbility::OnExtension(const std::string& exten
     MessageParcel& data, MessageParcel& reply)
 {
     ANS_LOGI("extension is %{public}s.", extension.c_str());
+    if (extension == EXTENSION_CLEAN) {
+        if (!IsCleanupModeEnabled()) {
+            ANS_LOGE("OnClean dispatched but not in Cleanup mode, refuse to clean");
+            return ERR_ANS_INNER_NOT_ALLOWED;
+        }
+        auto cleanMgr = DelayedSingleton<NotificationCleanMgr>::GetInstance();
+        if (cleanMgr == nullptr) {
+            ANS_LOGE("Get NotificationCleanMgr failed");
+            return ERR_ANS_INNER_SERVICE_NOT_READY;
+        }
+        int32_t ret = cleanMgr->OnClean();
+        if (ret != ERR_ANS_INNER_OK) {
+            ANS_LOGE("OnClean failed, err is %{public}d.", ret);
+        }
+        return ret;
+    }
     auto notificationService = AdvancedNotificationService::GetInstance();
     if (notificationService == nullptr) {
         ANS_LOGW("notification service is not initial.");
@@ -247,6 +275,20 @@ bool AdvancedNotificationServiceAbility::IsBopdOrRescueMode()
 bool AdvancedNotificationServiceAbility::IsSafeBootMode()
 {
     return OHOS::system::GetParameter("ohos.boot.mode", "") == "safemode";
+}
+
+bool AdvancedNotificationServiceAbility::IsCleanupModeEnabled()
+{
+    return OHOS::system::GetParameter(CLEANUP_MODE_PARAM, "") == PARAM_TRUE;
+}
+
+void AdvancedNotificationServiceAbility::ProcessRegisterReady()
+{
+    ANS_LOGI("ProcessRegisterReady start");
+    if (!OHOS::system::SetParameter(BOOTEVENT_ANS_REGISTER_READY, PARAM_TRUE)) {
+        ANS_LOGE("set ans register ready failed");
+    }
+    ANS_LOGI("ProcessRegisterReady end");
 }
 }  // namespace Notification
 }  // namespace OHOS

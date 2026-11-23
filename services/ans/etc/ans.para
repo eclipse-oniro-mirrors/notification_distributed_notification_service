@@ -13,3 +13,4 @@
 
 
 notification.ans.check.sa.permission=false
+bootevent.ans.register.ready = false

@@ -57,6 +57,8 @@ private:
     bool IsBopdMode();
     bool IsBopdOrRescueMode();
     bool IsSafeBootMode();
+    bool IsCleanupModeEnabled();
+    void ProcessRegisterReady();
 
 private:
     std::atomic<bool> isDatashaReready_ {false};

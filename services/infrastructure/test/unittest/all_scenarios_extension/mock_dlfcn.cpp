@@ -67,6 +67,13 @@ static int32_t MockCheckLiveViewRights(const sptr<NotificationRequest>&)
     return g_mockDlfcn.checkLiveViewRightsResult;
 }
 
+// Mock function for optional symbol: OnCleanup
+static int32_t MockOnCleanup()
+{
+    g_mockDlfcn.onCleanupCalled++;
+    return g_mockDlfcn.onCleanupResult;
+}
+
 namespace OHOS {
 namespace Notification {
 namespace Infra {
@@ -88,6 +95,7 @@ void ResetMockDlfcn()
     g_mockDlfcn.dlsymSuccessMap["OnNotifyDelayedNotification"] = true;
     g_mockDlfcn.dlsymSuccessMap["OnNotifyClearNotification"] = true;
     g_mockDlfcn.dlsymSuccessMap["CheckLiveViewRights"] = true;
+    g_mockDlfcn.dlsymSuccessMap["OnCleanup"] = true;
 }
 
 }  // namespace Test
@@ -140,6 +148,10 @@ extern "C" void* __wrap_dlsym(void* handle, const char* symbol)
         if (strcmp(symbol, "CheckLiveViewRights") == 0 &&
             g_mockDlfcn.dlsymSuccessMap["CheckLiveViewRights"]) {
             return reinterpret_cast<void*>(MockCheckLiveViewRights);
+        }
+        if (strcmp(symbol, "OnCleanup") == 0 &&
+            g_mockDlfcn.dlsymSuccessMap["OnCleanup"]) {
+            return reinterpret_cast<void*>(MockOnCleanup);
         }
         return nullptr;
     }
