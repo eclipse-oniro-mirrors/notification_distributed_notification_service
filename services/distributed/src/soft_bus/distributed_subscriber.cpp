@@ -162,12 +162,8 @@ ErrCode DistribuedSubscriber::OnOperationResponse(const std::shared_ptr<Notifica
         return ERR_ANS_INNER_INVALID_PARAM;
     }
     DistributedDeviceInfo operRespDevice;
-    if (!DistributedDeviceService::GetInstance().GetDeviceInfoByUdid(
-        operationInfo->GetNotificationUdid(), operRespDevice)) {
-        ANS_LOGE("GetDeviceInfoByUdid failed, udid: %{public}s",
-            StringAnonymous(operationInfo->GetNotificationUdid()).c_str());
-        return ERR_ANS_INNER_DISTRIBUTED_OPERATION_FAILED;
-    }
+    DistributedDeviceService::GetInstance().GetDeviceInfoByUdid(
+        operationInfo->GetNotificationUdid(), operRespDevice);
     ANS_LOGI("Subscriber on response %{public}d %{public}s %{public}d %{public}s, OperRespDeviceId: %{public}s.",
         peerDevice_.deviceType_, StringAnonymous(peerDevice_.deviceId_).c_str(), localDevice_.deviceType_,
         StringAnonymous(localDevice_.deviceId_).c_str(), StringAnonymous(operRespDevice.deviceId_).c_str());
