@@ -1151,6 +1151,10 @@ int32_t ReminderStore::QueryActiveReminderCount()
         .append(" = 'false' AND ").append(ReminderTable::REMINDER_TYPE).append(" != 1");
     std::vector<std::string> whereArgs;
     auto resultSet = rdbStore_->QuerySql(queryCondition, whereArgs);
+    if (resultSet == nullptr) {
+        ANSR_LOGE("QuerySql failed");
+        return 0;
+    }
     int32_t baseTableNum = 0;
     resultSet->GetRowCount(baseTableNum);
 
@@ -1165,6 +1169,10 @@ int32_t ReminderStore::QueryActiveReminderCount()
         .append(ReminderCalendarTable::CALENDAR_DATE_TIME).append(" = ")
         .append(ReminderCalendarTable::CALENDAR_END_DATE_TIME).append(")");
     resultSet = rdbStore_->QuerySql(queryCondition, whereArgs);
+    if (resultSet == nullptr) {
+        ANSR_LOGE("QuerySql failed");
+        return 0;
+    }
     int32_t calenderTableNum = 0;
     resultSet->GetRowCount(calenderTableNum);
     return baseTableNum + calenderTableNum;
