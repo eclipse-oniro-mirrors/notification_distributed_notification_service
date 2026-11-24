@@ -1837,40 +1837,6 @@ bool NotificationRequest::Marshalling(Parcel &parcel) const
         return false;
     }
 
-    return MarshallingPriorityNotificationFields(parcel);
-}
-
-bool NotificationRequest::MarshallingPriorityNotificationFields(Parcel &parcel) const
-{
-    // Priority notification flags of devices, appended at tail for parcel compatibility.
-    bool valid = priorityNotificationFlagsOfDevices_ ? true : false;
-    if (!parcel.WriteBool(valid)) {
-        ANS_LOGE("Failed to write priority notification device flags cause invalid sptr");
-        return false;
-    }
-    if (valid) {
-        if (!parcel.WriteInt32(static_cast<int32_t>(priorityNotificationFlagsOfDevices_->size()))) {
-            ANS_LOGE("Failed to write priority notification devices flags size");
-            return false;
-        }
-        for (auto deviceFlag : *priorityNotificationFlagsOfDevices_) {
-            if (!parcel.WriteString(deviceFlag.first)) {
-                ANS_LOGE("Failed to write priority notification devices flags key");
-                return false;
-            }
-            if (!parcel.WriteParcelable(deviceFlag.second.get())) {
-                ANS_LOGE("Failed to write priority notification devices flags value");
-                return false;
-            }
-        }
-    }
-
-    // All priority by bundle flag, appended at tail for parcel compatibility.
-    if (!parcel.WriteBool(isAllPriorityByBundle_)) {
-        ANS_LOGE("Failed to write isAllPriorityByBundle");
-        return false;
-    }
-
     return true;
 }
 
@@ -2274,28 +2240,6 @@ bool NotificationRequest::ReadFromParcel(Parcel &parcel)
     }
     // New field appended at tail: old-version parcel without this field reads default false.
     isUserDeletableOnly_ = parcel.ReadBool();
-
-    return ReadPriorityNotificationFieldsFromParcel(parcel);
-}
-
-bool NotificationRequest::ReadPriorityNotificationFieldsFromParcel(Parcel &parcel)
-{
-    // Priority notification flags of devices, appended at tail for parcel compatibility.
-    bool valid = parcel.ReadBool();
-    if (valid) {
-        priorityNotificationFlagsOfDevices_ =
-            std::make_shared<std::map<std::string, std::shared_ptr<NotificationFlags>>>();
-        int32_t priorityMapSize = parcel.ReadInt32();
-        priorityMapSize = (priorityMapSize < MAX_MAP_SIZE) ? priorityMapSize : MAX_MAP_SIZE;
-        for (int32_t seq = 0; seq < priorityMapSize; seq++) {
-            std::string deviceType = parcel.ReadString();
-            std::shared_ptr<NotificationFlags> notificationFlags =
-                std::shared_ptr<NotificationFlags>(parcel.ReadParcelable<NotificationFlags>());
-            (*priorityNotificationFlagsOfDevices_)[deviceType] = notificationFlags;
-        }
-    }
-    // All priority by bundle flag, appended at tail: old-version parcel without this field reads default false.
-    isAllPriorityByBundle_ = parcel.ReadBool();
     return true;
 }
 
