@@ -92,6 +92,9 @@ HWTEST_F(DistributedSubscriberTest, DistributedSubscriberTest_00200, Function | 
 HWTEST_F(DistributedSubscriberTest, DistributedSubscriberTest_00300, Function | SmallTest | Level1)
 {
     std::shared_ptr<DistribuedSubscriber> subscriber = std::make_shared<DistribuedSubscriber>();
+    DistributedDeviceInfo peerDevice;
+    peerDevice.deviceId_ = "peer_device_id";
+    subscriber->SetPeerDevice(peerDevice);
     std::shared_ptr<NotificationOperationInfo> operationInfo = std::make_shared<NotificationOperationInfo>();
     operationInfo->SetNotificationUdid("unknown_udid");
     auto result = subscriber->OnOperationResponse(operationInfo);

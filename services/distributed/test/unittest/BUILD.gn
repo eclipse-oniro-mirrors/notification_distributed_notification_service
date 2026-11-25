@@ -1185,6 +1185,7 @@ ohos_unittest("distributed_soft_bus_test") {
 
   sources = [
     "/${services_path}/distributed/src/helper/analytics_util.cpp",
+    "/${services_path}/distributed/src/helper/distributed_operation_helper.cpp",
     "/${services_path}/distributed/src/base/distributed_liveview_all_scenarios_extension_wrapper.cpp",
     "/${services_path}/distributed/src/soft_bus/distributed_unlock_listener_oper_service.cpp",
     "/${services_path}/distributed/src/soft_bus/distributed_device_service.cpp",
