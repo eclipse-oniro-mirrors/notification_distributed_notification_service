@@ -26,6 +26,10 @@
 #undef private
 #undef protected
 
+#include "ans_const_define.h"
+#include "bool_wrapper.h"
+#include "want_params.h"
+
 using namespace testing::ext;
 using namespace OHOS::Security::AccessToken;
 namespace OHOS {
@@ -239,7 +243,8 @@ HWTEST_F(PublishProcessTest, LivePublishNotificationByApp_00003, Function | Smal
 
 /**
  * @tc.name: Test PublishNotificationByApp_00004
- * @tc.desc: Test systemApp publish notification with isInProgress true, isInProgress should keep true
+ * @tc.desc: Test systemApp publish notification with isInProgress true on non-wearable device,
+ *           isInProgress should be degraded to false
  * @tc.type: FUNC
  */
 HWTEST_F(PublishProcessTest, PublishNotificationByApp_00004, Function | SmallTest | Level1)
@@ -251,7 +256,13 @@ HWTEST_F(PublishProcessTest, PublishNotificationByApp_00004, Function | SmallTes
 
     CommonNotificationPublishProcess progress;
     auto res = progress.PublishNotificationByApp(request);
-    ASSERT_EQ(request->IsInProgress(), true);
+    ASSERT_EQ(request->IsInProgress(), false);
+    auto extendInfo = request->GetExtendInfo();
+    ASSERT_NE(extendInfo, nullptr);
+    auto recoverValue = extendInfo->GetParam(EXTENDINFO_RECOVER_INPROGRESS);
+    auto recoverFlag = AAFwk::IBoolean::Query(recoverValue);
+    ASSERT_NE(recoverFlag, nullptr);
+    EXPECT_TRUE(AAFwk::Boolean::Unbox(recoverFlag));
 }
 
 /**

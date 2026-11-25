@@ -16,12 +16,26 @@
 #include "common_notification_publish_process.h"
 
 #include "access_token_helper.h"
-#include "ans_log_wrapper.h"
 #include "advanced_notification_inline.h"
+#include "ans_const_define.h"
+#include "ans_log_wrapper.h"
+#include "bool_wrapper.h"
 #include "notification_analytics_util.h"
+#include "parameters.h"
+#include "want_params.h"
 
 namespace OHOS {
 namespace Notification {
+namespace {
+bool IsWearableDevice()
+{
+    // const.product.devicetype is a boot-time constant; cache it once per process
+    // to avoid reading the system parameter on every publish request.
+    static bool isWearable = OHOS::system::GetParameter("const.product.devicetype", "") == "wearable";
+    return isWearable;
+}
+}
+
 std::shared_ptr<CommonNotificationPublishProcess> CommonNotificationPublishProcess::instance_;
 ffrt::mutex CommonNotificationPublishProcess::instanceMutex_;
 
@@ -47,19 +61,29 @@ AnsStatus CommonNotificationPublishProcess::PublishNotificationByApp(const sptr<
     }
 
     if (request->IsInProgress()) {
-        if (AccessTokenHelper::IsSystemApp()) {
+        if (!AccessTokenHelper::IsSystemApp()) {
+            request->SetInProgress(false);
+        } else if (!IsWearableDevice()) {
+            // Non-wearable devices: system app inProgress is degraded to false.
             std::string bundleName = GetClientBundleName();
             HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_36, EventBranchId::BRANCH_0)
                 .SlotType(static_cast<int32_t>(request->GetSlotType()))
-                .NotificationId(request->GetNotificationId())
-                .Message("systemApp publish notification isInProgress, bundleName:" + bundleName +
-                    ", slotType:" + std::to_string(static_cast<int32_t>(request->GetSlotType())) +
-                    ", contentType:" + std::to_string(static_cast<int32_t>(request->GetNotificationType())) +
-                    ", notificationId:" + std::to_string(request->GetNotificationId()));
+                .Message("sysApp inProgress, bn:" + bundleName +
+                    ", ct:" + std::to_string(static_cast<int32_t>(request->GetNotificationType())) +
+                    ", id:" + std::to_string(request->GetNotificationId()));
             NotificationAnalyticsUtil::ReportModifyEvent(message);
-        } else {
+            // Record the degradation so wearable subscribers can recover inProgress later.
+            auto extendInfo = request->GetExtendInfo();
+            if (extendInfo == nullptr) {
+                request->SetExtendInfo(std::make_shared<AAFwk::WantParams>());
+                extendInfo = request->GetExtendInfo();
+            }
+            if (extendInfo != nullptr) {
+                extendInfo->SetParam(EXTENDINFO_RECOVER_INPROGRESS, AAFwk::Boolean::Box(true));
+            }
             request->SetInProgress(false);
         }
+        // Wearable devices: system app inProgress keeps true, no event reported.
     }
 
     ansStatus = CommonPublishProcess(request);

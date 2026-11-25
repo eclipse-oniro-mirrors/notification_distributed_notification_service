@@ -1227,6 +1227,35 @@ static bool AdjustSubscribedFlags(const std::shared_ptr<NotificationSubscriberMa
     return true;
 }
 
+static void RecoverInProgressForWearable(
+    const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record,
+    const sptr<Notification> &notificationStub)
+{
+    if (record == nullptr || notificationStub == nullptr) {
+        return;
+    }
+    if (record->deviceType != NotificationConstant::WEARABLE_DEVICE_TYPE &&
+        record->deviceType != NotificationConstant::LITEWEARABLE_DEVICE_TYPE) {
+        return;
+    }
+    sptr<NotificationRequest> request = notificationStub->GetNotificationRequestPoint();
+    if (request == nullptr || request->IsInProgress()) {
+        return;
+    }
+    auto extendInfo = request->GetExtendInfo();
+    if (extendInfo == nullptr) {
+        return;
+    }
+    auto value = extendInfo->GetParam(EXTENDINFO_RECOVER_INPROGRESS);
+    auto booleanValue = AAFwk::IBoolean::Query(value);
+    if (booleanValue == nullptr || !AAFwk::Boolean::Unbox(booleanValue)) {
+        return;
+    }
+    request->SetInProgress(true);
+    ANS_LOGI("Recover inProgress for wearable subscriber, deviceType: %{public}s",
+        record->deviceType.c_str());
+}
+
 sptr<Notification> NotificationSubscriberManager::GenerateSubscribedNotification(
     const std::shared_ptr<SubscriberRecord> &record, const sptr<Notification> &notification,
     const std::string& voiceContent)
@@ -1260,6 +1289,7 @@ sptr<Notification> NotificationSubscriberManager::GenerateSubscribedNotification
         ANS_LOGE("null notificationStub");
         return nullptr;
     }
+    RecoverInProgressForWearable(record, notificationStub);
     if (!voiceContent.empty()) {
         auto content = std::make_shared<NotificationVoiceContent>();
         if (content != nullptr) {
