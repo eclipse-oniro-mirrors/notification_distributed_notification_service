@@ -2666,6 +2666,12 @@ private:
 
     ErrCode UpdateNotificationSwitchState(
         const sptr<NotificationBundleOption> &bundleOption, const AppExecFwk::BundleInfo &bundleInfo);
+    ErrCode UpdateBundleSwitchStateInner(const sptr<NotificationBundleOption> &bundleOption,
+        bool systemDefaultEnable, bool hasRecord, NotificationConstant::SWITCH_STATE currentState);
+    std::vector<sptr<NotificationBundleOption>> CollectDefaultEnableBundles(
+        const std::vector<AppExecFwk::BundleInfo> &bundleInfos);
+    void InitDefaultEnableBundle(const sptr<NotificationBundleOption> &bundleOption,
+        const std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> &recordedStates);
     ErrCode DistributeOperationInner(const sptr<NotificationOperationInfo>& operationInfo);
 #ifdef NOTIFICATION_EXTENSION_SUBSCRIPTION_SUPPORTED
     void CheckExtensionServiceCondition(std::vector<sptr<NotificationBundleOption>> &bundles,

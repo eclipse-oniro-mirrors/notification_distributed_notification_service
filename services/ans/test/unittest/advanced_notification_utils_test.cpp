@@ -15,6 +15,7 @@
 
 #include <chrono>
 #include <functional>
+#include <map>
 #include <memory>
 #include <thread>
 
@@ -499,6 +500,240 @@ HWTEST_F(AnsUtilsTest, InitNotificationEnableList_00002, Function | SmallTest | 
     sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test1", 2);
     NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
     NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state);
+    EXPECT_EQ(static_cast<int32_t>(state), 2);
+}
+
+/**
+ * @tc.name: GetBatchBundleEnableStates_00001
+ * @tc.desc: Batch query with an empty bundle list returns ERR_OK without DB access.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetBatchBundleEnableStates_00001, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> bundleStates;
+    ErrCode result = NotificationPreferences::GetInstance()->GetBatchBundleEnableStates(bundleOptions, bundleStates);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_TRUE(bundleStates.empty());
+}
+
+/**
+ * @tc.name: GetBatchBundleEnableStates_00002
+ * @tc.desc: Batch query on a fresh DB (first boot) returns ERR_OK with an empty result.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetBatchBundleEnableStates_00002, Function | SmallTest | Level1)
+{
+    std::vector<sptr<NotificationBundleOption>> bundleOptions;
+    bundleOptions.push_back(new NotificationBundleOption("batch_fresh_a", 1));
+    bundleOptions.push_back(new NotificationBundleOption("batch_fresh_b", 2));
+    std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> bundleStates;
+    ErrCode result = NotificationPreferences::GetInstance()->GetBatchBundleEnableStates(bundleOptions, bundleStates);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_TRUE(bundleStates.empty());
+}
+
+/**
+ * @tc.name: GetBatchBundleEnableStates_00003
+ * @tc.desc: Batch query returns the recorded enable states written before.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetBatchBundleEnableStates_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundleA = new NotificationBundleOption("batch_record_a", 1);
+    sptr<NotificationBundleOption> bundleB = new NotificationBundleOption("batch_record_b", 2);
+    sptr<NotificationBundleOption> bundleC = new NotificationBundleOption("batch_record_c", 3);
+    EXPECT_EQ(NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleA,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON), ERR_OK);
+    EXPECT_EQ(NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleB,
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF), ERR_OK);
+    EXPECT_EQ(NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundleC,
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON), ERR_OK);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions = {bundleA, bundleB, bundleC};
+    std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> bundleStates;
+    ErrCode result = NotificationPreferences::GetInstance()->GetBatchBundleEnableStates(bundleOptions, bundleStates);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(bundleStates.size(), static_cast<size_t>(3));
+    EXPECT_EQ(bundleStates[bundleA], NotificationConstant::SWITCH_STATE::USER_MODIFIED_ON);
+    EXPECT_EQ(bundleStates[bundleB], NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+    EXPECT_EQ(bundleStates[bundleC], NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+}
+
+/**
+ * @tc.name: GetBatchBundleEnableStates_00004
+ * @tc.desc: Batch query returns error when the user id cannot be resolved, and keeps recorded
+ *           states untouched.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, GetBatchBundleEnableStates_00004, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("batch_fail_a", 1);
+    EXPECT_EQ(NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF), ERR_OK);
+    MockGetOsAccountLocalIdFromUid(false);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions = {bundle};
+    std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> bundleStates;
+    ErrCode result = NotificationPreferences::GetInstance()->GetBatchBundleEnableStates(bundleOptions, bundleStates);
+    MockGetOsAccountLocalIdFromUid(true);
+    EXPECT_EQ(result, ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED);
+    EXPECT_TRUE(bundleStates.empty());
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state), ERR_OK);
+    EXPECT_EQ(state, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+}
+
+/**
+ * @tc.name: CollectDefaultEnableBundles_00001
+ * @tc.desc: Collect keeps only the bundles enabled by default and preserves their order.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, CollectDefaultEnableBundles_00001, Function | SmallTest | Level1)
+{
+    std::vector<AppExecFwk::BundleInfo> bundleInfos;
+    AppExecFwk::BundleInfo infoA;
+    infoA.applicationInfo.allowEnableNotification = true;
+    infoA.applicationInfo.bundleName = "collect_a";
+    infoA.uid = 1;
+    bundleInfos.push_back(infoA);
+    AppExecFwk::BundleInfo infoB;
+    infoB.applicationInfo.allowEnableNotification = false;
+    infoB.applicationInfo.bundleName = "collect_b";
+    infoB.uid = 2;
+    bundleInfos.push_back(infoB);
+    AppExecFwk::BundleInfo infoC;
+    infoC.applicationInfo.allowEnableNotification = true;
+    infoC.applicationInfo.bundleName = "collect_c";
+    infoC.uid = 3;
+    bundleInfos.push_back(infoC);
+    auto defaultEnableOptions = advancedNotificationService_->CollectDefaultEnableBundles(bundleInfos);
+    EXPECT_EQ(defaultEnableOptions.size(), static_cast<size_t>(2));
+    ASSERT_FALSE(defaultEnableOptions.empty());
+    EXPECT_EQ(defaultEnableOptions[0]->GetBundleName(), "collect_a");
+    EXPECT_EQ(defaultEnableOptions[0]->GetUid(), 1);
+    EXPECT_EQ(defaultEnableOptions[1]->GetBundleName(), "collect_c");
+    EXPECT_EQ(defaultEnableOptions[1]->GetUid(), 3);
+}
+
+/**
+ * @tc.name: InitDefaultEnableBundle_00001
+ * @tc.desc: The user modified off state is kept after the restart scan processes the bundle.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, InitDefaultEnableBundle_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundle_protect_a", 1);
+    EXPECT_EQ(NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF), ERR_OK);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions = {bundle};
+    std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> recordedStates;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetBatchBundleEnableStates(bundleOptions, recordedStates),
+        ERR_OK);
+    advancedNotificationService_->InitDefaultEnableBundle(bundle, recordedStates);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state), ERR_OK);
+    EXPECT_EQ(state, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+}
+
+/**
+ * @tc.name: InitDefaultEnableBundle_00002
+ * @tc.desc: A recorded default-off bundle is upgraded to default-on by the restart scan.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, InitDefaultEnableBundle_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundle_upgrade_a", 1);
+    EXPECT_EQ(NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle,
+        NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF), ERR_OK);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions = {bundle};
+    std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> recordedStates;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetBatchBundleEnableStates(bundleOptions, recordedStates),
+        ERR_OK);
+    advancedNotificationService_->InitDefaultEnableBundle(bundle, recordedStates);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state), ERR_OK);
+    EXPECT_EQ(state, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+}
+
+/**
+ * @tc.name: InitDefaultEnableBundle_00003
+ * @tc.desc: A bundle without any record is initialized to default-on by the restart scan.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, InitDefaultEnableBundle_00003, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("bundle_init_a", 1);
+    std::vector<sptr<NotificationBundleOption>> bundleOptions = {bundle};
+    std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> recordedStates;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetBatchBundleEnableStates(bundleOptions, recordedStates),
+        ERR_OK);
+    advancedNotificationService_->InitDefaultEnableBundle(bundle, recordedStates);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state), ERR_OK);
+    EXPECT_EQ(state, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_ON);
+}
+
+/**
+ * @tc.name: UpdateNotificationSwitchState_00001
+ * @tc.desc: Install/update event path initializes a fresh default-off bundle to the off anchor.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateNotificationSwitchState_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("event_anchor_a", 1);
+    AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.applicationInfo.allowEnableNotification = false;
+    bundleInfo.applicationInfo.bundleName = "event_anchor_a";
+    bundleInfo.uid = 1;
+    EXPECT_EQ(advancedNotificationService_->UpdateNotificationSwitchState(bundle, bundleInfo), ERR_OK);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state), ERR_OK);
+    EXPECT_EQ(state, NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF);
+}
+
+/**
+ * @tc.name: UpdateNotificationSwitchState_00002
+ * @tc.desc: Install/update event path never changes a user modified off state.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, UpdateNotificationSwitchState_00002, Function | SmallTest | Level1)
+{
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("event_protect_a", 1);
+    EXPECT_EQ(NotificationPreferences::GetInstance()->SetNotificationsEnabledForBundle(bundle,
+        NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF), ERR_OK);
+    AppExecFwk::BundleInfo bundleInfo;
+    bundleInfo.applicationInfo.allowEnableNotification = true;
+    bundleInfo.applicationInfo.bundleName = "event_protect_a";
+    bundleInfo.uid = 1;
+    EXPECT_EQ(advancedNotificationService_->UpdateNotificationSwitchState(bundle, bundleInfo), ERR_OK);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    EXPECT_EQ(NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state), ERR_OK);
+    EXPECT_EQ(state, NotificationConstant::SWITCH_STATE::USER_MODIFIED_OFF);
+}
+
+/**
+ * @tc.name: InitNotificationEnableList_00003
+ * @tc.desc: The restart scan writes nothing when the bundle list is empty.
+ * @tc.type: FUNC
+ * @tc.require: issue
+ */
+HWTEST_F(AnsUtilsTest, InitNotificationEnableList_00003, Function | SmallTest | Level1)
+{
+    MockSetBundleInfoEnabled(true);
+    advancedNotificationService_->InitNotificationEnableList();
+    SleepForFC();
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("scan_empty_a", 1);
+    NotificationConstant::SWITCH_STATE state = NotificationConstant::SWITCH_STATE::SYSTEM_DEFAULT_OFF;
+    EXPECT_NE(NotificationPreferences::GetInstance()->GetNotificationsEnabledForBundle(bundle, state), ERR_OK);
     EXPECT_EQ(static_cast<int32_t>(state), 2);
 }
 

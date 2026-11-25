@@ -718,6 +718,22 @@ ErrCode NotificationPreferences::GetNotificationsEnabledForBundle(
     return ERR_OK;
 }
 
+ErrCode NotificationPreferences::GetBatchBundleEnableStates(
+    const std::vector<sptr<NotificationBundleOption>> &bundleOptions,
+    std::map<sptr<NotificationBundleOption>, NotificationConstant::SWITCH_STATE> &bundleStates)
+{
+    if (preferncesDB_ == nullptr) {
+        ANS_LOGE("preferences db instance is null.");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    std::lock_guard<ffrt::mutex> lock(preferenceMutex_);
+    if (!preferncesDB_->GetBundleEnableStatesFromDisturbeDB(bundleOptions, bundleStates)) {
+        ANS_LOGE("Batch query bundle enable states from DB failed.");
+        return ERR_ANS_INNER_PREFERENCES_NOTIFICATION_DB_OPERATION_FAILED;
+    }
+    return ERR_OK;
+}
+
 ErrCode NotificationPreferences::SetNotificationsEnabledForBundle(
     const sptr<NotificationBundleOption> &bundleOption, const NotificationConstant::SWITCH_STATE state)
 {
