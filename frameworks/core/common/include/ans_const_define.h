@@ -110,6 +110,7 @@ extern const std::string VOICE_BROADCAST_CONFIG_RULE_KEY;
 extern const std::string LIVE_VIEW_SHARE_FUNC_SWITCH_KEY;
 extern const std::string EXTENDINFO_CREATE_TIME;
 extern const std::string EXTENDINFO_IS_FROM_ACCOUNT;
+extern const std::string EXTENDINFO_RECOVER_INPROGRESS;
 
 const static std::string DEFAULT_TEMPLATE_PATH("/system/etc/notification_template/external.json");
 

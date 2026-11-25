@@ -21,7 +21,11 @@
 #include "notification_subscriber_manager.h"
 #undef private
 #undef protected
+#include "ans_const_define.h"
 #include "ans_subscriber_stub.h"
+#include "bool_wrapper.h"
+#include "notification_constant.h"
+#include "want_params.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -307,6 +311,101 @@ HWTEST_F(NotificationSubscriberDispatchBranchTest, ReportNotificationsRemovedEve
     sptr<Notification> notification = new Notification(req);
     manager->ReportNotificationsRemovedEvent({notification});
     EXPECT_NE(notification, nullptr);
+}
+
+namespace {
+sptr<NotificationRequest> BuildRecoverInProgressRequest(bool withRecoverMark)
+{
+    sptr<NotificationRequest> req = new NotificationRequest();
+    req->SetInProgress(false);
+    if (withRecoverMark) {
+        AAFwk::WantParams extendInfo;
+        extendInfo.SetParam(EXTENDINFO_RECOVER_INPROGRESS, AAFwk::Boolean::Box(true));
+        req->SetExtendInfo(std::make_shared<AAFwk::WantParams>(extendInfo));
+    }
+    return req;
+}
+} // namespace
+
+/**
+ * @tc.number    : GenerateSubscribedNotification_RecoverInProgress_00100
+ * @tc.name      : GenerateSubscribedNotification_RecoverInProgress_00100
+ * @tc.desc      : test inProgress is recovered for wearable subscriber with recover mark
+ */
+HWTEST_F(NotificationSubscriberDispatchBranchTest, GenerateSubscribedNotification_RecoverInProgress_00100,
+    Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->subscriber = new FakeAnsSubscriber();
+    record->deviceType = NotificationConstant::WEARABLE_DEVICE_TYPE;
+    sptr<NotificationRequest> req = BuildRecoverInProgressRequest(true);
+    sptr<Notification> notification = new Notification(req);
+    auto stub = manager->GenerateSubscribedNotification(record, notification);
+    ASSERT_NE(stub, nullptr);
+    ASSERT_NE(stub->GetNotificationRequestPoint(), nullptr);
+    EXPECT_TRUE(stub->GetNotificationRequestPoint()->IsInProgress());
+    EXPECT_FALSE(notification->GetNotificationRequestPoint()->IsInProgress());
+}
+
+/**
+ * @tc.number    : GenerateSubscribedNotification_RecoverInProgress_00200
+ * @tc.name      : GenerateSubscribedNotification_RecoverInProgress_00200
+ * @tc.desc      : test inProgress is recovered for liteWearable subscriber with recover mark
+ */
+HWTEST_F(NotificationSubscriberDispatchBranchTest, GenerateSubscribedNotification_RecoverInProgress_00200,
+    Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->subscriber = new FakeAnsSubscriber();
+    record->deviceType = NotificationConstant::LITEWEARABLE_DEVICE_TYPE;
+    sptr<NotificationRequest> req = BuildRecoverInProgressRequest(true);
+    sptr<Notification> notification = new Notification(req);
+    auto stub = manager->GenerateSubscribedNotification(record, notification);
+    ASSERT_NE(stub, nullptr);
+    ASSERT_NE(stub->GetNotificationRequestPoint(), nullptr);
+    EXPECT_TRUE(stub->GetNotificationRequestPoint()->IsInProgress());
+}
+
+/**
+ * @tc.number    : GenerateSubscribedNotification_RecoverInProgress_00300
+ * @tc.name      : GenerateSubscribedNotification_RecoverInProgress_00300
+ * @tc.desc      : test inProgress is not recovered for non-wearable subscriber with recover mark
+ */
+HWTEST_F(NotificationSubscriberDispatchBranchTest, GenerateSubscribedNotification_RecoverInProgress_00300,
+    Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->subscriber = new FakeAnsSubscriber();
+    record->deviceType = NotificationConstant::CURRENT_DEVICE_TYPE;
+    sptr<NotificationRequest> req = BuildRecoverInProgressRequest(true);
+    sptr<Notification> notification = new Notification(req);
+    auto stub = manager->GenerateSubscribedNotification(record, notification);
+    ASSERT_NE(stub, nullptr);
+    ASSERT_NE(stub->GetNotificationRequestPoint(), nullptr);
+    EXPECT_FALSE(stub->GetNotificationRequestPoint()->IsInProgress());
+}
+
+/**
+ * @tc.number    : GenerateSubscribedNotification_RecoverInProgress_00400
+ * @tc.name      : GenerateSubscribedNotification_RecoverInProgress_00400
+ * @tc.desc      : test inProgress is not recovered for wearable subscriber without recover mark
+ */
+HWTEST_F(NotificationSubscriberDispatchBranchTest, GenerateSubscribedNotification_RecoverInProgress_00400,
+    Function | SmallTest | Level1)
+{
+    auto manager = std::make_shared<NotificationSubscriberManager>();
+    auto record = std::make_shared<NotificationSubscriberManager::SubscriberRecord>();
+    record->subscriber = new FakeAnsSubscriber();
+    record->deviceType = NotificationConstant::WEARABLE_DEVICE_TYPE;
+    sptr<NotificationRequest> req = BuildRecoverInProgressRequest(false);
+    sptr<Notification> notification = new Notification(req);
+    auto stub = manager->GenerateSubscribedNotification(record, notification);
+    ASSERT_NE(stub, nullptr);
+    ASSERT_NE(stub->GetNotificationRequestPoint(), nullptr);
+    EXPECT_FALSE(stub->GetNotificationRequestPoint()->IsInProgress());
 }
 }  // namespace Notification
 }  // namespace OHOS

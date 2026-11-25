@@ -806,16 +806,14 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
     if (request->IsInProgress()) {
         HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_4, EventBranchId::BRANCH_16)
             .SlotType(static_cast<int32_t>(request->GetSlotType()))
-            .NotificationId(request->GetNotificationId())
-            .Message("SA publish notification isInProgress, callerUid:" +
+            .Message("SA inProgress, cuid:" +
                 std::to_string(IPCSkeleton::GetCallingUid()) +
-                ", slotType:" + std::to_string(static_cast<int32_t>(request->GetSlotType())) +
-                ", contentType:" + std::to_string(static_cast<int32_t>(request->GetNotificationType())) +
-                ", notificationId:" + std::to_string(request->GetNotificationId()) +
-                ", creatorUid:" + std::to_string(request->GetCreatorUid()) +
-                ", creatorBundleName:" + request->GetCreatorBundleName() +
-                ", ownerUid:" + std::to_string(request->GetOwnerUid()) +
-                ", ownerBundleName:" + request->GetOwnerBundleName());
+                ", ct:" + std::to_string(static_cast<int32_t>(request->GetNotificationType())) +
+                ", id:" + std::to_string(request->GetNotificationId()) +
+                ", crUid:" + std::to_string(request->GetCreatorUid()) +
+                ", crBn:" + request->GetCreatorBundleName() +
+                ", owUid:" + std::to_string(request->GetOwnerUid()) +
+                ", owBn:" + request->GetOwnerBundleName());
         NotificationAnalyticsUtil::ReportModifyEvent(message);
     }
 

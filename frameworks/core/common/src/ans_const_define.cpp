@@ -36,5 +36,6 @@ const std::string VOICE_BROADCAST_CONFIG_RULE_KEY = "voice_broadcast_config_rule
 const std::string LIVE_VIEW_SHARE_FUNC_SWITCH_KEY = "LIVE_VIEW_SHARE_FUNC_SWITCH_KEY";
 const std::string EXTENDINFO_CREATE_TIME = "createTime";
 const std::string EXTENDINFO_IS_FROM_ACCOUNT = "isFromAccount";
+const std::string EXTENDINFO_RECOVER_INPROGRESS = "recoverInProgress";
 }
 }
