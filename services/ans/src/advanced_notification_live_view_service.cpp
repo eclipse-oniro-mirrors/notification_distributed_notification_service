@@ -617,9 +617,6 @@ ErrCode AdvancedNotificationService::OnSubscriberAdd(
             request->SetDeviceFlags(notificationFlagsOfDevices);
             request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::SOUND_FLAG, false);
             request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::VIBRATION_FLAG, false);
-            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LOCKSCREEN_FLAG, false);
-            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::BANNER_FLAG, false);
-            request->SetDistributedFlagBit(NotificationConstant::ReminderFlag::LIGHTSCREEN_FLAG, false);
             sptr<Notification> notification = new (std::nothrow) Notification(request);
             ANS_COND_DO_ERR(notification == nullptr, return ERR_ANS_INNER_NO_MEMORY, "Notification malloc error.");
             notifications.emplace_back(notification);
