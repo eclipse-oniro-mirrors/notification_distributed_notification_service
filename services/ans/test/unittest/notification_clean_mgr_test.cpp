@@ -43,6 +43,8 @@ namespace OHOS {
 namespace Notification {
 namespace {
 const std::string ANS_RDB_FILE = "/notificationdb.db";
+const std::string ANS_RDB_SLAVE_FILE = "/notificationdb_slave.db";
+const std::string ANS_RDB_BINLOG_DIR = "/notificationdb.db_binlog";
 const std::string KEYFILE_NAME = "/keyfile";
 
 const std::string RINGTONE_URI_A = "ans://tone-a";
@@ -171,8 +173,9 @@ HWTEST_F(NotificationCleanMgrTest, NotificationCleanMgrTest_00300, Function | Sm
 /**
  * @tc.number    : NotificationCleanMgrTest_00400
  * @tc.name      : OnClean_00400
- * @tc.desc      : OnClean deletes the rdb files (db/wal/shm/journal) and the keyfile, and keeps the
- *                 notification_service directory itself
+ * @tc.desc      : OnClean deletes the rdb files (db/wal/shm/journal/dwr/compare, the slave store
+ *                 and the binlog folder) and the keyfile, and keeps the notification_service
+ *                 directory itself
  */
 HWTEST_F(NotificationCleanMgrTest, NotificationCleanMgrTest_00400, Function | SmallTest | Level1)
 {
@@ -180,6 +183,13 @@ HWTEST_F(NotificationCleanMgrTest, NotificationCleanMgrTest_00400, Function | Sm
     CreateTextFile(mirrorDbDir_ + ANS_RDB_FILE + "-wal");
     CreateTextFile(mirrorDbDir_ + ANS_RDB_FILE + "-shm");
     CreateTextFile(mirrorDbDir_ + ANS_RDB_FILE + "-journal");
+    CreateTextFile(mirrorDbDir_ + ANS_RDB_FILE + "-dwr");
+    CreateTextFile(mirrorDbDir_ + ANS_RDB_FILE + "-compare");
+    CreateTextFile(mirrorDbDir_ + ANS_RDB_SLAVE_FILE);
+    std::error_code binlogEc;
+    std::filesystem::create_directories(mirrorDbDir_ + ANS_RDB_BINLOG_DIR, binlogEc);
+    ASSERT_FALSE(binlogEc) << "create binlog dir failed";
+    CreateTextFile(mirrorDbDir_ + ANS_RDB_BINLOG_DIR + "/binlog.1");
     CreateTextFile(mirrorDbDir_ + KEYFILE_NAME);
 
     auto cleanMgr = DelayedSingleton<NotificationCleanMgr>::GetInstance();
@@ -190,6 +200,10 @@ HWTEST_F(NotificationCleanMgrTest, NotificationCleanMgrTest_00400, Function | Sm
     EXPECT_FALSE(std::filesystem::exists(mirrorDbDir_ + ANS_RDB_FILE + "-wal"));
     EXPECT_FALSE(std::filesystem::exists(mirrorDbDir_ + ANS_RDB_FILE + "-shm"));
     EXPECT_FALSE(std::filesystem::exists(mirrorDbDir_ + ANS_RDB_FILE + "-journal"));
+    EXPECT_FALSE(std::filesystem::exists(mirrorDbDir_ + ANS_RDB_FILE + "-dwr"));
+    EXPECT_FALSE(std::filesystem::exists(mirrorDbDir_ + ANS_RDB_FILE + "-compare"));
+    EXPECT_FALSE(std::filesystem::exists(mirrorDbDir_ + ANS_RDB_SLAVE_FILE));
+    EXPECT_FALSE(std::filesystem::exists(mirrorDbDir_ + ANS_RDB_BINLOG_DIR));
     EXPECT_FALSE(std::filesystem::exists(mirrorDbDir_ + KEYFILE_NAME));
     EXPECT_TRUE(std::filesystem::exists(mirrorDbDir_)) << "the mirror directory itself must be kept";
 }
