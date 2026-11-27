@@ -23,6 +23,9 @@
 #include "notification_request.h"
 #include "notification_record.h"
 #include "notification_parameters.h"
+#include "notification_content.h"
+#include "notification_live_view_content.h"
+#include "notification_local_live_view_content.h"
 #include "string_wrapper.h"
 
 using namespace testing::ext;
@@ -79,6 +82,15 @@ static std::shared_ptr<NotificationRecord> CreateActiveNotificationRecord(
         record->request = nullptr;
     }
     return record;
+}
+
+// Turns an existing record into a transient system live view (LIVE_VIEW slot + LOCAL_LIVE_VIEW
+// content). The notification shares the request pointer, so the type change is visible to both.
+static void MakeRecordSystemLiveView(const std::shared_ptr<NotificationRecord> &record)
+{
+    record->request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto localContent = std::make_shared<NotificationLocalLiveViewContent>();
+    record->request->SetContent(std::make_shared<NotificationContent>(localContent));
 }
 
 
@@ -552,6 +564,141 @@ HWTEST_F(AdvancedNotificationQueryTest, GetActiveNotifications_FilterAndCopy_000
     EXPECT_EQ(AAFwk::String::Unbox(strValue), "test://uri");
 
     IPCSkeleton::SetCallingUid(1);
+}
+
+/**
+ * @tc.name: GetAllActiveNotifications_SkipTransientLiveView_00002
+ * @tc.desc: Test GetAllActiveNotifications skips transient system live views but keeps regular ones.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationQueryTest, GetAllActiveNotifications_SkipTransientLiveView_00002,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    auto flagged = CreateActiveNotificationRecord(service, "testFlagged", 1, "", true);
+    auto matched = CreateActiveNotificationRecord(service, "testMatched", 1, "", true);
+    ASSERT_NE(flagged, nullptr);
+    ASSERT_NE(matched, nullptr);
+    flagged->request->SetNotificationId(1);
+    MakeRecordSystemLiveView(flagged);
+    matched->request->SetNotificationId(2);
+    service->notificationList_.push_back(flagged);
+    service->notificationList_.push_back(matched);
+
+    std::vector<sptr<Notification>> notifications;
+    auto result = service->GetAllActiveNotifications(notifications);
+    EXPECT_EQ(result, ERR_OK);
+    ASSERT_EQ(notifications.size(), 1);
+    sptr<NotificationRequest> request = notifications[0]->GetNotificationRequestPoint();
+    ASSERT_NE(request, nullptr);
+    EXPECT_EQ(request->GetNotificationId(), 2);
+    EXPECT_FALSE(AdvancedNotificationService::IsTransientLiveView(request));
+}
+
+/**
+ * @tc.name: GetActiveNotifications_SkipTransientLiveView_00002
+ * @tc.desc: Test GetActiveNotifications skips transient system live views but keeps regular ones.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationQueryTest, GetActiveNotifications_SkipTransientLiveView_00002,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    const int32_t callingUid = 100;
+    IPCSkeleton::SetCallingUid(callingUid);
+
+    auto flagged = CreateActiveNotificationRecord(service, "", callingUid, "", true);
+    auto matched = CreateActiveNotificationRecord(service, "", callingUid, "", true);
+    ASSERT_NE(flagged, nullptr);
+    ASSERT_NE(matched, nullptr);
+    flagged->request->SetNotificationId(1);
+    MakeRecordSystemLiveView(flagged);
+    matched->request->SetNotificationId(2);
+    service->notificationList_.push_back(flagged);
+    service->notificationList_.push_back(matched);
+
+    std::vector<sptr<NotificationRequest>> notifications;
+    auto result = service->GetActiveNotifications(notifications, "");
+    EXPECT_EQ(result, ERR_OK);
+    ASSERT_EQ(notifications.size(), 1);
+    EXPECT_EQ(notifications[0]->GetNotificationId(), 2);
+    EXPECT_FALSE(AdvancedNotificationService::IsTransientLiveView(notifications[0]));
+
+    IPCSkeleton::SetCallingUid(1);
+}
+
+/**
+ * @tc.name: GetActiveNotificationNums_SkipTransientLiveView_00001
+ * @tc.desc: Test GetActiveNotificationNums does not count transient system live views.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationQueryTest, GetActiveNotificationNums_SkipTransientLiveView_00001,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    const int32_t callingUid = 100;
+    IPCSkeleton::SetCallingUid(callingUid);
+
+    auto flagged = CreateActiveNotificationRecord(service, "", callingUid, "", true);
+    auto matched = CreateActiveNotificationRecord(service, "", callingUid, "", true);
+    ASSERT_NE(flagged, nullptr);
+    ASSERT_NE(matched, nullptr);
+    MakeRecordSystemLiveView(flagged);
+    service->notificationList_.push_back(flagged);
+    service->notificationList_.push_back(matched);
+
+    uint64_t num = 0;
+    auto result = service->GetActiveNotificationNums(num);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_EQ(num, 1U);
+
+    IPCSkeleton::SetCallingUid(1);
+}
+
+/**
+ * @tc.name: GetAllNotificationsBySlotType_SkipTransientLiveView_00002
+ * @tc.desc: Test GetAllNotificationsBySlotType skips transient system live views in the same slot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AdvancedNotificationQueryTest, GetAllNotificationsBySlotType_SkipTransientLiveView_00002,
+    Function | SmallTest | Level1)
+{
+    auto service = GetService();
+    const int32_t userId = 100;
+    auto makeRecord = [&service, userId](int32_t notificationId, bool isSystemLiveView) {
+        sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+        request->SetNotificationId(notificationId);
+        request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+        request->SetReceiverUserId(userId);
+        request->SetOwnerBundleName("testBundle");
+        request->SetOwnerUid(1);
+        if (isSystemLiveView) {
+            auto localContent = std::make_shared<NotificationLocalLiveViewContent>();
+            request->SetContent(std::make_shared<NotificationContent>(localContent));
+        } else {
+            auto commonContent = std::make_shared<NotificationLiveViewContent>();
+            request->SetContent(std::make_shared<NotificationContent>(commonContent));
+        }
+        sptr<NotificationBundleOption> bundle = new NotificationBundleOption("testBundle", 1);
+        return service->MakeNotificationRecord(request, bundle);
+    };
+    auto flagged = makeRecord(1, true);
+    auto matched = makeRecord(2, false);
+    ASSERT_NE(flagged, nullptr);
+    ASSERT_NE(matched, nullptr);
+    ASSERT_TRUE(flagged->request->IsSystemLiveView());
+    ASSERT_FALSE(matched->request->IsSystemLiveView());
+    service->notificationList_.push_back(flagged);
+    service->notificationList_.push_back(matched);
+
+    std::vector<sptr<Notification>> notifications;
+    auto result = service->GetAllNotificationsBySlotTypeInner(notifications,
+        static_cast<int32_t>(NotificationConstant::SlotType::LIVE_VIEW), userId);
+    EXPECT_EQ(result, ERR_OK);
+    ASSERT_EQ(notifications.size(), 1);
+    sptr<NotificationRequest> replayedRequest = notifications[0]->GetNotificationRequestPoint();
+    ASSERT_NE(replayedRequest, nullptr);
+    EXPECT_EQ(replayedRequest->GetNotificationId(), 2);
 }
 
 /**

@@ -16,6 +16,7 @@
 #include <chrono>
 #include <functional>
 #include <thread>
+#include <unistd.h>
 
 #include "ans_inner_errors.h"
 #include "ans_manager_proxy.h"
@@ -27,6 +28,7 @@
 #include "datetime_ex.h"
 #include "if_system_ability_manager.h"
 #include "int_wrapper.h"
+#include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "notification_helper.h"
 #include "notification_json_convert.h"
@@ -1850,6 +1852,12 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10001, Function
     req.SetContent(content);
     req.SetSlotType(NotificationConstant::LIVE_VIEW);
     req.SetNotificationId(notificationId);
+
+    // An earlier case (e.g. 10002 when tests are shuffled) may have subscribed LocalLiveView in this
+    // process, and there is no public unsubscribe API. Drop this process's subscription so the case
+    // always covers "publish without a LocalLiveView subscriber", regardless of test order.
+    const int32_t callingUid = IPCSkeleton::GetCallingUid();
+    (void)service_->RemoveSystemLiveViewNotifications("", callingUid, getpid());
 
     EXPECT_EQ(ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED, NotificationHelper::PublishNotification(req));
 

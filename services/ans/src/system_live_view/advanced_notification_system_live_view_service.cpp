@@ -15,6 +15,8 @@
 
 #include "advanced_notification_service.h"
 
+#include <algorithm>
+
 #include "ans_permission_def.h"
 #include "access_token_helper.h"
 #include "ans_log_wrapper.h"
@@ -198,6 +200,67 @@ ErrCode AdvancedNotificationService::RemoveSystemLiveViewNotificationsOfSa(int32
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Remove sa live view.");
     return result;
+}
+
+void AdvancedNotificationService::TrackRecoveredSystemLiveView(const sptr<NotificationRequest> &request)
+{
+    if (request == nullptr || !request->IsSystemLiveView()) {
+        return;
+    }
+    auto &keys = recoveredSystemLiveViewKeys_[request->GetReceiverUserId()];
+    const std::string key = request->GetKey();
+    auto iter = std::find_if(keys.begin(), keys.end(),
+        [&key](const auto &item) { return item.first == key; });
+    if (iter == keys.end()) {
+        keys.emplace_back(key, request->GetSecureKey());
+    }
+}
+
+void AdvancedNotificationService::UntrackRecoveredSystemLiveView(const std::string &key, int32_t userId)
+{
+    auto iter = recoveredSystemLiveViewKeys_.find(userId);
+    if (iter == recoveredSystemLiveViewKeys_.end()) {
+        return;
+    }
+    auto &keys = iter->second;
+    keys.erase(std::remove_if(keys.begin(), keys.end(),
+        [&key](const auto &item) { return item.first == key; }), keys.end());
+    if (keys.empty()) {
+        recoveredSystemLiveViewKeys_.erase(iter);
+    }
+}
+
+void AdvancedNotificationService::CleanSystemLiveViewOnUserSwitch(int32_t userId)
+{
+    wptr<AdvancedNotificationService> wThis = this;
+    notificationSvrQueue_.Submit([wThis, userId]() {
+        sptr<AdvancedNotificationService> sThis = wThis.promote();
+        if (sThis == nullptr) {
+            return;
+        }
+        // Only system live views recovered from the db in this service lifetime are dropped. A live
+        // view published or re-published by an app is owned by that app and must survive the event.
+        std::vector<std::shared_ptr<NotificationRecord>> systemLiveViews;
+        for (const auto &record : sThis->notificationList_) {
+            if (record != nullptr && record->request != nullptr && record->notification != nullptr &&
+                record->isRecovered && record->request->IsSystemLiveView()) {
+                systemLiveViews.emplace_back(record);
+            }
+        }
+        if (!systemLiveViews.empty()) {
+            sThis->RemoveNotificationFromRecordList(systemLiveViews);
+        }
+        // Delete only the persisted rows that still back recovered records; rows written by an app
+        // publish after recovery were untracked and must stay.
+        for (const auto &item : sThis->recoveredSystemLiveViewKeys_) {
+            for (const auto &keys : item.second) {
+                (void)sThis->DoubleDeleteNotificationFromDb(keys.first, keys.second, item.first);
+            }
+        }
+        sThis->recoveredSystemLiveViewKeys_.clear();
+        ANS_LOGI("Clean recovered system live views on USER_SWITCHED, user=%{public}d, count=%{public}zu",
+            userId, systemLiveViews.size());
+    });
 }
 }  // namespace Notification
 }  // namespace OHOS

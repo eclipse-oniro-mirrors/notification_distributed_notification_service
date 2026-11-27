@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_NOTIFICATION_H
 #define BASE_NOTIFICATION_ANS_STANDARD_FRAMEWORKS_ANS_CORE_INCLUDE_ANS_NOTIFICATION_H
 
+#include <atomic>
 #include <list>
 #include <memory>
 #include <vector>
@@ -2098,14 +2099,57 @@ private:
         bool isV26 = false;
         uint32_t subscribedFlags = 0;
     };
+    struct LocalLiveViewSubscriptionRecord {
+        bool isNative = false;
+    };
+    // Outcome of updating the client-side replay record when an unsubscribe arrives. The replay
+    // record is the snapshot used to re-subscribe after an ANS restart, so it must track partial
+    // unsubscribe. The caller only branches on KEPT (retain the subscriber listener) vs any other
+    // value (drop the listener); the remaining values distinguish why no record is kept, for
+    // logging and unit tests. This replaces an earlier bool return that left zombie listeners when
+    // the record was missing or the remaining-filter rebuild failed.
+    enum class ReplayRecordUpdateResult {
+        REMOVED,    // record deleted: full unsubscribe, or partial unsubscribe emptied the filter
+        KEPT,       // record retained: partial unsubscribe still has filters (or subscribe-all no-op)
+        NOT_FOUND,  // no replay record exists for this subscriber
+        FAILED,     // remaining-filter rebuild failed; record defensively dropped
+    };
+    using NormalReplayRecords = std::vector<std::pair<sptr<IAnsSubscriber>, SubscriptionRecord>>;
+    using LocalLiveViewReplayRecords =
+        std::vector<std::pair<sptr<IAnsSubscriberLocalLiveView>, LocalLiveViewSubscriptionRecord>>;
     void AddSubscriptionRecord(const sptr<IAnsSubscriber> &stub,
         const sptr<NotificationSubscribeInfo> &subscribeInfo, bool isSelf, bool isV26, uint32_t subscribedFlags);
+    void AddLocalLiveViewSubscriptionRecord(const sptr<IAnsSubscriberLocalLiveView> &stub, bool isNative);
     void RemoveSubscriptionRecord(const sptr<IAnsSubscriber> &stub);
     void RemoveSubscriptionRecordLocked(const sptr<IAnsSubscriber> &stub);
+    ReplayRecordUpdateResult UpdateSubscriptionRecordAfterUnsubscribe(const sptr<IAnsSubscriber> &stub,
+        const sptr<NotificationSubscribeInfo> &subscribeInfo);
+    ReplayRecordUpdateResult UpdateSubscriptionRecordAfterUnsubscribeLocked(const sptr<IAnsSubscriber> &stub,
+        const sptr<NotificationSubscribeInfo> &subscribeInfo);
+    void UpdateSubscriberAfterUnsubscribeLocked(const sptr<IAnsSubscriber> &stub,
+        const sptr<NotificationSubscribeInfo> &subscribeInfo);
+    void CollectReSubscribeRecords(NormalReplayRecords &normalRecords,
+        LocalLiveViewReplayRecords &liveViewRecords);
+    void CollectBadgeQueryListeners(std::vector<sptr<BadgeQueryListener>> &listeners);
+    void ReSubscribeBadgeQueryCallbacks(const sptr<IAnsManager> &proxy,
+        const std::vector<sptr<BadgeQueryListener>> &listeners, size_t &successCount, size_t &failedCount,
+        bool &retryNeeded);
+    ErrCode ReSubscribeNormalRecord(const sptr<IAnsManager> &proxy, const sptr<IAnsSubscriber> &stub,
+        const SubscriptionRecord &record);
+    bool ReSubscribeNotificationsInternal();
+    bool HandleReSubscribeRetry(uint32_t retryAttempt, uint64_t retryEpoch);
+    void ScheduleReSubscribeRetry(uint32_t retryAttempt, uint64_t retryEpoch);
+    static uint32_t GetReSubscribeRetryDelayMs(uint32_t retryAttempt);
+    void InvalidateReSubscribeRetry();
 
     std::mutex subscriberMutex_;
     std::map<std::shared_ptr<NotificationSubscriber>, sptr<SubscriberListener>> subscribers_;
     std::vector<std::pair<wptr<IAnsSubscriber>, SubscriptionRecord>> subscriptionRecords_;
+    std::vector<std::pair<wptr<IAnsSubscriberLocalLiveView>, LocalLiveViewSubscriptionRecord>>
+        localLiveViewSubscriptionRecords_;
+    std::atomic<bool> reSubscribeRetryScheduled_ {false};
+    std::atomic<uint64_t> reSubscribeRetryEpoch_ {0};
+    std::atomic<uint64_t> reSubscribeRetryScheduledEpoch_ {0};
     std::mutex badgeQueryMutex_;
     std::map<std::shared_ptr<IBadgeQueryCallback>, sptr<BadgeQueryListener>> badgeQueryCallbacks_;
 #ifdef NOTIFICATION_SMART_REMINDER_SUPPORTED

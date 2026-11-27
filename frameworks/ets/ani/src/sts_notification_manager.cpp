@@ -397,9 +397,8 @@ void StsNotificationLocalLiveViewSubscriber::OnDisconnected()
 
 void StsNotificationLocalLiveViewSubscriber::OnDied()
 {
-    // Unified release path (same as OnDisconnected): the service died, the subscription
-    // is gone and the subscriber will no longer be called.
-    ReleaseFromRegistry();
+    // Keep the subscriber in the registry: the client replays LocalLiveView
+    // subscriptions after the ANS service restarts.
 }
 
 void StsNotificationLocalLiveViewSubscriber::KeepAliveInRegistry()

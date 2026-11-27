@@ -25,7 +25,8 @@
 
 ❌ **不包含(Scope Out)**：
 - 三方实况（IsCommonLiveView）持久化（保持不变）
-- 系统实况（IsSystemLiveView）持久化（保持不变）
+- 系统实况（IsSystemLiveView）持久化：自 v3 起常开（与三方实况一致），不受本宏
+  `ANS_FEATURE_DIST_NOTIFICATION_PERSIST` 控制，详见变更记录 v3
 - DB 删除路径（保留,以便清理可能的残留数据）
 - Snooze 恢复路径中的定时器启动（`StartSnoozeTimer` 保持不变）
 - 单元测试更新
@@ -34,6 +35,11 @@
 > **变更记录**：
 > - v1：原方案包含 Snooze 恢复隔离（`IsCanRecoverSnooze` L78-L80、`StartSnoozeTimer` L126），用户终审移除，隔离点从 4→2。
 > - v2：用户追加方案变更——为保证向后兼容，宏关闭时恢复路径中遇到非 LiveView 记录直接从 DB 删除，不再恢复。隔离点从 2→3。
+> - v3（issue #4470）：为支持 ANS（subfoundation）重启后系统实况恢复、按钮可点击，新增系统实况持久化与恢复。
+>   该能力常开（与三方实况一致），`SetNotificationRequestToDbCommon` 对系统实况无条件落盘；不受默认关闭的
+>   `ANS_FEATURE_DIST_NOTIFICATION_PERSIST` 控制（该宏仅隔离非实况通知），不提供独立裁剪开关。
+>   系统实况恢复记录带服务端派生的瞬态谓词（`IsTransientLiveView`，等价 `IsSystemLiveView`），
+>   不回放给订阅者、不返回给应用侧批量查询。
 
 ### 1.3 关键约束
 

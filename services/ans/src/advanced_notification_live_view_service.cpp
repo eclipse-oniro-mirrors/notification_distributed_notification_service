@@ -48,6 +48,12 @@ constexpr int32_t BGTASK_UID = 1096;
 constexpr int32_t TYPE_CODE_DOWNLOAD = 8;
 constexpr int32_t MAX_RESTART_ATTEMPTS = 2;
 const std::string RECOVER_FAIL_COUNT_KEY = "ans_recover_fail_count";
+// Coalesce window for persisting a single system live view; bounds staleness after a restart.
+constexpr int64_t SYSTEM_LIVE_VIEW_PERSIST_INTERVAL_MS = 500;
+// Fallback retention for a recovered system live view that carries no auto-delete time.
+constexpr int64_t SYSTEM_LIVE_VIEW_RECOVER_TTL_MS = 24 * 60 * 60 * 1000;
+std::mutex AdvancedNotificationService::systemLiveViewPersistMutex_;
+std::map<std::string, int64_t> AdvancedNotificationService::systemLiveViewPersistTime_;
 
 namespace {
 int32_t GetRecoverFailCount(int32_t userId)
@@ -427,8 +433,16 @@ void AdvancedNotificationService::StartRecoveryTimers(const NotificationRequestD
             StartGeofenceTriggerTimer(record, triggerDeadLine,
                 NotificationConstant::TRIGGER_GEOFENCE_REASON_DELETE);
         }
-    } else {
+    } else if (requestObj.request->GetAutoDeletedTime() > GetCurrentTime()) {
         StartAutoDeletedTimer(record);
+    } else if (requestObj.request->IsSystemLiveView()) {
+        // Fallback TTL so a recovered system live view without an expiry cannot linger forever.
+        uint64_t timerId = StartAutoDelete(record,
+            GetCurrentTime() + SYSTEM_LIVE_VIEW_RECOVER_TTL_MS,
+            NotificationConstant::TRIGGER_AUTO_DELETE_REASON_DELETE);
+        if (timerId != NotificationConstant::INVALID_TIMER_ID) {
+            record->notification->SetAutoDeletedTimer(timerId);
+        }
     }
 }
 
@@ -474,6 +488,10 @@ void AdvancedNotificationService::ProcessRecoveryEntry(const std::vector<Notific
         DoubleDeleteNotificationFromDb(requestObj.request->GetKey(),
             requestObj.request->GetSecureKey(), requestObj.request->GetReceiverUserId());
         return;
+    }
+    if (record->request->IsSystemLiveView()) {
+        record->isRecovered = true;
+        TrackRecoveredSystemLiveView(record->request);
     }
     UpdateRecentNotification(record->notification, false, 0);
     StartRecoveryTimers(requestObj, record);
@@ -549,6 +567,10 @@ void AdvancedNotificationService::ProcForDeleteLiveView(const std::shared_ptr<No
         record->request->GetSecureKey(), userId) != ERR_OK) {
         ANS_LOGE("Live View cancel, delete notification failed.");
     }
+    if (record->request->IsSystemLiveView()) {
+        std::lock_guard<std::mutex> lock(systemLiveViewPersistMutex_);
+        systemLiveViewPersistTime_.erase(record->request->GetBaseKey(""));
+    }
 
     CancelUpdateTimer(record);
     CancelFinishTimer(record);
@@ -586,6 +608,11 @@ void AdvancedNotificationService::DeleteNotificationFromDb(const std::shared_ptr
         }
         return;
     }
+    if (record->request->IsSystemLiveView()) {
+        // A click-deleted system live view must not resurrect from the db after a restart.
+        ProcForDeleteLiveView(record);
+        return;
+    }
     if (!(record->request->IsCommonLiveView() || record->request->IsSystemLiveView())) {
         DoubleDeleteNotificationFromDb(record->request->GetKey(),
             record->request->GetSecureKey(), record->request->GetReceiverUserId());
@@ -605,6 +632,9 @@ ErrCode AdvancedNotificationService::OnSubscriberAdd(
     for (auto notificationRecord : notificationList_) {
         if (notificationRecord != nullptr &&
             notificationRecord->notification != nullptr) {
+            if (IsTransientLiveView(notificationRecord->notification->GetNotificationRequestPoint())) {
+                continue;
+            }
             sptr<NotificationRequest> request =
                 new (std::nothrow) NotificationRequest(notificationRecord->notification->GetNotificationRequest());
             ANS_COND_DO_ERR(request == nullptr, return ERR_ANS_INNER_NO_MEMORY, "NotificationRequest malloc error.");
@@ -641,6 +671,9 @@ ErrCode AdvancedNotificationService::OnSubscriberAddWithSilentReplay(
         for (auto notificationRecord : notificationList_) {
             if (notificationRecord == nullptr || notificationRecord->notification == nullptr ||
                 notificationRecord->notification->GetNotificationRequestPoint() == nullptr) {
+                continue;
+            }
+            if (IsTransientLiveView(notificationRecord->notification->GetNotificationRequestPoint())) {
                 continue;
             }
             MessageParcel parcel;
@@ -719,8 +752,17 @@ bool AdvancedNotificationService::IsCanRecoverCommon(const sptr<NotificationRequ
         return false;
     }
     if (request->IsSystemLiveView()) {
-        ANS_LOGE("system liveview is not supported.");
-        return false;
+        if (request->GetContent() == nullptr || request->GetContent()->GetNotificationContent() == nullptr) {
+            ANS_LOGE("Invalid system live view content.");
+            return false;
+        }
+        int64_t autoDeletedTime = request->GetAutoDeletedTime();
+        if (autoDeletedTime != NotificationConstant::INVALID_AUTO_DELETE_TIME &&
+            autoDeletedTime > 0 && GetCurrentTime() > autoDeletedTime) {
+            ANS_LOGE("The system live view has expired.");
+            return false;
+        }
+        return true;
     }
     if (request->IsCommonLiveView()) {
         return IsLiveViewCanRecover(request);
@@ -743,7 +785,7 @@ bool AdvancedNotificationService::IsCanRecoverCommon(const sptr<NotificationRequ
 int32_t AdvancedNotificationService::SetNotificationRequestToDb(const NotificationRequestDb &requestDb)
 {
     auto request = requestDb.request;
-    if (!request->IsCommonLiveView()) {
+    if (!request->IsCommonLiveView() && !request->IsSystemLiveView()) {
         ANS_LOGD("Slot type %{public}d, content type %{public}d.",
             request->GetSlotType(), request->GetNotificationType());
 
@@ -756,24 +798,34 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
     }
 
     ANS_LOGD("Enter.");
-    auto content = std::static_pointer_cast<NotificationLiveViewContent>(
-        request->GetContent()->GetNotificationContent());
-    if (request->GetOwnerUid() != DEFAULT_UID) {
-        content->SetUid(request->GetOwnerUid());
-    }
-    if (content->GetLiveViewStatus() == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END &&
-        request->GetAutoDeletedTime() == NotificationConstant::NO_DELAY_DELETE_TIME) {
-        ANS_LOGI("Don't need set to db when liveview is in end status and no delay delete time.");
-        return ERR_OK;
-    }
+    if (request->IsCommonLiveView()) {
+        auto content = std::static_pointer_cast<NotificationLiveViewContent>(
+            request->GetContent()->GetNotificationContent());
+        if (content == nullptr) {
+            ANS_LOGE("Invalid common live view content.");
+            return ERR_ANS_INNER_INVALID_PARAM;
+        }
+        if (request->GetOwnerUid() != DEFAULT_UID) {
+            content->SetUid(request->GetOwnerUid());
+        }
+        if (content->GetLiveViewStatus() == NotificationLiveViewContent::LiveViewStatus::LIVE_VIEW_END &&
+            request->GetAutoDeletedTime() == NotificationConstant::NO_DELAY_DELETE_TIME) {
+            ANS_LOGI("Don't need set to db when liveview is in end status and no delay delete time.");
+            return ERR_OK;
+        }
 
-    if (content->GetIsOnlyLocalUpdate()) {
-        ANS_LOGI("skipDb in localUpdate");
-        return ERR_OK;
+        if (content->GetIsOnlyLocalUpdate()) {
+            ANS_LOGI("skipDb in localUpdate");
+            return ERR_OK;
+        }
+        if (content->GetRemoveOnProcessExitState() ==
+                NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_REMOVE) {
+            ANS_LOGI("Not saving notification request to db for common live view with "
+                "RemoveOnProcessExit set to true.");
+            return ERR_OK;
+        }
     }
-    if (content->GetRemoveOnProcessExitState() ==
-            NotificationLiveViewContent::LiveViewRemoveStatus::LIVE_VIEW_REMOVE) {
-        ANS_LOGI("Not saving notification request to db for common live view with RemoveOnProcessExit set to true.");
+    if (IsSystemLiveViewPersistCoalesced(request)) {
         return ERR_OK;
     }
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3).
@@ -792,7 +844,6 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
         NotificationAnalyticsUtil::ReportModifyEvent(message.Message("convert option failed"));
         return ERR_ANS_INNER_TASK_ERR;
     }
-
     std::string encryptValue;
     ErrCode errorCode = AesGcmHelper::Encrypt(
         jsonObject.dump(-1, ' ', false, nlohmann::json::error_handler_t::replace), encryptValue);
@@ -807,9 +858,8 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
             request->GetCreatorBundleName().c_str(), request->GetNotificationId(), request->GetKey().c_str(), result);
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).Message("set failed"));
         return result;
-    } else {
-        DeleteNotificationRequestFromDb(request->GetKey(), request->GetReceiverUserId());
     }
+    FinalizeLiveViewDbWrite(request);
 
     result = SetLockScreenPictureToDb(request);
     if (result != ERR_OK) {
@@ -822,16 +872,18 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDb(const Notificati
 int32_t AdvancedNotificationService::SetNotificationRequestToDbCommon(const NotificationRequestDb &requestDb)
 {
     auto request = requestDb.request;
-    if (request->IsSystemLiveView()) {
-        return ERR_OK;
-    }
-    if (request->IsCommonLiveView()) {
+    if (request->IsCommonLiveView() || request->IsSystemLiveView()) {
         ANS_LOGD("Slot type %{public}d, content type %{public}d.",
             request->GetSlotType(), request->GetNotificationType());
         return SetNotificationRequestToDb(requestDb);
     }
+    return SetNormalNotificationRequestToDb(requestDb);
+}
 
+int32_t AdvancedNotificationService::SetNormalNotificationRequestToDb(const NotificationRequestDb &requestDb)
+{
 #ifdef ANS_FEATURE_DIST_NOTIFICATION_PERSIST
+    auto request = requestDb.request;
     ANS_LOGD("Enter.");
     HaMetaMessage message = HaMetaMessage(EventSceneId::SCENE_6, EventBranchId::BRANCH_3).
         BundleName(request->GetCreatorBundleName()).NotificationId(request->GetNotificationId());
@@ -864,14 +916,37 @@ int32_t AdvancedNotificationService::SetNotificationRequestToDbCommon(const Noti
             request->GetCreatorBundleName().c_str(), request->GetNotificationId(), request->GetKey().c_str(), result);
         NotificationAnalyticsUtil::ReportModifyEvent(message.ErrorCode(result).Message("set failed"));
         return result;
-    } else {
-        DeleteNotificationRequestFromDb(request->GetKey(), request->GetReceiverUserId());
     }
-
+    DeleteNotificationRequestFromDb(request->GetKey(), request->GetReceiverUserId());
     return result;
 #else
     return ERR_OK;
 #endif
+}
+
+bool AdvancedNotificationService::IsSystemLiveViewPersistCoalesced(const sptr<NotificationRequest> &request)
+{
+    if (!request->IsSystemLiveView()) {
+        return false;
+    }
+    // Coalesce rapid updates so high-frequency live views do not block the serial publish queue
+    // with repeated JSON + encrypt + SQLite writes. Staleness is bounded by the window.
+    std::lock_guard<std::mutex> lock(systemLiveViewPersistMutex_);
+    auto it = systemLiveViewPersistTime_.find(request->GetBaseKey(""));
+    return it != systemLiveViewPersistTime_.end() &&
+        GetCurrentTime() - it->second < SYSTEM_LIVE_VIEW_PERSIST_INTERVAL_MS;
+}
+
+void AdvancedNotificationService::FinalizeLiveViewDbWrite(const sptr<NotificationRequest> &request)
+{
+    if (request->IsSystemLiveView()) {
+        // Only the secure key is written for system live views; the plain-key and lock-screen
+        // picture deletes would be no-ops, so skip them and just record the coalesce timestamp.
+        std::lock_guard<std::mutex> lock(systemLiveViewPersistMutex_);
+        systemLiveViewPersistTime_[request->GetBaseKey("")] = GetCurrentTime();
+        return;
+    }
+    DeleteNotificationRequestFromDb(request->GetKey(), request->GetReceiverUserId());
 }
 
 int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
@@ -917,8 +992,7 @@ int32_t AdvancedNotificationService::GetBatchNotificationRequestsFromDb(
                 request->GetSecureKey(), request->GetReceiverUserId());
             continue;
         }
-
-        if (GetLockScreenPictureFromDb(request) != ERR_OK) {
+        if (!request->IsSystemLiveView() && GetLockScreenPictureFromDb(request) != ERR_OK) {
             ANS_LOGE("Get request lock screen picture failed.");
         }
         NotificationRequestDb requestDb = { .request = request, .bundleOption = bundleOption };
@@ -1188,6 +1262,14 @@ ErrCode AdvancedNotificationService::StartPublishDelayedNotification(const std::
         ANS_LOGE("Failed to assign notification list");
         return result;
     }
+    NotificationRequestDb requestDb = { .request = record->request, .bundleOption = record->bundleOption };
+    ErrCode dbResult = SetNotificationRequestToDbCommon(requestDb);
+    if (dbResult != ERR_OK) {
+        ANS_LOGE("Failed to persist delayed system live view, ret=%{public}d", dbResult);
+        NotificationAnalyticsUtil::ReportPublishFailedEvent(record->request,
+            AnsStatus(dbResult, "SetNotificationRequestToDbCommon fail.").BuildMessage(true));
+        return dbResult;
+    }
 
     UpdateRecentNotification(record->notification, false, 0);
     NotificationSubscriberManager::GetInstance()->NotifyConsumed(record->notification, GenerateSortingMap());
@@ -1267,6 +1349,9 @@ AnsStatus AdvancedNotificationService::UpdateRecordByOwner(
         ANS_LOGE("request is nullptr.");
         return AnsStatus();
     }
+    // The owner is updating a live view it owns; stop treating it as a db-recovered record.
+    record->isRecovered = false;
+    UntrackRecoveredSystemLiveView(record->request->GetKey(), record->request->GetReceiverUserId());
     if (wantAgent != nullptr) {
         record->request->SetWantAgent(wantAgent);
     }

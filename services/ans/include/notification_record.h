@@ -40,6 +40,7 @@ struct NotificationRecord {
     uint32_t tokenCaller = 0;
     int32_t uid = -1;
     bool isSystemApp {false};
+    bool isRecovered {false};
 #ifdef ANS_FEATURE_ORIGINAL_DISTRIBUTED
     std::string deviceId;
     std::string bundleName;

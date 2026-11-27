@@ -4711,7 +4711,8 @@ HWTEST_F(AdvancedNotificationServiceTest, IsCanRecoverCommonTest_003, Function |
 /**
  * @tc.number    : IsCanRecoverCommonTest_004
  * @tc.name      : IsCanRecoverCommon
- * @tc.desc      : Test IsCanRecoverCommon and request is LocalLiveView.
+ * @tc.desc      : Test IsCanRecoverCommon for a system live view: recoverable by default,
+ *                 not recoverable once its auto-delete time has passed.
  */
 HWTEST_F(AdvancedNotificationServiceTest, IsCanRecoverCommonTest_004, Function | SmallTest | Level1)
 {
@@ -4725,6 +4726,13 @@ HWTEST_F(AdvancedNotificationServiceTest, IsCanRecoverCommonTest_004, Function |
     request->SetCreatorUserId(100);
     request->SetLabel("test_001");
     request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    ASSERT_TRUE(request->IsSystemLiveView());
+    // Default auto-delete time (invalid) means the system live view is recoverable.
+    ASSERT_EQ(advancedNotificationService_->IsCanRecoverCommon(request), true);
+
+    auto epoch = std::chrono::system_clock::now().time_since_epoch();
+    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    request->SetAutoDeletedTime(curTime - 1000);
     ASSERT_EQ(advancedNotificationService_->IsCanRecoverCommon(request), false);
 }
 

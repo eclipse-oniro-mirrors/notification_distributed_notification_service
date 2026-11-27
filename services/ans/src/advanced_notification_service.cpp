@@ -522,10 +522,21 @@ void AdvancedNotificationService::SelfClean(bool resetQueues)
     }
 }
 
+bool AdvancedNotificationService::IsTransientLiveView(const sptr<NotificationRequest> &request)
+{
+    return request != nullptr && request->IsSystemLiveView();
+}
+
 ErrCode AdvancedNotificationService::AssignToNotificationList(
     const std::shared_ptr<NotificationRecord> &record, bool isRecover)
 {
     ErrCode result = ERR_OK;
+    if (!isRecover && record != nullptr && record->request != nullptr) {
+        // An app publish/update takes ownership of the record: it is no longer a db recovery and
+        // must not be dropped by USER_SWITCHED.
+        record->isRecovered = false;
+        UntrackRecoveredSystemLiveView(record->request->GetKey(), record->request->GetReceiverUserId());
+    }
     if (!IsNotificationExists(record->notification->GetKey())) {
         if (record->request->IsUpdateOnly() && !IsSetSnooze(record->notification->GetKey())) {
             ANS_LOGW("Notification not exists when update");

@@ -234,6 +234,10 @@ void SystemEventObserver::OnReceiveEvent(const EventFwk::CommonEventData &data)
         }
         NotificationPreferences::GetInstance()->InitSettingFromDisturbDB(userId);
         AdvancedNotificationService::GetInstance()->RecoverLiveViewFromDb(userId);
+        // A full boot emits USER_SWITCHED (a subfoundation crash/restart does not). System live
+        // views are recovered from the db on service start; drop them here so they do not survive
+        // a full reboot / user switch. On a crash/restart this event is absent and they stay.
+        AdvancedNotificationService::GetInstance()->CleanSystemLiveViewOnUserSwitch(userId);
         NotificationCloneManager::GetInstance().OnUserSwitch(userId);
         DelayedSingleton<AdvancedDatashareHelper>::GetInstance()->OnUserSwitch(userId);
         AdvancedNotificationService::GetInstance()->TriggerLiveViewSwitchCheck(userId);
