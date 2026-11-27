@@ -35,7 +35,6 @@ namespace OHOS {
 namespace Notification {
 namespace {
 const std::string ANS_RDB_FILE = Infra::NtfRdbConstant::NOTIFICATION_RDB_NAME;
-const std::vector<std::string> RDB_SUFFIXES = {"", "-wal", "-shm", "-journal"};
 const std::string KEYFILE_DIR = "/keyfile";
 const std::string RINGTONE_KEY_SUFFIX = "bundleRingtoneNotification";
 const std::string CLONE_RINGTONE_KEY_PREFIX = "clone_ringtone_";
@@ -203,14 +202,15 @@ int32_t NotificationCleanMgr::CollectRingtoneInfos(const std::string &mirrorDbDi
 
 int32_t NotificationCleanMgr::CleanRdbFiles(const std::string &mirrorDbDir)
 {
-    for (const auto &suffix : RDB_SUFFIXES) {
-        std::string filePath = mirrorDbDir + ANS_RDB_FILE + suffix;
-        std::error_code ec;
-        std::filesystem::remove(filePath, ec);
-        if (ec && ec != std::errc::no_such_file_or_directory) {
-            ANS_LOGE("BOPD clean: remove rdb file failed, err is %{public}d", ec.value());
-            return ERR_ANS_INNER_INVALID_OPERATION;
-        }
+    NativeRdb::RdbStoreConfig config(mirrorDbDir + ANS_RDB_FILE, NativeRdb::StorageMode::MODE_DISK, false,
+        std::vector<uint8_t>(), Infra::NtfRdbConstant::NOTIFICATION_JOURNAL_MODE,
+        Infra::NtfRdbConstant::NOTIFICATION_SYNC_MODE);
+    config.SetSecurityLevel(NativeRdb::SecurityLevel::S1);
+    config.SetHaMode(NativeRdb::HAMode::MAIN_REPLICA);
+    int32_t ret = NativeRdb::RdbHelper::DeleteRdbStore(config);
+    if (ret != NativeRdb::E_OK) {
+        ANS_LOGE("BOPD clean: delete rdb store failed, err is %{public}d", ret);
+        return ERR_ANS_INNER_INVALID_OPERATION;
     }
     ANS_LOGI("BOPD clean: notification rdb files removed on mirror path");
     return ERR_ANS_INNER_OK;
