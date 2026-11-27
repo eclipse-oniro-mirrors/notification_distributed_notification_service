@@ -874,7 +874,8 @@ AnsStatus AdvancedNotificationService::PublishNotificationBySa(const sptr<Notifi
             return;
         }
 #endif
-        if (IsDisableNotificationForSaByRestrictedMode(bundle, record->notification->GetRecvUserId(), directAgency)) {
+        if (IsDisableNotificationForSaByRestrictedMode(bundle, record->notification->GetRecvUserId(),
+            directAgency, uid)) {
             ANS_LOGE("bundle(%{public}s) not in trust list.", bundle.c_str());
             ansStatus = AnsStatus(ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION, "bundle not in trust list");
             return;
@@ -1296,10 +1297,18 @@ bool AdvancedNotificationService::IsDisableNotification(const std::string &bundl
     return IsDisableNotificationInner(bundleName, userId);
 }
 
-bool AdvancedNotificationService::IsDisableNotificationByRestrictedMode(
-    const std::string &bundleName, const int32_t &userId)
+bool AdvancedNotificationService::IsThirdpartyForSafeMode(int32_t ownerUid)
 {
-    if (NotificationPreferences::GetInstance()->IsSafeMode()) {
+    if (!NotificationPreferences::GetInstance()->IsSafeMode()) {
+        return false;
+    }
+    return !BundleManagerHelper::GetInstance()->IsSystemApp(ownerUid);
+}
+
+bool AdvancedNotificationService::IsDisableNotificationByRestrictedMode(
+    const std::string &bundleName, const int32_t &userId, int32_t ownerUid)
+{
+    if (IsThirdpartyForSafeMode(ownerUid)) {
         ANS_LOGE("Safe Mode is on.");
         return true;
     }
@@ -1318,13 +1327,13 @@ bool AdvancedNotificationService::IsDisableNotificationByRestrictedMode(
 }
 
 bool AdvancedNotificationService::IsDisableNotificationForSaByRestrictedMode(
-    const std::string &bundleName, const int32_t &userId, bool directAgency)
+    const std::string &bundleName, const int32_t &userId, bool directAgency, int32_t ownerUid)
 {
     bool isAppAgent = false;
     if (!directAgency && !bundleName.empty()) {
         isAppAgent = true;
     }
-    if (isAppAgent && NotificationPreferences::GetInstance()->IsSafeMode()) {
+    if (isAppAgent && IsThirdpartyForSafeMode(ownerUid)) {
         ANS_LOGE("Safe Mode is on.");
         return true;
     }

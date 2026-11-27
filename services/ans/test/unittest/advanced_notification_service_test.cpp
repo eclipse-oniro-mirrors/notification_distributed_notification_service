@@ -5026,6 +5026,44 @@ HWTEST_F(AdvancedNotificationServiceTest, GetNotificationParameters_200, Functio
 }
 
 /**
+ * @tc.number    : Publish_SafeMode_0001
+ * @tc.name      : PublishWithSafeMode
+ * @tc.desc      : Test Publish in safe mode resolves third-party by notification owner uid.
+ * @tc.require   : issue
+ */
+HWTEST_F(AdvancedNotificationServiceTest, Publish_SafeMode_0001, Function | SmallTest | Level1)
+{
+    TestAddSlot(NotificationConstant::SlotType::OTHER);
+    MockGetTokenTypeFlag(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP);
+    MockIsSystemApp(true);
+    MockIsVerfyPermisson(true);
+    ASSERT_EQ(advancedNotificationService_->SetNotificationsEnabledForSpecialBundle(std::string(),
+        new NotificationBundleOption(TEST_DEFUALT_BUNDLE, SYSTEM_APP_UID), true), (int)ERR_OK);
+    std::string label = "PublishWithSafeMode's label";
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(true);
+
+    sptr<NotificationRequest> req = new NotificationRequest(3);
+    req->SetSlotType(NotificationConstant::OTHER);
+    req->SetLabel(label);
+    req->SetIsAgentNotification(true);
+    req->SetOwnerBundleName("testOwner");
+    req->SetOwnerUserId(1);
+    EXPECT_EQ(advancedNotificationService_->Publish(label, req),
+        (int)ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION);
+
+    sptr<NotificationRequest> sysReq = new NotificationRequest(4);
+    sysReq->SetSlotType(NotificationConstant::OTHER);
+    sysReq->SetLabel(label);
+    sysReq->SetIsAgentNotification(true);
+    sysReq->SetOwnerBundleName("testOwner");
+    sysReq->SetOwnerUid(SYSTEM_APP_UID);
+    EXPECT_NE(advancedNotificationService_->Publish(label, sysReq),
+        (int)ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION);
+
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(false);
+}
+
+/**
  * @tc.number    : IsAllowedRemoveSlot_0001
  * @tc.name      : IsAllowedRemoveSlot
  * @tc.desc      : Test IsAllowedRemoveSlot and slotType is not liveView.

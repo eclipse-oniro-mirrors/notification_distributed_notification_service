@@ -3303,6 +3303,10 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByRestrictedMode_003, Funct
 /**
  * @tc.name: IsDisableNotificationByRestrictedMode_004
  * @tc.desc: Test IsDisableNotificationByRestrictedMode with safe mode blocking notifications
+ * 1. Safe mode on, third-party app, expects blocked
+ * 2. Safe mode on, third-party app in kiosk trust list, expects blocked
+ * 3. Safe mode on with exam mode, third-party app, expects blocked
+ * 4. Safe mode on, system app, expects not blocked
  * @tc.type: FUNC
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByRestrictedMode_004, Function | SmallTest | Level1)
@@ -3324,6 +3328,10 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationByRestrictedMode_004, Funct
     EXPECT_TRUE(result);
 
     NotificationPreferences::GetInstance()->SetExamStatus(false);
+    result = advancedNotificationService_->IsDisableNotificationByRestrictedMode(bundleName, userId,
+        SYSTEM_APP_UID);
+    EXPECT_FALSE(result);
+
     NotificationPreferences::GetInstance()->SetSafeModeStatus(false);
     NotificationPreferences::GetInstance()->preferencesInfo_.kioskAppTrustList_.clear();
 }
@@ -3400,9 +3408,10 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_004, 
 /**
  * @tc.name: IsDisableNotificationForSaByRestrictedMode_005
  * @tc.desc: Test IsDisableNotificationForSaByRestrictedMode with safe mode.
- * 1. Safe mode on, SA publishing on behalf of an app, expects blocked
+ * 1. Safe mode on, SA publishing on behalf of a third-party app, expects blocked
  * 2. Safe mode on, directAgency SA notification, expects not blocked
  * 3. Safe mode on, SA notification without bundle, expects not blocked
+ * 4. Safe mode on, SA publishing on behalf of a system app, expects not blocked
  * @tc.type: FUNC
  */
 HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_005, Function | SmallTest | Level1)
@@ -3416,6 +3425,33 @@ HWTEST_F(AnsPublishServiceTest, IsDisableNotificationForSaByRestrictedMode_005, 
     EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(bundleName, userId, true));
 
     EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode("", userId, false));
+
+    EXPECT_FALSE(advancedNotificationService_->IsDisableNotificationForSaByRestrictedMode(
+        bundleName, userId, false, SYSTEM_APP_UID));
+
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(false);
+}
+
+/**
+ * @tc.name: IsThirdpartyForSafeMode_001
+ * @tc.desc: Test IsThirdpartyForSafeMode resolves notification owner by uid.
+ * 1. Safe mode off, expects false without query
+ * 2. Safe mode on, third-party owner uid, expects true
+ * 3. Safe mode on, system owner uid, expects false
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, IsThirdpartyForSafeMode_001, Function | SmallTest | Level1)
+{
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(false);
+    bool result = advancedNotificationService_->IsThirdpartyForSafeMode(NON_SYSTEM_APP_UID);
+    EXPECT_FALSE(result);
+
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(true);
+    result = advancedNotificationService_->IsThirdpartyForSafeMode(NON_SYSTEM_APP_UID);
+    EXPECT_TRUE(result);
+
+    result = advancedNotificationService_->IsThirdpartyForSafeMode(SYSTEM_APP_UID);
+    EXPECT_FALSE(result);
 
     NotificationPreferences::GetInstance()->SetSafeModeStatus(false);
 }
@@ -3444,6 +3480,28 @@ HWTEST_F(AnsPublishServiceTest, AtomicServicePublish_0200, Function | MediumTest
     request->SetExtendInfo(extendInfo);
     auto ret = advancedNotificationService_->Publish("", request);
     EXPECT_EQ(ret, ERR_ANS_INNER_INVALID_PARAM);
+}
+
+/*
+ * @tc.name: AtomicServicePublish_0300
+ * @tc.desc: Test AtomicServicePublish with safe mode blocking notifications
+ * 1. Safe mode on, atomic service notification, expects rejected
+ * 2. Safe mode off, atomic service notification, expects not rejected by safe mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsPublishServiceTest, AtomicServicePublish_0300, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> request = new NotificationRequest(1000);
+    request->SetOwnerBundleName("test.com");
+    request->SetOwnerUserId(-1);
+
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(true);
+    auto ret = advancedNotificationService_->AtomicServicePublish(request);
+    EXPECT_EQ(ret.GetErrCode(), ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION);
+
+    NotificationPreferences::GetInstance()->SetSafeModeStatus(false);
+    ret = advancedNotificationService_->AtomicServicePublish(request);
+    EXPECT_NE(ret.GetErrCode(), ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION);
 }
 
 /**

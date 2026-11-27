@@ -27,6 +27,7 @@
 
 #include "hitrace_meter_adapter.h"
 #include "notification_analytics_util.h"
+#include "notification_preferences.h"
 #include "os_account_manager.h"
 #include "os_account_manager_helper.h"
 #include "string_wrapper.h"
@@ -36,6 +37,12 @@ namespace OHOS {
 namespace Notification {
 AnsStatus AdvancedNotificationService::AtomicServicePublish(const sptr<NotificationRequest> &request)
 {
+    if (NotificationPreferences::GetInstance()->IsSafeMode()) {
+        ANS_LOGE("Safe Mode is on.");
+        return AnsStatus(ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION,
+            "Safe Mode is on, atomic service notification rejected.");
+    }
+
     ErrCode result = PermissionVerification();
     if (result != ERR_OK) {
         return AnsStatus(result, "PermissionVerification fail.");

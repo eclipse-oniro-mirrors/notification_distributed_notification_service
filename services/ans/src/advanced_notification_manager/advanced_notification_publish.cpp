@@ -563,7 +563,7 @@ ErrCode AdvancedNotificationService::PublishNotificationForIndirectProxy(const s
             return;
         }
 #endif
-        if (IsDisableNotificationByRestrictedMode(bundle, record->notification->GetRecvUserId())) {
+        if (IsDisableNotificationByRestrictedMode(bundle, record->notification->GetRecvUserId(), uid)) {
             ANS_LOGE("bundle(%{public}s) not in trust list.", bundle.c_str());
             result = ERR_ANS_INNER_REJECTED_WITH_DISABLE_NOTIFICATION;
             return;
