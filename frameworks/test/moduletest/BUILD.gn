@@ -54,6 +54,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "${services_path}/infrastructure/external_adapter/rdb/include",
     "${services_path}/infrastructure/external_adapter/rdb/include/public",
     "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${core_path}/test/unittest/mock",
   ]
 
   sources = [
@@ -63,6 +64,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
+    "mock/mock_mst_samgr.cpp",
     "mock/remote_native_token.cpp",
   ]
 
@@ -97,6 +99,7 @@ ohos_moduletest("ans_innerkits_module_publish_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -133,6 +136,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "${services_path}/infrastructure/external_adapter/rdb/include",
     "${services_path}/infrastructure/external_adapter/rdb/include/public",
     "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${core_path}/test/unittest/mock",
   ]
 
   sources = [
@@ -143,6 +147,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "mock/mock_bundle_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
+    "mock/mock_mst_samgr.cpp",
     "mock/mock_single_kv_store.cpp",
     "mock/remote_native_token.cpp",
   ]
@@ -174,6 +179,7 @@ ohos_moduletest("ans_innerkits_module_slot_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",
@@ -219,6 +225,7 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "${services_path}/infrastructure/external_adapter/rdb/include",
     "${services_path}/infrastructure/external_adapter/rdb/include/public",
     "${services_path}/infrastructure/external_adapter/rdb/include/rdb_store_wrapper",
+    "${core_path}/test/unittest/mock",
   ]
 
   sources = [
@@ -226,6 +233,7 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "mock/distributed_kv_data_manager.cpp",
     "mock/mock_bundle_manager_helper.cpp",
     "mock/mock_ipc.cpp",
+    "mock/mock_mst_samgr.cpp",
     "mock/mock_single_kv_store.cpp",
     "mock/remote_native_token.cpp",
   ]
@@ -257,6 +265,7 @@ ohos_moduletest("ans_innerkits_module_setting_test") {
     "common_event_service:cesfwk_innerkits",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gmock",
     "googletest:gtest_main",
     "hilog:libhilog",
     "image_framework:image_native",

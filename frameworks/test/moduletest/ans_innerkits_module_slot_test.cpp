@@ -22,6 +22,7 @@
 #include "ans_inner_errors.h"
 #include "ans_manager_proxy.h"
 #include "if_system_ability_manager.h"
+#include "mock/mock_mst_samgr.h"
 #include "iservice_registry.h"
 #include "mock_ans_rdb_mgr_builder.h"
 #include "notification_helper.h"
@@ -37,8 +38,6 @@ namespace Notification {
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
 extern void MockIsSystemApp(bool isSystemApp);
 const int32_t SLEEP_TIME = 1;
-static sptr<ISystemAbilityManager> systemAbilityManager =
-    SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
 // Default sound for notification
 const static std::vector<int64_t> DEFAULT_NOTIFICATION_VIBRATION = {200};
 const static Uri DEFAULT_NOTIFICATION_SOUND("file://system/etc/Light.ogg");
@@ -50,19 +49,30 @@ public:
     void TearDown();
 
     static sptr<AdvancedNotificationService> service_;
+    static sptr<ISystemAbilityManager> realSamgr_;
 };
 
 sptr<AdvancedNotificationService> AnsInnerKitsModuleSlotTest::service_;
+sptr<ISystemAbilityManager> AnsInnerKitsModuleSlotTest::realSamgr_;
 void AnsInnerKitsModuleSlotTest::SetUpTestCase()
 {
     RemoteNativeToken::SetNativeToken("ans_innerkits_module_slot_test");
     service_ = OHOS::Notification::AdvancedNotificationService::GetInstance();
+    ASSERT_NE(service_, nullptr);
+    realSamgr_ = OHOS::Notification::GetMstRealSystemAbilityManager();
+    ASSERT_NE(realSamgr_, nullptr);
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
-    systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service_, saExtraProp);
+    ASSERT_EQ(realSamgr_->AddSystemAbility(OHOS::Notification::MST_ANS_SA_ID, service_->AsObject(), saExtraProp),
+        ERR_OK);
+    OHOS::Notification::ConfigureMstSamgr(realSamgr_);
 }
 
 void AnsInnerKitsModuleSlotTest::TearDownTestCase()
 {
+    if (realSamgr_ != nullptr) {
+        realSamgr_->RemoveSystemAbility(OHOS::Notification::MST_ANS_SA_ID);
+        realSamgr_ = nullptr;
+    }
     NotificationHelper::RemoveAllSlots();
     if (service_ != nullptr) {
         service_->SelfClean();

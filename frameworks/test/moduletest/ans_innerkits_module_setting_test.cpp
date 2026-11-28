@@ -21,6 +21,7 @@
 #include "advanced_notification_service.h"
 #undef private
 #include "if_system_ability_manager.h"
+#include "mock/mock_mst_samgr.h"
 #include "iservice_registry.h"
 #include "notification_helper.h"
 #include "remote_native_token.h"
@@ -29,8 +30,6 @@
 using namespace testing::ext;
 namespace OHOS {
 namespace Notification {
-static sptr<ISystemAbilityManager> systemAbilityManager =
-    SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
 const int32_t CALLING_UID = 9998;
 const int32_t USERID = 100;
 
@@ -42,9 +41,11 @@ public:
     void TearDown();
 
     static sptr<AdvancedNotificationService> service_;
+    static sptr<ISystemAbilityManager> realSamgr_;
 };
 
 sptr<AdvancedNotificationService> AnsInnerKitsModuleSettingTest::service_;
+sptr<ISystemAbilityManager> AnsInnerKitsModuleSettingTest::realSamgr_;
 void AnsInnerKitsModuleSettingTest::SetUpTestCase()
 {
     NativeTokenInfoParams infoInstance = {
@@ -61,10 +62,23 @@ void AnsInnerKitsModuleSettingTest::SetUpTestCase()
     infoInstance.processName = "ans_innerkits_module_setting_test";
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
+
+    service_ = OHOS::Notification::AdvancedNotificationService::GetInstance();
+    ASSERT_NE(service_, nullptr);
+    realSamgr_ = OHOS::Notification::GetMstRealSystemAbilityManager();
+    ASSERT_NE(realSamgr_, nullptr);
+    OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
+    ASSERT_EQ(realSamgr_->AddSystemAbility(OHOS::Notification::MST_ANS_SA_ID, service_->AsObject(), saExtraProp),
+        ERR_OK);
+    OHOS::Notification::ConfigureMstSamgr(realSamgr_);
 }
 
 void AnsInnerKitsModuleSettingTest::TearDownTestCase()
 {
+    if (realSamgr_ != nullptr) {
+        realSamgr_->RemoveSystemAbility(OHOS::Notification::MST_ANS_SA_ID);
+        realSamgr_ = nullptr;
+    }
     if (service_ != nullptr) {
         service_->SelfClean();
     }

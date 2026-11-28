@@ -16,7 +16,6 @@
 #include <chrono>
 #include <functional>
 #include <thread>
-#include <unistd.h>
 
 #include "ans_inner_errors.h"
 #include "ans_manager_proxy.h"
@@ -33,6 +32,7 @@
 #include "notification_helper.h"
 #include "notification_json_convert.h"
 #include "mock_ans_rdb_mgr_builder.h"
+#include "mock/mock_mst_samgr.h"
 #include "remote_native_token.h"
 #include "system_ability_definition.h"
 #include "want_agent_info.h"
@@ -46,8 +46,6 @@ namespace OHOS {
 namespace Notification {
 extern void MockGetTokenTypeFlag(ATokenTypeEnum mockRet);
 
-static sptr<ISystemAbilityManager> systemAbilityManager =
-    SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
 bool g_onConsumedReceived = false;
 bool g_onCanceledReceived = false;
 bool g_onWantReceived = false;
@@ -498,19 +496,34 @@ public:
     void CheckJsonConverter(const NotificationRequest *request);
 
     static sptr<AdvancedNotificationService> service_;
+    static sptr<ISystemAbilityManager> realSamgr_;
 };
 
 sptr<AdvancedNotificationService> AnsInnerKitsModulePublishTest::service_;
+sptr<ISystemAbilityManager> AnsInnerKitsModulePublishTest::realSamgr_;
 void AnsInnerKitsModulePublishTest::SetUpTestCase()
 {
     RemoteNativeToken::SetNativeToken("ans_innerkits_module_publish_test");
     service_ = OHOS::Notification::AdvancedNotificationService::GetInstance();
+    ASSERT_NE(service_, nullptr);
+
+    // Never register the production ANS SA id: that would replace the real 3203 registration in
+    // the device samgr. Register a test-owned SA instead and make the samgr lookup (overridden by
+    // mock_mst_samgr.cpp) return that registered object for both the production and test ids.
+    realSamgr_ = OHOS::Notification::GetMstRealSystemAbilityManager();
+    ASSERT_NE(realSamgr_, nullptr);
     OHOS::ISystemAbilityManager::SAExtraProp saExtraProp;
-    systemAbilityManager->AddSystemAbility(OHOS::ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID, service_, saExtraProp);
+    ASSERT_EQ(realSamgr_->AddSystemAbility(OHOS::Notification::MST_ANS_SA_ID, service_->AsObject(), saExtraProp),
+        ERR_OK);
+    OHOS::Notification::ConfigureMstSamgr(realSamgr_);
 }
 
 void AnsInnerKitsModulePublishTest::TearDownTestCase()
 {
+    if (realSamgr_ != nullptr) {
+        realSamgr_->RemoveSystemAbility(OHOS::Notification::MST_ANS_SA_ID);
+        realSamgr_ = nullptr;
+    }
     if (service_ != nullptr) {
         service_->SelfClean();
     }
@@ -1852,12 +1865,6 @@ HWTEST_F(AnsInnerKitsModulePublishTest, ANS_Interface_MT_Publish_10001, Function
     req.SetContent(content);
     req.SetSlotType(NotificationConstant::LIVE_VIEW);
     req.SetNotificationId(notificationId);
-
-    // An earlier case (e.g. 10002 when tests are shuffled) may have subscribed LocalLiveView in this
-    // process, and there is no public unsubscribe API. Drop this process's subscription so the case
-    // always covers "publish without a LocalLiveView subscriber", regardless of test order.
-    const int32_t callingUid = IPCSkeleton::GetCallingUid();
-    (void)service_->RemoveSystemLiveViewNotifications("", callingUid, getpid());
 
     EXPECT_EQ(ERR_ANS_LOCAL_SUBSCRIBE_CHECK_FAILED, NotificationHelper::PublishNotification(req));
 
