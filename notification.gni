@@ -159,17 +159,25 @@ declare_args() {
 
 # ROM size optimization 公共编译 flag
 # 参考 PR#4766: LTO 必须同时在 cflags 和 ldflags 才能生效
+# 注意：优化级别不在这里，见 notification_size_opt_cflags_cc
 notification_size_opt_cflags = [
   "-fno-math-errno",
   "-fno-unroll-loops",
   "-fmerge-all-constants",
   "-fno-ident",
-  "-Oz",
   "-flto",
   "-ffunction-sections",
   "-fdata-sections",
   "-fno-rtti",
 ]
+
+# ROM size optimization 优化级别。
+# clang 以命令行最后一个 -O 为准：target 级 cflags 排在框架默认 config 之前，写在 cflags 里
+# 会被默认的 -O2 覆盖；cflags_cc 排在全部 cflags 之后（含 public_configs 追加的 flag），
+# 所以优化级别统一由各 target 通过 cflags_cc 引用本变量下发。
+# 注意：只有一两个编译单元的极小库（module loader、ndk 等）实测 -Oz 反而变大，保持框架默认；
+# 同一个 .so 链接的各 target 档位要一致，混用（如共享 source_set 用 -Oz、其余用 -O2）实测也会变大。
+notification_size_opt_cflags_cc = [ "-Oz" ]
 
 # ROM size optimization 公共链接 flag
 notification_size_opt_ldflags = [

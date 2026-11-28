@@ -74,6 +74,7 @@ ohos_shared_library("notification_napi_common") {
 
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags
+  cflags_cc = notification_size_opt_cflags_cc
   # 公共库不加 -fvisibility=hidden [PR#4766 借鉴]
 
   sources = [
@@ -162,6 +163,7 @@ ohos_shared_library("notification") {
 
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags
+  cflags_cc = notification_size_opt_cflags_cc
 
   sources = [
     "src/init.cpp",
