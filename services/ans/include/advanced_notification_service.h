@@ -20,9 +20,12 @@
 #include "nocopyable.h"
 #include <atomic>
 #include <list>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <set>
+#include <utility>
+#include <vector>
 #include "ans_service_errors.h"
 
 #include "event_handler.h"
@@ -1545,6 +1548,16 @@ public:
     ErrCode RemoveSystemLiveViewNotificationsOfSa(int32_t uid);
 
     /**
+     * @brief Drop system live views recovered from the db on user switch / full boot. System live
+     *        views are recovered from the db on every service start; a full boot also emits
+     *        USER_SWITCHED, which cleans the recovered ones up so they do not survive a reboot.
+     *        A live view published or re-published by an app is owned by that app and is kept.
+     *        A subfoundation crash/restart emits no USER_SWITCHED, so recovered system live views
+     *        stay for the app to manage.
+     */
+    void CleanSystemLiveViewOnUserSwitch(int32_t userId);
+
+    /**
      * @brief Set the notification flags by soltType.
      */
     void SetRequestBySlotType(const sptr<NotificationRequest> &request,
@@ -2255,6 +2268,8 @@ private:
     ErrCode UpdateInNotificationList(const std::shared_ptr<NotificationRecord> &record);
     void UpdateInDelayNotificationList(const std::shared_ptr<NotificationRecord> &record);
     ErrCode AssignToNotificationList(const std::shared_ptr<NotificationRecord> &record, bool isRecover = false);
+    void TrackRecoveredSystemLiveView(const sptr<NotificationRequest> &request);
+    void UntrackRecoveredSystemLiveView(const std::string &key, int32_t userId);
     ErrCode RemoveFromNotificationList(const sptr<NotificationBundleOption> &bundleOption,
         NotificationKey notificationKey, sptr<Notification> &notification, int32_t removeReason,
         bool isCancel = false);
@@ -2459,10 +2474,17 @@ private:
         const std::shared_ptr<NotificationSubscriberManager::SubscriberRecord> &record);
     bool IsLiveViewCanRecover(const sptr<NotificationRequest> request);
     bool IsCanRecoverCommon(const sptr<NotificationRequest> request);
+    // Server-derived predicate: system live views are transient. They must not be replayed to
+    // subscribers on recovery/reconnect and must not be returned by app-facing batch queries.
+    // Derived from the request type only; it is never a client-writable or persisted field.
+    static bool IsTransientLiveView(const sptr<NotificationRequest> &request);
     AnsStatus FillNotificationRecord(const NotificationRequestDb &requestdbObj,
         std::shared_ptr<NotificationRecord> record);
     static int32_t SetNotificationRequestToDb(const NotificationRequestDb &requestDb);
     static int32_t SetNotificationRequestToDbCommon(const NotificationRequestDb &requestDb);
+    static int32_t SetNormalNotificationRequestToDb(const NotificationRequestDb &requestDb);
+    static bool IsSystemLiveViewPersistCoalesced(const sptr<NotificationRequest> &request);
+    static void FinalizeLiveViewDbWrite(const sptr<NotificationRequest> &request);
     static int32_t GetBatchNotificationRequestsFromDb(std::vector<NotificationRequestDb> &requests,
         int32_t userId = -1, std::vector<std::string> *removedBaseKeys = nullptr);
     static int32_t DoubleDeleteNotificationFromDb(const std::string &key,
@@ -2867,6 +2889,12 @@ private:
     std::atomic<bool> orphanSweepInFlight_ {false};
     std::set<int32_t> recoverReplayUserIds_;
     std::set<int32_t> recoveredLiveViewUserIds_;
+    // Persisted keys of system live views recovered in this service lifetime. Used to delete only
+    // those rows on USER_SWITCHED, leaving live views published/re-published by apps untouched.
+    std::map<int32_t, std::vector<std::pair<std::string, std::string>>> recoveredSystemLiveViewKeys_;
+    // Coalesce high-frequency system live view persists: last successful write time per base key.
+    static std::mutex systemLiveViewPersistMutex_;
+    static std::map<std::string, int64_t> systemLiveViewPersistTime_;
     std::shared_ptr<OHOS::AppExecFwk::EventRunner> runner_ = nullptr;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> handler_ = nullptr;
     std::list<std::shared_ptr<NotificationRecord>> notificationList_;

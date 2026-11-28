@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -667,7 +667,6 @@ InnerErrorCode AnsNotification::SubscribeNotificationV26(const std::shared_ptr<N
     if (subscribeInfo != nullptr && subscribeInfo->GetPictureOption() != nullptr) {
         subscriber->SetPictureOption(subscribeInfo->GetPictureOption());
     }
-    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
     AddSubscriptionRecord(listener, subscribeInfo, false, true, subscriber->GetSubscribedFlags());
 
     if (subscribeInfo == nullptr) {
@@ -728,7 +727,15 @@ InnerErrorCode AnsNotification::SubscribeLocalLiveViewNotification(
         ANS_LOGE("null subscriberSptr");
         return ERR_ANS_INNER_INVALID_PARAM;
     }
-    return static_cast<InnerErrorCode>(proxy->SubscribeLocalLiveView(subscriberSptr, isNative));
+    // Register the SA listener first; persist the replay record only after the server accepts it.
+    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
+    InnerErrorCode result = static_cast<InnerErrorCode>(proxy->SubscribeLocalLiveView(subscriberSptr, isNative));
+    if (result == ERR_ANS_INNER_OK) {
+        AddLocalLiveViewSubscriptionRecord(subscriberSptr, isNative);
+    } else {
+        ANS_LOGE("SubscribeLocalLiveView failed, ret=%{public}d", static_cast<int32_t>(result));
+    }
+    return result;
 }
 
 InnerErrorCode AnsNotification::SubscribeNotification(
@@ -811,7 +818,7 @@ InnerErrorCode AnsNotification::UnSubscribeNotification(
     }
     ErrCode unsubscribeResult = proxy->Unsubscribe(subscriberSptr, sptrInfo);
     if (unsubscribeResult == ERR_OK) {
-        RemoveSubscriptionRecord(subscriberSptr);
+        UpdateSubscriptionRecordAfterUnsubscribe(subscriberSptr, sptrInfo);
     }
     return static_cast<InnerErrorCode>(unsubscribeResult);
 }
@@ -842,7 +849,6 @@ InnerErrorCode AnsNotification::SubscribeNotificationSelf(const std::shared_ptr<
         ANS_LOGE("null listener");
         return ERR_ANS_INNER_NO_MEMORY;
     }
-    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
     AddSubscriptionRecord(listener, nullptr, true, false, subscriber->GetSubscribedFlags());
     return static_cast<InnerErrorCode>(proxy->SubscribeSelf(listener, subscriber->GetSubscribedFlags()));
 }
@@ -874,7 +880,6 @@ InnerErrorCode AnsNotification::SubscribeNotification(const std::shared_ptr<Noti
     if (subscribeInfo != nullptr && subscribeInfo->GetPictureOption() != nullptr) {
         subscriber->SetPictureOption(subscribeInfo->GetPictureOption());
     }
-    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
     AddSubscriptionRecord(listener, subscribeInfo, false, false, subscriber->GetSubscribedFlags());
 
     if (subscribeInfo == nullptr) {
@@ -918,11 +923,7 @@ InnerErrorCode AnsNotification::UnSubscribeNotification(const std::shared_ptr<No
             ret = static_cast<InnerErrorCode>(proxy->Unsubscribe(listener, subscribeInfo));
         }
         if (ret == ERR_OK) {
-            subscribers_.erase(item);
-            // caller already holds subscriberMutex_; keep the subscription record
-            // vector consistent with the registry on successful unsubscribe
-            sptr<IAnsSubscriber> listenerBase = listener;
-            RemoveSubscriptionRecordLocked(listenerBase);
+            UpdateSubscriberAfterUnsubscribeLocked(listener, subscribeInfo);
         }
         return ret;
     }
@@ -3165,6 +3166,7 @@ void AnsNotification::CreateSubscribeListener(const std::shared_ptr<Notification
 
 void AnsNotification::OnServiceDied()
 {
+    InvalidateReSubscribeRetry();
     std::lock_guard<std::mutex> lock(subscriberMutex_);
     for (auto item : subscribers_) {
         item.first->OnDied();
@@ -3868,6 +3870,8 @@ InnerErrorCode AnsNotification::RegisterBadgeQueryCallback(
         return ERR_ANS_INNER_NO_MEMORY;
     }
 
+    // Arm the SA-restart listener so badge-only clients also replay this callback after a restart.
+    DelayedSingleton<AnsManagerDeathRecipient>::GetInstance()->SubscribeSAManager();
     return static_cast<InnerErrorCode>(proxy->RegisterBadgeQueryCallback(listener));
 }
 

@@ -160,6 +160,26 @@ constexpr int32_t TEST_NOTIFICATION_ID = 1;
 constexpr int64_t TEST_FUTURE_OFFSET_MS = 3600 * 1000;
 constexpr int64_t TEST_PAST_OFFSET_MS = 1000;
 
+sptr<NotificationRequest> BuildAppSystemLiveViewRequest(int32_t userId, int32_t notificationId,
+    const std::string &label)
+{
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    if (request == nullptr) {
+        return nullptr;
+    }
+    request->SetNotificationId(notificationId);
+    request->SetLabel(label);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetReceiverUserId(userId);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorBundleName("test_app_system_live_view");
+    request->SetOwnerBundleName("test_app_system_live_view");
+    auto localContent = std::make_shared<NotificationLocalLiveViewContent>();
+    localContent->SetType(1);
+    request->SetContent(std::make_shared<NotificationContent>(localContent));
+    return request;
+}
+
 sptr<NotificationRequest> BuildRecoverableLiveViewRequest(int32_t userId, const std::string &label)
 {
     sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
@@ -621,6 +641,33 @@ HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_400, Function | SmallTest | Lev
 
     ASSERT_EQ(ret1, (int)ERR_OK);
     ASSERT_EQ(ret2, (int)ERR_OK);
+}
+
+/**
+ * @tc.name: OnSubscriberAdd_TransientLiveView_500
+ * @tc.desc: Test OnSubscriberAdd skips transient system live views during recovery replay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, OnSubscriberAdd_TransientLiveView_500, Function | SmallTest | Level1)
+{
+    auto slotType = NotificationConstant::SlotType::LIVE_VIEW;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetSlotType(slotType);
+    request->SetNotificationId(1);
+    auto localLiveContent = std::make_shared<NotificationLocalLiveViewContent>();
+    request->SetContent(std::make_shared<NotificationContent>(localLiveContent));
+    ASSERT_TRUE(request->IsSystemLiveView());
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test_not_replay", 1);
+    auto notificationRecord = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    ASSERT_NE(notificationRecord, nullptr);
+    advancedNotificationService_->AddToNotificationList(notificationRecord);
+
+    auto record = NotificationSubscriberManager::GetInstance()->CreateSubscriberRecord(nullptr);
+    // The only active notification is a transient system live view, so there is nothing to replay.
+    auto ret = advancedNotificationService_->OnSubscriberAdd(record, 100);
+
+    ASSERT_EQ(ret, (int)ERR_ANS_INNER_NOTIFICATION_NOT_EXISTS);
 }
 
 /**
@@ -1604,6 +1651,185 @@ HWTEST_F(AnsLiveViewServiceTest, RecoverLiveViewFromDb_SkipRecovery_00001, Funct
     std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
     advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, 100);
     ASSERT_EQ(requestsdb.size(), 0);
+}
+
+/**
+ * @tc.name: RecoverSystemLiveViewFromDb_00001
+ * @tc.desc: Test a persisted system live view is restored to the active list after a restart
+ *           and is marked as not replayable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, RecoverSystemLiveViewFromDb_00001, Function | SmallTest | Level1)
+{
+    constexpr int32_t userId = 4242;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetNotificationId(1);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetReceiverUserId(userId);
+    request->SetCreatorBundleName("test_system_recover");
+    request->SetOwnerBundleName("test_system_recover");
+    auto localContent = std::make_shared<NotificationLocalLiveViewContent>();
+    localContent->SetType(1);
+    request->SetContent(std::make_shared<NotificationContent>(localContent));
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test_system_recover", 1);
+    AdvancedNotificationService::NotificationRequestDb requestDb = { .request = request, .bundleOption = bundle };
+    ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDbCommon(requestDb), ERR_OK);
+
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->RecoverLiveViewFromDb(userId);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    auto record = advancedNotificationService_->notificationList_.front();
+    ASSERT_NE(record->request, nullptr);
+    EXPECT_TRUE(record->request->IsSystemLiveView());
+    EXPECT_EQ(record->request->GetNotificationId(), 1);
+    EXPECT_TRUE(AdvancedNotificationService::IsTransientLiveView(record->request));
+
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->DoubleDeleteNotificationFromDb(
+        request->GetKey(), request->GetSecureKey(), userId);
+}
+
+/**
+ * @tc.name: RecoverSystemLiveViewFromDb_Expired_00002
+ * @tc.desc: Test an expired system live view is dropped and removed from the db during recovery.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, RecoverSystemLiveViewFromDb_Expired_00002, Function | SmallTest | Level1)
+{
+    constexpr int32_t userId = 4243;
+    auto epoch = std::chrono::system_clock::now().time_since_epoch();
+    auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(epoch).count();
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetNotificationId(2);
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetReceiverUserId(userId);
+    request->SetCreatorBundleName("test_system_expired");
+    request->SetOwnerBundleName("test_system_expired");
+    request->SetAutoDeletedTime(curTime - 1000);
+    auto localContent = std::make_shared<NotificationLocalLiveViewContent>();
+    localContent->SetType(1);
+    request->SetContent(std::make_shared<NotificationContent>(localContent));
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test_system_expired", 1);
+    AdvancedNotificationService::NotificationRequestDb requestDb = { .request = request, .bundleOption = bundle };
+    ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDbCommon(requestDb), ERR_OK);
+
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->RecoverLiveViewFromDb(userId);
+    SleepForFC();
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+
+    std::vector<AdvancedNotificationService::NotificationRequestDb> requestsdb;
+    advancedNotificationService_->GetBatchNotificationRequestsFromDb(requestsdb, userId);
+    EXPECT_EQ(requestsdb.size(), 0);
+}
+
+/**
+ * @tc.name: CleanSystemLiveViewOnUserSwitch_00003
+ * @tc.desc: A system live view is recovered on a service restart, but USER_SWITCHED (full boot /
+ *           user switch) drops it from both memory and the db so it does not survive a reboot.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, CleanSystemLiveViewOnUserSwitch_00003, Function | SmallTest | Level1)
+{
+    constexpr int32_t userId = 4244;
+    sptr<NotificationRequest> request = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(request, nullptr);
+    request->SetNotificationId(3);
+    request->SetLabel("user_switch");
+    request->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    request->SetReceiverUserId(userId);
+    request->SetCreatorUid(TEST_CREATOR_UID);
+    request->SetCreatorBundleName("test_user_switch");
+    request->SetOwnerBundleName("test_user_switch");
+    auto localContent = std::make_shared<NotificationLocalLiveViewContent>();
+    localContent->SetType(1);
+    request->SetContent(std::make_shared<NotificationContent>(localContent));
+    ASSERT_TRUE(request->IsSystemLiveView());
+    sptr<NotificationBundleOption> bundle = new NotificationBundleOption("test_user_switch", TEST_CREATOR_UID);
+    AdvancedNotificationService::NotificationRequestDb requestDb = { .request = request, .bundleOption = bundle };
+    ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDbCommon(requestDb), ERR_OK);
+
+    // A service restart recovers the system live view (no boot-session gating).
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->RecoverLiveViewFromDb(userId);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+
+    // USER_SWITCHED (full boot / user switch) drops it from memory and the db.
+    advancedNotificationService_->CleanSystemLiveViewOnUserSwitch(userId);
+    SleepForFC();
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 0);
+    EXPECT_FALSE(LiveViewKvExists(request->GetSecureKey(), userId));
+}
+
+/**
+ * @tc.name: CleanSystemLiveViewOnUserSwitch_AppPublishedKept_00004
+ * @tc.desc: A system live view published by an app (not recovered from the db) must survive
+ *           USER_SWITCHED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, CleanSystemLiveViewOnUserSwitch_AppPublishedKept_00004,
+    Function | SmallTest | Level1)
+{
+    constexpr int32_t userId = 4245;
+    sptr<NotificationRequest> request = BuildAppSystemLiveViewRequest(userId, 4, "app_published");
+    ASSERT_NE(request, nullptr);
+    ASSERT_TRUE(request->IsSystemLiveView());
+    sptr<NotificationBundleOption> bundle =
+        new NotificationBundleOption("test_app_system_live_view", TEST_CREATOR_UID);
+    auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
+    ASSERT_NE(record, nullptr);
+
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->recoveredSystemLiveViewKeys_.clear();
+    ASSERT_EQ(advancedNotificationService_->AssignToNotificationList(record, false), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    EXPECT_FALSE(advancedNotificationService_->notificationList_.front()->isRecovered);
+
+    advancedNotificationService_->CleanSystemLiveViewOnUserSwitch(userId);
+    SleepForFC();
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+}
+
+/**
+ * @tc.name: CleanSystemLiveViewOnUserSwitch_RepublishedAfterRecover_00005
+ * @tc.desc: Once an app re-publishes a recovered system live view, it is owned by the app again
+ *           and must survive USER_SWITCHED in both memory and the db.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsLiveViewServiceTest, CleanSystemLiveViewOnUserSwitch_RepublishedAfterRecover_00005,
+    Function | SmallTest | Level1)
+{
+    constexpr int32_t userId = 4246;
+    sptr<NotificationRequest> request = BuildAppSystemLiveViewRequest(userId, 5, "recover_then_publish");
+    ASSERT_NE(request, nullptr);
+    sptr<NotificationBundleOption> bundle =
+        new NotificationBundleOption("test_app_system_live_view", TEST_CREATOR_UID);
+    AdvancedNotificationService::NotificationRequestDb requestDb = { .request = request, .bundleOption = bundle };
+    ASSERT_EQ(advancedNotificationService_->SetNotificationRequestToDbCommon(requestDb), ERR_OK);
+
+    advancedNotificationService_->notificationList_.clear();
+    advancedNotificationService_->recoveredSystemLiveViewKeys_.clear();
+    advancedNotificationService_->RecoverLiveViewFromDb(userId);
+    SleepForFC();
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    ASSERT_TRUE(advancedNotificationService_->notificationList_.front()->isRecovered);
+
+    sptr<NotificationRequest> republished = BuildAppSystemLiveViewRequest(userId, 5, "recover_then_publish");
+    ASSERT_NE(republished, nullptr);
+    auto republishedRecord = advancedNotificationService_->MakeNotificationRecord(republished, bundle);
+    ASSERT_NE(republishedRecord, nullptr);
+    ASSERT_EQ(advancedNotificationService_->AssignToNotificationList(republishedRecord, false), ERR_OK);
+    ASSERT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    EXPECT_FALSE(advancedNotificationService_->notificationList_.front()->isRecovered);
+
+    advancedNotificationService_->CleanSystemLiveViewOnUserSwitch(userId);
+    SleepForFC();
+    EXPECT_EQ(advancedNotificationService_->notificationList_.size(), 1);
+    EXPECT_TRUE(LiveViewKvExists(republished->GetSecureKey(), userId));
 }
 
 /**

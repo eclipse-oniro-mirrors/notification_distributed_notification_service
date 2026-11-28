@@ -62,6 +62,9 @@ ErrCode AdvancedNotificationService::GetActiveNotifications(
         ANS_LOGD("called");
         notifications.clear();
         for (auto record : notificationList_) {
+            if (record->request == nullptr || IsTransientLiveView(record->request)) {
+                continue;
+            }
             if ((record->bundleOption->GetBundleName() != bundleOption->GetBundleName()) ||
                 (record->bundleOption->GetUid() != bundleOption->GetUid()) ||
                 (record->notification->GetInstanceKey() != bundleOption->GetAppInstanceKey())) {
@@ -91,6 +94,9 @@ ErrCode AdvancedNotificationService::GetActiveNotificationNums(uint64_t &num)
         ANS_LOGD("called");
         size_t count = 0;
         for (auto record : notificationList_) {
+            if (IsTransientLiveView(record->request)) {
+                continue;
+            }
             if ((record->bundleOption->GetBundleName() == bundleOption->GetBundleName()) &&
                 (record->bundleOption->GetUid() == bundleOption->GetUid())) {
                 count += 1;
@@ -121,9 +127,13 @@ ErrCode AdvancedNotificationService::GetAllActiveNotifications(std::vector<sptr<
         ANS_LOGD("called");
         notifications.clear();
         for (auto record : notificationList_) {
-            if (record->notification != nullptr && record->notification->request_ != nullptr) {
-                notifications.push_back(record->notification);
+            if (record->notification == nullptr || record->notification->request_ == nullptr) {
+                continue;
             }
+            if (IsTransientLiveView(record->notification->request_)) {
+                continue;
+            }
+            notifications.push_back(record->notification);
         }
     }));
     ANS_COND_DO_ERR(submitResult != ERR_OK, return submitResult, "Get all active notifications.");
@@ -151,6 +161,9 @@ ErrCode AdvancedNotificationService::GetAllNotificationsBySlotTypeInner(std::vec
         notifications.clear();
         for (auto record : notificationList_) {
             if (record->notification == nullptr || record->notification->request_ == nullptr) {
+                continue;
+            }
+            if (IsTransientLiveView(record->notification->request_)) {
                 continue;
             }
             if (record->notification->request_->GetSlotType() != slotType) {

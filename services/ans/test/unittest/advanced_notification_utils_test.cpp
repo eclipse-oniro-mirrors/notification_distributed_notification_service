@@ -39,6 +39,7 @@
 #include "accesstoken_kit.h"
 #include "notification_preferences.h"
 #include "notification_record.h"
+#include "notification_local_live_view_content.h"
 #include "notification_subscriber.h"
 #include "refbase.h"
 #include "mock_bundle_manager_helper.h"
@@ -145,6 +146,39 @@ void AnsUtilsTest::TestAddNotification(int notificationId, const sptr<Notificati
     request->SetNotificationId(notificationId);
     auto record = advancedNotificationService_->MakeNotificationRecord(request, bundle);
     auto ret = advancedNotificationService_->AssignToNotificationList(record);
+}
+
+/**
+ * @tc.name: IsTransientLiveView_00001
+ * @tc.desc: Test the server-derived transient predicate: only system live views are transient;
+ *           regular notifications, common live views and null requests are not.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AnsUtilsTest, IsTransientLiveView_00001, Function | SmallTest | Level1)
+{
+    sptr<NotificationRequest> liveRequest = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(liveRequest, nullptr);
+    liveRequest->SetNotificationId(1);
+    liveRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto localLiveViewContent = std::make_shared<NotificationLocalLiveViewContent>();
+    liveRequest->SetContent(std::make_shared<NotificationContent>(localLiveViewContent));
+    ASSERT_TRUE(liveRequest->IsSystemLiveView());
+    EXPECT_TRUE(AdvancedNotificationService::IsTransientLiveView(liveRequest));
+
+    sptr<NotificationRequest> normalRequest = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(normalRequest, nullptr);
+    normalRequest->SetNotificationId(2);
+    EXPECT_FALSE(AdvancedNotificationService::IsTransientLiveView(normalRequest));
+
+    sptr<NotificationRequest> commonLiveRequest = new (std::nothrow) NotificationRequest();
+    ASSERT_NE(commonLiveRequest, nullptr);
+    commonLiveRequest->SetSlotType(NotificationConstant::SlotType::LIVE_VIEW);
+    auto commonLiveContent = std::make_shared<NotificationLiveViewContent>();
+    commonLiveRequest->SetContent(std::make_shared<NotificationContent>(commonLiveContent));
+    ASSERT_TRUE(commonLiveRequest->IsCommonLiveView());
+    EXPECT_FALSE(AdvancedNotificationService::IsTransientLiveView(commonLiveRequest));
+
+    EXPECT_FALSE(AdvancedNotificationService::IsTransientLiveView(nullptr));
 }
 
 /**
