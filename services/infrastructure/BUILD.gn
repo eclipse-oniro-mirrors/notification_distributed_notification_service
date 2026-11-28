@@ -40,6 +40,7 @@ ohos_shared_library("ans_base") {
 
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags
+  cflags_cc = notification_size_opt_cflags_cc
 
   sources = [
     "external_adapter/account/iaccount_manager_impl.cpp",

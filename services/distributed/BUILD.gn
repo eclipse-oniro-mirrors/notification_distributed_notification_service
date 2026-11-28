@@ -31,6 +31,7 @@ ohos_shared_library("libans_distributed") {
 
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags
+  cflags_cc = notification_size_opt_cflags_cc
   version_script = "libans_distributed.map"
 
   sources = [
@@ -96,6 +97,7 @@ ohos_shared_library("libdans") {
   version_script = "libdans.map"
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags
+  cflags_cc = notification_size_opt_cflags_cc
 
   sources = [
     "src/base/distributed_client.cpp",
@@ -213,6 +215,7 @@ ohos_shared_library("libans_extension_service") {
   version_script = "libans_extension_service.map"
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags
+  cflags_cc = notification_size_opt_cflags_cc
 
   sources = [
     "${services_path}/ans/src/bundle_manager_helper.cpp",

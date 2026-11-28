@@ -63,6 +63,7 @@ ohos_source_set("ans_service_sources") {
   branch_protector_ret = "pac_ret"
 
   cflags = notification_size_opt_cflags
+  cflags_cc = notification_size_opt_cflags_cc
 
   include_dirs = [
     "${services_path}/ans/include",

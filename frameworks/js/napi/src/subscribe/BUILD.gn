@@ -45,6 +45,7 @@ ohos_shared_library("notificationsubscribe") {
 
   cflags = notification_size_opt_cflags
   ldflags = notification_size_opt_ldflags
+  cflags_cc = notification_size_opt_cflags_cc
 
   sources = [
     "../distributed_operation_callback.cpp",
