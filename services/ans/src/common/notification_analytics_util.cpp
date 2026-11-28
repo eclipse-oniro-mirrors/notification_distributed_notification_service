@@ -16,7 +16,6 @@
 #include "notification_analytics_util.h"
 #include "singleton.h"
 
-#include <regex>
 #include <atomic>
 
 #include "want_params_wrapper.h"
@@ -47,7 +46,6 @@ namespace Notification {
 const static std::string LINE = "_";
 const static std::string ANS_BUNDLE_BEGIN = "ans_bundle";
 const static std::string LIVE_VIEW_SLOT_ENABLE_END = "slot_type_5_enabled";
-const static std::string SLOT_ENABLE_REG_PATTERN = "^ans_bundle_(.*)_slot_type_5_enabled$";
 const static std::string NAME = "name";
 const static std::string UID = "uid";
 
@@ -1915,14 +1913,15 @@ bool NotificationAnalyticsUtil::GetAllSlotMessageCache(const int32_t &userId)
 bool NotificationAnalyticsUtil::GetReportSlotMessage(std::string& budleEntryKey,
     std::string& budleEntryValue, ReportSlotMessage& reportSlotMessage, const int32_t &userId)
 {
-    std::string extracted;
-    std::regex pattern(SLOT_ENABLE_REG_PATTERN);
-    std::smatch matches;
-    if (std::regex_search(budleEntryKey, matches, pattern) && matches.size() > 1) {
-        extracted = matches[1].str();
-    } else {
+    const std::string prefix = "ans_bundle_";
+    const std::string suffix = "_slot_type_5_enabled";
+    if (budleEntryKey.size() <= prefix.size() + suffix.size() ||
+        budleEntryKey.compare(0, prefix.size(), prefix) != 0 ||
+        budleEntryKey.compare(budleEntryKey.size() - suffix.size(), suffix.size(), suffix) != 0) {
         return false;
     }
+    std::string extracted = budleEntryKey.substr(prefix.size(),
+        budleEntryKey.size() - prefix.size() - suffix.size());
 
     std::unordered_map<std::string, std::string> bundleInfoMap;
     auto res = NotificationPreferences::GetInstance()->GetBatchKvsFromDbContainsKey(
